@@ -2126,10 +2126,14 @@
         </div>
       </div>
 
-      <div class="search-box">
-        <span class="search-icon"></span>
-        <input type="text" id="searchInput" placeholder="Search Netflix, Disney+, Spotify, Canva..." oninput="renderProducts()" />
+      <div class="search-box" style="display:flex; gap:8px; align-items:center;">
+        <div style="position:relative; flex:1;">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" style="padding-left:36px;" placeholder="Search app or show (e.g. Doraemon)..." oninput="renderProducts()" onkeydown="if(event.key==='Enter'){ event.preventDefault(); searchShowFromMainBox(); }" />
+        </div>
+        <button type="button" id="inlineShowSearchBtn" onclick="searchShowFromMainBox()" style="background:rgba(56,189,248,0.16); border:1px solid rgba(56,189,248,0.4); color:var(--accent-cyan); padding:11px 12px; border-radius:12px; font-size:0.74rem; font-weight:800; cursor:pointer; white-space:nowrap; flex-shrink:0;" data-i18n="inlineShowBtn">🎬 Show</button>
       </div>
+      <div id="inlineShowResultsBox" style="display:none; background:var(--bg-card); border:1px solid var(--border-strong); border-radius:14px; padding:12px; margin-bottom:14px;"></div>
 
       <div class="filter-row" id="filterRow">
         <button class="filter-chip active" onclick="setCategory('All', this)" data-i18n="catAll">All (8)</button>
@@ -2140,7 +2144,7 @@
 
       <div class="section-head">
         <h2 data-i18n="selectAppTitle">Select Subscription App</h2>
-        <button type="button" onclick="openShowSearchModal()" style="background:rgba(56,189,248,0.14); border:1px solid rgba(56,189,248,0.35); color:var(--accent-cyan); padding:5px 11px; border-radius:999px; font-size:0.72rem; font-weight:700; cursor:pointer;" data-i18n="findShowBtn">🎬 Search Show / Movie</button>
+        <span data-i18n="tapToOrder">Tap app to order</span>
       </div>
 
       <div class="product-grid" id="productGrid">
@@ -2466,7 +2470,8 @@
         catMusic: 'Music (1)',
         catCreative: 'Creative (2)',
         selectAppTitle: 'Select Subscription App',
-        findShowBtn: '🎬 Search Show / Movie',
+        tapToOrder: 'Tap app to order',
+        inlineShowBtn: '🎬 Show',
         showSearchTitle: 'Search Show or Movie',
         runShowSearchBtn: 'Search Availability',
         backCatalog: 'Back to Catalog',
@@ -2525,7 +2530,8 @@
         catMusic: 'Muzik (1)',
         catCreative: 'Kreatif (2)',
         selectAppTitle: 'Pilih Aplikasi Langganan',
-        findShowBtn: '🎬 Cari Cerita / Movie',
+        tapToOrder: 'Tekan aplikasi untuk tempah',
+        inlineShowBtn: '🎬 Cerita',
         showSearchTitle: 'Cari Tajuk Cerita atau Movie',
         runShowSearchBtn: 'Semak Aplikasi Tersedia',
         backCatalog: 'Kembali ke Katalog',
@@ -2936,6 +2942,83 @@
     }
 
 
+
+    async function searchShowFromMainBox() {
+      const inp = document.getElementById('searchInput');
+      const box = document.getElementById('inlineShowResultsBox');
+      if (!inp || !box) return;
+      const q = inp.value.trim();
+      if (!q) {
+        openShowSearchModal();
+        return;
+      }
+
+      triggerTopLoader(650);
+      box.style.display = 'block';
+      animateElementEnter(box, 'view-animate-in');
+      box.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Searching show:' : 'Mencari cerita:'} "${q}"</span>
+          <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
+        </div>
+        <div style="font-size:0.78rem; color:var(--text-secondary); padding:8px 0;">${currentLang === 'en' ? 'Checking available apps...' : 'Menyemak aplikasi tersedia...'}</div>
+      `;
+
+      try {
+        const res = await fetch(`/api/search-title?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        const items = data.items || [];
+
+        if (!items.length) {
+          box.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 "${q}"</span>
+              <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
+            </div>
+            <div style="font-size:0.76rem; color:var(--text-muted);">${currentLang === 'en' ? 'No matching show/movie found.' : 'Tiada cerita/movie sepadan ditemui.'}</div>
+          `;
+          return;
+        }
+
+        const rowsHtml = items.slice(0, 5).map(it => {
+          const apps = Array.isArray(it.availableApps) ? it.availableApps : [];
+          const chips = apps.length
+            ? apps.map(ap => `
+                <button type="button" onclick="openCheckout('${ap.id}');" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer;">
+                  ${ap.shortLabel} →
+                </button>
+              `).join('')
+            : `<span style="font-size:0.7rem; color:var(--text-muted);">${currentLang === 'en' ? 'Ask Admin on WhatsApp' : 'Tanya Admin di WhatsApp'}</span>`;
+
+          return `
+            <div style="display:flex; gap:10px; align-items:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:8px;">
+              ${it.poster ? `<img src="${it.poster}" alt="${it.title}" style="width:42px; height:62px; object-fit:cover; border-radius:7px; flex-shrink:0;" />` : ''}
+              <div style="flex:1; min-width:0;">
+                <div style="font-weight:700; font-size:0.82rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.title} ${it.year ? `<small style="color:var(--text-muted); font-weight:500;">(${it.year})</small>` : ''}</div>
+                <div style="font-size:0.66rem; color:var(--accent-cyan); margin:2px 0 5px 0;">${it.mediaType} • ★ ${it.rating}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:5px;">${chips}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        box.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Show Results:' : 'Hasil Cerita:'} "${q}"</span>
+            <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">${rowsHtml}</div>
+        `;
+      } catch (e) {
+        box.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.75rem; color:#f87171;">${currentLang === 'en' ? 'Failed to search show.' : 'Gagal mencari cerita.'}</span>
+            <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
+          </div>
+        `;
+      }
+    }
+
     function openShowSearchModal() {
       triggerTopLoader(400);
       const modal = document.getElementById('showSearchModal');
@@ -3081,7 +3164,7 @@
             <div class="app-name">${p.name}</div>
             <span class="mode-badge ${p.mode === 'invite' ? 'mode-invite' : 'mode-private'}">${p.mode === 'dual' ? 'Share • Private' : (p.mode === 'invite' ? 'Via Invite' : 'Private')}</span>
             <div class="app-cat">${p.category}</div>
-            <div class="app-price">${p.mode === 'dual' ? 'RM10 - RM15' : `RM${p.price}`} <small>${moLabel}</small></div>
+            <div class="app-cat" style="margin-bottom:0; color:var(--accent-cyan); font-weight:600;">${currentLang === 'en' ? 'Tap to view price & order' : 'Tekan untuk lihat harga & tempah'}</div>
           </div>
         `;
       }).join('');
