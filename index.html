@@ -1430,9 +1430,154 @@
       display: inline-block;
     }
 
+  
+    /* Tactile Motion & Smooth View Transitions */
+    .top-loader-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2.5px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan), var(--accent-gold));
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.65);
+    }
+
+    .top-loader-bar.active {
+      opacity: 1;
+    }
+
+    @keyframes viewEnter {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.992);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes cardPopIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes modalSheetIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes skeletonShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .view-animate-in {
+      animation: viewEnter 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .card-stagger-in {
+      animation: cardPopIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .modal-backdrop.open .modal-card {
+      animation: modalSheetIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .skeleton-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .skeleton-bar {
+      border-radius: 999px;
+      background: linear-gradient(
+        90deg,
+        rgba(148, 163, 184, 0.1) 25%,
+        rgba(56, 189, 248, 0.18) 50%,
+        rgba(148, 163, 184, 0.1) 75%
+      );
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.35s infinite linear;
+    }
+
+    .skeleton-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: linear-gradient(
+        90deg,
+        rgba(148, 163, 184, 0.1) 25%,
+        rgba(56, 189, 248, 0.18) 50%,
+        rgba(148, 163, 184, 0.1) 75%
+      );
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.35s infinite linear;
+    }
+
+    /* Tactile Click / Press Effects */
+    .product-card:active:not(.out-of-stock),
+    .plan-option:active,
+    .pay-choice-card:active,
+    .filter-chip:active,
+    .back-btn:active,
+    .pill-btn:active,
+    .menu-btn:active,
+    .icon-btn:active,
+    .drawer-link:active,
+    .hero-cta-btn:active {
+      transform: scale(0.965);
+    }
+
+    .pay-btn:active:not(:disabled),
+    .primary-submit:active {
+      transform: scale(0.975);
+    }
+
+    .product-card {
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .product-card:hover:not(.out-of-stock) {
+      transform: translateY(-3px);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 16px 32px -12px rgba(37, 99, 235, 0.32);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
   </style>
 </head>
 <body>
+  <div class="top-loader-bar" id="topLoaderBar"></div>
   <!-- Side Drawer Navigation -->
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
   <aside class="side-drawer" id="sideDrawer">
@@ -1555,7 +1700,12 @@
         <span data-i18n="tapToOrder">Tap app to order</span>
       </div>
 
-      <div class="product-grid" id="productGrid"></div>
+      <div class="product-grid" id="productGrid">
+        <div class="skeleton-card"><div class="skeleton-bar" style="width:68px;height:18px;"></div><div class="skeleton-icon"></div><div class="skeleton-bar" style="width:84px;height:14px;"></div><div class="skeleton-bar" style="width:56px;height:18px;"></div></div>
+        <div class="skeleton-card"><div class="skeleton-bar" style="width:68px;height:18px;"></div><div class="skeleton-icon"></div><div class="skeleton-bar" style="width:84px;height:14px;"></div><div class="skeleton-bar" style="width:56px;height:18px;"></div></div>
+        <div class="skeleton-card"><div class="skeleton-bar" style="width:68px;height:18px;"></div><div class="skeleton-icon"></div><div class="skeleton-bar" style="width:84px;height:14px;"></div><div class="skeleton-bar" style="width:56px;height:18px;"></div></div>
+        <div class="skeleton-card"><div class="skeleton-bar" style="width:68px;height:18px;"></div><div class="skeleton-icon"></div><div class="skeleton-bar" style="width:84px;height:14px;"></div><div class="skeleton-bar" style="width:56px;height:18px;"></div></div>
+      </div>
     </div>
 
     <!-- Checkout View -->
@@ -1763,6 +1913,34 @@
   </div>
 
   <script>
+    let loaderTimer = null;
+    function triggerTopLoader(durationMs = 650) {
+      const bar = document.getElementById('topLoaderBar');
+      if (!bar) return;
+      if (loaderTimer) clearTimeout(loaderTimer);
+      bar.style.width = '0%';
+      bar.classList.add('active');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          bar.style.width = '78%';
+        });
+      });
+      loaderTimer = setTimeout(() => {
+        bar.style.width = '100%';
+        setTimeout(() => {
+          bar.classList.remove('active');
+          bar.style.width = '0%';
+        }, 220);
+      }, durationMs);
+    }
+
+    function animateElementEnter(el, className = 'view-animate-in') {
+      if (!el) return;
+      el.classList.remove(className);
+      void el.offsetWidth;
+      el.classList.add(className);
+    }
+
     const SHEET_ID = '15zWwrvLk9c138m7yGSlzgPwTTNPAmwarGomu2jjDG0w';
     const ADMIN_WA = '60189066291';
 
@@ -1901,7 +2079,8 @@
     function toggleLang() {
       currentLang = currentLang === 'en' ? 'my' : 'en';
       localStorage.setItem('spystore_lang', currentLang);
-      applyLanguage();
+      triggerTopLoader(700);
+    applyLanguage();
       renderProducts();
     }
 
@@ -2013,7 +2192,10 @@
       if (!modal) return;
       activeDiscoveryCat = CATEGORY_TITLES[defaultCat] ? defaultCat : 'tv_my';
       activeAppSubFilter = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(appFilter) ? appFilter : 'netflix';
+      triggerTopLoader(450);
       modal.style.display = 'flex';
+      const box = modal.querySelector('.discovery-modal-box');
+      if (box) animateElementEnter(box, 'modal-sheet-in');
       renderTrendingModal();
     }
 
@@ -2309,7 +2491,7 @@
         return matchCat && matchQuery;
       });
 
-      grid.innerHTML = filtered.map(p => {
+      grid.innerHTML = filtered.map((p, idx) => {
         const inStock = p.stock > 0;
         const stockLabel = inStock
           ? (currentLang === 'en' ? `In Stock • ${p.stock}` : `Stok Ada • ${p.stock}`)
@@ -2317,7 +2499,7 @@
         const moLabel = currentLang === 'en' ? '/ mo' : '/ bln';
 
         return `
-          <div class="product-card ${inStock ? '' : 'out-of-stock'}" onclick="${inStock ? `openCheckout('${p.id}')` : `showToast('${p.name} out of stock')`}">
+          <div class="product-card card-stagger-in ${inStock ? '' : 'out-of-stock'}" style="animation-delay:${Math.min(idx * 40, 280)}ms;" onclick="${inStock ? `openCheckout('${p.id}')` : `showToast('${p.name} out of stock')`}">
             <span class="stock-pill ${inStock ? 'stock-in' : 'stock-out'}">${stockLabel}</span>
             ${renderAppIconHtml(p)}
             <div class="app-name">${p.name}</div>
@@ -2335,8 +2517,11 @@
       selectedMonths = 1;
       selectedPaymentMethod = 'fpx';
       selectPaymentMethod('fpx');
+      triggerTopLoader(500);
       document.getElementById('catalogView').style.display = 'none';
-      document.getElementById('checkoutView').classList.add('active');
+      const coView = document.getElementById('checkoutView');
+      coView.classList.add('active');
+      animateElementEnter(coView);
       document.getElementById('checkoutBar').classList.add('active');
 
       document.getElementById('selectedAppHeader').innerHTML = `
@@ -2374,9 +2559,12 @@
 
     function closeCheckout() {
       currentProduct = null;
+      triggerTopLoader(420);
       document.getElementById('checkoutView').classList.remove('active');
       document.getElementById('checkoutBar').classList.remove('active');
-      document.getElementById('catalogView').style.display = 'block';
+      const catView = document.getElementById('catalogView');
+      catView.style.display = 'block';
+      animateElementEnter(catView);
     }
 
     function updatePayTotalDisplay() {
