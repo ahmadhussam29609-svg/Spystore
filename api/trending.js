@@ -3,45 +3,46 @@ export default async function handler(req, res) {
   const today = new Date().toISOString().split('T')[0];
 
   try {
-    // Tarik cerita yang SUDAH release dan boleh distrim di Malaysia (watch_region=MY)
-    const platforms = [
-      { id: 'netflix', label: 'Netflix', providerId: '8', type: 'tv' },
-      { id: 'disney', label: 'Disney+', providerId: '337', type: 'movie' },
-      { id: 'hbomax', label: 'HBO Max', providerId: '1899|384', type: 'tv' },
-      { id: 'prime', label: 'Prime Video', providerId: '119', type: 'movie' },
-      { id: 'netflix', label: 'Netflix', providerId: '8', type: 'movie' }
-    ];
+    const [nfTv, dpMov, hboTv, nfMov, dpTv] = await Promise.all([
+      fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&watch_region=MY&with_watch_providers=8&with_watch_monetization_types=flatrate&sort_by=popularity.desc&first_air_date.lte=${today}&language=en-US`).then(r => r.json()),
+      fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&watch_region=MY&with_watch_providers=337&with_watch_monetization_types=flatrate&sort_by=popularity.desc&primary_release_date.lte=${today}&language=en-US`).then(r => r.json()),
+      fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&watch_region=MY&with_watch_providers=1899|384&with_watch_monetization_types=flatrate&sort_by=popularity.desc&first_air_date.lte=${today}&language=en-US`).then(r => r.json()),
+      fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&watch_region=MY&with_watch_providers=8&with_watch_monetization_types=flatrate&sort_by=popularity.desc&primary_release_date.lte=${today}&language=en-US`).then(r => r.json()),
+      fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&watch_region=MY&with_watch_providers=337&with_watch_monetization_types=flatrate&sort_by=popularity.desc&first_air_date.lte=${today}&language=en-US`).then(r => r.json())
+    ]);
 
-    const results = await Promise.all(
-      platforms.map(async (plat, index) => {
-        const dateParam = plat.type === 'movie'
-          ? `primary_release_date.lte=${today}`
-          : `first_air_date.lte=${today}`;
+    const mapItem = (item, platformId, platformLabel, mediaType) => ({
+      title: item.title || item.name || 'Trending Title',
+      overview: item.overview || '',
+      rating: item.vote_average ? item.vote_average.toFixed(1) : '8.0',
+      poster: item.poster_path ? `https://image.tmdb.org/t/p/w185${item.poster_path}` : '',
+      backdrop: item.backdrop_path ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}` : '',
+      platformId,
+      platformLabel,
+      mediaType
+    });
 
-        const url = `https://api.themoviedb.org/3/discover/${plat.type}?api_key=${apiKey}&watch_region=MY&with_watch_providers=${plat.providerId}&with_watch_monetization_types=flatrate&sort_by=popularity.desc&${dateParam}&language=en-US`;
+    const nfTvList = (nfTv.results || []).filter(r => r.backdrop_path).map(i => mapItem(i, 'netflix', 'Netflix', 'SERIES'));
+    const dpMovList = (dpMov.results || []).filter(r => r.backdrop_path).map(i => mapItem(i, 'disney', 'Disney+', 'MOVIE'));
+    const hboTvList = (hboTv.results || []).filter(r => r.backdrop_path).map(i => mapItem(i, 'hbomax', 'HBO Max', 'SERIES'));
+    const nfMovList = (nfMov.results || []).filter(r => r.backdrop_path).map(i => mapItem(i, 'netflix', 'Netflix', 'MOVIE'));
+    const dpTvList = (dpTv.results || []).filter(r => r.backdrop_path).map(i => mapItem(i, 'disney', 'Disney+', 'SERIES'));
 
-        const resp = await fetch(url);
-        const data = await resp.json();
-        const item = (data.results || []).find(r => r.backdrop_path) || (data.results || [])[0];
+    const heroItems = [nfTvList[0], dpMovList[0], hboTvList[0], nfMovList[0], dpTvList[0]]
+      .filter(Boolean)
+      .map((item, idx) => ({ ...item, rank: idx + 1 }));
 
-        if (!item) return null;
+    const top10Movies = [...nfMovList.slice(0, 5), ...dpMovList.slice(0, 5)]
+      .slice(0, 10)
+      .map((item, idx) => ({ ...item, rank: idx + 1 }));
 
-        return {
-          rank: index + 1,
-          title: item.title || item.name || 'Trending Now',
-          overview: item.overview || '',
-          backdrop: item.backdrop_path ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}` : '',
-          platformId: plat.id,
-          platformLabel: plat.label,
-          mediaType: plat.type === 'tv' ? 'SERIES' : 'MOVIE'
-        };
-      })
-    );
+    const top10Series = [...nfTvList.slice(0, 4), ...dpTvList.slice(0, 3), ...hboTvList.slice(0, 3)]
+      .slice(0, 10)
+      .map((item, idx) => ({ ...item, rank: idx + 1 }));
 
-    const validItems = results.filter(Boolean);
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-    return res.status(200).json({ items: validItems });
+    return res.status(200).json({ items: heroItems, top10Movies, top10Series });
   } catch (err) {
-    return res.status(500).json({ error: err.message, items: [] });
+    return res.status(500).json({ error: err.message, items: [], top10Movies: [], top10Series: [] });
   }
 }
