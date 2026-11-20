@@ -1359,6 +1359,77 @@
       }
     }
 
+  
+    .pay-options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .pay-choice-card {
+      background: var(--bg-input);
+      border: 1.5px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .pay-choice-card:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .pay-choice-card.selected {
+      border-color: var(--accent-gold);
+      background: rgba(250, 204, 21, 0.08);
+    }
+
+    .pay-choice-card h4 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .pay-choice-card p {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .qr-ewallet-box {
+      display: none;
+      margin-top: 12px;
+      background: var(--bg-input);
+      border: 1px dashed var(--border-strong);
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 0.78rem;
+    }
+
+    .qr-ewallet-box.show {
+      display: block;
+    }
+
+    .qr-preview-wrap {
+      margin: 10px 0;
+      text-align: center;
+      background: #0b1120;
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .qr-preview-wrap img {
+      max-width: 190px;
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
   </style>
 </head>
 <body>
@@ -1473,8 +1544,8 @@
       </div>
 
       <div class="filter-row" id="filterRow">
-        <button class="filter-chip active" onclick="setCategory('All', this)" data-i18n="catAll">All (7)</button>
-        <button class="filter-chip" onclick="setCategory('Streaming', this)" data-i18n="catStreaming">Streaming (4)</button>
+        <button class="filter-chip active" onclick="setCategory('All', this)" data-i18n="catAll">All (8)</button>
+        <button class="filter-chip" onclick="setCategory('Streaming', this)" data-i18n="catStreaming">Streaming (5)</button>
         <button class="filter-chip" onclick="setCategory('Music', this)" data-i18n="catMusic">Music (1)</button>
         <button class="filter-chip" onclick="setCategory('Creative', this)" data-i18n="catCreative">Creative (2)</button>
       </div>
@@ -1502,13 +1573,20 @@
           <label data-i18n="labelName">Full Name *</label>
           <input type="text" class="form-control" id="custName" placeholder="e.g. Ahmad Hussam" />
         </div>
-        <div class="form-group">
+        <div class="form-group" id="phoneGroup">
           <label data-i18n="labelPhone">WhatsApp Number (For Account Delivery) *</label>
           <input type="tel" class="form-control" id="custPhone" placeholder="e.g. 0189066291" />
         </div>
-        <div class="form-group" style="margin-bottom:0;">
+        <div class="form-group" id="deviceFieldGroup" style="display:none; margin-bottom:0;">
           <label data-i18n="labelDevice">Device Used *</label>
           <input type="text" class="form-control" id="custDevice" placeholder="e.g. iPhone / Android / Smart TV / Laptop" />
+        </div>
+        <div class="form-group" id="emailFieldGroup" style="display:none; margin-bottom:0;">
+          <label data-i18n="labelEmail">Account Email Address *</label>
+          <input type="email" class="form-control" id="custEmail" placeholder="e.g. name@gmail.com" />
+        </div>
+        <div id="noExtraInfoNote" style="display:none; font-size:0.74rem; color:var(--text-secondary); padding-top:2px;" data-i18n="noExtraInfoNote">
+          No extra account details required for this plan.
         </div>
       </div>
 
@@ -1534,12 +1612,40 @@
           <span class="step-num">3</span>
           <h3 class="step-title" data-i18n="step3Title">Payment Method</h3>
         </div>
-        <div class="pay-method-box">
-          <div class="pay-info">
-            <h4 data-i18n="fpxTitle">Online Banking (FPX)</h4>
-            <p data-i18n="fpxDesc">Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank &amp; all MY banks via ToyyibPay</p>
+        <div class="pay-options-list">
+          <div class="pay-choice-card selected" id="payOpt_fpx" onclick="selectPaymentMethod('fpx')">
+            <div class="pay-info">
+              <h4 data-i18n="fpxTitle">Online Banking (FPX)</h4>
+              <p data-i18n="fpxDesc">Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank &amp; all MY banks via ToyyibPay</p>
+            </div>
+            <span class="fee-tag">+RM1.00 Fee</span>
           </div>
-          <span class="fee-tag">+RM1.00 Fee</span>
+
+          <div class="pay-choice-card" id="payOpt_duitnow" onclick="selectPaymentMethod('duitnow')">
+            <div class="pay-info">
+              <h4 data-i18n="duitnowTitle">DuitNow QR</h4>
+              <p data-i18n="duitnowDesc">Pay via Billplz DuitNow QR &amp; online payment channels</p>
+            </div>
+            <span class="fee-tag" style="background:rgba(34,197,94,0.15); color:#4ade80;" data-i18n="noFeeTag">No Fee</span>
+          </div>
+
+          <div class="pay-choice-card" id="payOpt_ewallet" onclick="selectPaymentMethod('ewallet')">
+            <div class="pay-info">
+              <h4 data-i18n="ewalletTitle">eWallet (TNG / GrabPay / Boost)</h4>
+              <p data-i18n="ewalletDesc">Pay via Touch 'n Go eWallet, GrabPay, Boost or ShopeePay &amp; confirm via WhatsApp</p>
+            </div>
+            <span class="fee-tag" style="background:rgba(34,197,94,0.15); color:#4ade80;" data-i18n="noFeeTag2">No Fee</span>
+          </div>
+        </div>
+
+        <div class="qr-ewallet-box" id="manualPayInstructionBox">
+          <div style="font-weight:700; color:var(--accent-gold); margin-bottom:4px;" id="manualPayHeading">DuitNow QR Payment</div>
+          <p style="color:var(--text-secondary); font-size:0.75rem;" id="manualPayText">
+            Scan the DuitNow QR code below (optional `duitnow-qr.png` in repo) or transfer the exact amount, then tap Pay Now to send your order details to WhatsApp Admin.
+          </p>
+          <div class="qr-preview-wrap" id="qrImageWrap" style="display:none;">
+            <img src="duitnow-qr.png" alt="DuitNow QR" onload="document.getElementById('qrImageWrap').style.display='block';" onerror="this.parentElement.style.display='none';" />
+          </div>
         </div>
       </div>
     </div>
@@ -1662,7 +1768,8 @@
     let products = [
       { id: 'netflix', logo: 'netflix.png', name: 'Netflix Premium', category: 'Streaming', price: 18, stock: 2, badge: 'N', bg: '#18181b', color: '#ef4444' },
       { id: 'disney', logo: 'disney.png', name: 'Disney+ Premium', category: 'Streaming', price: 16, stock: 1, badge: 'D+', bg: '#0c1d3d', color: '#38bdf8' },
-      { id: 'hbomax', logo: 'hbomax.png', name: 'HBO Max', category: 'Streaming', price: 15, stock: 3, badge: 'MAX', bg: '#1e1b4b', color: '#a78bfa' },
+      { id: 'hbomax', logo: 'hbomax.png', name: 'HBO Max', category: 'Streaming', price: 16, stock: 3, badge: 'MAX', bg: '#1e1b4b', color: '#a78bfa' },
+      { id: 'primevideo', logo: 'primevideo.png', name: 'Prime Video', category: 'Streaming', price: 10, stock: 3, badge: 'PV', bg: '#091a2c', color: '#38bdf8' },
       { id: 'youtube', logo: 'youtube.png', name: 'YouTube Premium', category: 'Streaming', price: 5, stock: 5, badge: 'YT', bg: '#271313', color: '#f87171' },
       { id: 'spotify', logo: 'spotify.png', name: 'Spotify Premium', category: 'Music', price: 13, stock: 4, badge: 'SP', bg: '#0d2618', color: '#22c55e' },
       { id: 'canva', logo: 'canva.png', name: 'Canva Pro', category: 'Creative', price: 5, stock: 6, badge: 'C', bg: '#0e2933', color: '#22d3ee' },
@@ -1672,6 +1779,7 @@
     let selectedCategory = 'All';
     let currentProduct = null;
     let selectedMonths = 1;
+    let selectedPaymentMethod = 'fpx';
     let currentSlide = 0;
     let currentLang = localStorage.getItem('spystore_lang') || 'en';
 
@@ -1696,8 +1804,8 @@
         trust2Desc: '5–15 mins via WA',
         trust3Title: 'Auto FPX',
         trust3Desc: 'All MY Banks',
-        catAll: 'All (7)',
-        catStreaming: 'Streaming (4)',
+        catAll: 'All (8)',
+        catStreaming: 'Streaming (5)',
         catMusic: 'Music (1)',
         catCreative: 'Creative (2)',
         selectAppTitle: 'Select Subscription App',
@@ -1707,12 +1815,20 @@
         labelName: 'Full Name *',
         labelPhone: 'WhatsApp Number (For Account Delivery) *',
         labelDevice: 'Device Used *',
+        labelEmail: 'Account Email Address *',
+        noExtraInfoNote: 'No extra account details required for this plan.',
         step2Title: 'Select Duration Plan',
         mo1: '1 Month',
         mo2: '2 Months',
         step3Title: 'Payment Method',
         fpxTitle: 'Online Banking (FPX)',
         fpxDesc: 'Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank & all MY banks via ToyyibPay',
+        duitnowTitle: 'DuitNow QR',
+        duitnowDesc: 'Pay via Billplz DuitNow QR & online payment channels',
+        ewalletTitle: "eWallet (Touch 'n Go / GrabPay / Boost)",
+        ewalletDesc: "Pay via Touch 'n Go eWallet, GrabPay, Boost or ShopeePay & confirm via WhatsApp",
+        noFeeTag: 'No Fee',
+        noFeeTag2: 'No Fee',
         totalLabel: 'Total Payable (incl. RM1 FPX fee)',
         payNowBtn: 'Pay Now →',
         claimWaBtn: 'Send Receipt & Claim on WhatsApp →'
@@ -1737,8 +1853,8 @@
         trust2Desc: '5–15 minit via WA',
         trust3Title: 'FPX Automatik',
         trust3Desc: 'Semua Bank MY',
-        catAll: 'Semua (7)',
-        catStreaming: 'Penstriman (4)',
+        catAll: 'Semua (8)',
+        catStreaming: 'Penstriman (5)',
         catMusic: 'Muzik (1)',
         catCreative: 'Kreatif (2)',
         selectAppTitle: 'Pilih Aplikasi Langganan',
@@ -1748,12 +1864,20 @@
         labelName: 'Nama Penuh *',
         labelPhone: 'Nombor WhatsApp (Untuk Terima Akaun) *',
         labelDevice: 'Peranti Digunakan *',
+        labelEmail: 'Alamat E-mel Akaun *',
+        noExtraInfoNote: 'Tiada maklumat tambahan khusus diperlukan untuk langganan ini.',
         step2Title: 'Pilih Tempoh Langganan',
         mo1: '1 Bulan',
         mo2: '2 Bulan',
         step3Title: 'Kaedah Pembayaran',
         fpxTitle: 'Perbankan Dalam Talian (FPX)',
         fpxDesc: 'Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank & semua bank MY melalui ToyyibPay',
+        duitnowTitle: 'DuitNow QR',
+        duitnowDesc: 'Bayar melalui Billplz DuitNow QR & saluran bayaran dalam talian',
+        ewalletTitle: "eWallet (Touch 'n Go / GrabPay / Boost)",
+        ewalletDesc: "Bayar melalui Touch 'n Go eWallet, GrabPay, Boost atau ShopeePay & sahkan di WhatsApp",
+        noFeeTag: 'Tiada Caj',
+        noFeeTag2: 'Tiada Caj',
         totalLabel: 'Jumlah Perlu Dibayar (termasuk caj FPX RM1)',
         payNowBtn: 'Bayar Sekarang →',
         claimWaBtn: 'Hantar Resit & Tuntut di WhatsApp →'
@@ -2018,7 +2142,7 @@
       }));
       const nList = mapApp('netflix', 'Netflix', 18);
       const dList = mapApp('disney', 'Disney+', 16);
-      const hList = mapApp('hbomax', 'HBO Max', 15);
+      const hList = mapApp('hbomax', 'HBO Max', 16);
       return {
         byApp: {
           netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: nList, price: 18, label: 'Netflix' },
@@ -2201,6 +2325,8 @@
       if (!currentProduct) return;
 
       selectedMonths = 1;
+      selectedPaymentMethod = 'fpx';
+      selectPaymentMethod('fpx');
       document.getElementById('catalogView').style.display = 'none';
       document.getElementById('checkoutView').classList.add('active');
       document.getElementById('checkoutBar').classList.add('active');
@@ -2221,6 +2347,21 @@
         if (!document.getElementById('custPhone').value) document.getElementById('custPhone').value = user.phone || '';
       }
 
+      const needsDevice = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(currentProduct.id);
+      const needsEmail = ['youtube', 'canva'].includes(currentProduct.id);
+
+      const devGroup = document.getElementById('deviceFieldGroup');
+      const emGroup = document.getElementById('emailFieldGroup');
+      const noExtraNote = document.getElementById('noExtraInfoNote');
+
+      devGroup.style.display = needsDevice ? 'block' : 'none';
+      emGroup.style.display = needsEmail ? 'block' : 'none';
+      noExtraNote.style.display = (!needsDevice && !needsEmail) ? 'block' : 'none';
+
+      if (user && needsEmail && !document.getElementById('custEmail').value) {
+        document.getElementById('custEmail').value = user.email || '';
+      }
+
       document.getElementById('plan1Price').textContent = `RM${currentProduct.price.toFixed(2)}`;
       document.getElementById('plan2Price').textContent = `RM${(currentProduct.price * 2).toFixed(2)}`;
       selectMonths(1);
@@ -2234,15 +2375,50 @@
       document.getElementById('catalogView').style.display = 'block';
     }
 
+    function updatePayTotalDisplay() {
+      if (!currentProduct) return;
+      const planAmt = currentProduct.price * selectedMonths;
+      const feeAmt = selectedPaymentMethod === 'fpx' ? 1.00 : 0.00;
+      const total = planAmt + feeAmt;
+      document.getElementById('totalPayableText').textContent = `RM${total.toFixed(2)}`;
+    }
+
+    function selectPaymentMethod(method) {
+      selectedPaymentMethod = method;
+      ['fpx', 'duitnow', 'ewallet'].forEach(m => {
+        const el = document.getElementById(`payOpt_${m}`);
+        if (el) el.classList.toggle('selected', m === method);
+      });
+
+      const box = document.getElementById('manualPayInstructionBox');
+      const heading = document.getElementById('manualPayHeading');
+      const text = document.getElementById('manualPayText');
+
+      if (!box || !heading || !text) return;
+      if (method === 'duitnow') {
+        box.classList.add('show');
+        heading.textContent = currentLang === 'en' ? 'DuitNow QR Payment' : 'Pembayaran DuitNow QR';
+        text.textContent = currentLang === 'en'
+          ? 'Scan the DuitNow QR code (if shown) or pay the exact total without extra fee, then tap Pay Now to send your order & receipt proof to WhatsApp Admin.'
+          : 'Imbas kod DuitNow QR (jika dipaparkan) atau bayar jumlah tepat tanpa caj tambahan, kemudian tekan Bayar Sekarang untuk hantar butiran tempahan & bukti bayaran ke WhatsApp Admin.';
+      } else if (method === 'ewallet') {
+        box.classList.add('show');
+        heading.textContent = currentLang === 'en' ? "eWallet (Touch 'n Go / GrabPay / Boost)" : "eWallet (Touch 'n Go / GrabPay / Boost)";
+        text.textContent = currentLang === 'en'
+          ? "Pay via Touch 'n Go eWallet, GrabPay, Boost, or ShopeePay with no extra fee, then tap Pay Now to confirm your order on WhatsApp."
+          : "Bayar melalui Touch 'n Go eWallet, GrabPay, Boost atau ShopeePay tanpa caj tambahan, kemudian tekan Bayar Sekarang untuk sahkan tempahan di WhatsApp.";
+      } else {
+        box.classList.remove('show');
+      }
+
+      updatePayTotalDisplay();
+    }
+
     function selectMonths(mo) {
       selectedMonths = mo;
       document.getElementById('plan1Btn').classList.toggle('selected', mo === 1);
       document.getElementById('plan2Btn').classList.toggle('selected', mo === 2);
-
-      const planAmt = currentProduct.price * selectedMonths;
-      const feeAmt = 1.00;
-      const total = planAmt + feeAmt;
-      document.getElementById('totalPayableText').textContent = `RM${total.toFixed(2)}`;
+      updatePayTotalDisplay();
     }
 
     async function processPayment() {
@@ -2250,15 +2426,26 @@
 
       const customerName = document.getElementById('custName').value.trim();
       const customerPhone = document.getElementById('custPhone').value.trim();
-      const customerDevice = document.getElementById('custDevice').value.trim();
+      const needsDevice = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(currentProduct.id);
+      const needsEmail = ['youtube', 'canva'].includes(currentProduct.id);
+      const customerDevice = needsDevice ? document.getElementById('custDevice').value.trim() : '-';
+      const customerEmail = needsEmail ? document.getElementById('custEmail').value.trim() : '-';
 
-      if (!customerName || !customerPhone || !customerDevice) {
-        showToast(currentLang === 'en' ? 'Please fill in Name, WhatsApp Number, and Device!' : 'Sila isi Nama, No. WhatsApp, dan Peranti!');
+      if (!customerName || !customerPhone) {
+        showToast(currentLang === 'en' ? 'Please fill in Full Name and WhatsApp Number!' : 'Sila isi Nama Penuh dan No. WhatsApp!');
+        return;
+      }
+      if (needsDevice && !customerDevice) {
+        showToast(currentLang === 'en' ? 'Please fill in Device Used!' : 'Sila isi Peranti Digunakan!');
+        return;
+      }
+      if (needsEmail && !customerEmail) {
+        showToast(currentLang === 'en' ? 'Please fill in Account Email Address!' : 'Sila isi Alamat E-mel Akaun!');
         return;
       }
 
       const planAmount = currentProduct.price * selectedMonths;
-      const feeAmount = 1.00;
+      const feeAmount = selectedPaymentMethod === 'fpx' ? 1.00 : 0.00;
       const totalAmount = planAmount + feeAmount;
 
       localStorage.setItem('spystore_pending_order', JSON.stringify({
@@ -2269,8 +2456,88 @@
         totalAmount: totalAmount.toFixed(2),
         customerName,
         customerPhone,
-        customerDevice
+        customerDevice,
+        customerEmail,
+        paymentMethod: selectedPaymentMethod
       }));
+
+      if (selectedPaymentMethod === 'duitnow') {
+        const btn = document.getElementById('payNowBtn');
+        btn.disabled = true;
+        btn.textContent = currentLang === 'en' ? 'Generating Billplz QR...' : 'Menjana Bil Billplz...';
+
+        saveLocalOrder({
+          app: currentProduct.name,
+          months: selectedMonths,
+          total: totalAmount.toFixed(2),
+          date: new Date().toLocaleDateString('en-MY')
+        });
+
+        try {
+          const res = await fetch('/api/create-billplz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              appId: currentProduct.id,
+              appName: currentProduct.name,
+              months: selectedMonths,
+              planAmount,
+              feeAmount,
+              totalAmount,
+              customerName,
+              customerPhone,
+              customerDevice,
+              paymentMethod: 'duitnow'
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.paymentUrl) {
+            window.location.href = data.paymentUrl;
+            return;
+          } else {
+            showToast(data.error || 'Failed to create Billplz bill.');
+            btn.disabled = false;
+            btn.textContent = I18N[currentLang].payNowBtn;
+            return;
+          }
+        } catch (err) {
+          showToast('Network error connecting to Billplz server.');
+          btn.disabled = false;
+          btn.textContent = I18N[currentLang].payNowBtn;
+          return;
+        }
+      }
+
+      if (selectedPaymentMethod === 'ewallet') {
+        const methodLabel = selectedPaymentMethod === 'duitnow' ? 'DuitNow QR' : 'eWallet';
+        saveLocalOrder({
+          app: currentProduct.name,
+          months: selectedMonths,
+          total: totalAmount.toFixed(2),
+          date: new Date().toLocaleDateString('en-MY')
+        });
+
+        const waMsg = [
+          '*TEMPAHAN BAHARU — SPYSTORE BY SAMS*',
+          '━━━━━━━━━━━━━━━━━━━━',
+          `• *Kaedah Bayaran:* ${methodLabel}`,
+          `• *Produk:* ${currentProduct.name} (${selectedMonths} Bulan)`,
+          `• *Jumlah Bayaran:* RM${totalAmount.toFixed(2)}`,
+          `• *Nama:* ${customerName}`,
+          `• *No. WhatsApp:* ${customerPhone}`,
+          ...(needsDevice ? [`• *Peranti:* ${customerDevice}`] : []),
+          ...(needsEmail ? [`• *E-mel Akaun:* ${customerEmail}`] : []),
+          '━━━━━━━━━━━━━━━━━━━━',
+          'Saya akan lampirkan resit pembayaran di sini. Mohon semak & proses akaun saya. Terima kasih!'
+        ].join('\n');
+
+        window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waMsg)}`, '_blank');
+        showToast(currentLang === 'en'
+          ? `Opening WhatsApp to send ${methodLabel} order & proof...`
+          : `Membuka WhatsApp untuk hantar tempahan & bukti ${methodLabel}...`);
+        return;
+      }
 
       const btn = document.getElementById('payNowBtn');
       btn.disabled = true;
