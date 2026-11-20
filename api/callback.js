@@ -1,9 +1,24 @@
 // /api/callback.js
-// Mengendalikan pengesahan pembayaran ToyyibPay & menolak stok automatik pada Google Sheet (kolum slots)
+// Mengendalikan pengesahan pembayaran & menolak stok automatik pada Google Sheet (kolum slots)
 
 const SHEET_STOCK_WEBHOOK_URL = process.env.SHEET_STOCK_WEBHOOK_URL;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+
+function inferAppId(rawAppId, rawAppName) {
+  const candidate = String(rawAppId || '').toLowerCase().trim();
+  if (candidate) return candidate;
+  const n = String(rawAppName || '').toLowerCase();
+  if (n.includes('netflix')) return 'netflix';
+  if (n.includes('disney')) return 'disney';
+  if (n.includes('hbo') || n.includes('max')) return 'hbomax';
+  if (n.includes('prime')) return 'primevideo';
+  if (n.includes('youtube')) return 'youtube';
+  if (n.includes('spotify')) return 'spotify';
+  if (n.includes('canva')) return 'canva';
+  if (n.includes('capcut')) return 'capcut';
+  return '';
+}
 
 async function notifyStockWebhook(payload) {
   if (!SHEET_STOCK_WEBHOOK_URL) return { ok: false, reason: 'Missing SHEET_STOCK_WEBHOOK_URL' };
@@ -52,16 +67,16 @@ export default async function handler(req, res) {
     }
 
     const q = req.query || {};
-    const status = String(body.status || body.status_id || q.status_id || '').trim();
+    const status = String(body.status || body.status_id || q.status || q.status_id || '').trim();
     const refNo = String(body.refno || body.order_id || q.order_id || q.ref || '').trim();
     const billCode = String(body.billcode || q.billcode || '').trim();
-    const appId = String(body.appId || body.app || q.app || '').toLowerCase().trim();
-    const appName = String(body.appName || q.appName || appId || 'Subscription').trim();
+    const appName = String(body.appName || q.appName || body.appId || body.app || q.app || 'Subscription').trim();
+    const appId = inferAppId(body.appId || body.app || q.app, appName);
     const months = parseInt(body.months || q.mo || 1, 10) || 1;
-    const totalAmount = String(body.totalAmount || body.amount || '').trim();
-    const customerName = String(body.customerName || q.name || '-').trim();
-    const customerPhone = String(body.customerPhone || '-').trim();
-    const customerDevice = String(body.customerDevice || '-').trim();
+    const totalAmount = String(body.totalAmount || body.amount || q.amount || '').trim();
+    const customerName = String(body.customerName || q.name || q.customerName || '-').trim();
+    const customerPhone = String(body.customerPhone || q.phone || '-').trim();
+    const customerDevice = String(body.customerDevice || q.device || '-').trim();
     const qty = Math.max(1, parseInt(body.qty || 1, 10));
 
     if (status !== '1') {
