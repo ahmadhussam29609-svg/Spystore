@@ -1854,10 +1854,75 @@
       }).join('');
     }
 
+    function buildFallbackTrendingData() {
+      const fb = {
+        netflix: [
+          { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', overview: 'Hundreds of cash-strapped players accept a strange invitation to compete in children\'s games.' },
+          { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', overview: 'Wednesday Addams investigates a murder spree while making new friends at Nevermore.' },
+          { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', overview: 'A small town uncovers a mystery involving secret experiments and supernatural forces.' }
+        ],
+        disney: [
+          { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins.' },
+          { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'A lone gunfighter makes his way through the outer reaches of the galaxy.' },
+          { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: 'Riley\'s mind headquarters makes room for new Emotions.' }
+        ],
+        hbomax: [
+          { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The Targaryen civil war about 200 years before Game of Thrones.' },
+          { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Paul Atreides unites with Chani and the Fremen on a path of revenge.' },
+          { id: 155, title: 'The Dark Knight', mediaType: 'MOVIE', rating: '8.5', overview: 'Batman raises the stakes in his war on crime.' }
+        ]
+      };
+      const mapApp = (key, label, price) => (fb[key] || []).map((x, idx) => ({
+        rank: idx + 1,
+        id: x.id,
+        title: x.title,
+        mediaType: x.mediaType,
+        platformId: key,
+        platformLabel: label,
+        price,
+        rating: x.rating,
+        popularity: 100 - idx * 10,
+        overview: x.overview,
+        backdrop: '',
+        poster: ''
+      }));
+      const nList = mapApp('netflix', 'Netflix', 18);
+      const dList = mapApp('disney', 'Disney+', 16);
+      const hList = mapApp('hbomax', 'HBO Max', 15);
+      return {
+        byApp: {
+          netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: nList, price: 18, label: 'Netflix' },
+          disney: { movies: dList.filter(i => i.mediaType === 'MOVIE'), series: dList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: dList, price: 16, label: 'Disney+' },
+          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: hList, price: 15, label: 'HBO Max' }
+        },
+        categories: {
+          tv_my: [nList[0], dList[1], hList[0]],
+          movie_my: [dList[0], hList[1], dList[2]],
+          new_in: [nList[1], dList[2], hList[1]],
+          popcorn: [dList[0], hList[1], hList[2]],
+          kdrama: [nList[0], nList[1], dList[0]],
+          rewatched: [hList[0], nList[2], dList[1]],
+          only_on: [nList[0], dList[0], hList[0]]
+        },
+        items: [nList[0], dList[0], hList[0]].map((it, idx) => ({ ...it, rank: idx + 1 }))
+      };
+    }
+
     async function loadTrendingHero() {
+      let data = null;
       try {
         const res = await fetch('/api/trending');
-        const data = await res.json();
+        if (res.ok) {
+          const json = await res.json();
+          if (json && Array.isArray(json.items) && json.items.length > 0) {
+            data = json;
+          }
+        }
+      } catch (e) {}
+      if (!data) {
+        data = buildFallbackTrendingData();
+      }
+      try {
         const items = data.items || [];
         trendingByApp = data.byApp || {};
         if (data.categories) {
