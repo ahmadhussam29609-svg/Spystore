@@ -1,5 +1,5 @@
 // /api/trending.js
-// Menarik carta penstriman untuk SPYSTORE BY SAMS dengan jaminan senarai sentiasa terisi
+// Menarik carta penstriman untuk SPYSTORE BY SAMS (Netflix RM18, Disney+ RM16, HBO Max RM15)
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY || '4d8856163cb184c1dc7eda6063f78d1a';
 const WATCH_REGION = 'MY';
@@ -15,31 +15,104 @@ const IMG_POSTER = 'https://image.tmdb.org/t/p/w342';
 
 const FALLBACK_CATALOG = {
   netflix: [
-    { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', overview: 'Hundreds of cash-strapped players accept a strange invitation to compete in children's games for a tempting prize.' },
-    { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', overview: 'Smart, sarcastic and a little dead inside, Wednesday Addams investigates a murder spree while making new friends at Nevermore.' },
-    { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', overview: 'When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.' },
-    { id: 202250, title: '3 Body Problem', mediaType: 'SERIES', rating: '7.5', overview: 'Across continents and decades, five brilliant scientists make startling discoveries as the laws of science unspool before their eyes.' },
-    { id: 1399, title: 'Game of Thrones', mediaType: 'SERIES', rating: '8.5', overview: 'Seven noble families fight for control of the mythical land of Westeros.' }
+    {
+      id: 93405,
+      title: 'Squid Game',
+      mediaType: 'SERIES',
+      rating: '7.9',
+      overview: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games for a tempting prize.",
+      backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg'
+    },
+    {
+      id: 119051,
+      title: 'Wednesday',
+      mediaType: 'SERIES',
+      rating: '8.5',
+      overview: 'Smart, sarcastic and a little dead inside, Wednesday Addams investigates a murder spree while making new friends at Nevermore.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg'
+    },
+    {
+      id: 66732,
+      title: 'Stranger Things',
+      mediaType: 'SERIES',
+      rating: '8.6',
+      overview: 'When a young boy vanishes, a small town uncovers a mystery involving secret experiments and supernatural forces.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg'
+    }
   ],
   disney: [
-    { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins due to the efforts of Thanos.' },
-    { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'After the fall of the Galactic Empire, a lone gunfighter makes his way through the outer reaches of the galaxy.' },
-    { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: 'Teenager Riley's mind headquarters is undergoing a sudden demolition to make room for something completely unexpected: new Emotions!' },
-    { id: 92749, title: 'Moon Knight', mediaType: 'SERIES', rating: '7.8', overview: 'When Steven Grant, a mild-mannered gift-shop employee, becomes plagued with blackouts and memories of another life, he discovers he has dissociative identity disorder.' },
-    { id: 150540, title: 'Inside Out', mediaType: 'MOVIE', rating: '7.9', overview: 'When 11-year-old Riley moves to a new city, her Emotions team up to help her through the transition.' }
+    {
+      id: 299534,
+      title: 'Avengers: Endgame',
+      mediaType: 'MOVIE',
+      rating: '8.3',
+      overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins due to the efforts of Thanos.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg'
+    },
+    {
+      id: 82684,
+      title: 'The Mandalorian',
+      mediaType: 'SERIES',
+      rating: '8.5',
+      overview: 'After the fall of the Galactic Empire, a lone gunfighter makes his way through the outer reaches of the galaxy.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg'
+    },
+    {
+      id: 1022796,
+      title: 'Inside Out 2',
+      mediaType: 'MOVIE',
+      rating: '7.6',
+      overview: "Teenager Riley's mind headquarters is undergoing a sudden demolition to make room for new Emotions.",
+      backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg'
+    }
   ],
   hbomax: [
-    { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The story of the Targaryen civil war that took place about 200 years before events portrayed in Game of Thrones.' },
-    { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge.' },
-    { id: 155, title: 'The Dark Knight', mediaType: 'MOVIE', rating: '8.5', overview: 'Batman raises the stakes in his war on crime with the help of Lt. Jim Gordon and District Attorney Harvey Dent.' },
-    { id: 87108, title: 'Succession', mediaType: 'SERIES', rating: '8.3', overview: 'The Roy family is known for controlling the biggest media and entertainment company in the world.' },
-    { id: 1622, title: 'Supernatural', mediaType: 'SERIES', rating: '8.3', overview: 'When they were boys, Sam and Dean Winchester lost their mother to a mysterious and demonic supernatural force.' }
+    {
+      id: 94997,
+      title: 'House of the Dragon',
+      mediaType: 'SERIES',
+      rating: '8.4',
+      overview: 'The story of the Targaryen civil war that took place about 200 years before events portrayed in Game of Thrones.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg'
+    },
+    {
+      id: 693134,
+      title: 'Dune: Part Two',
+      mediaType: 'MOVIE',
+      rating: '8.1',
+      overview: 'Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg'
+    },
+    {
+      id: 155,
+      title: 'The Dark Knight',
+      mediaType: 'MOVIE',
+      rating: '8.5',
+      overview: 'Batman raises the stakes in his war on crime with the help of Lt. Jim Gordon and District Attorney Harvey Dent.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/qJ2tW6WMUDux911r6m7haRef0WH.jpg'
+    }
   ]
 };
 
 function formatItem(raw, mediaType, platform, rank) {
   const title = raw.title || raw.name || 'Untitled';
   const releaseDate = raw.release_date || raw.first_air_date || '';
+  const backdropUrl = raw.backdrop_path
+    ? `${IMG_BACKDROP}${raw.backdrop_path}`
+    : (raw.backdrop || '');
+  const posterUrl = raw.poster_path
+    ? `${IMG_POSTER}${raw.poster_path}`
+    : (raw.poster || backdropUrl);
+
   return {
     rank,
     id: raw.id,
@@ -52,8 +125,8 @@ function formatItem(raw, mediaType, platform, rank) {
     popularity: raw.popularity || 0,
     releaseDate,
     overview: raw.overview || '',
-    backdrop: raw.backdrop_path ? `${IMG_BACKDROP}${raw.backdrop_path}` : '',
-    poster: raw.poster_path ? `${IMG_POSTER}${raw.poster_path}` : ''
+    backdrop: backdropUrl,
+    poster: posterUrl
   };
 }
 
