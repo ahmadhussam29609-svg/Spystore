@@ -1,59 +1,46 @@
 export default async function handler(req, res) {
   const apiKey = process.env.TMDB_API_KEY || '4d8856163cb184c1dc7eda6063f78d1a';
+  const today = new Date().toISOString().split('T')[0];
 
   try {
-    const trendingRes = await fetch(
-      `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&language=en-US`
-    );
-    const trendingData = await trendingRes.json();
-    const topItems = (trendingData.results || []).slice(0, 5);
+    // Tarik cerita yang SUDAH release dan boleh distrim di Malaysia (watch_region=MY)
+    const platforms = [
+      { id: 'netflix', label: 'Netflix', providerId: '8', type: 'tv' },
+      { id: 'disney', label: 'Disney+', providerId: '337', type: 'movie' },
+      { id: 'hbomax', label: 'HBO Max', providerId: '1899|384', type: 'tv' },
+      { id: 'prime', label: 'Prime Video', providerId: '119', type: 'movie' },
+      { id: 'netflix', label: 'Netflix', providerId: '8', type: 'movie' }
+    ];
 
-    const enriched = await Promise.all(
-      topItems.map(async (item, index) => {
-        const mediaType = item.media_type === 'tv' ? 'tv' : 'movie';
-        const title = item.title || item.name || 'Trending Title';
-        const overview = item.overview || '';
-        const backdrop = item.backdrop_path
-          ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}`
-          : '';
+    const results = await Promise.all(
+      platforms.map(async (plat, index) => {
+        const dateParam = plat.type === 'movie'
+          ? `primary_release_date.lte=${today}`
+          : `first_air_date.lte=${today}`;
 
-        let platformId = 'netflix';
-        let platformLabel = 'Netflix';
+        const url = `https://api.themoviedb.org/3/discover/${plat.type}?api_key=${apiKey}&watch_region=MY&with_watch_providers=${plat.providerId}&with_watch_monetization_types=flatrate&sort_by=popularity.desc&${dateParam}&language=en-US`;
 
-        try {
-          const provRes = await fetch(
-            `https://api.themoviedb.org/3/${mediaType}/${item.id}/watch/providers?api_key=${apiKey}`
-          );
-          const provData = await provRes.json();
-          const myProviders = provData.results?.MY?.flatrate || provData.results?.US?.flatrate || [];
-          const names = myProviders.map((p) => (p.provider_name || '').toLowerCase()).join(' ');
+        const resp = await fetch(url);
+        const data = await resp.json();
+        const item = (data.results || []).find(r => r.backdrop_path) || (data.results || [])[0];
 
-          if (names.includes('disney')) {
-            platformId = 'disney';
-            platformLabel = 'Disney+';
-          } else if (names.includes('hbo') || names.includes('max')) {
-            platformId = 'hbomax';
-            platformLabel = 'HBO Max';
-          } else if (names.includes('netflix')) {
-            platformId = 'netflix';
-            platformLabel = 'Netflix';
-          }
-        } catch (e) {}
+        if (!item) return null;
 
         return {
           rank: index + 1,
-          title,
-          overview,
-          backdrop,
-          platformId,
-          platformLabel,
-          mediaType: mediaType === 'tv' ? 'SERIES' : 'MOVIE'
+          title: item.title || item.name || 'Trending Now',
+          overview: item.overview || '',
+          backdrop: item.backdrop_path ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}` : '',
+          platformId: plat.id,
+          platformLabel: plat.label,
+          mediaType: plat.type === 'tv' ? 'SERIES' : 'MOVIE'
         };
       })
     );
 
+    const validItems = results.filter(Boolean);
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-    return res.status(200).json({ items: enriched });
+    return res.status(200).json({ items: validItems });
   } catch (err) {
     return res.status(500).json({ error: err.message, items: [] });
   }
