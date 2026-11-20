@@ -73,18 +73,20 @@ export default async function handler(req, res) {
     const platformBundles = await Promise.all(
       PROVIDERS.map(async (prov) => {
         const reg = prov.region || WATCH_REGION;
-        const [movDisc, tvDisc, movNew, tvNew] = await Promise.all([
+        const [movDisc, tvDisc, movNew, tvNew, movKo, tvKo] = await Promise.all([
           tmdbGetSafe(`/discover/movie?watch_region=${reg}&with_watch_providers=${prov.providerId}&sort_by=popularity.desc&release_date.lte=${todayStr}`),
           tmdbGetSafe(`/discover/tv?watch_region=${reg}&with_watch_providers=${prov.providerId}&sort_by=popularity.desc&first_air_date.lte=${todayStr}`),
           tmdbGetSafe(`/discover/movie?watch_region=${reg}&with_watch_providers=${prov.providerId}&sort_by=release_date.desc&release_date.lte=${todayStr}&vote_count.gte=10`),
-          tmdbGetSafe(`/discover/tv?watch_region=${reg}&with_watch_providers=${prov.providerId}&sort_by=first_air_date.desc&first_air_date.lte=${todayStr}&vote_count.gte=10`)
+          tmdbGetSafe(`/discover/tv?watch_region=${reg}&with_watch_providers=${prov.providerId}&sort_by=first_air_date.desc&first_air_date.lte=${todayStr}&vote_count.gte=10`),
+          tmdbGetSafe(`/discover/movie?watch_region=${reg}&with_watch_providers=${prov.providerId}&with_original_language=ko&sort_by=popularity.desc&release_date.lte=${todayStr}`),
+          tmdbGetSafe(`/discover/tv?watch_region=${reg}&with_watch_providers=${prov.providerId}&with_original_language=ko&sort_by=popularity.desc&first_air_date.lte=${todayStr}`)
         ]);
-        return { prov, movDisc, tvDisc, movNew, tvNew };
+        return { prov, movDisc, tvDisc, movNew, tvNew, movKo, tvKo };
       })
     );
 
     const byApp = {};
-    platformBundles.forEach(({ prov, movDisc, tvDisc, movNew, tvNew }) => {
+    platformBundles.forEach(({ prov, movDisc, tvDisc, movNew, tvNew, movKo, tvKo }) => {
       const seenM = new Set();
       const movies = (movDisc.results || [])
         .map((m, i) => formatItem(m, 'movie', prov, i + 1))
@@ -127,11 +129,26 @@ export default async function handler(req, res) {
         })
         .slice(0, 6);
 
+      const seenKo = new Set();
+      const kdramaList = [
+        ...(tvKo.results || []).map((t, i) => formatItem(t, 'tv', prov, i + 1)),
+        ...(movKo.results || []).map((m, i) => formatItem(m, 'movie', prov, i + 1))
+      ]
+        .filter(it => {
+          const key = `${it.mediaType}_${it.id}`;
+          if (seenKo.has(key) || !isReleased(it)) return false;
+          seenKo.add(key);
+          return true;
+        })
+        .slice(0, 10)
+        .map((it, i) => ({ ...it, rank: i + 1 }));
+
       byApp[prov.id] = {
         movies,
         series,
         newMovies,
         newSeries,
+        kdrama: kdramaList,
         price: prov.price,
         label: prov.label
       };
@@ -147,7 +164,6 @@ export default async function handler(req, res) {
       });
     });
 
-    // 1. Top 10 Tv Show in Malaysia Today
     const tvMy = (trendingTvRes.results || [])
       .map((r, idx) => {
         const plat = idToPlatform.get(`SERIES_${r.id}`) || PROVIDERS[idx % PROVIDERS.length];
@@ -157,7 +173,6 @@ export default async function handler(req, res) {
       .slice(0, 10)
       .map((item, i) => ({ ...item, rank: i + 1 }));
 
-    // 2. Top 10 Movie in Malaysia Today
     const movieMy = (trendingMovRes.results || [])
       .map((r, idx) => {
         const plat = idToPlatform.get(`MOVIE_${r.id}`) || PROVIDERS[idx % PROVIDERS.length];
@@ -167,7 +182,6 @@ export default async function handler(req, res) {
       .slice(0, 10)
       .map((item, i) => ({ ...item, rank: i + 1 }));
 
-    // 3. New in Netflix/Disney/Hbo
     const newPool = [];
     for (let i = 0; i < 5; i++) {
       for (const prov of PROVIDERS) {
@@ -187,7 +201,6 @@ export default async function handler(req, res) {
       .slice(0, 12)
       .map((it, idx) => ({ ...it, rank: idx + 1 }));
 
-    // 4. Perfect Popcorn Movie
     const popcornRaw = [];
     PROVIDERS.forEach(prov => {
       (byApp[prov.id]?.movies || []).forEach(m => popcornRaw.push(m));
@@ -203,7 +216,6 @@ export default async function handler(req, res) {
       .slice(0, 10)
       .map((it, idx) => ({ ...it, rank: idx + 1 }));
 
-    // 5. Kdrama
     const kdramaRaw = [];
     const koTvList = kdramaTvRes.results || [];
     const koMovList = kdramaMovRes.results || [];
@@ -228,7 +240,6 @@ export default async function handler(req, res) {
       .slice(0, 10)
       .map((it, idx) => ({ ...it, rank: idx + 1 }));
 
-    // 6. Most Rewatched Show
     const rewatchedRaw = [];
     PROVIDERS.forEach(prov => {
       (byApp[prov.id]?.series || []).forEach(s => rewatchedRaw.push(s));
@@ -244,7 +255,6 @@ export default async function handler(req, res) {
       .slice(0, 10)
       .map((it, idx) => ({ ...it, rank: idx + 1 }));
 
-    // 7. Only On Netflix / Disney+ / HBO Max
     const onlyOnPool = [];
     PROVIDERS.forEach(prov => {
       const mList = byApp[prov.id]?.movies || [];
@@ -279,6 +289,24 @@ export default async function handler(req, res) {
       tv_my: tvMy,
       movie_my: movieMy,
       new_in: newIn,
+      popcorn,
+      kdrama,
+      rewatched,
+      only_on: onlyOn
+    };
+
+    return res.status(200).json({
+      items: heroItems,
+      categories,
+      byApp
+    });
+  } catch (err) {
+    return res.status(500).json({
+      error: 'Failed to load trending charts',
+      detail: err.message
+    });
+  }
+}
       popcorn,
       kdrama,
       rewatched,
