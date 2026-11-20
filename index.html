@@ -1816,14 +1816,14 @@
         labelName: 'Full Name *',
         labelPhone: 'WhatsApp Number (For Account Delivery) *',
         labelDevice: 'Device Used *',
-        labelEmail: 'Account Email Address *',
-        noExtraInfoNote: 'No extra account details required for this plan.',
         step2Title: 'Select Duration Plan',
         mo1: '1 Month',
         mo2: '2 Months',
         step3Title: 'Payment Method',
         fpxTitle: 'Online Banking (FPX)',
         fpxDesc: 'Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank & all MY banks via ToyyibPay',
+        labelEmail: 'Account Email Address *',
+        noExtraInfoNote: 'No extra account details required for this plan.',
         duitnowTitle: 'DuitNow QR',
         duitnowDesc: 'Pay via Billplz DuitNow QR & online payment channels',
         ewalletTitle: "eWallet (Touch 'n Go / GrabPay / Boost)",
@@ -1865,14 +1865,14 @@
         labelName: 'Nama Penuh *',
         labelPhone: 'Nombor WhatsApp (Untuk Terima Akaun) *',
         labelDevice: 'Peranti Digunakan *',
-        labelEmail: 'Alamat E-mel Akaun *',
-        noExtraInfoNote: 'Tiada maklumat tambahan khusus diperlukan untuk langganan ini.',
         step2Title: 'Pilih Tempoh Langganan',
         mo1: '1 Bulan',
         mo2: '2 Bulan',
         step3Title: 'Kaedah Pembayaran',
         fpxTitle: 'Perbankan Dalam Talian (FPX)',
         fpxDesc: 'Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank & semua bank MY melalui ToyyibPay',
+        labelEmail: 'Alamat E-mel Akaun *',
+        noExtraInfoNote: 'Tiada maklumat tambahan khusus diperlukan untuk langganan ini.',
         duitnowTitle: 'DuitNow QR',
         duitnowDesc: 'Bayar melalui Billplz DuitNow QR & saluran bayaran dalam talian',
         ewalletTitle: "eWallet (Touch 'n Go / GrabPay / Boost)",
@@ -2121,8 +2121,7 @@
           { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'A lone gunfighter makes his way through the outer reaches of the galaxy.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
           { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: "Riley's mind headquarters makes room for new Emotions.", backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' }
         ],
-        hbomax: [,
-          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: pList, price: 10, label: 'Prime Video' }
+        hbomax: [
           { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The Targaryen civil war about 200 years before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
           { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Paul Atreides unites with Chani and the Fremen on a path of revenge.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
           { id: 155, title: 'The Dark Knight', mediaType: 'MOVIE', rating: '8.5', overview: 'Batman raises the stakes in his war on crime.', backdrop: 'https://image.tmdb.org/t/p/w780/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', poster: 'https://image.tmdb.org/t/p/w342/qJ2tW6WMUDux911r6m7haRef0WH.jpg' }
@@ -2132,7 +2131,6 @@
           { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', overview: 'Jack Reacher investigates a conspiracy in a small town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' },
           { id: 605722, title: 'The Tomorrow War', mediaType: 'MOVIE', rating: '7.5', overview: 'A family man is drafted to fight in a future war.', backdrop: 'https://image.tmdb.org/t/p/w780/8Y43pPCjBBGV3exGpWM5bDB1C6W.jpg', poster: 'https://image.tmdb.org/t/p/w342/34nDCQZ3u3uN3n4x3n4o4Z3P9k7.jpg' }
         ]
-
       };
       const mapApp = (key, label, price) => (fb[key] || []).map((x, idx) => ({
         rank: idx + 1,
@@ -2156,18 +2154,19 @@
         byApp: {
           netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: nList, price: 18, label: 'Netflix' },
           disney: { movies: dList.filter(i => i.mediaType === 'MOVIE'), series: dList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: dList, price: 16, label: 'Disney+' },
-          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: hList, price: 15, label: 'HBO Max' }
+          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: hList, price: 16, label: 'HBO Max' },
+          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: pList, price: 10, label: 'Prime Video' }
         },
         categories: {
-          tv_my: [nList[0], dList[1], hList[0]],
-          movie_my: [dList[0], hList[1], dList[2]],
-          new_in: [nList[1], dList[2], hList[1]],
-          popcorn: [dList[0], hList[1], hList[2]],
+          tv_my: [nList[0], dList[1], hList[0], pList[0]],
+          movie_my: [dList[0], hList[1], dList[2], pList[2]],
+          new_in: [nList[1], dList[2], hList[1], pList[1]],
+          popcorn: [dList[0], hList[1], hList[2], pList[2]],
           kdrama: [nList[0], nList[1], dList[0]],
-          rewatched: [hList[0], nList[2], dList[1]],
-          only_on: [nList[0], dList[0], hList[0]]
+          rewatched: [hList[0], nList[2], dList[1], pList[0]],
+          only_on: [nList[0], dList[0], hList[0], pList[0]]
         },
-        items: [nList[0], dList[0], hList[0]].map((it, idx) => ({ ...it, rank: idx + 1 }))
+        items: [nList[0], dList[0], hList[0], pList[0]].map((it, idx) => ({ ...it, rank: idx + 1 }))
       };
     }
 
@@ -2359,13 +2358,9 @@
       const needsDevice = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(currentProduct.id);
       const needsEmail = ['youtube', 'canva'].includes(currentProduct.id);
 
-      const devGroup = document.getElementById('deviceFieldGroup');
-      const emGroup = document.getElementById('emailFieldGroup');
-      const noExtraNote = document.getElementById('noExtraInfoNote');
-
-      devGroup.style.display = needsDevice ? 'block' : 'none';
-      emGroup.style.display = needsEmail ? 'block' : 'none';
-      noExtraNote.style.display = (!needsDevice && !needsEmail) ? 'block' : 'none';
+      document.getElementById('deviceFieldGroup').style.display = needsDevice ? 'block' : 'none';
+      document.getElementById('emailFieldGroup').style.display = needsEmail ? 'block' : 'none';
+      document.getElementById('noExtraInfoNote').style.display = (!needsDevice && !needsEmail) ? 'block' : 'none';
 
       if (user && needsEmail && !document.getElementById('custEmail').value) {
         document.getElementById('custEmail').value = user.email || '';
@@ -2408,8 +2403,8 @@
         box.classList.add('show');
         heading.textContent = currentLang === 'en' ? 'DuitNow QR Payment' : 'Pembayaran DuitNow QR';
         text.textContent = currentLang === 'en'
-          ? 'Scan the DuitNow QR code (if shown) or pay the exact total without extra fee, then tap Pay Now to send your order & receipt proof to WhatsApp Admin.'
-          : 'Imbas kod DuitNow QR (jika dipaparkan) atau bayar jumlah tepat tanpa caj tambahan, kemudian tekan Bayar Sekarang untuk hantar butiran tempahan & bukti bayaran ke WhatsApp Admin.';
+          ? 'Pay via Billplz DuitNow QR & online payment channels with no extra fee.'
+          : 'Bayar melalui Billplz DuitNow QR & saluran bayaran dalam talian tanpa caj tambahan.';
       } else if (method === 'ewallet') {
         box.classList.add('show');
         heading.textContent = currentLang === 'en' ? "eWallet (Touch 'n Go / GrabPay / Boost)" : "eWallet (Touch 'n Go / GrabPay / Boost)";
@@ -2496,6 +2491,7 @@
               customerName,
               customerPhone,
               customerDevice,
+              customerEmail,
               paymentMethod: 'duitnow'
             })
           });
@@ -2519,7 +2515,6 @@
       }
 
       if (selectedPaymentMethod === 'ewallet') {
-        const methodLabel = selectedPaymentMethod === 'duitnow' ? 'DuitNow QR' : 'eWallet';
         saveLocalOrder({
           app: currentProduct.name,
           months: selectedMonths,
@@ -2530,7 +2525,7 @@
         const waMsg = [
           '*TEMPAHAN BAHARU — SPYSTORE BY SAMS*',
           '━━━━━━━━━━━━━━━━━━━━',
-          `• *Kaedah Bayaran:* ${methodLabel}`,
+          '• *Kaedah Bayaran:* eWallet',
           `• *Produk:* ${currentProduct.name} (${selectedMonths} Bulan)`,
           `• *Jumlah Bayaran:* RM${totalAmount.toFixed(2)}`,
           `• *Nama:* ${customerName}`,
@@ -2543,8 +2538,8 @@
 
         window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waMsg)}`, '_blank');
         showToast(currentLang === 'en'
-          ? `Opening WhatsApp to send ${methodLabel} order & proof...`
-          : `Membuka WhatsApp untuk hantar tempahan & bukti ${methodLabel}...`);
+          ? 'Opening WhatsApp to send eWallet order & proof...'
+          : 'Membuka WhatsApp untuk hantar tempahan & bukti eWallet...');
         return;
       }
 
