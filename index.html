@@ -1630,18 +1630,6 @@
       const dots = document.querySelectorAll('#heroDots .hero-dot');
       dots.forEach((d, i) => d.classList.toggle('active', i === idx));
     }
-
-    let heroTouching = false;
-    const heroTrackEl = document.getElementById('heroTrack');
-    heroTrackEl.addEventListener('touchstart', () => { heroTouching = true; }, { passive: true });
-    heroTrackEl.addEventListener('touchend', () => { setTimeout(() => { heroTouching = false; }, 3000); }, { passive: true });
-
-    setInterval(() => {
-      if (!heroTouching && document.getElementById('catalogView').style.display !== 'none') {
-        const nextSlide = (currentSlide + 1) % totalSlides;
-        goToSlide(nextSlide);
-      }
-    }, 5000);
     let heroTouching = false;
     let heroMoved = false;
     let touchStartX = 0;
