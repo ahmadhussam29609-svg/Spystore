@@ -1,5 +1,5 @@
 // /api/trending.js
-// Netflix (RM18) & HBO Max (RM15) guna wilayah MY; Disney+ (RM16) guna katalog global rasmi Disney+ (US)
+// Menarik carta penstriman untuk SPYSTORE BY SAMS dengan jaminan senarai sentiasa terisi
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY || '4d8856163cb184c1dc7eda6063f78d1a';
 const WATCH_REGION = 'MY';
@@ -13,6 +13,30 @@ const PROVIDERS = [
 const IMG_BACKDROP = 'https://image.tmdb.org/t/p/w780';
 const IMG_POSTER = 'https://image.tmdb.org/t/p/w342';
 
+const FALLBACK_CATALOG = {
+  netflix: [
+    { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', overview: 'Hundreds of cash-strapped players accept a strange invitation to compete in children's games for a tempting prize.' },
+    { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', overview: 'Smart, sarcastic and a little dead inside, Wednesday Addams investigates a murder spree while making new friends at Nevermore.' },
+    { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', overview: 'When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.' },
+    { id: 202250, title: '3 Body Problem', mediaType: 'SERIES', rating: '7.5', overview: 'Across continents and decades, five brilliant scientists make startling discoveries as the laws of science unspool before their eyes.' },
+    { id: 1399, title: 'Game of Thrones', mediaType: 'SERIES', rating: '8.5', overview: 'Seven noble families fight for control of the mythical land of Westeros.' }
+  ],
+  disney: [
+    { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins due to the efforts of Thanos.' },
+    { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'After the fall of the Galactic Empire, a lone gunfighter makes his way through the outer reaches of the galaxy.' },
+    { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: 'Teenager Riley's mind headquarters is undergoing a sudden demolition to make room for something completely unexpected: new Emotions!' },
+    { id: 92749, title: 'Moon Knight', mediaType: 'SERIES', rating: '7.8', overview: 'When Steven Grant, a mild-mannered gift-shop employee, becomes plagued with blackouts and memories of another life, he discovers he has dissociative identity disorder.' },
+    { id: 150540, title: 'Inside Out', mediaType: 'MOVIE', rating: '7.9', overview: 'When 11-year-old Riley moves to a new city, her Emotions team up to help her through the transition.' }
+  ],
+  hbomax: [
+    { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The story of the Targaryen civil war that took place about 200 years before events portrayed in Game of Thrones.' },
+    { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge.' },
+    { id: 155, title: 'The Dark Knight', mediaType: 'MOVIE', rating: '8.5', overview: 'Batman raises the stakes in his war on crime with the help of Lt. Jim Gordon and District Attorney Harvey Dent.' },
+    { id: 87108, title: 'Succession', mediaType: 'SERIES', rating: '8.3', overview: 'The Roy family is known for controlling the biggest media and entertainment company in the world.' },
+    { id: 1622, title: 'Supernatural', mediaType: 'SERIES', rating: '8.3', overview: 'When they were boys, Sam and Dean Winchester lost their mother to a mysterious and demonic supernatural force.' }
+  ]
+};
+
 function formatItem(raw, mediaType, platform, rank) {
   const title = raw.title || raw.name || 'Untitled';
   const releaseDate = raw.release_date || raw.first_air_date || '';
@@ -24,7 +48,7 @@ function formatItem(raw, mediaType, platform, rank) {
     platformId: platform.id,
     platformLabel: platform.label,
     price: platform.price,
-    rating: raw.vote_average ? Number(raw.vote_average).toFixed(1) : '7.5',
+    rating: raw.vote_average ? Number(raw.vote_average).toFixed(1) : (raw.rating || '7.8'),
     popularity: raw.popularity || 0,
     releaseDate,
     overview: raw.overview || '',
@@ -87,8 +111,15 @@ export default async function handler(req, res) {
 
     const byApp = {};
     platformBundles.forEach(({ prov, movDisc, tvDisc, movNew, tvNew, movKo, tvKo }) => {
+      const fbList = FALLBACK_CATALOG[prov.id] || [];
+      const fbMovies = fbList.filter(x => x.mediaType === 'MOVIE');
+      const fbSeries = fbList.filter(x => x.mediaType === 'SERIES');
+
+      const rawMovSource = (movDisc.results && movDisc.results.length) ? movDisc.results : fbMovies;
+      const rawTvSource = (tvDisc.results && tvDisc.results.length) ? tvDisc.results : fbSeries;
+
       const seenM = new Set();
-      const movies = (movDisc.results || [])
+      const movies = rawMovSource
         .map((m, i) => formatItem(m, 'movie', prov, i + 1))
         .filter(it => {
           if (seenM.has(it.id) || !isReleased(it)) return false;
@@ -99,7 +130,7 @@ export default async function handler(req, res) {
         .map((m, i) => ({ ...m, rank: i + 1 }));
 
       const seenT = new Set();
-      const series = (tvDisc.results || [])
+      const series = rawTvSource
         .map((t, i) => formatItem(t, 'tv', prov, i + 1))
         .filter(it => {
           if (seenT.has(it.id) || !isReleased(it)) return false;
@@ -109,8 +140,11 @@ export default async function handler(req, res) {
         .slice(0, 10)
         .map((t, i) => ({ ...t, rank: i + 1 }));
 
+      const rawNewMovSource = (movNew.results && movNew.results.length) ? movNew.results : rawMovSource;
+      const rawNewTvSource = (tvNew.results && tvNew.results.length) ? tvNew.results : rawTvSource;
+
       const seenNM = new Set();
-      const newMovies = (movNew.results || [])
+      const newMovies = rawNewMovSource
         .map((m, i) => formatItem(m, 'movie', prov, i + 1))
         .filter(it => {
           if (seenNM.has(it.id) || !isReleased(it)) return false;
@@ -120,7 +154,7 @@ export default async function handler(req, res) {
         .slice(0, 6);
 
       const seenNT = new Set();
-      const newSeries = (tvNew.results || [])
+      const newSeries = rawNewTvSource
         .map((t, i) => formatItem(t, 'tv', prov, i + 1))
         .filter(it => {
           if (seenNT.has(it.id) || !isReleased(it)) return false;
@@ -130,10 +164,11 @@ export default async function handler(req, res) {
         .slice(0, 6);
 
       const seenKo = new Set();
-      const kdramaList = [
+      const koRaw = [
         ...(tvKo.results || []).map((t, i) => formatItem(t, 'tv', prov, i + 1)),
         ...(movKo.results || []).map((m, i) => formatItem(m, 'movie', prov, i + 1))
-      ]
+      ];
+      const kdramaList = (koRaw.length ? koRaw : [...series, ...movies])
         .filter(it => {
           const key = `${it.mediaType}_${it.id}`;
           if (seenKo.has(key) || !isReleased(it)) return false;
@@ -164,7 +199,11 @@ export default async function handler(req, res) {
       });
     });
 
-    const tvMy = (trendingTvRes.results || [])
+    const tvSource = (trendingTvRes.results && trendingTvRes.results.length)
+      ? trendingTvRes.results
+      : [...(byApp.netflix?.series || []), ...(byApp.disney?.series || []), ...(byApp.hbomax?.series || [])];
+
+    const tvMy = tvSource
       .map((r, idx) => {
         const plat = idToPlatform.get(`SERIES_${r.id}`) || PROVIDERS[idx % PROVIDERS.length];
         return formatItem(r, 'tv', plat, idx + 1);
@@ -173,7 +212,11 @@ export default async function handler(req, res) {
       .slice(0, 10)
       .map((item, i) => ({ ...item, rank: i + 1 }));
 
-    const movieMy = (trendingMovRes.results || [])
+    const movSource = (trendingMovRes.results && trendingMovRes.results.length)
+      ? trendingMovRes.results
+      : [...(byApp.disney?.movies || []), ...(byApp.hbomax?.movies || []), ...(byApp.netflix?.movies || [])];
+
+    const movieMy = movSource
       .map((r, idx) => {
         const plat = idToPlatform.get(`MOVIE_${r.id}`) || PROVIDERS[idx % PROVIDERS.length];
         return formatItem(r, 'movie', plat, idx + 1);
@@ -230,7 +273,11 @@ export default async function handler(req, res) {
       }
     }
     const seenKd = new Set();
-    const kdrama = kdramaRaw
+    const kdrama = (kdramaRaw.length ? kdramaRaw : [
+      ...(byApp.netflix?.kdrama || []),
+      ...(byApp.disney?.kdrama || []),
+      ...(byApp.hbomax?.kdrama || [])
+    ])
       .filter(it => {
         const key = `${it.mediaType}_${it.id}`;
         if (seenKd.has(key) || !isReleased(it)) return false;
@@ -289,24 +336,6 @@ export default async function handler(req, res) {
       tv_my: tvMy,
       movie_my: movieMy,
       new_in: newIn,
-      popcorn,
-      kdrama,
-      rewatched,
-      only_on: onlyOn
-    };
-
-    return res.status(200).json({
-      items: heroItems,
-      categories,
-      byApp
-    });
-  } catch (err) {
-    return res.status(500).json({
-      error: 'Failed to load trending charts',
-      detail: err.message
-    });
-  }
-}
       popcorn,
       kdrama,
       rewatched,
