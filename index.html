@@ -1574,10 +1574,365 @@
       }
     }
 
+  
+    /* === 1. INSTAGRAM-STYLE LOGO SPLASH INTRO === */
+    .splash-intro {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: radial-gradient(circle at 50% 42%, #0f1b38 0%, #07090e 72%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.45s ease;
+    }
+
+    [data-theme="light"] .splash-intro {
+      background: radial-gradient(circle at 50% 42%, #eff6ff 0%, #f8fafc 75%);
+    }
+
+    .splash-intro.hide {
+      opacity: 0;
+      transform: scale(1.06);
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-logo-wrap {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      border-radius: 26px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      border: 2.5px solid var(--accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.45), 0 20px 45px -10px rgba(37, 99, 235, 0.65);
+      animation: splashLogoPop 0.68s cubic-bezier(0.16, 1, 0.3, 1) both, splashRingPulse 1.6s ease-out infinite;
+    }
+
+    .splash-logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .splash-logo-fallback {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      font-size: 2.2rem;
+      color: var(--accent-gold);
+      letter-spacing: 0.04em;
+    }
+
+    .splash-footer {
+      position: absolute;
+      bottom: 38px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      animation: splashTextFade 0.6s 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .splash-from {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .splash-brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      background: linear-gradient(90deg, #38bdf8, #facc15);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    @keyframes splashLogoPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.72);
+      }
+      70% {
+        opacity: 1;
+        transform: scale(1.04);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes splashRingPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.45), 0 20px 45px -10px rgba(37, 99, 235, 0.65);
+      }
+      70% {
+        box-shadow: 0 0 0 18px rgba(56, 189, 248, 0), 0 20px 45px -10px rgba(37, 99, 235, 0.65);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0), 0 20px 45px -10px rgba(37, 99, 235, 0.65);
+      }
+    }
+
+    @keyframes splashTextFade {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* === 2. COMPREHENSIVE SITE-WIDE ANIMATIONS === */
+    @keyframes headerSlideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideBarUp {
+      from {
+        opacity: 0;
+        transform: translateY(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes drawerItemIn {
+      from {
+        opacity: 0;
+        transform: translateX(-16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes backdropFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes floatBob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .topbar {
+      animation: headerSlideDown 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .logo-box {
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+    }
+
+    .logo-box:hover {
+      transform: scale(1.06) rotate(-2deg);
+      box-shadow: 0 0 18px rgba(250, 204, 21, 0.45);
+    }
+
+    .icon-btn {
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      transform: rotate(18deg) scale(1.06);
+      border-color: var(--accent-gold);
+    }
+
+    .lang-btn {
+      transition: transform 0.18s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .lang-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* Drawer backdrop & staggered links */
+    .drawer-backdrop.open {
+      display: block;
+      animation: backdropFadeIn 0.22s ease both;
+    }
+
+    .side-drawer.open .drawer-link {
+      animation: drawerItemIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .side-drawer.open .drawer-link:nth-child(1) { animation-delay: 0.04s; }
+    .side-drawer.open .drawer-link:nth-child(2) { animation-delay: 0.08s; }
+    .side-drawer.open .drawer-link:nth-child(3) { animation-delay: 0.12s; }
+    .side-drawer.open .drawer-link:nth-child(4) { animation-delay: 0.16s; }
+
+    .side-drawer.open .drawer-info-card {
+      animation: fadeSlideUp 0.32s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Catalog sections entrance */
+    #catalogView .status-strip {
+      animation: fadeSlideUp 0.35s 0.05s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    #catalogView .hero-wrapper {
+      animation: fadeSlideUp 0.4s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    #catalogView .trust-grid {
+      animation: fadeSlideUp 0.4s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .trust-item {
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .trust-item:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-gold);
+    }
+
+    #catalogView .search-box {
+      animation: fadeSlideUp 0.4s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .search-box input {
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-box input:focus {
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+    }
+
+    #catalogView .filter-row {
+      animation: fadeSlideUp 0.4s 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Checkout steps & sticky bar animation */
+    #checkoutView.active .step-card:nth-of-type(1) {
+      animation: fadeSlideUp 0.28s 0.03s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    #checkoutView.active .step-card:nth-of-type(2) {
+      animation: fadeSlideUp 0.28s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    #checkoutView.active .step-card:nth-of-type(3) {
+      animation: fadeSlideUp 0.28s 0.13s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    #checkoutView.active .step-card:nth-of-type(4) {
+      animation: fadeSlideUp 0.28s 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .checkout-bar.active {
+      display: block;
+      animation: slideBarUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .plan-option,
+    .pay-choice-card,
+    .form-control {
+      transition: transform 0.18s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-control:focus {
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
+    }
+
+    .qr-ewallet-box.show {
+      display: block;
+      animation: fadeSlideUp 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Auth Modal backdrop & tab transitions */
+    .modal-backdrop.open {
+      display: flex;
+      animation: backdropFadeIn 0.22s ease both;
+    }
+
+    .auth-form-anim {
+      animation: fadeSlideUp 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Discovery Fullpage Modal rows & buttons */
+    .discovery-row-card {
+      animation: cardPopIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+      transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+    }
+
+    .discovery-row-card:hover {
+      border-color: rgba(56, 189, 248, 0.35) !important;
+      transform: translateX(3px);
+    }
+
+    .discovery-row-card:active {
+      transform: scale(0.98);
+    }
+
+    #trendingModal button {
+      transition: transform 0.16s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+
+    #trendingModal button:active {
+      transform: scale(0.94);
+    }
+
+    /* Receipt Banner & Floating WhatsApp */
+    .receipt-banner.show {
+      display: block;
+      animation: fadeSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .wa-float {
+      animation: floatBob 3s ease-in-out infinite;
+    }
+
+    .wa-float:active {
+      transform: scale(0.92);
+    }
+
   </style>
 </head>
 <body>
   <div class="top-loader-bar" id="topLoaderBar"></div>
+  <!-- Instagram-style Logo Splash Intro -->
+  <div class="splash-intro" id="splashIntro" onclick="dismissSplash()">
+    <div class="splash-logo-wrap">
+      <img src="logo.png" alt="SPYSTORE BY SAMS" onerror="this.style.display='none'; document.getElementById('splashLogoFallback').style.display='flex';" />
+      <span class="splash-logo-fallback" id="splashLogoFallback" style="display:none;">SB</span>
+    </div>
+    <div class="splash-footer">
+      <span class="splash-from">OFFICIAL STORE</span>
+      <span class="splash-brand">SPYSTORE BY SAMS</span>
+    </div>
+  </div>
   <!-- Side Drawer Navigation -->
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
   <aside class="side-drawer" id="sideDrawer">
@@ -1913,6 +2268,21 @@
   </div>
 
   <script>
+
+    function dismissSplash() {
+      const splash = document.getElementById('splashIntro');
+      if (!splash || splash.classList.contains('hide')) return;
+      splash.classList.add('hide');
+      setTimeout(() => {
+        if (splash && splash.parentNode) splash.style.display = 'none';
+      }, 480);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(dismissSplash, 1150);
+    });
+    setTimeout(dismissSplash, 1600);
+
     let loaderTimer = null;
     function triggerTopLoader(durationMs = 650) {
       const bar = document.getElementById('topLoaderBar');
@@ -2274,7 +2644,7 @@
       body.innerHTML = list.map((item, idx) => {
         const displayRank = idx + 1;
         return `
-          <div style="display:flex; gap:12px; align-items:center; background:#141b29; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px 12px;">
+          <div class="discovery-row-card" style="animation-delay:${Math.min(idx * 35, 320)}ms; display:flex; gap:12px; align-items:center; background:#141b29; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px 12px;">
             <div style="font-weight:800; font-size:0.9rem; color:#facc15; min-width:26px; text-align:center;">#${displayRank}</div>
             ${item.poster ? `<img src="${item.poster}" style="width:64px; height:94px; object-fit:cover; border-radius:10px; flex-shrink:0; box-shadow:0 6px 16px rgba(0,0,0,0.45);" />` : ''}
             <div style="flex:1; min-width:0;">
@@ -2825,8 +3195,11 @@
       const isLogin = tab === 'login';
       document.getElementById('tabLoginBtn').classList.toggle('active', isLogin);
       document.getElementById('tabRegisterBtn').classList.toggle('active', !isLogin);
-      document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
-      document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+      const lf = document.getElementById('loginForm');
+      const rf = document.getElementById('registerForm');
+      lf.style.display = isLogin ? 'block' : 'none';
+      rf.style.display = isLogin ? 'none' : 'block';
+      animateElementEnter(isLogin ? lf : rf, 'auth-form-anim');
     }
 
     function handleRegister(e) {
