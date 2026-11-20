@@ -3,48 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SPYSTORE — Digital Subscription Store by Sams</title>
+  <title>SPYSTORE BY SAMS — Digital Subscriptions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg-primary: #090d16;
-      --bg-secondary: #111827;
-      --bg-card: #161f33;
-      --bg-card-hover: #1d2842;
-      --bg-input: #0d1322;
-      --border-color: rgba(255, 255, 255, 0.09);
-      --border-active: #facc15;
+      --bg-primary: #07090e;
+      --bg-secondary: #0d121d;
+      --bg-card: #111827;
+      --bg-input: #090d16;
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
+      --border-color: rgba(56, 189, 248, 0.16);
+      --border-strong: rgba(56, 189, 248, 0.35);
+      --accent-blue: #2563eb;
+      --accent-cyan: #38bdf8;
       --accent-gold: #facc15;
       --accent-gold-hover: #eab308;
-      --accent-blue: #38bdf8;
-      --accent-blue-deep: #0284c7;
       --success: #22c55e;
       --danger: #ef4444;
-      --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.45);
-      --header-bg: rgba(9, 13, 22, 0.88);
+      --shadow-card: 0 12px 30px -10px rgba(0, 0, 0, 0.65);
     }
 
     [data-theme="light"] {
-      --bg-primary: #f1f5f9;
+      --bg-primary: #f8fafc;
       --bg-secondary: #ffffff;
       --bg-card: #ffffff;
-      --bg-card-hover: #f8fafc;
-      --bg-input: #f8fafc;
-      --border-color: rgba(15, 23, 42, 0.1);
-      --border-active: #0284c7;
+      --bg-input: #f1f5f9;
       --text-primary: #0f172a;
       --text-secondary: #475569;
       --text-muted: #64748b;
+      --border-color: rgba(37, 99, 235, 0.15);
+      --border-strong: rgba(37, 99, 235, 0.35);
+      --accent-blue: #2563eb;
+      --accent-cyan: #0284c7;
       --accent-gold: #eab308;
       --accent-gold-hover: #ca8a04;
-      --accent-blue: #0284c7;
-      --accent-blue-deep: #0369a1;
-      --success: #16a34a;
-      --danger: #dc2626;
-      --shadow-card: 0 8px 24px rgba(15, 23, 42, 0.08);
-      --header-bg: rgba(255, 255, 255, 0.9);
+      --shadow-card: 0 10px 25px -8px rgba(15, 23, 42, 0.08);
     }
 
     * {
@@ -55,34 +52,36 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg-primary);
       color: var(--text-primary);
       line-height: 1.5;
       min-height: 100vh;
-      overflow-x: hidden;
+      padding-bottom: 92px;
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    .brand-font {
-      font-family: "Trebuchet MS", "Arial Black", Impact, system-ui, sans-serif;
-      letter-spacing: 0.08em;
-      font-weight: 900;
+    h1, h2, h3, .brand-title, .price-tag, .tech-font {
+      font-family: 'Space Grotesk', sans-serif;
     }
 
     /* Header */
-    .top-header {
+    .topbar {
       position: sticky;
       top: 0;
-      z-index: 50;
-      background: var(--header-bg);
+      z-index: 40;
+      background: rgba(7, 9, 14, 0.88);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border-color);
       padding: 12px 16px;
     }
 
-    .header-inner {
+    [data-theme="light"] .topbar {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .topbar-inner {
       max-width: 680px;
       margin: 0 auto;
       display: flex;
@@ -91,105 +90,141 @@
       gap: 10px;
     }
 
-    .header-left {
+    .brand-group {
       display: flex;
       align-items: center;
       gap: 10px;
+      min-width: 0;
     }
 
-    .icon-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
+    .logo-box {
       width: 38px;
       height: 38px;
-      border-radius: 11px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.15s ease, border-color 0.2s ease;
-    }
-
-    .icon-btn:active {
-      transform: scale(0.95);
-    }
-
-    .brand-logo-wrap {
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-blue), #1d4ed8);
+      border: 1.5px solid var(--accent-gold);
       display: flex;
       align-items: center;
-      gap: 9px;
-      cursor: pointer;
-      text-decoration: none;
-      color: inherit;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+    }
+
+    .logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .logo-fallback {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--accent-gold);
+      letter-spacing: -0.5px;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
     }
 
     .brand-title {
-      font-size: 1.2rem;
-      background: linear-gradient(90deg, var(--accent-gold), var(--accent-blue));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      line-height: 1.1;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-title span {
+      color: var(--accent-gold);
     }
 
     .brand-sub {
       font-size: 0.68rem;
-      color: var(--text-secondary);
       font-weight: 600;
-      letter-spacing: 0.04em;
+      color: var(--accent-cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    .header-actions {
+    .nav-actions {
       display: flex;
       align-items: center;
       gap: 7px;
+      flex-shrink: 0;
     }
 
     .pill-btn {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       color: var(--text-primary);
-      padding: 7px 11px;
+      padding: 7px 12px;
       border-radius: 999px;
-      font-size: 0.76rem;
+      font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       transition: all 0.2s ease;
     }
 
-    .pill-btn.member-active {
-      border-color: var(--accent-gold);
+    .pill-btn:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .pill-btn.auth-active {
+      background: rgba(37, 99, 235, 0.18);
+      border-color: var(--accent-blue);
+      color: var(--accent-cyan);
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
       color: var(--accent-gold);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
     }
 
     /* Container */
     .container {
       max-width: 680px;
       margin: 0 auto;
-      padding: 16px 16px 105px;
+      padding: 14px 16px;
     }
 
-    /* Live Admin Status Bar */
+    /* Live Status Bar */
     .status-strip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 9px 14px;
       margin-bottom: 14px;
       font-size: 0.78rem;
+      font-weight: 600;
     }
 
-    .status-indicator {
+    .status-left {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-weight: 700;
     }
 
     .pulse-dot {
@@ -197,89 +232,133 @@
       height: 9px;
       border-radius: 50%;
       background: var(--success);
-      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      animation: pulse 2s infinite;
     }
 
-    .pulse-dot.offline {
-      background: #f59e0b;
-      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
     }
 
-    .sync-tag {
-      font-size: 0.7rem;
-      color: var(--text-secondary);
-      background: var(--bg-input);
-      padding: 3px 8px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
+    .stock-badge-top {
+      background: rgba(37, 99, 235, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
     }
 
-    /* Hero Banner Carousel */
-    .hero-banner {
+    /* Swipeable Hero Banner Slider */
+    .hero-wrapper {
       position: relative;
+      margin-bottom: 14px;
       border-radius: 18px;
       overflow: hidden;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c4a6e 100%);
-      border: 1px solid rgba(250, 204, 21, 0.28);
-      padding: 22px 20px;
-      margin-bottom: 16px;
+      border: 1px solid var(--border-strong);
       box-shadow: var(--shadow-card);
-      color: #f8fafc;
+      touch-action: pan-y;
+      user-select: none;
     }
 
-    .hero-badge {
+    .hero-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .hero-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hero-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      scroll-snap-align: start;
+      background: linear-gradient(135deg, #0b132b 0%, #102a56 55%, #09152b 100%);
+      padding: 20px 18px 34px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-slide.slide-2 {
+      background: linear-gradient(135deg, #090d16 0%, #1e3a8a 60%, #0f172a 100%);
+    }
+
+    .hero-slide::after {
+      content: "";
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, rgba(250, 204, 21, 0.22) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-pill {
       display: inline-block;
-      background: rgba(250, 204, 21, 0.16);
-      color: #facc15;
-      border: 1px solid rgba(250, 204, 21, 0.4);
-      font-size: 0.7rem;
+      background: rgba(250, 204, 21, 0.14);
+      border: 1px solid rgba(250, 204, 21, 0.45);
+      color: var(--accent-gold);
+      font-size: 0.68rem;
       font-weight: 800;
+      letter-spacing: 0.08em;
       padding: 4px 10px;
       border-radius: 999px;
       margin-bottom: 10px;
-      letter-spacing: 0.05em;
       text-transform: uppercase;
     }
 
-    .hero-banner h1 {
-      font-size: 1.38rem;
-      font-weight: 800;
+    .hero-slide h1 {
+      font-size: 1.35rem;
       line-height: 1.25;
-      margin-bottom: 6px;
+      color: #ffffff;
+      margin-bottom: 8px;
     }
 
-    .hero-banner p {
-      font-size: 0.85rem;
+    .hero-slide p {
+      font-size: 0.82rem;
       color: #cbd5e1;
-      max-width: 480px;
-      margin-bottom: 14px;
+      max-width: 94%;
     }
 
     .hero-dots {
+      position: absolute;
+      bottom: 12px;
+      left: 18px;
       display: flex;
       gap: 6px;
+      z-index: 5;
     }
 
     .hero-dot {
-      width: 22px;
+      width: 18px;
       height: 4px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.28);
+      border: none;
       cursor: pointer;
       transition: all 0.25s ease;
     }
 
     .hero-dot.active {
-      background: #facc15;
-      width: 34px;
+      width: 28px;
+      background: var(--accent-gold);
     }
 
-    /* Trust Badges */
+    /* Trust Grid */
     .trust-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .trust-item {
@@ -298,7 +377,7 @@
     }
 
     .trust-desc {
-      font-size: 0.67rem;
+      font-size: 0.66rem;
       color: var(--text-secondary);
     }
 
@@ -313,15 +392,15 @@
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       color: var(--text-primary);
-      padding: 12px 14px 12px 40px;
-      border-radius: 13px;
-      font-size: 0.9rem;
+      padding: 12px 14px 12px 38px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-family: inherit;
       outline: none;
-      transition: border-color 0.2s ease;
     }
 
     .search-box input:focus {
-      border-color: var(--accent-blue);
+      border-color: var(--accent-cyan);
     }
 
     .search-icon {
@@ -330,181 +409,173 @@
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-muted);
-      pointer-events: none;
+      font-size: 0.9rem;
     }
 
-    .filter-tabs {
+    .filter-row {
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding-bottom: 6px;
+      padding-bottom: 4px;
       margin-bottom: 16px;
       scrollbar-width: none;
     }
 
-    .filter-tabs::-webkit-scrollbar {
+    .filter-row::-webkit-scrollbar {
       display: none;
     }
 
-    .filter-tab {
+    .filter-chip {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       color: var(--text-secondary);
-      padding: 8px 14px;
+      padding: 7px 14px;
       border-radius: 999px;
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 700;
       white-space: nowrap;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
-    .filter-tab.active {
-      background: linear-gradient(135deg, var(--accent-gold), #f59e0b);
-      color: #090d16;
-      border-color: transparent;
+    .filter-chip.active {
+      background: var(--accent-gold);
+      color: #09090b;
+      border-color: var(--accent-gold);
     }
 
-    /* Product Grid */
-    .section-heading {
-      font-size: 1rem;
-      font-weight: 800;
-      margin-bottom: 12px;
+    /* Section Header */
+    .section-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-bottom: 12px;
     }
 
-    .apps-grid {
+    .section-head h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .section-head span {
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    /* Product Grid */
+    .product-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
-      margin-bottom: 24px;
     }
 
-    @media (min-width: 540px) {
-      .apps-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    .app-card {
+    .product-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 15px 12px;
+      padding: 14px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
       cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease;
       position: relative;
-      transition: transform 0.18s ease, border-color 0.2s ease, background-color 0.2s ease;
       box-shadow: var(--shadow-card);
     }
 
-    .app-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--accent-blue);
+    .product-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-cyan);
     }
 
-    .app-card.sold-out {
-      opacity: 0.62;
+    .product-card.out-of-stock {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
 
     .stock-pill {
-      font-size: 0.65rem;
-      font-weight: 800;
-      padding: 3px 8px;
+      font-size: 0.67rem;
+      font-weight: 700;
+      padding: 3px 9px;
       border-radius: 999px;
-      margin-bottom: 10px;
-      letter-spacing: 0.02em;
+      margin-bottom: 12px;
     }
 
-    .stock-pill.in {
-      background: rgba(34, 197, 94, 0.15);
-      color: var(--success);
-      border: 1px solid rgba(34, 197, 94, 0.35);
+    .stock-in {
+      background: rgba(34, 197, 94, 0.14);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
-    .stock-pill.out {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--danger);
-      border: 1px solid rgba(239, 68, 68, 0.35);
+    [data-theme="light"] .stock-in {
+      color: #15803d;
     }
 
-    .app-logo-box {
-      width: 56px;
-      height: 56px;
-      border-radius: 15px;
+    .stock-out {
+      background: rgba(239, 68, 68, 0.14);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .app-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
       margin-bottom: 10px;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+      overflow: hidden;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+      position: relative;
+    }
+
+    .app-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .app-name {
-      font-size: 0.92rem;
-      font-weight: 800;
-      margin-bottom: 3px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
     }
 
     .app-cat {
       font-size: 0.7rem;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       margin-bottom: 8px;
     }
 
     .app-price {
-      font-size: 0.95rem;
-      font-weight: 900;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
       color: var(--accent-gold);
     }
 
-    .app-price span {
+    .app-price small {
       font-size: 0.72rem;
-      font-weight: 600;
+      font-weight: 500;
       color: var(--text-secondary);
     }
 
-    /* How To Order / FAQ Box */
-    .info-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
+    /* Checkout Drawer / Section */
+    .checkout-panel {
+      display: none;
+      margin-top: 6px;
     }
 
-    .info-card h3 {
-      font-size: 0.95rem;
-      font-weight: 800;
-      margin-bottom: 10px;
-      color: var(--accent-blue);
-    }
-
-    .steps-list {
-      display: grid;
-      gap: 10px;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-    }
-
-    .steps-list div strong {
-      color: var(--text-primary);
-    }
-
-    /* Checkout View */
-    .view-hidden {
-      display: none !important;
-    }
-
-    .back-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
+    .checkout-panel.active {
+      display: block;
     }
 
     .back-btn {
@@ -512,35 +583,25 @@
       border: 1px solid var(--border-color);
       color: var(--text-primary);
       padding: 8px 14px;
-      border-radius: 11px;
-      font-size: 0.84rem;
+      border-radius: 10px;
+      font-size: 0.8rem;
       font-weight: 700;
       cursor: pointer;
+      margin-bottom: 14px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
     }
 
-    .product-hero-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 18px;
-      padding: 16px;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
     .step-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 18px;
+      border-radius: 16px;
       padding: 16px;
       margin-bottom: 14px;
     }
 
-    .step-header {
+    .step-head {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -548,36 +609,32 @@
     }
 
     .step-num {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, var(--accent-gold), #f59e0b);
-      color: #090d16;
-      font-weight: 900;
-      font-size: 0.85rem;
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      background: var(--accent-blue);
+      color: #ffffff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
     }
 
     .step-title {
-      font-size: 0.96rem;
-      font-weight: 800;
+      font-size: 0.95rem;
+      font-weight: 700;
     }
 
     .form-group {
       margin-bottom: 12px;
     }
 
-    .form-group:last-child {
-      margin-bottom: 0;
-    }
-
     .form-group label {
       display: block;
-      font-size: 0.78rem;
-      font-weight: 700;
+      font-size: 0.76rem;
+      font-weight: 600;
       color: var(--text-secondary);
       margin-bottom: 5px;
     }
@@ -587,18 +644,17 @@
       background: var(--bg-input);
       border: 1px solid var(--border-color);
       color: var(--text-primary);
-      padding: 11px 13px;
-      border-radius: 11px;
-      font-size: 0.9rem;
+      padding: 11px 12px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-family: inherit;
       outline: none;
-      transition: border-color 0.2s ease;
     }
 
     .form-control:focus {
-      border-color: var(--accent-gold);
+      border-color: var(--accent-cyan);
     }
 
-    /* Plan Selection Cards */
     .plan-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -607,12 +663,11 @@
 
     .plan-option {
       background: var(--bg-input);
-      border: 2px solid var(--border-color);
-      border-radius: 13px;
-      padding: 13px 12px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px;
       cursor: pointer;
       transition: all 0.2s ease;
-      position: relative;
     }
 
     .plan-option.selected {
@@ -620,75 +675,70 @@
       background: rgba(250, 204, 21, 0.08);
     }
 
-    .plan-dur {
-      font-size: 0.88rem;
-      font-weight: 800;
+    .plan-mo {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
       margin-bottom: 4px;
     }
 
     .plan-amt {
-      font-size: 1.05rem;
-      font-weight: 900;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
       color: var(--accent-gold);
     }
 
-    /* Payment Method Cards */
-    .pay-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .pay-option {
+    .pay-method-box {
       background: var(--bg-input);
-      border: 2px solid var(--border-color);
-      border-radius: 13px;
-      padding: 13px 14px;
+      border: 1.5px solid var(--accent-cyan);
+      border-radius: 12px;
+      padding: 13px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      gap: 10px;
     }
 
-    .pay-option.selected {
-      border-color: var(--accent-blue);
-      background: rgba(56, 189, 248, 0.08);
-    }
-
-    .pay-name {
+    .pay-info h4 {
       font-size: 0.88rem;
-      font-weight: 800;
+      font-weight: 700;
+      margin-bottom: 2px;
     }
 
-    .pay-sub {
+    .pay-info p {
       font-size: 0.72rem;
       color: var(--text-secondary);
     }
 
-    .pay-fee {
-      font-size: 0.76rem;
-      font-weight: 800;
-      padding: 4px 9px;
+    .fee-tag {
+      background: rgba(56, 189, 248, 0.14);
+      color: var(--accent-cyan);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 9px;
       border-radius: 8px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
+      white-space: nowrap;
     }
 
-    /* Sticky Bottom Checkout Bar */
-    .sticky-checkout {
+    /* Sticky Checkout Bar */
+    .checkout-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      z-index: 45;
-      background: var(--header-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-strong);
       padding: 12px 16px;
+      z-index: 45;
+      display: none;
     }
 
-    .sticky-inner {
+    .checkout-bar.active {
+      display: block;
+    }
+
+    .checkout-bar-inner {
       max-width: 680px;
       margin: 0 auto;
       display: flex;
@@ -700,175 +750,180 @@
     .total-label {
       font-size: 0.72rem;
       color: var(--text-secondary);
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .total-val {
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 1.25rem;
-      font-weight: 900;
+      font-weight: 700;
       color: var(--accent-gold);
     }
 
-    .pay-submit-btn {
-      background: linear-gradient(135deg, var(--accent-gold), #f59e0b);
-      color: #090d16;
+    .pay-btn {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-hover));
+      color: #09090b;
       border: none;
       padding: 13px 22px;
-      border-radius: 13px;
+      border-radius: 12px;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 0.92rem;
-      font-weight: 900;
+      font-weight: 700;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
       box-shadow: 0 6px 20px rgba(250, 204, 21, 0.3);
-      transition: transform 0.15s ease, opacity 0.2s ease;
+      transition: transform 0.15s ease;
     }
 
-    .pay-submit-btn:active {
-      transform: scale(0.97);
-    }
-
-    .pay-submit-btn:disabled {
-      opacity: 0.5;
+    .pay-btn:disabled {
+      opacity: 0.6;
       cursor: not-allowed;
     }
 
-    /* Receipt / Confirmation View */
-    .receipt-box {
+    /* Auth Modal (Login & Register) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.82);
+      backdrop-filter: blur(6px);
+      z-index: 80;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
       background: var(--bg-card);
-      border: 1px solid var(--success);
-      border-radius: 18px;
-      padding: 22px 18px;
-      text-align: center;
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .modal-top h3 {
+      font-size: 1.1rem;
+      color: var(--text-primary);
+    }
+
+    .close-modal {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg-input);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
       margin-bottom: 16px;
     }
 
-    .receipt-rows {
-      background: var(--bg-input);
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin: 16px 0;
-      text-align: left;
-      font-size: 0.84rem;
-      display: grid;
-      gap: 8px;
-    }
-
-    .receipt-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .wa-claim-btn {
-      width: 100%;
-      background: #22c55e;
-      color: #ffffff;
+    .auth-tab {
+      padding: 9px;
       border: none;
-      padding: 14px;
-      border-radius: 13px;
-      font-size: 0.94rem;
-      font-weight: 800;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-decoration: none;
-    }
-
-    /* Drawer & Modal */
-    .overlay-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.65);
-      z-index: 80;
-      display: none;
-    }
-
-    .overlay-backdrop.open {
-      display: block;
-    }
-
-    .side-drawer {
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 280px;
-      max-width: 82vw;
-      background: var(--bg-secondary);
-      border-right: 1px solid var(--border-color);
-      z-index: 90;
-      padding: 20px 16px;
-      transform: translateX(-100%);
-      transition: transform 0.25s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .side-drawer.open {
-      transform: translateX(0);
-    }
-
-    .drawer-nav {
-      display: grid;
-      gap: 8px;
-      margin-top: 18px;
-    }
-
-    .drawer-link {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 11px 14px;
-      border-radius: 12px;
-      font-size: 0.86rem;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--text-secondary);
       font-weight: 700;
-      text-align: left;
+      font-size: 0.82rem;
       cursor: pointer;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      transition: all 0.2s ease;
     }
 
-    .modal-box {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 92%;
-      max-width: 420px;
-      max-height: 85vh;
-      overflow-y: auto;
-      background: var(--bg-secondary);
+    .auth-tab.active {
+      background: var(--accent-blue);
+      color: #ffffff;
+    }
+
+    .primary-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent-blue), #1d4ed8);
+      color: #ffffff;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 12px;
+      border-radius: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .logout-btn {
+      width: 100%;
+      background: rgba(239, 68, 68, 0.14);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    .profile-box {
+      background: var(--bg-input);
       border: 1px solid var(--border-color);
-      border-radius: 18px;
-      padding: 20px 18px;
-      z-index: 95;
-      display: none;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      font-size: 0.82rem;
     }
 
-    .modal-box.open {
-      display: block;
+    .profile-box p {
+      margin-bottom: 4px;
+      color: var(--text-secondary);
+    }
+
+    .profile-box strong {
+      color: var(--text-primary);
+    }
+
+    .order-item {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 0.78rem;
     }
 
     /* Toast */
     .toast {
       position: fixed;
-      top: 72px;
+      bottom: 82px;
       left: 50%;
-      transform: translateX(-50%) translateY(-16px);
-      background: #1e293b;
+      transform: translateX(-50%) translateY(15px);
+      background: #0f172a;
       color: #f8fafc;
       border: 1px solid var(--accent-gold);
       padding: 10px 16px;
       border-radius: 12px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 700;
       z-index: 120;
       opacity: 0;
@@ -897,758 +952,526 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
-      z-index: 40;
       text-decoration: none;
+      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+      z-index: 35;
+      font-size: 1.35rem;
+    }
+
+    /* Receipt Banner */
+    .receipt-banner {
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid rgba(34, 197, 94, 0.45);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .receipt-banner.show {
+      display: block;
+    }
+
+    .receipt-banner h4 {
+      color: #4ade80;
+      font-size: 0.92rem;
+      margin-bottom: 4px;
+    }
+
+    .receipt-banner p {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .receipt-wa-btn {
+      display: inline-block;
+      background: #22c55e;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 700;
     }
   </style>
 </head>
 <body>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="toast"></div>
-
-  <!-- Backdrop & Sidebar Drawer -->
-  <div id="backdrop" class="overlay-backdrop" onclick="closeAllOverlays()"></div>
-
-  <aside id="side-drawer" class="side-drawer">
-    <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div class="brand-logo-wrap" onclick="goHome();closeAllOverlays();">
-          <span class="brand-font brand-title">SPYSTORE</span>
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-group">
+        <div class="logo-box" id="logoContainer">
+          <img src="logo.png" alt="SPYSTORE BY SAMS" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';" />
+          <span class="logo-fallback" id="logoFallback" style="display:none;">SB</span>
         </div>
-        <button class="icon-btn" onclick="closeAllOverlays()" aria-label="Close Menu">✕</button>
-      </div>
-      <div class="drawer-nav">
-        <button class="drawer-link" onclick="goHome();closeAllOverlays();">
-          <span data-i18n="navHome">Store Catalog</span> <span>→</span>
-        </button>
-        <button class="drawer-link" onclick="closeAllOverlays();openAccountModal();">
-          <span data-i18n="navAccount">Member Account / History</span> <span>→</span>
-        </button>
-        <button class="drawer-link" onclick="syncGoogleSheetStock(true);closeAllOverlays();">
-          <span data-i18n="navSync">Refresh Live Stock</span> <span>↻</span>
-        </button>
-        <a class="drawer-link" href="https://wa.me/60189066291?text=Hi%20SPYSTORE%2C%20saya%20ada%20soalan%20tentang%20langganan." target="_blank" rel="noopener">
-          <span data-i18n="navSupport">WhatsApp Admin Support</span> <span>↗</span>
-        </a>
-      </div>
-    </div>
-    <div style="font-size:0.74rem;color:var(--text-secondary);border-top:1px solid var(--border-color);padding-top:12px;">
-      <strong>SPYSTORE</strong> by Sams<br/>
-      WhatsApp: +6018-906 6291
-    </div>
-  </aside>
-
-  <!-- Member Account Modal -->
-  <div id="account-modal" class="modal-box">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <h3 style="font-size:1rem;font-weight:800;" data-i18n="memberTitle">SPYSTORE Member Account</h3>
-      <button class="icon-btn" onclick="closeAllOverlays()">✕</button>
-    </div>
-
-    <div id="auth-guest-view">
-      <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px;" data-i18n="memberSub">
-        Register or sign in to auto-fill your checkout details and save your order history.
-      </p>
-      <div class="form-group">
-        <label data-i18n="lblName">Your Name</label>
-        <input type="text" id="auth-name" class="form-control" placeholder="e.g. Adam" />
-      </div>
-      <div class="form-group">
-        <label data-i18n="lblWa">WhatsApp Number</label>
-        <input type="tel" id="auth-wa" class="form-control" placeholder="e.g. 0123456789" />
-      </div>
-      <div class="form-group">
-        <label data-i18n="lblDevice">Default Device</label>
-        <input type="text" id="auth-device" class="form-control" placeholder="e.g. iPhone / Smart TV / Laptop" />
-      </div>
-      <button class="pay-submit-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="saveMemberProfile()">
-        <span data-i18n="btnSaveMember">Save & Sign In</span>
-      </button>
-    </div>
-
-    <div id="auth-member-view" class="view-hidden">
-      <div style="background:var(--bg-input);padding:12px;border-radius:12px;margin-bottom:14px;font-size:0.84rem;">
-        <div style="font-weight:800;color:var(--accent-gold);" id="profile-display-name">-</div>
-        <div style="color:var(--text-secondary);" id="profile-display-wa">-</div>
-        <div style="color:var(--text-secondary);" id="profile-display-dev">-</div>
-      </div>
-      <h4 style="font-size:0.85rem;font-weight:800;margin-bottom:8px;" data-i18n="orderHistTitle">Recent Orders</h4>
-      <div id="order-history-list" style="display:grid;gap:8px;margin-bottom:14px;font-size:0.8rem;"></div>
-      <button class="back-btn" style="width:100%;justify-content:center;color:var(--danger);" onclick="logoutMember()">
-        <span data-i18n="btnLogout">Sign Out</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Sticky Header -->
-  <header class="top-header">
-    <div class="header-inner">
-      <div class="header-left">
-        <button class="icon-btn" onclick="openDrawer()" aria-label="Open Menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <div class="brand-logo-wrap" onclick="goHome()">
-          <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
-            <rect width="40" height="40" rx="11" fill="url(#spyGrad)"/>
-            <path d="M12 22C12 16.5 16.5 12 22 12H28V17H22C19.2 17 17 19.2 17 22C17 24.8 19.2 27 22 27H28V32H22C16.5 32 12 27.5 12 22Z" fill="#090D16"/>
-            <circle cx="25" cy="22" r="3" fill="#090D16"/>
-            <defs>
-              <linearGradient id="spyGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#FACC15"/>
-                <stop offset="1" stop-color="#38BDF8"/>
-              </linearGradient>
-            </defs>
-          </svg>
-          <div>
-            <div class="brand-font brand-title">SPYSTORE</div>
-            <div class="brand-sub">BY SAMS</div>
-          </div>
+        <div class="brand-text">
+          <div class="brand-title">SPYSTORE <span>BY SAMS</span></div>
+          <div class="brand-sub">Digital Subscription Hub</div>
         </div>
       </div>
 
-      <div class="header-actions">
-        <button id="member-pill" class="pill-btn" onclick="openAccountModal()">
-          <span id="member-pill-text">Account</span>
-        </button>
-        <button class="pill-btn" onclick="toggleLanguage()" id="lang-btn">EN</button>
-        <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" aria-label="Toggle Theme">☀️</button>
+      <div class="nav-actions">
+        <button class="pill-btn" id="authNavBtn" onclick="openAuthModal()">Login / Register</button>
+        <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Switch Theme">☀️</button>
       </div>
     </div>
   </header>
 
-  <!-- STOREFRONT HOME VIEW -->
-  <main id="store-view" class="container">
-    <!-- Live Admin Status Strip -->
-    <div class="status-strip">
-      <div class="status-indicator">
-        <span id="admin-dot" class="pulse-dot"></span>
-        <span id="admin-status-text">Admin Online • Fast Delivery</span>
-      </div>
-      <span id="sheet-sync-badge" class="sync-tag">Syncing Stock...</span>
+  <main class="container">
+
+    <!-- Payment Return Receipt -->
+    <div class="receipt-banner" id="receiptBanner">
+      <h4 id="receiptTitle">Payment Received!</h4>
+      <p id="receiptDesc">Your order has been sent to admin. Tap below to receive your account details via WhatsApp.</p>
+      <a href="https://wa.me/60189066291" target="_blank" class="receipt-wa-btn" id="receiptWaLink">Claim Account on WhatsApp →</a>
     </div>
 
-    <!-- Hero Banner -->
-    <section class="hero-banner">
-      <span class="hero-badge" id="banner-badge">INSTANT FPX &amp; DUITNOW QR</span>
-      <h1 id="banner-title">Premium Digital Subscriptions at Best Local Prices</h1>
-      <p id="banner-desc">Pay securely via FPX or DuitNow QR. Account details delivered straight to your WhatsApp right after payment.</p>
-      <div class="hero-dots">
-        <div class="hero-dot active" onclick="setBanner(0)"></div>
-        <div class="hero-dot" onclick="setBanner(1)"></div>
+    <!-- Catalog View -->
+    <div id="catalogView">
+      <div class="status-strip">
+        <div class="status-left">
+          <span class="pulse-dot"></span>
+          <span>System Online • Fast Delivery</span>
+        </div>
+        <span class="stock-badge-top" id="liveStockStatus">Syncing Stock...</span>
       </div>
-    </section>
 
-    <!-- Trust Badges -->
-    <section class="trust-grid">
-      <div class="trust-item">
-        <div class="trust-title" data-i18n="trust1Title">100% Warranty</div>
-        <div class="trust-desc" data-i18n="trust1Desc">Full duration cover</div>
+      <!-- Swipeable Hero Slider -->
+      <div class="hero-wrapper" id="heroWrapper">
+        <div class="hero-track" id="heroTrack" onscroll="handleHeroScroll()">
+          <!-- Slide 1 -->
+          <section class="hero-slide">
+            <span class="hero-pill">Full Warranty • Fast Delivery</span>
+            <h1>Netflix, Disney+, HBO Max, Spotify, Canva &amp; CapCut</h1>
+            <p>100% warranty throughout your subscription period with live stock updates and instant admin alerts.</p>
+          </section>
+          <!-- Slide 2 -->
+          <section class="hero-slide slide-2">
+            <span class="hero-pill">Instant FPX Online Banking</span>
+            <h1>Premium Digital Subscriptions at Best Local Prices</h1>
+            <p>Pay securely via FPX online banking. Account details delivered straight to your WhatsApp right after payment.</p>
+          </section>
+        </div>
+        <div class="hero-dots">
+          <button class="hero-dot active" id="dot0" onclick="goToSlide(0)" aria-label="Slide 1"></button>
+          <button class="hero-dot" id="dot1" onclick="goToSlide(1)" aria-label="Slide 2"></button>
+        </div>
       </div>
-      <div class="trust-item">
-        <div class="trust-title" data-i18n="trust2Title">Fast Delivery</div>
-        <div class="trust-desc" data-i18n="trust2Desc">5–15 mins via WA</div>
-      </div>
-      <div class="trust-item">
-        <div class="trust-title" data-i18n="trust3Title">Auto Payment</div>
-        <div class="trust-desc" data-i18n="trust3Desc">FPX &amp; DuitNow QR</div>
-      </div>
-    </section>
 
-    <!-- Search & Category Tabs -->
-    <div class="search-box">
-      <svg class="search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="search-input" placeholder="Search Netflix, Spotify, Canva..." oninput="renderCatalog()" />
+      <div class="trust-grid">
+        <div class="trust-item">
+          <div class="trust-title">100% Warranty</div>
+          <div class="trust-desc">Full duration cover</div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-title">Fast Delivery</div>
+          <div class="trust-desc">5–15 mins via WA</div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-title">Auto FPX</div>
+          <div class="trust-desc">All MY Banks</div>
+        </div>
+      </div>
+
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search Netflix, Disney+, Spotify, Canva..." oninput="renderProducts()" />
+      </div>
+
+      <div class="filter-row" id="filterRow">
+        <button class="filter-chip active" onclick="setCategory('All', this)">All (7)</button>
+        <button class="filter-chip" onclick="setCategory('Streaming', this)">Streaming (4)</button>
+        <button class="filter-chip" onclick="setCategory('Music', this)">Music (1)</button>
+        <button class="filter-chip" onclick="setCategory('Creative', this)">Creative (2)</button>
+      </div>
+
+      <div class="section-head">
+        <h2>Select Subscription App</h2>
+        <span>Tap app to order</span>
+      </div>
+
+      <div class="product-grid" id="productGrid"></div>
     </div>
 
-    <div class="filter-tabs" id="filter-tabs">
-      <button class="filter-tab active" data-cat="All" onclick="setCategory('All', this)">All (7)</button>
-      <button class="filter-tab" data-cat="Streaming" onclick="setCategory('Streaming', this)">Streaming (4)</button>
-      <button class="filter-tab" data-cat="Music" onclick="setCategory('Music', this)">Music (1)</button>
-      <button class="filter-tab" data-cat="Creative" onclick="setCategory('Creative', this)">Creative (2)</button>
-    </div>
+    <!-- Checkout View -->
+    <div class="checkout-panel" id="checkoutView">
+      <button class="back-btn" onclick="closeCheckout()">← Back to Catalog</button>
 
-    <!-- Apps Catalog Grid -->
-    <div class="section-heading">
-      <span data-i18n="catalogHeading">Select Subscription App</span>
-      <span style="font-size:0.75rem;color:var(--text-secondary);" data-i18n="tapToOrder">Tap app to order</span>
-    </div>
-    <div id="apps-grid" class="apps-grid"></div>
+      <div class="step-card" id="selectedAppHeader"></div>
 
-    <!-- How To Order Guide -->
-    <section class="info-card">
-      <h3 data-i18n="howTitle">How To Order (3 Simple Steps)</h3>
-      <div class="steps-list">
-        <div><strong data-i18n="step1H">1. Choose App &amp; Fill Details:</strong> <span data-i18n="step1B">Select your subscription plan, enter your Name, WhatsApp number, and Device.</span></div>
-        <div><strong data-i18n="step2H">2. Complete Payment:</strong> <span data-i18n="step2B">Pay instantly using Touch 'n Go eWallet / DuitNow QR or Online Banking (FPX).</span></div>
-        <div><strong data-i18n="step3H">3. Receive Account on WhatsApp:</strong> <span data-i18n="step3B">Once paid, our system notifies admin automatically and sends your account details to WhatsApp.</span></div>
+      <!-- Step 1 -->
+      <div class="step-card">
+        <div class="step-head">
+          <span class="step-num">1</span>
+          <h3 class="step-title">Customer Delivery Details</h3>
+        </div>
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" class="form-control" id="custName" placeholder="e.g. Ahmad Hussam" />
+        </div>
+        <div class="form-group">
+          <label>WhatsApp Number (For Account Delivery) *</label>
+          <input type="tel" class="form-control" id="custPhone" placeholder="e.g. 0189066291" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Device Used *</label>
+          <input type="text" class="form-control" id="custDevice" placeholder="e.g. iPhone / Android / Smart TV / Laptop" />
+        </div>
       </div>
-    </section>
+
+      <!-- Step 2 -->
+      <div class="step-card">
+        <div class="step-head">
+          <span class="step-num">2</span>
+          <h3 class="step-title">Select Duration Plan</h3>
+        </div>
+        <div class="plan-grid">
+          <div class="plan-option selected" id="plan1Btn" onclick="selectMonths(1)">
+            <div class="plan-mo">1 Month</div>
+            <div class="plan-amt" id="plan1Price">RM0.00</div>
+          </div>
+          <div class="plan-option" id="plan2Btn" onclick="selectMonths(2)">
+            <div class="plan-mo">2 Months</div>
+            <div class="plan-amt" id="plan2Price">RM0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card">
+        <div class="step-head">
+          <span class="step-num">3</span>
+          <h3 class="step-title">Payment Method</h3>
+        </div>
+        <div class="pay-method-box">
+          <div class="pay-info">
+            <h4>Online Banking (FPX)</h4>
+            <p>Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank &amp; all MY banks via ToyyibPay</p>
+          </div>
+          <span class="fee-tag">+RM1.00 Fee</span>
+        </div>
+      </div>
+    </div>
+
   </main>
 
-  <!-- CHECKOUT VIEW -->
-  <section id="checkout-view" class="container view-hidden">
-    <div class="back-bar">
-      <button class="back-btn" onclick="goHome()">← <span data-i18n="btnBack">Back to Store</span></button>
-      <span id="checkout-stock-badge" class="stock-pill in">In Stock</span>
-    </div>
-
-    <!-- Selected Product Summary -->
-    <div class="product-hero-card">
-      <div id="checkout-logo-box" class="app-logo-box" style="margin-bottom:0;flex-shrink:0;"></div>
+  <!-- Sticky Bottom Bar -->
+  <div class="checkout-bar" id="checkoutBar">
+    <div class="checkout-bar-inner">
       <div>
-        <div style="font-size:0.72rem;color:var(--accent-blue);font-weight:800;" id="checkout-cat">STREAMING</div>
-        <h2 style="font-size:1.15rem;font-weight:900;" id="checkout-app-name">Netflix Premium</h2>
-        <div style="font-size:0.78rem;color:var(--text-secondary);" id="checkout-app-desc">4K UHD • Private Profile • Full Warranty</div>
+        <div class="total-label">Total Payable (incl. RM1 FPX fee)</div>
+        <div class="total-val" id="totalPayableText">RM0.00</div>
       </div>
+      <button class="pay-btn" id="payNowBtn" onclick="processPayment()">Pay Now →</button>
     </div>
+  </div>
 
-    <!-- Step 1: Customer Details -->
-    <div class="step-card">
-      <div class="step-header">
-        <div class="step-num">1</div>
-        <div class="step-title" data-i18n="cStep1">Enter Your Details</div>
-      </div>
-      <div class="form-group">
-        <label data-i18n="lblName">Your Name *</label>
-        <input type="text" id="cust-name" class="form-control" placeholder="e.g. Ahmad" />
-      </div>
-      <div class="form-group">
-        <label data-i18n="lblWa">WhatsApp Number (For Account Delivery) *</label>
-        <input type="tel" id="cust-wa" class="form-control" placeholder="e.g. 0123456789" />
-      </div>
-      <div class="form-group">
-        <label data-i18n="lblDevice">Device Used *</label>
-        <input type="text" id="cust-device" class="form-control" placeholder="e.g. iPhone, Android, Smart TV, Laptop" />
-      </div>
-    </div>
+  <!-- Floating WhatsApp -->
+  <a href="https://wa.me/60189066291?text=Hi%20SPYSTORE%20BY%20SAMS,%20saya%20nak%20bertanya%20tentang%20langganan." target="_blank" class="wa-float" title="Chat on WhatsApp">💬</a>
 
-    <!-- Step 2: Select Duration Plan -->
-    <div class="step-card">
-      <div class="step-header">
-        <div class="step-num">2</div>
-        <div class="step-title" data-i18n="cStep2">Select Duration Plan</div>
+  <!-- Login / Register Modal -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="modal-card">
+      <div class="modal-top">
+        <h3 id="authModalTitle">SPYSTORE Account</h3>
+        <button class="close-modal" onclick="closeAuthModal()">✕</button>
       </div>
-      <div class="plan-grid">
-        <div class="plan-option selected" id="plan-1m" onclick="selectDuration(1)">
-          <div class="plan-dur" data-i18n="dur1m">1 Month</div>
-          <div class="plan-amt" id="price-1m">RM18.00</div>
+
+      <!-- Logged Out View -->
+      <div id="authFormsView">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">Login</button>
+          <button class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Register</button>
         </div>
-        <div class="plan-option" id="plan-2m" onclick="selectDuration(2)">
-          <div class="plan-dur" data-i18n="dur2m">2 Months</div>
-          <div class="plan-amt" id="price-2m">RM36.00</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Step 3: Select Payment Method (ToyyibPay Only - No Sams Kredit) -->
-    <div class="step-card">
-      <div class="step-header">
-        <div class="step-num">3</div>
-        <div class="step-title" data-i18n="cStep3">Select Payment Method</div>
-      </div>
-      <div class="pay-list">
-        <div class="pay-option selected" id="pay-qr" onclick="selectPayment('qr')">
-          <div>
-            <div class="pay-name">Touch 'n Go eWallet / DuitNow QR</div>
-            <div class="pay-sub" data-i18n="payQrSub">Instant QR &amp; eWallet via ToyyibPay</div>
+        <!-- Login Form -->
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label>Email or WhatsApp Number *</label>
+            <input type="text" class="form-control" id="loginIdentifier" placeholder="e.g. user@email.com or 0123456789" required />
           </div>
-          <div class="pay-fee" style="color:var(--success);">RM0.00 Fees</div>
-        </div>
-        <div class="pay-option" id="pay-fpx" onclick="selectPayment('fpx')">
-          <div>
-            <div class="pay-name">Online Banking / FPX</div>
-            <div class="pay-sub" data-i18n="payFpxSub">Maybank2u, CIMB Clicks, Bank Islam, RHB &amp; all MY banks</div>
+          <div class="form-group">
+            <label>Password *</label>
+            <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required />
           </div>
-          <div class="pay-fee">RM1.00 Fees</div>
-        </div>
+          <button type="submit" class="primary-submit">Sign In to Account</button>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" class="form-control" id="regName" placeholder="e.g. Ahmad Hussam" required />
+          </div>
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" class="form-control" id="regEmail" placeholder="e.g. ahmad@gmail.com" required />
+          </div>
+          <div class="form-group">
+            <label>WhatsApp Number *</label>
+            <input type="tel" class="form-control" id="regPhone" placeholder="e.g. 0123456789" required />
+          </div>
+          <div class="form-group">
+            <label>Create Password *</label>
+            <input type="password" class="form-control" id="regPassword" placeholder="Minimum 6 characters" minlength="6" required />
+          </div>
+          <button type="submit" class="primary-submit">Create Account</button>
+        </form>
+      </div>
+
+      <!-- Logged In Profile View -->
+      <div id="loggedInView" style="display:none;">
+        <div class="profile-box" id="profileDetailsBox"></div>
+        <h4 style="font-size:0.85rem; margin-bottom:8px;">Recent Order History</h4>
+        <div id="orderHistoryList"></div>
+        <button class="logout-btn" onclick="handleLogout()">Log Out</button>
       </div>
     </div>
+  </div>
 
-    <!-- Sticky Bottom Pay Bar -->
-    <div class="sticky-checkout">
-      <div class="sticky-inner">
-        <div>
-          <div class="total-label" data-i18n="totalPayable">Total Payable</div>
-          <div class="total-val" id="checkout-total">RM18.00</div>
-        </div>
-        <button id="pay-now-btn" class="pay-submit-btn" onclick="submitToyyibPayOrder()">
-          <span id="pay-btn-label" data-i18n="btnPayNow">Pay Now</span> <span>→</span>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- PAYMENT RECEIPT / CONFIRMATION VIEW -->
-  <section id="receipt-view" class="container view-hidden">
-    <div class="receipt-box">
-      <div style="width:54px;height:54px;border-radius:50%;background:rgba(34,197,94,0.16);color:var(--success);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.6rem;font-weight:900;">✓</div>
-      <h2 style="font-size:1.2rem;font-weight:900;margin-bottom:4px;" id="receipt-title">Payment Confirmed!</h2>
-      <p style="font-size:0.82rem;color:var(--text-secondary);" id="receipt-subtitle">
-        Admin has been notified automatically via Telegram. Tap below to claim your account on WhatsApp.
-      </p>
-
-      <div class="receipt-rows" id="receipt-details"></div>
-
-      <a id="receipt-wa-link" class="wa-claim-btn" href="https://wa.me/60189066291" target="_blank" rel="noopener">
-        Claim Account via WhatsApp →
-      </a>
-    </div>
-    <button class="back-btn" style="width:100%;justify-content:center;" onclick="goHome()">← Back to SPYSTORE</button>
-  </section>
-
-  <!-- Floating WhatsApp Button -->
-  <a id="wa-float-btn" class="wa-float" href="https://wa.me/60189066291?text=Hi%20SPYSTORE%2C%20saya%20nak%20tanya%20stok%20aplikasi." target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"/></svg>
-  </a>
+  <!-- Toast -->
+  <div class="toast" id="toastBox"></div>
 
   <script>
-    // Safe storage wrapper
-    const memoryFallback = {};
-    const safeStore = {
-      get(key) {
-        try { return window.localStorage.getItem(key); } catch (e) { return memoryFallback[key] || null; }
-      },
-      set(key, val) {
-        try { window.localStorage.setItem(key, val); } catch (e) { memoryFallback[key] = val; }
-      },
-      remove(key) {
-        try { window.localStorage.removeItem(key); } catch (e) { delete memoryFallback[key]; }
-      }
-    };
+    const SHEET_ID = '15zWwrvLk9c138m7yGSlzgPwTTNPAmwarGomu2jjDG0w';
+    const ADMIN_WA = '60189066291';
 
-    // Google Sheets Live CSV URL
-    const GOOGLE_SHEET_ID = '15zWwrvLk9c138m7yGSlzgPwTTNPAmwarGomu2jjDG0w';
-    const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv`;
-
-    // Official 7 Apps Catalog
-    const APPS_DATA = [
-      {
-        id: 'netflix',
-        name: 'Netflix Premium',
-        category: 'Streaming',
-        price: 18,
-        desc: '4K Ultra HD • Private Profile • Full Warranty',
-        status: 'In Stock',
-        slots: 5,
-        bg: '#141414',
-        svg: '<svg width="30" height="30" viewBox="0 0 24 24" fill="#E50914"><path d="M5 3h3.5l4.5 11.2V3H16.5v18h-3.3L8.5 9.6V21H5V3z"/></svg>'
-      },
-      {
-        id: 'disney',
-        name: 'Disney+ Premium',
-        category: 'Streaming',
-        price: 16,
-        desc: '4K UHD & IMAX • Marvel, Pixar, Star Wars',
-        status: 'In Stock',
-        slots: 5,
-        bg: '#061942',
-        svg: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M4 13.5C7.5 10.5 15.5 10 20 13.5" stroke="#38BDF8" stroke-width="2.2" stroke-linecap="round"/><text x="5" y="18" fill="#FFFFFF" font-family="Arial,sans-serif" font-weight="900" font-size="9">D+</text></svg>'
-      },
-      {
-        id: 'hbomax',
-        name: 'HBO Max Ultimate',
-        category: 'Streaming',
-        price: 16,
-        desc: '4K Dolby Atmos • HBO Originals & Warner Bros',
-        status: 'In Stock',
-        slots: 5,
-        bg: '#1e1035',
-        svg: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none"><text x="2.5" y="15.5" fill="#C084FC" font-family="Arial Black,sans-serif" font-weight="900" font-size="8.5">MAX</text></svg>'
-      },
-      {
-        id: 'youtube',
-        name: 'YouTube Premium',
-        category: 'Streaming',
-        price: 5,
-        desc: 'Ad-Free Video • Background Play • YouTube Music',
-        status: 'In Stock',
-        slots: 10,
-        bg: '#1f0909',
-        svg: '<svg width="30" height="30" viewBox="0 0 24 24" fill="#FF0000"><rect x="2" y="5" width="20" height="14" rx="4"/><polygon points="10,8.5 16,12 10,15.5" fill="#FFFFFF"/></svg>'
-      },
-      {
-        id: 'spotify',
-        name: 'Spotify Premium',
-        category: 'Music',
-        price: 10,
-        desc: 'Ad-Free Lossless Audio • Offline Downloads',
-        status: 'In Stock',
-        slots: 5,
-        bg: '#082614',
-        svg: '<svg width="30" height="30" viewBox="0 0 24 24" fill="#1DB954"><circle cx="12" cy="12" r="10"/><path d="M7.5 9.5c3-.8 6.5-.6 9.2.8M8 12.5c2.4-.6 5.2-.4 7.4.7M8.6 15.3c1.9-.4 4-.3 5.7.6" stroke="#082614" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>'
-      },
-      {
-        id: 'canva',
-        name: 'Canva Premium',
-        category: 'Creative',
-        price: 5,
-        desc: 'Pro Templates • Magic Studio AI • Brand Kit',
-        status: 'In Stock',
-        slots: 10,
-        bg: '#0a2936',
-        svg: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#00C4CC"/><text x="6.2" y="15.5" fill="#FFFFFF" font-family="Georgia,serif" font-weight="900" font-size="11">C</text></svg>'
-      },
-      {
-        id: 'capcut',
-        name: 'CapCut Pro',
-        category: 'Creative',
-        price: 15,
-        desc: 'All Pro Effects • Auto Captions • 4K 60fps Export',
-        status: 'In Stock',
-        slots: 5,
-        bg: '#111827',
-        svg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"><path d="M4 7l16 10M20 7L4 17"/><rect x="4" y="6" width="16" height="12" rx="2" stroke="#38BDF8" stroke-width="1.4"/></svg>'
-      }
+    let products = [
+      { id: 'netflix', logo: 'netflix.png', name: 'Netflix Premium', category: 'Streaming', price: 18, stock: 2, badge: 'N', bg: '#18181b', color: '#ef4444' },
+      { id: 'disney', logo: 'disney.png', name: 'Disney+ Premium', category: 'Streaming', price: 16, stock: 1, badge: 'D+', bg: '#0c1d3d', color: '#38bdf8' },
+      { id: 'hbomax', logo: 'hbomax.png', name: 'HBO Max', category: 'Streaming', price: 15, stock: 3, badge: 'MAX', bg: '#1e1b4b', color: '#a78bfa' },
+      { id: 'youtube', logo: 'youtube.png', name: 'YouTube Premium', category: 'Streaming', price: 5, stock: 5, badge: 'YT', bg: '#271313', color: '#f87171' },
+      { id: 'spotify', logo: 'spotify.png', name: 'Spotify Premium', category: 'Music', price: 8, stock: 4, badge: 'SP', bg: '#0d2618', color: '#22c55e' },
+      { id: 'canva', logo: 'canva.png', name: 'Canva Pro', category: 'Creative', price: 5, stock: 6, badge: 'C', bg: '#0e2933', color: '#22d3ee' },
+      { id: 'capcut', logo: 'capcut.png', name: 'CapCut Pro', category: 'Creative', price: 10, stock: 3, badge: 'CC', bg: '#18181b', color: '#facc15' }
     ];
 
-    // State
-    let currentLang = 'en';
-    let currentCategory = 'All';
-    let selectedApp = APPS_DATA[0];
+    let selectedCategory = 'All';
+    let currentProduct = null;
     let selectedMonths = 1;
-    let selectedPayment = 'qr'; // 'qr' (RM0) or 'fpx' (RM1)
-    let bannerIdx = 0;
+    let currentSlide = 0;
 
-    const BANNERS = [
-      {
-        en: {
-          badge: 'INSTANT FPX & DUITNOW QR',
-          title: 'Premium Digital Subscriptions at Best Local Prices',
-          desc: 'Pay securely via FPX or DuitNow QR. Account details delivered straight to your WhatsApp right after payment.'
-        },
-        my: {
-          badge: 'BAYARAN PANTAS FPX & DUITNOW QR',
-          title: 'Langganan Digital Premium pada Harga Terbaik Malaysia',
-          desc: 'Bayar terus guna FPX atau DuitNow QR. Butiran akaun dihantar terus ke WhatsApp anda selepas bayaran disahkan.'
-        }
-      },
-      {
-        en: {
-          badge: 'FULL WARRANTY • FAST DELIVERY',
-          title: 'Netflix, Disney+, HBO Max, Spotify, Canva & CapCut',
-          desc: '100% warranty throughout your subscription period with live stock updates and instant admin alerts.'
-        },
-        my: {
-          badge: 'WARANTI PENUH • PENGHANTARAN PANTAS',
-          title: 'Netflix, Disney+, HBO Max, Spotify, Canva & CapCut',
-          desc: 'Waranti penuh sepanjang tempoh langganan dengan semakan stok masa nyata dan notifikasi admin automatik.'
-        }
-      }
-    ];
+    function goToSlide(index) {
+      const track = document.getElementById('heroTrack');
+      if (!track) return;
+      currentSlide = index;
+      track.scrollTo({
+        left: track.clientWidth * index,
+        behavior: 'smooth'
+      });
+      updateHeroDots(index);
+    }
 
-    const I18N = {
-      en: {
-        navHome: 'Store Catalog',
-        navAccount: 'Member Account / History',
-        navSync: 'Refresh Live Stock',
-        navSupport: 'WhatsApp Admin Support',
-        memberTitle: 'SPYSTORE Member Account',
-        memberSub: 'Register or sign in to auto-fill your checkout details and save your order history.',
-        lblName: 'Your Name *',
-        lblWa: 'WhatsApp Number *',
-        lblDevice: 'Device Used *',
-        btnSaveMember: 'Save & Sign In',
-        orderHistTitle: 'Recent Orders',
-        btnLogout: 'Sign Out',
-        trust1Title: '100% Warranty',
-        trust1Desc: 'Full duration cover',
-        trust2Title: 'Fast Delivery',
-        trust2Desc: '5–15 mins via WA',
-        trust3Title: 'Auto Payment',
-        trust3Desc: 'FPX & DuitNow QR',
-        catalogHeading: 'Select Subscription App',
-        tapToOrder: 'Tap app to order',
-        howTitle: 'How To Order (3 Simple Steps)',
-        step1H: '1. Choose App & Fill Details:',
-        step1B: 'Select your subscription plan, enter your Name, WhatsApp number, and Device.',
-        step2H: '2. Complete Payment:',
-        step2B: "Pay instantly using Touch 'n Go eWallet / DuitNow QR or Online Banking (FPX).",
-        step3H: '3. Receive Account on WhatsApp:',
-        step3B: 'Once paid, our system notifies admin automatically and sends your account details to WhatsApp.',
-        btnBack: 'Back to Store',
-        cStep1: 'Enter Your Details',
-        cStep2: 'Select Duration Plan',
-        cStep3: 'Select Payment Method',
-        dur1m: '1 Month',
-        dur2m: '2 Months',
-        payQrSub: 'Instant QR & eWallet via ToyyibPay',
-        payFpxSub: 'Maybank2u, CIMB Clicks, Bank Islam, RHB & all MY banks',
-        totalPayable: 'Total Payable',
-        btnPayNow: 'Pay Now'
-      },
-      my: {
-        navHome: 'Katalog Kedai',
-        navAccount: 'Akaun Ahli / Sejarah',
-        navSync: 'Kemas Kini Stok Terkini',
-        navSupport: 'Bantuan WhatsApp Admin',
-        memberTitle: 'Akaun Ahli SPYSTORE',
-        memberSub: 'Daftar atau log masuk untuk isi maklumat tempahan secara automatik dan simpan rekod pesanan.',
-        lblName: 'Nama Anda *',
-        lblWa: 'No. WhatsApp *',
-        lblDevice: 'Peranti Digunakan *',
-        btnSaveMember: 'Simpan & Log Masuk',
-        orderHistTitle: 'Rekod Tempahan Terkini',
-        btnLogout: 'Log Keluar',
-        trust1Title: 'Waranti 100%',
-        trust1Desc: 'Jaminan penuh tempoh',
-        trust2Title: 'Hantar Pantas',
-        trust2Desc: '5–15 minit ke WA',
-        trust3Title: 'Bayar Automatik',
-        trust3Desc: 'FPX & DuitNow QR',
-        catalogHeading: 'Pilih Aplikasi Langganan',
-        tapToOrder: 'Tekan aplikasi untuk tempah',
-        howTitle: 'Cara Tempahan (3 Langkah Mudah)',
-        step1H: '1. Pilih Aplikasi & Isi Maklumat:',
-        step1B: 'Pilih pelan langganan, masukkan Nama, nombor WhatsApp, dan Peranti anda.',
-        step2H: '2. Buat Pembayaran:',
-        step2B: "Bayar terus menggunakan Touch 'n Go eWallet / DuitNow QR atau Perbankan Internet (FPX).",
-        step3H: '3. Terima Akaun di WhatsApp:',
-        step3B: 'Selepas bayaran berjaya, sistem terus maklumkan admin dan hantar butiran akaun ke WhatsApp anda.',
-        btnBack: 'Kembali ke Kedai',
-        cStep1: 'Masukkan Maklumat Anda',
-        cStep2: 'Pilih Tempoh Langganan',
-        cStep3: 'Pilih Kaedah Pembayaran',
-        dur1m: '1 Bulan',
-        dur2m: '2 Bulan',
-        payQrSub: 'QR & eWallet Pantas melalui ToyyibPay',
-        payFpxSub: 'Maybank2u, CIMB Clicks, Bank Islam, RHB & semua bank MY',
-        totalPayable: 'Jumlah Perlu Dibayar',
-        btnPayNow: 'Bayar Sekarang'
+    function handleHeroScroll() {
+      const track = document.getElementById('heroTrack');
+      if (!track || !track.clientWidth) return;
+      const idx = Math.round(track.scrollLeft / track.clientWidth);
+      if (idx !== currentSlide) {
+        currentSlide = idx;
+        updateHeroDots(idx);
       }
-    };
+    }
+
+    function updateHeroDots(idx) {
+      document.getElementById('dot0').classList.toggle('active', idx === 0);
+      document.getElementById('dot1').classList.toggle('active', idx === 1);
+    }
+
+    let heroTouching = false;
+    const heroTrackEl = document.getElementById('heroTrack');
+    heroTrackEl.addEventListener('touchstart', () => { heroTouching = true; }, { passive: true });
+    heroTrackEl.addEventListener('touchend', () => { setTimeout(() => { heroTouching = false; }, 3000); }, { passive: true });
+
+    setInterval(() => {
+      if (!heroTouching && document.getElementById('catalogView').style.display !== 'none') {
+        goToSlide(currentSlide === 0 ? 1 : 0);
+      }
+    }, 5000);
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('spystore_theme', next);
+    }
+
+    (function initTheme() {
+      const saved = localStorage.getItem('spystore_theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        document.getElementById('themeBtn').textContent = saved === 'dark' ? '☀️' : '🌙';
+      }
+    })();
 
     function showToast(msg) {
-      const el = document.getElementById('toast');
-      el.textContent = msg;
-      el.classList.add('show');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+      const box = document.getElementById('toastBox');
+      box.textContent = msg;
+      box.classList.add('show');
+      setTimeout(() => box.classList.remove('show'), 3200);
     }
 
-    // Parse CSV cleanly
-    function parseCSV(text) {
-      const lines = text.trim().split(/\r?\n/);
-      return lines.map(line => {
-        const result = [];
-        let cur = '';
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-          const ch = line[i];
-          if (ch === '"') {
-            inQuotes = !inQuotes;
-          } else if (ch === ',' && !inQuotes) {
-            result.push(cur.trim());
-            cur = '';
-          } else {
-            cur += ch;
-          }
-        }
-        result.push(cur.trim());
-        return result;
-      });
-    }
-
-    // Live Google Sheets Sync
-    async function syncGoogleSheetStock(manual = false) {
-      const badge = document.getElementById('sheet-sync-badge');
-      if (badge) badge.textContent = currentLang === 'my' ? 'Menyemak stok...' : 'Syncing stock...';
+    async function syncGoogleSheetStock() {
+      const statusEl = document.getElementById('liveStockStatus');
       try {
-        const res = await fetch(`${SHEET_CSV_URL}&_t=${Date.now()}`);
-        if (!res.ok) throw new Error('Sheet fetch error');
-        const csvText = await res.text();
-        const rows = parseCSV(csvText);
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+        const res = await fetch(url);
+        const text = await res.text();
+        const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+        const data = JSON.parse(jsonStr);
+        const rows = data.table?.rows || [];
 
-        rows.forEach((cols, idx) => {
-          if (idx === 0) return; // header row
-          const id = (cols[0] || '').toLowerCase().trim();
-          const statusRaw = (cols[1] || '').trim();
-          const slotsRaw = parseInt(cols[2], 10);
+        rows.forEach(r => {
+          const cells = r.c || [];
+          const rowName = String(cells[0]?.v || '').toLowerCase();
+          const rowPrice = parseFloat(cells[1]?.v);
+          const rowStock = parseInt(cells[2]?.v, 10);
 
-          if (id === 'admin') {
-            const isOnline = statusRaw.toLowerCase() !== 'offline';
-            const dot = document.getElementById('admin-dot');
-            const txt = document.getElementById('admin-status-text');
-            if (dot && txt) {
-              dot.className = isOnline ? 'pulse-dot' : 'pulse-dot offline';
-              txt.textContent = isOnline
-                ? (currentLang === 'my' ? 'Admin Online • Penghantaran Pantas' : 'Admin Online • Fast Delivery')
-                : (currentLang === 'my' ? 'Admin Offline • Giliran Diproses' : 'Admin Offline • Queue Mode');
+          products.forEach(p => {
+            if (rowName && (rowName.includes(p.id) || p.name.toLowerCase().includes(rowName))) {
+              if (!isNaN(rowPrice) && rowPrice > 0) p.price = rowPrice;
+              if (!isNaN(rowStock) && rowStock >= 0) p.stock = rowStock;
             }
-          } else {
-            const app = APPS_DATA.find(a => a.id === id);
-            if (app) {
-              const slotCount = isNaN(slotsRaw) ? app.slots : slotsRaw;
-              app.slots = slotCount;
-              if (statusRaw.toLowerCase().includes('sold') || statusRaw.toLowerCase().includes('out') || slotCount <= 0) {
-                app.status = 'Sold Out';
-              } else {
-                app.status = 'In Stock';
-              }
-            }
-          }
+          });
         });
 
-        if (badge) badge.textContent = currentLang === 'my' ? 'Stok Terkini ✓' : 'Live Stock ✓';
-        renderCatalog();
-        if (selectedApp) updateCheckoutStockUI();
-        if (manual) showToast(currentLang === 'my' ? 'Stok berjaya dikemas kini dari Google Sheets!' : 'Stock synced from Google Sheets!');
-      } catch (err) {
-        if (badge) badge.textContent = 'Live Stock';
-        renderCatalog();
+        statusEl.textContent = 'Live Stock ✓';
+        renderProducts();
+      } catch (e) {
+        statusEl.textContent = 'Live Stock ✓';
+        renderProducts();
       }
     }
 
     function setCategory(cat, btn) {
-      currentCategory = cat;
-      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      renderCatalog();
+      selectedCategory = cat;
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      renderProducts();
     }
 
-    function renderCatalog() {
-      const grid = document.getElementById('apps-grid');
-      const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
-      const filtered = APPS_DATA.filter(app => {
-        const matchCat = currentCategory === 'All' || app.category === currentCategory;
-        const matchQuery = !query || app.name.toLowerCase().includes(query) || app.category.toLowerCase().includes(query);
+    function renderAppIconHtml(p, sizePx) {
+      const sizeStyle = sizePx ? `width:${sizePx}px; height:${sizePx}px; margin-bottom:0;` : '';
+      return `
+        <div class="app-icon" style="background:${p.bg}; color:${p.color}; ${sizeStyle}">
+          <img src="${p.logo}" alt="${p.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+          <span style="display:none;">${p.badge}</span>
+        </div>
+      `;
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('productGrid');
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      const filtered = products.filter(p => {
+        const matchCat = selectedCategory === 'All' || p.category === selectedCategory;
+        const matchQuery = !query || p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query);
         return matchCat && matchQuery;
       });
 
-      grid.innerHTML = filtered.map(app => {
-        const isOut = app.status === 'Sold Out' || app.slots <= 0;
-        const stockLabel = isOut
-          ? (currentLang === 'my' ? 'Habis Stok' : 'Sold Out')
-          : `${currentLang === 'my' ? 'Ada Stok' : 'In Stock'} • ${app.slots}`;
+      grid.innerHTML = filtered.map(p => {
+        const inStock = p.stock > 0;
         return `
-          <div class="app-card ${isOut ? 'sold-out' : ''}" onclick="openCheckout('${app.id}')">
-            <span class="stock-pill ${isOut ? 'out' : 'in'}">${stockLabel}</span>
-            <div class="app-logo-box" style="background:${app.bg};">${app.svg}</div>
-            <div class="app-name">${app.name}</div>
-            <div class="app-cat">${app.category}</div>
-            <div class="app-price">RM${app.price} <span>/ ${currentLang === 'my' ? 'bln' : 'mo'}</span></div>
+          <div class="product-card ${inStock ? '' : 'out-of-stock'}" onclick="${inStock ? `openCheckout('${p.id}')` : `showToast('${p.name} is currently out of stock')`}">
+            <span class="stock-pill ${inStock ? 'stock-in' : 'stock-out'}">
+              ${inStock ? `In Stock • ${p.stock}` : 'Out of Stock'}
+            </span>
+            ${renderAppIconHtml(p)}
+            <div class="app-name">${p.name}</div>
+            <div class="app-cat">${p.category}</div>
+            <div class="app-price">RM${p.price} <small>/ mo</small></div>
           </div>
         `;
       }).join('');
     }
 
-    function openCheckout(appId) {
-      const app = APPS_DATA.find(a => a.id === appId);
-      if (!app) return;
-      selectedApp = app;
+    function openCheckout(productId) {
+      currentProduct = products.find(p => p.id === productId);
+      if (!currentProduct) return;
+
       selectedMonths = 1;
-      selectedPayment = 'qr';
+      document.getElementById('catalogView').style.display = 'none';
+      document.getElementById('checkoutView').classList.add('active');
+      document.getElementById('checkoutBar').classList.add('active');
 
-      document.getElementById('checkout-logo-box').style.background = app.bg;
-      document.getElementById('checkout-logo-box').innerHTML = app.svg;
-      document.getElementById('checkout-cat').textContent = app.category.toUpperCase();
-      document.getElementById('checkout-app-name').textContent = app.name;
-      document.getElementById('checkout-app-desc').textContent = app.desc;
+      document.getElementById('selectedAppHeader').innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px;">
+          ${renderAppIconHtml(currentProduct, 48)}
+          <div>
+            <div style="font-size:1.05rem; font-weight:700;">${currentProduct.name}</div>
+            <div style="font-size:0.76rem; color:var(--accent-cyan);">Full Warranty • Available Stock: ${currentProduct.stock}</div>
+          </div>
+        </div>
+      `;
 
-      document.getElementById('price-1m').textContent = `RM${app.price.toFixed(2)}`;
-      document.getElementById('price-2m').textContent = `RM${(app.price * 2).toFixed(2)}`;
-
-      // Auto-fill from saved member profile
-      const profileRaw = safeStore.get('spystore_member');
-      if (profileRaw) {
-        try {
-          const p = JSON.parse(profileRaw);
-          if (p.name && !document.getElementById('cust-name').value) document.getElementById('cust-name').value = p.name;
-          if (p.wa && !document.getElementById('cust-wa').value) document.getElementById('cust-wa').value = p.wa;
-          if (p.device && !document.getElementById('cust-device').value) document.getElementById('cust-device').value = p.device;
-        } catch (_) {}
+      const user = getCurrentUser();
+      if (user) {
+        if (!document.getElementById('custName').value) document.getElementById('custName').value = user.name || '';
+        if (!document.getElementById('custPhone').value) document.getElementById('custPhone').value = user.phone || '';
       }
 
-      selectDuration(1);
-      selectPayment('qr');
-      updateCheckoutStockUI();
-
-      document.getElementById('store-view').classList.add('view-hidden');
-      document.getElementById('receipt-view').classList.add('view-hidden');
-      document.getElementById('checkout-view').classList.remove('view-hidden');
+      document.getElementById('plan1Price').textContent = `RM${currentProduct.price.toFixed(2)}`;
+      document.getElementById('plan2Price').textContent = `RM${(currentProduct.price * 2).toFixed(2)}`;
+      selectMonths(1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function updateCheckoutStockUI() {
-      const isOut = selectedApp.status === 'Sold Out' || selectedApp.slots <= 0;
-      const badge = document.getElementById('checkout-stock-badge');
-      const btn = document.getElementById('pay-now-btn');
-      const btnLabel = document.getElementById('pay-btn-label');
-
-      if (isOut) {
-        badge.className = 'stock-pill out';
-        badge.textContent = currentLang === 'my' ? 'Habis Stok' : 'Sold Out';
-        btn.disabled = true;
-        btnLabel.textContent = currentLang === 'my' ? 'Stok Habis' : 'Out of Stock';
-      } else {
-        badge.className = 'stock-pill in';
-        badge.textContent = `${currentLang === 'my' ? 'Ada Stok' : 'In Stock'} • ${selectedApp.slots} ${currentLang === 'my' ? 'Slot' : 'Slots'}`;
-        btn.disabled = false;
-        btnLabel.textContent = currentLang === 'my' ? 'Bayar Sekarang' : 'Pay Now';
-      }
+    function closeCheckout() {
+      currentProduct = null;
+      document.getElementById('checkoutView').classList.remove('active');
+      document.getElementById('checkoutBar').classList.remove('active');
+      document.getElementById('catalogView').style.display = 'block';
     }
 
-    function selectDuration(months) {
-      selectedMonths = months;
-      document.getElementById('plan-1m').classList.toggle('selected', months === 1);
-      document.getElementById('plan-2m').classList.toggle('selected', months === 2);
-      updateTotalCalculation();
+    function selectMonths(mo) {
+      selectedMonths = mo;
+      document.getElementById('plan1Btn').classList.toggle('selected', mo === 1);
+      document.getElementById('plan2Btn').classList.toggle('selected', mo === 2);
+
+      const planAmt = currentProduct.price * selectedMonths;
+      const feeAmt = 1.00;
+      const total = planAmt + feeAmt;
+      document.getElementById('totalPayableText').textContent = `RM${total.toFixed(2)}`;
     }
 
-    function selectPayment(method) {
-      selectedPayment = method;
-      document.getElementById('pay-qr').classList.toggle('selected', method === 'qr');
-      document.getElementById('pay-fpx').classList.toggle('selected', method === 'fpx');
-      updateTotalCalculation();
-    }
+    async function processPayment() {
+      if (!currentProduct) return;
 
-    function updateTotalCalculation() {
-      const base = selectedApp.price * selectedMonths;
-      const fee = selectedPayment === 'fpx' ? 1 : 0;
-      const total = base + fee;
-      document.getElementById('checkout-total').textContent = `RM${total.toFixed(2)}`;
-    }
-
-    async function submitToyyibPayOrder() {
-      if (selectedApp.status === 'Sold Out' || selectedApp.slots <= 0) {
-        showToast(currentLang === 'my' ? 'Maaf, stok aplikasi ini telah habis.' : 'Sorry, this item is currently sold out.');
-        return;
-      }
-
-      const customerName = document.getElementById('cust-name').value.trim();
-      const customerPhone = document.getElementById('cust-wa').value.trim();
-      const customerDevice = document.getElementById('cust-device').value.trim();
+      const customerName = document.getElementById('custName').value.trim();
+      const customerPhone = document.getElementById('custPhone').value.trim();
+      const customerDevice = document.getElementById('custDevice').value.trim();
 
       if (!customerName || !customerPhone || !customerDevice) {
-        showToast(currentLang === 'my' ? 'Sila lengkapkan Nama, No. WhatsApp dan Peranti.' : 'Please fill in your Name, WhatsApp Number, and Device.');
+        showToast('Please fill in Name, WhatsApp Number, and Device!');
         return;
       }
 
-      const planAmount = selectedApp.price * selectedMonths;
-      const feeAmount = selectedPayment === 'fpx' ? 1 : 0;
+      const planAmount = currentProduct.price * selectedMonths;
+      const feeAmount = 1.00;
       const totalAmount = planAmount + feeAmount;
 
-      const btn = document.getElementById('pay-now-btn');
-      const btnLabel = document.getElementById('pay-btn-label');
+      const btn = document.getElementById('payNowBtn');
       btn.disabled = true;
-      btnLabel.textContent = currentLang === 'my' ? 'Menjana Bil...' : 'Creating Bill...';
+      btn.textContent = 'Generating FPX Bill...';
 
-      // Save order to local history
       saveLocalOrder({
-        app: selectedApp.name,
+        app: currentProduct.name,
         months: selectedMonths,
         total: totalAmount.toFixed(2),
-        date: new Date().toLocaleDateString()
+        date: new Date().toLocaleDateString('en-MY')
       });
 
       try {
-        const response = await fetch('/api/create-bill', {
+        const res = await fetch('/api/create-bill', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            appId: selectedApp.id,
-            appName: selectedApp.name,
+            appId: currentProduct.id,
+            appName: currentProduct.name,
             months: selectedMonths,
             planAmount,
             feeAmount,
@@ -1656,213 +1479,198 @@
             customerName,
             customerPhone,
             customerDevice,
-            paymentMethod: selectedPayment
+            paymentMethod: 'fpx'
           })
         });
 
-        const data = await response.json();
-        if (response.ok && data.paymentUrl) {
+        const data = await res.json();
+        if (res.ok && data.paymentUrl) {
           window.location.href = data.paymentUrl;
-          return;
         } else {
-          throw new Error(data.error || 'ToyyibPay endpoint unavailable');
+          showToast(data.error || 'Failed to create ToyyibPay bill.');
+          btn.disabled = false;
+          btn.textContent = 'Pay Now →';
         }
       } catch (err) {
-        // Fallback direct WhatsApp checkout if backend API is not deployed yet
+        showToast('Network error connecting to payment server.');
         btn.disabled = false;
-        btnLabel.textContent = currentLang === 'my' ? 'Bayar Sekarang' : 'Pay Now';
-        const waText = encodeURIComponent(
-          `Hi SPYSTORE! Saya ingin membuat tempahan:\n` +
-          `• Aplikasi: ${selectedApp.name}\n` +
-          `• Tempoh: ${selectedMonths} Bulan\n` +
-          `• Jumlah: RM${totalAmount.toFixed(2)}\n` +
-          `• Nama: ${customerName}\n` +
-          `• No. WhatsApp: ${customerPhone}\n` +
-          `• Device: ${customerDevice}`
-        );
-        showToast(currentLang === 'my' ? 'Menghubungkan ke WhatsApp SPYSTORE...' : 'Redirecting to SPYSTORE WhatsApp...');
-        window.open(`https://wa.me/60189066291?text=${waText}`, '_blank');
+        btn.textContent = 'Pay Now →';
       }
     }
 
-    function goHome() {
-      document.getElementById('checkout-view').classList.add('view-hidden');
-      document.getElementById('receipt-view').classList.add('view-hidden');
-      document.getElementById('store-view').classList.remove('view-hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    function getUsersDB() {
+      try {
+        return JSON.parse(localStorage.getItem('spystore_users_db') || '[]');
+      } catch {
+        return [];
+      }
     }
 
-    // Check URL query params for ToyyibPay return (?status_id=1&billcode=...)
-    function checkToyyibPayReturn() {
-      const params = new URLSearchParams(window.location.search);
-      const statusId = params.get('status_id');
-      const billCode = params.get('billcode');
-      if (!statusId) return;
+    function saveUsersDB(users) {
+      localStorage.setItem('spystore_users_db', JSON.stringify(users));
+    }
 
-      const appName = params.get('app') || 'Subscription';
-      const mo = params.get('mo') || '1';
-      const name = params.get('name') || 'Customer';
-      const wa = params.get('wa') || '';
-      const dev = params.get('dev') || '-';
-      const tot = params.get('tot') || '0.00';
+    function getCurrentUser() {
+      try {
+        return JSON.parse(localStorage.getItem('spystore_current_user') || 'null');
+      } catch {
+        return null;
+      }
+    }
 
-      document.getElementById('store-view').classList.add('view-hidden');
-      document.getElementById('checkout-view').classList.add('view-hidden');
-      document.getElementById('receipt-view').classList.remove('view-hidden');
-
-      const titleEl = document.getElementById('receipt-title');
-      const subEl = document.getElementById('receipt-subtitle');
-      if (statusId === '1') {
-        titleEl.textContent = currentLang === 'my' ? 'Pembayaran Berjaya!' : 'Payment Confirmed!';
-        titleEl.style.color = 'var(--success)';
-        subEl.textContent = currentLang === 'my'
-          ? 'Notifikasi pesanan telah dihantar ke Telegram admin. Tekan butang di bawah untuk terima akaun di WhatsApp.'
-          : 'Admin has been notified via Telegram. Tap below to receive your account on WhatsApp.';
+    function updateAuthUI() {
+      const user = getCurrentUser();
+      const navBtn = document.getElementById('authNavBtn');
+      if (user) {
+        const firstName = user.name.split(' ')[0];
+        navBtn.textContent = `👤 ${firstName}`;
+        navBtn.classList.add('auth-active');
       } else {
-        titleEl.textContent = currentLang === 'my' ? 'Pembayaran Tidak Berjaya' : 'Payment Unsuccessful';
-        titleEl.style.color = 'var(--danger)';
-        subEl.textContent = currentLang === 'my'
-          ? 'Transaksi dibatalkan atau gagal. Sila cuba semula.'
-          : 'Transaction was cancelled or failed. Please try again.';
+        navBtn.textContent = 'Login / Register';
+        navBtn.classList.remove('auth-active');
       }
-
-      document.getElementById('receipt-details').innerHTML = `
-        <div class="receipt-row"><span>Bill Code:</span><strong>${billCode || '-'}</strong></div>
-        <div class="receipt-row"><span>App:</span><strong>${appName} (${mo} Mo)</strong></div>
-        <div class="receipt-row"><span>Name:</span><strong>${name}</strong></div>
-        <div class="receipt-row"><span>Device:</span><strong>${dev}</strong></div>
-        <div class="receipt-row"><span>Total Paid:</span><strong style="color:var(--accent-gold);">RM${tot}</strong></div>
-      `;
-
-      const claimMsg = encodeURIComponent(
-        `Hi SPYSTORE! Saya telah selesai membuat bayaran ToyyibPay.\n` +
-        `• Bill Code: ${billCode || '-'}\n` +
-        `• Aplikasi: ${appName} (${mo} Bulan)\n` +
-        `• Nama: ${name}\n` +
-        `• Device: ${dev}\n` +
-        `• Jumlah: RM${tot}`
-      );
-      document.getElementById('receipt-wa-link').href = `https://wa.me/60189066291?text=${claimMsg}`;
     }
 
-    // Member Account & Order History
-    function openAccountModal() {
-      renderMemberModal();
-      document.getElementById('backdrop').classList.add('open');
-      document.getElementById('account-modal').classList.add('open');
-    }
+    function openAuthModal() {
+      const modal = document.getElementById('authModal');
+      const user = getCurrentUser();
+      modal.classList.add('open');
 
-    function renderMemberModal() {
-      const raw = safeStore.get('spystore_member');
-      const guestView = document.getElementById('auth-guest-view');
-      const memberView = document.getElementById('auth-member-view');
-      const pill = document.getElementById('member-pill');
-      const pillText = document.getElementById('member-pill-text');
-
-      if (raw) {
-        const p = JSON.parse(raw);
-        guestView.classList.add('view-hidden');
-        memberView.classList.remove('view-hidden');
-        document.getElementById('profile-display-name').textContent = p.name;
-        document.getElementById('profile-display-wa').textContent = `WhatsApp: ${p.wa}`;
-        document.getElementById('profile-display-dev').textContent = `Device: ${p.device}`;
-        pill.classList.add('member-active');
-        pillText.textContent = p.name.split(' ')[0];
-
-        const histRaw = safeStore.get('spystore_orders');
-        const orders = histRaw ? JSON.parse(histRaw) : [];
-        const listEl = document.getElementById('order-history-list');
-        if (orders.length === 0) {
-          listEl.innerHTML = `<div style="color:var(--text-secondary);">No orders yet.</div>`;
-        } else {
-          listEl.innerHTML = orders.map(o => `
-            <div style="background:var(--bg-input);padding:9px 11px;border-radius:10px;display:flex;justify-content:space-between;">
-              <div><strong>${o.app}</strong> (${o.months}m)<br/><span style="font-size:0.7rem;color:var(--text-secondary);">${o.date}</span></div>
-              <div style="font-weight:800;color:var(--accent-gold);">RM${o.total}</div>
-            </div>
-          `).join('');
-        }
+      if (user) {
+        document.getElementById('authModalTitle').textContent = 'My Account';
+        document.getElementById('authFormsView').style.display = 'none';
+        document.getElementById('loggedInView').style.display = 'block';
+        document.getElementById('profileDetailsBox').innerHTML = `
+          <p><strong>Name:</strong> ${user.name}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p style="margin-bottom:0;"><strong>WhatsApp:</strong> ${user.phone}</p>
+        `;
+        renderOrderHistory();
       } else {
-        guestView.classList.remove('view-hidden');
-        memberView.classList.add('view-hidden');
-        pill.classList.remove('member-active');
-        pillText.textContent = currentLang === 'my' ? 'Akaun' : 'Account';
+        document.getElementById('authModalTitle').textContent = 'SPYSTORE Account';
+        document.getElementById('authFormsView').style.display = 'block';
+        document.getElementById('loggedInView').style.display = 'none';
+        switchAuthTab('login');
       }
     }
 
-    function saveMemberProfile() {
-      const name = document.getElementById('auth-name').value.trim();
-      const wa = document.getElementById('auth-wa').value.trim();
-      const device = document.getElementById('auth-device').value.trim() || 'Mobile';
-      if (!name || !wa) {
-        showToast(currentLang === 'my' ? 'Sila isi Nama dan No. WhatsApp.' : 'Please enter your Name and WhatsApp number.');
+    function closeAuthModal() {
+      document.getElementById('authModal').classList.remove('open');
+    }
+
+    function switchAuthTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('tabLoginBtn').classList.toggle('active', isLogin);
+      document.getElementById('tabRegisterBtn').classList.toggle('active', !isLogin);
+      document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+      document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim().toLowerCase();
+      const phone = document.getElementById('regPhone').value.trim();
+      const password = document.getElementById('regPassword').value;
+
+      const users = getUsersDB();
+      if (users.some(u => u.email === email || u.phone === phone)) {
+        showToast('Email or WhatsApp number already registered! Please Login.');
+        switchAuthTab('login');
         return;
       }
-      safeStore.set('spystore_member', JSON.stringify({ name, wa, device }));
-      renderMemberModal();
-      showToast(currentLang === 'my' ? 'Profil ahli disimpan!' : 'Member profile saved!');
+
+      const newUser = { name, email, phone, password };
+      users.push(newUser);
+      saveUsersDB(users);
+      localStorage.setItem('spystore_current_user', JSON.stringify(newUser));
+      updateAuthUI();
+      closeAuthModal();
+      showToast(`Welcome to SPYSTORE BY SAMS, ${name}!`);
     }
 
-    function logoutMember() {
-      safeStore.remove('spystore_member');
-      renderMemberModal();
-      showToast(currentLang === 'my' ? 'Telah log keluar.' : 'Signed out.');
+    function handleLogin(e) {
+      e.preventDefault();
+      const identifier = document.getElementById('loginIdentifier').value.trim().toLowerCase();
+      const password = document.getElementById('loginPassword').value;
+
+      const users = getUsersDB();
+      const found = users.find(u => (u.email === identifier || u.phone === identifier) && u.password === password);
+
+      if (!found) {
+        showToast('Invalid email/WhatsApp or password.');
+        return;
+      }
+
+      localStorage.setItem('spystore_current_user', JSON.stringify(found));
+      updateAuthUI();
+      closeAuthModal();
+      showToast(`Logged in as ${found.name}`);
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('spystore_current_user');
+      updateAuthUI();
+      closeAuthModal();
+      showToast('Logged out successfully.');
     }
 
     function saveLocalOrder(order) {
-      const raw = safeStore.get('spystore_orders');
-      const list = raw ? JSON.parse(raw) : [];
-      list.unshift(order);
-      safeStore.set('spystore_orders', JSON.stringify(list.slice(0, 15)));
+      try {
+        const list = JSON.parse(localStorage.getItem('spystore_orders') || '[]');
+        list.unshift(order);
+        localStorage.setItem('spystore_orders', JSON.stringify(list.slice(0, 15)));
+      } catch {}
     }
 
-    // Drawer & Overlays
-    function openDrawer() {
-      document.getElementById('backdrop').classList.add('open');
-      document.getElementById('side-drawer').classList.add('open');
+    function renderOrderHistory() {
+      const container = document.getElementById('orderHistoryList');
+      let list = [];
+      try {
+        list = JSON.parse(localStorage.getItem('spystore_orders') || '[]');
+      } catch {}
+
+      if (!list.length) {
+        container.innerHTML = `<p style="font-size:0.78rem; color:var(--text-muted);">No orders placed on this device yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map(o => `
+        <div class="order-item">
+          <div style="display:flex; justify-content:space-between; font-weight:700;">
+            <span>${o.app} (${o.months} Mo)</span>
+            <span style="color:var(--accent-gold);">RM${o.total}</span>
+          </div>
+          <div style="color:var(--text-muted); font-size:0.72rem; margin-top:2px;">Date: ${o.date}</div>
+        </div>
+      `).join('');
     }
 
-    function closeAllOverlays() {
-      document.getElementById('backdrop').classList.remove('open');
-      document.getElementById('side-drawer').classList.remove('open');
-      document.getElementById('account-modal').classList.remove('open');
-    }
+    (function checkPaymentReturn() {
+      const params = new URLSearchParams(window.location.search);
+      const statusId = params.get('status_id');
+      const ref = params.get('ref');
+      const app = params.get('app');
+      const mo = params.get('mo');
+      const name = params.get('name');
 
-    // Theme & Bilingual
-    function toggleTheme() {
-      const html = document.documentElement;
-      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️' : '🌙';
-    }
+      if (statusId === '1' && ref) {
+        const banner = document.getElementById('receiptBanner');
+        banner.classList.add('show');
+        document.getElementById('receiptTitle').textContent = `Payment Successful! (${ref})`;
+        document.getElementById('receiptDesc').textContent = `Order for ${app || 'Subscription'} (${mo || '1'} Month) confirmed. Admin has been notified via Telegram.`;
 
-    function toggleLanguage() {
-      currentLang = currentLang === 'en' ? 'my' : 'en';
-      document.getElementById('lang-btn').textContent = currentLang.toUpperCase();
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (I18N[currentLang][key]) el.textContent = I18N[currentLang][key];
-      });
-      setBanner(bannerIdx);
-      renderCatalog();
-      renderMemberModal();
-    }
+        const msg = encodeURIComponent(`Hi SPYSTORE BY SAMS! Saya sudah buat pembayaran FPX.
+Ref: ${ref}
+Nama: ${name || '-'}
+App: ${app || '-'} (${mo || '1'} Bulan)`);
+        document.getElementById('receiptWaLink').href = `https://wa.me/${ADMIN_WA}?text=${msg}`;
+      }
+    })();
 
-    function setBanner(idx) {
-      bannerIdx = idx;
-      const b = BANNERS[idx][currentLang];
-      document.getElementById('banner-badge').textContent = b.badge;
-      document.getElementById('banner-title').textContent = b.title;
-      document.getElementById('banner-desc').textContent = b.desc;
-      document.querySelectorAll('.hero-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
-    }
-
-    // Initialize
-    setInterval(() => setBanner((bannerIdx + 1) % BANNERS.length), 6000);
-    renderCatalog();
-    renderMemberModal();
-    checkToyyibPayReturn();
-    syncGoogleSheetStock(false);
+    updateAuthUI();
+    renderProducts();
+    syncGoogleSheetStock();
   </script>
 </body>
 </html>
