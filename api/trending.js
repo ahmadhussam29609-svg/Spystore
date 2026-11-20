@@ -1,5 +1,5 @@
 // /api/trending.js
-// Menarik carta penstriman untuk SPYSTORE BY SAMS (Netflix RM18, Disney+ RM16, HBO Max RM15)
+// Netflix (RM18) & HBO Max (RM15) guna wilayah MY; Disney+ (RM16) guna katalog global rasmi Disney+ (US)
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY || '4d8856163cb184c1dc7eda6063f78d1a';
 const WATCH_REGION = 'MY';
@@ -78,7 +78,7 @@ const FALLBACK_CATALOG = {
       title: 'House of the Dragon',
       mediaType: 'SERIES',
       rating: '8.4',
-      overview: 'The story of the Targaryen civil war that took place about 200 years before events portrayed in Game of Thrones.',
+      overview: 'The Targaryen civil war that took place about 200 years before events portrayed in Game of Thrones.',
       backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg',
       poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg'
     },
