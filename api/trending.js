@@ -7,7 +7,8 @@ const WATCH_REGION = 'MY';
 const PROVIDERS = [
   { id: 'netflix', label: 'Netflix', providerId: 8, price: 18, region: 'MY' },
   { id: 'disney', label: 'Disney+', providerId: 337, price: 16, region: 'US' },
-  { id: 'hbomax', label: 'HBO Max', providerId: 1899, price: 15, region: 'MY' }
+  { id: 'hbomax', label: 'HBO Max', providerId: 1899, price: 16, region: 'MY' },
+  { id: 'primevideo', label: 'Prime Video', providerId: 119, price: 10, region: 'MY' }
 ];
 
 const IMG_BACKDROP = 'https://image.tmdb.org/t/p/w780';
@@ -99,7 +100,37 @@ const FALLBACK_CATALOG = {
       overview: 'Batman raises the stakes in his war on crime with the help of Lt. Jim Gordon and District Attorney Harvey Dent.',
       backdrop: 'https://image.tmdb.org/t/p/w780/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg',
       poster: 'https://image.tmdb.org/t/p/w342/qJ2tW6WMUDux911r6m7haRef0WH.jpg'
+    ,
+  primevideo: [
+    {
+      id: 76600,
+      title: 'The Boys',
+      mediaType: 'SERIES',
+      rating: '8.5',
+      overview: 'A group of vigilantes set out to take down corrupt superheroes who abuse their superpowers.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg'
+    },
+    {
+      id: 84621,
+      title: 'Reacher',
+      mediaType: 'SERIES',
+      rating: '8.1',
+      overview: 'Jack Reacher, a veteran military police investigator, has just recently entered civilian life.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg'
+    },
+    {
+      id: 605722,
+      title: 'The Tomorrow War',
+      mediaType: 'MOVIE',
+      rating: '7.5',
+      overview: 'A family man is drafted to fight in a future war where the fate of humanity relies on his ability to confront the past.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/8Y43pPCjBBGV3exGpWM5bDB1C6W.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/34nDCQZ3u3uN3n4x3n4o4Z3P9k7.jpg'
     }
+  ]
+}
   ]
 };
 
