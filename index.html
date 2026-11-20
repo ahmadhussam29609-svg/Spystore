@@ -1739,11 +1739,12 @@
         <button onclick="closeTrendingModal()" style="background:rgba(255,255,255,0.14); border:none; color:#ffffff; width:36px; height:36px; border-radius:50%; font-size:1rem; cursor:pointer; flex-shrink:0;">✕</button>
       </div>
 
-      <!-- Baris 1: 3 Tab Platform Berasingan -->
-      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; padding:10px 16px 6px 16px; background:#0c1018;">
-        <button id="appSub_netflix" onclick="switchAppSubFilter('netflix')" style="padding:9px 8px; border-radius:10px; border:none; background:#2563eb; color:#ffffff; font-weight:800; font-size:0.82rem; cursor:pointer;">Netflix</button>
-        <button id="appSub_disney" onclick="switchAppSubFilter('disney')" style="padding:9px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.82rem; cursor:pointer;">Disney+</button>
-        <button id="appSub_hbomax" onclick="switchAppSubFilter('hbomax')" style="padding:9px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.82rem; cursor:pointer;">HBO Max</button>
+      <!-- Baris 1: 4 Tab Platform Berasingan -->
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; padding:10px 16px 6px 16px; background:#0c1018;">
+        <button id="appSub_netflix" onclick="switchAppSubFilter('netflix')" style="padding:9px 6px; border-radius:10px; border:none; background:#2563eb; color:#ffffff; font-weight:800; font-size:0.78rem; cursor:pointer;">Netflix</button>
+        <button id="appSub_disney" onclick="switchAppSubFilter('disney')" style="padding:9px 6px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.78rem; cursor:pointer;">Disney+</button>
+        <button id="appSub_hbomax" onclick="switchAppSubFilter('hbomax')" style="padding:9px 6px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.78rem; cursor:pointer;">HBO Max</button>
+        <button id="appSub_primevideo" onclick="switchAppSubFilter('primevideo')" style="padding:9px 6px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.78rem; cursor:pointer;">Prime Video</button>
       </div>
 
       <!-- Baris 2: 7 Kategori Pilihan -->
@@ -2003,7 +2004,7 @@
     function handleHeroCardClick(platformId, mediaType) {
       if (heroMoved) return;
       const defaultCat = mediaType === 'MOVIE' ? 'movie_my' : 'tv_my';
-      const appKey = ['netflix', 'disney', 'hbomax'].includes(platformId) ? platformId : 'netflix';
+      const appKey = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(platformId) ? platformId : 'netflix';
       openTrendingModal(defaultCat, appKey);
     }
 
@@ -2011,7 +2012,7 @@
       const modal = document.getElementById('trendingModal');
       if (!modal) return;
       activeDiscoveryCat = CATEGORY_TITLES[defaultCat] ? defaultCat : 'tv_my';
-      activeAppSubFilter = ['netflix', 'disney', 'hbomax'].includes(appFilter) ? appFilter : 'netflix';
+      activeAppSubFilter = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(appFilter) ? appFilter : 'netflix';
       modal.style.display = 'flex';
       renderTrendingModal();
     }
@@ -2055,12 +2056,12 @@
     }
 
     function renderTrendingModal() {
-      const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max' };
+      const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
       const baseTitle = CATEGORY_TITLES[activeDiscoveryCat] || 'Streaming Picks';
       document.getElementById('trendingModalTitle').textContent =
         `${appLabels[activeAppSubFilter] || 'Netflix'} • ${baseTitle}`;
 
-      ['netflix', 'disney', 'hbomax'].forEach(appId => {
+      ['netflix', 'disney', 'hbomax', 'primevideo'].forEach(appId => {
         const sBtn = document.getElementById(`appSub_${appId}`);
         if (!sBtn) return;
         const active = activeAppSubFilter === appId;
@@ -2120,11 +2121,18 @@
           { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'A lone gunfighter makes his way through the outer reaches of the galaxy.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
           { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: "Riley's mind headquarters makes room for new Emotions.", backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' }
         ],
-        hbomax: [
+        hbomax: [,
+          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: pList, price: 10, label: 'Prime Video' }
           { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The Targaryen civil war about 200 years before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
           { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Paul Atreides unites with Chani and the Fremen on a path of revenge.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
           { id: 155, title: 'The Dark Knight', mediaType: 'MOVIE', rating: '8.5', overview: 'Batman raises the stakes in his war on crime.', backdrop: 'https://image.tmdb.org/t/p/w780/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', poster: 'https://image.tmdb.org/t/p/w342/qJ2tW6WMUDux911r6m7haRef0WH.jpg' }
+        ],
+        primevideo: [
+          { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', overview: 'A group of vigilantes set out to take down corrupt superheroes.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg' },
+          { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', overview: 'Jack Reacher investigates a conspiracy in a small town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' },
+          { id: 605722, title: 'The Tomorrow War', mediaType: 'MOVIE', rating: '7.5', overview: 'A family man is drafted to fight in a future war.', backdrop: 'https://image.tmdb.org/t/p/w780/8Y43pPCjBBGV3exGpWM5bDB1C6W.jpg', poster: 'https://image.tmdb.org/t/p/w342/34nDCQZ3u3uN3n4x3n4o4Z3P9k7.jpg' }
         ]
+
       };
       const mapApp = (key, label, price) => (fb[key] || []).map((x, idx) => ({
         rank: idx + 1,
@@ -2143,6 +2151,7 @@
       const nList = mapApp('netflix', 'Netflix', 18);
       const dList = mapApp('disney', 'Disney+', 16);
       const hList = mapApp('hbomax', 'HBO Max', 16);
+      const pList = mapApp('primevideo', 'Prime Video', 10);
       return {
         byApp: {
           netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: nList, price: 18, label: 'Netflix' },
