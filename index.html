@@ -2939,84 +2939,140 @@
     };
 
     function buildFallbackTrendingData() {
-      const fb = {
+      const rawByApp = {
         netflix: [
-          { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', overview: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games.", backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
-          { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', overview: 'Wednesday Addams investigates a murder spree while making new friends at Nevermore.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
-          { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', overview: 'A small town uncovers a mystery involving secret experiments and supernatural forces.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' }
+          { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', popularity: 98, isNew: true, isKdrama: true, overview: "Hundreds of cash-strapped players compete in high-stakes survival games for a massive prize.", backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
+          { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', popularity: 95, isNew: true, overview: 'Wednesday Addams investigates a supernatural mystery while attending Nevermore Academy.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
+          { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', popularity: 96, isKdrama: false, overview: 'A group of young friends uncovers secret experiments and another dimension in Hawkins.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' },
+          { id: 76669, title: 'Doraemon: Stand by Me', mediaType: 'MOVIE', rating: '7.6', popularity: 89, isNew: false, overview: 'Nobita and Doraemon embark on an emotional journey to shape a brighter future.', backdrop: '', poster: '' },
+          { id: 204082, title: 'The Glory', mediaType: 'SERIES', rating: '8.3', popularity: 91, isNew: false, isKdrama: true, overview: 'A former bullying victim plans an intricate revenge years after school.', backdrop: '', poster: '' },
+          { id: 60574, title: 'Peaky Blinders', mediaType: 'SERIES', rating: '8.5', popularity: 90, isNew: false, overview: 'A gangster family epic set in post-war Birmingham.', backdrop: '', poster: '' },
+          { id: 902640, title: 'Extraction 2', mediaType: 'MOVIE', rating: '7.5', popularity: 88, isNew: true, overview: 'Black ops mercenary Tyler Rake takes on another deadly extraction mission.', backdrop: '', poster: '' },
+          { id: 872585, title: 'Oppenheimer', mediaType: 'MOVIE', rating: '8.1', popularity: 92, isNew: false, overview: 'The story of J. Robert Oppenheimer and the Manhattan Project.', backdrop: '', poster: '' }
         ],
         disney: [
-          { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg' },
-          { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'A lone gunfighter makes his way through the outer reaches of the galaxy.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
-          { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: "Riley's mind headquarters makes room for new Emotions.", backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' }
+          { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', popularity: 97, isNew: false, overview: 'The remaining Avengers assemble once more to reverse Thanos’s actions.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg' },
+          { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', popularity: 94, isNew: false, overview: 'A lone bounty hunter travels the outer reaches of the galaxy protecting Grogu.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
+          { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', popularity: 95, isNew: true, overview: 'Teenager Riley’s mind headquarters welcomes brand-new emotions.', backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' },
+          { id: 205940, title: 'Moving', mediaType: 'SERIES', rating: '8.4', popularity: 90, isNew: false, isKdrama: true, overview: 'South Korean teens with hidden superpowers and their parents protect their secrets.', backdrop: '', poster: '' },
+          { id: 124928, title: 'Loki', mediaType: 'SERIES', rating: '8.2', popularity: 88, isNew: false, overview: 'Loki steps out of his brother’s shadow in a time-bending adventure.', backdrop: '', poster: '' },
+          { id: 508943, title: 'Luca', mediaType: 'MOVIE', rating: '7.9', popularity: 86, isNew: false, overview: 'Two sea monster friends experience an unforgettable summer on the Italian Riviera.', backdrop: '', poster: '' }
         ],
         hbomax: [
-          { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The Targaryen civil war about 200 years before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
-          { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Paul Atreides unites with Chani and the Fremen on a path of revenge.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' }
+          { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', popularity: 95, isNew: true, overview: 'The Targaryen civil war unfolds generations before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
+          { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', popularity: 94, isNew: true, overview: 'Paul Atreides joins Chani and the Fremen on Arrakis.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
+          { id: 87472, title: 'The Last of Us', mediaType: 'SERIES', rating: '8.7', popularity: 93, isNew: false, overview: 'Joel and Ellie cross a post-pandemic America where survival is brutal.', backdrop: '', poster: '' },
+          { id: 414906, title: 'The Batman', mediaType: 'MOVIE', rating: '7.7', popularity: 89, isNew: false, overview: 'Batman uncovers corruption in Gotham City while tracking the Riddler.', backdrop: '', poster: '' },
+          { id: 100088, title: 'Succession', mediaType: 'SERIES', rating: '8.6', popularity: 85, isNew: false, overview: 'Power struggles inside a global media empire.', backdrop: '', poster: '' }
         ],
         primevideo: [
-          { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', overview: 'A group of vigilantes set out to take down corrupt superheroes.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg' },
-          { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', overview: 'Jack Reacher investigates a conspiracy in a small town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' }
+          { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', popularity: 95, isNew: true, overview: 'Vigilantes confront corrupt superheroes who abuse their fame and power.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg' },
+          { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', popularity: 91, isNew: true, overview: 'Former military policeman Jack Reacher takes down criminals across town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' },
+          { id: 79744, title: 'Fallout', mediaType: 'SERIES', rating: '8.4', popularity: 92, isNew: true, overview: 'A vault dweller emerges into a dangerous wasteland two centuries after nuclear war.', backdrop: '', poster: '' },
+          { id: 609681, title: 'The Idea of You', mediaType: 'MOVIE', rating: '7.4', popularity: 87, isNew: true, overview: 'A single mother begins an unexpected romance with a young boy-band singer.', backdrop: '', poster: '' },
+          { id: 106379, title: 'The Rings of Power', mediaType: 'SERIES', rating: '7.5', popularity: 86, isNew: false, overview: 'Epic tales of Middle-earth’s Second Age.', backdrop: '', poster: '' },
+          { id: 823464, title: 'Air', mediaType: 'MOVIE', rating: '7.5', popularity: 84, isNew: false, overview: 'The story behind the partnership that launched Air Jordan.', backdrop: '', poster: '' }
         ]
       };
-      const mapApp = (key, label, price) => (fb[key] || []).map((x, idx) => ({
-        rank: idx + 1,
-        id: x.id,
-        title: x.title,
-        mediaType: x.mediaType,
-        platformId: key,
-        platformLabel: label,
-        price,
-        rating: x.rating,
-        popularity: 100 - idx * 10,
-        overview: x.overview,
-        backdrop: x.backdrop || '',
-        poster: x.poster || ''
-      }));
-      const nList = mapApp('netflix', 'Netflix', 18);
-      const dList = mapApp('disney', 'Disney+', 16);
-      const hList = mapApp('hbomax', 'HBO Max', 16);
-      const pList = mapApp('primevideo', 'Prime Video', 10);
-      const allFb = [nList[0], nList[1], dList[0], dList[1], hList[0], pList[0], dList[2], hList[1]];
+
+      const appMeta = {
+        netflix: { label: 'Netflix', price: 18 },
+        disney: { label: 'Disney+', price: 16 },
+        hbomax: { label: 'HBO Max', price: 16 },
+        primevideo: { label: 'Prime Video', price: 10 }
+      };
+
+      const byApp = {};
+      const allFlat = [];
+
+      Object.keys(appMeta).forEach(appKey => {
+        const meta = appMeta[appKey];
+        const prod = products.find(p => p.id === appKey);
+        const unitPrice = prod ? Number(prod.price) : meta.price;
+        const list = (rawByApp[appKey] || []).map((x, i) => ({
+          rank: i + 1,
+          id: x.id,
+          title: x.title,
+          mediaType: x.mediaType,
+          platformId: appKey,
+          platformLabel: meta.label,
+          price: unitPrice,
+          rating: x.rating,
+          popularity: x.popularity || (95 - i * 4),
+          isNew: Boolean(x.isNew),
+          isKdrama: Boolean(x.isKdrama),
+          overview: x.overview,
+          backdrop: x.backdrop || '',
+          poster: x.poster || ''
+        }));
+
+        const movies = list.filter(item => item.mediaType === 'MOVIE');
+        const series = list.filter(item => item.mediaType === 'SERIES');
+        const newReleases = list.filter(item => item.isNew);
+        const kdramaList = list.filter(item => item.isKdrama);
+
+        byApp[appKey] = {
+          label: meta.label,
+          price: unitPrice,
+          all: list,
+          movies: movies.length ? movies : list,
+          series: series.length ? series : list,
+          newReleases: newReleases.length ? newReleases : list.slice(0, 4),
+          popcorn: (movies.length ? movies : list).slice().sort((a, b) => Number(b.rating) - Number(a.rating)),
+          kdrama: kdramaList.length ? kdramaList : list.slice(0, 4),
+          rewatched: (series.length ? series : list).slice().sort((a, b) => (b.popularity * Number(b.rating)) - (a.popularity * Number(a.rating))),
+          onlyOn: list.slice(0, 6)
+        };
+
+        allFlat.push(...list);
+      });
+
       return {
-        byApp: {
-          netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [nList[1]], newSeries: [nList[0]], kdrama: [nList[0], nList[1]], price: 18, label: 'Netflix' },
-          disney: { movies: dList.filter(i => i.mediaType === 'MOVIE'), series: dList.filter(i => i.mediaType === 'SERIES'), newMovies: [dList[2]], newSeries: [dList[1]], kdrama: [dList[1]], price: 16, label: 'Disney+' },
-          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: [hList[1]], newSeries: [hList[0]], kdrama: [hList[0]], price: 16, label: 'HBO Max' },
-          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [pList[0], pList[1]], kdrama: [pList[1]], price: 10, label: 'Prime Video' }
-        },
+        byApp,
         categories: {
-          tv_my: [nList[0], dList[1], hList[0], pList[0]],
-          movie_my: [dList[0], hList[1], dList[2]],
-          new_in: [nList[1], dList[2], hList[1], pList[1]],
-          popcorn: [dList[0], hList[1], dList[2]],
-          kdrama: [nList[0], nList[1], dList[1]],
-          rewatched: [hList[0], nList[2], dList[1], pList[0]],
-          only_on: [nList[0], dList[0], hList[0], pList[0]]
+          tv_my: allFlat.filter(i => i.mediaType === 'SERIES').slice(0, 10),
+          movie_my: allFlat.filter(i => i.mediaType === 'MOVIE').slice(0, 10),
+          new_in: allFlat.filter(i => i.isNew).slice(0, 10),
+          popcorn: allFlat.filter(i => i.mediaType === 'MOVIE').sort((a, b) => Number(b.rating) - Number(a.rating)).slice(0, 10),
+          kdrama: allFlat.filter(i => i.isKdrama).slice(0, 10),
+          rewatched: allFlat.filter(i => i.mediaType === 'SERIES').sort((a, b) => b.popularity - a.popularity).slice(0, 10),
+          only_on: allFlat.slice(0, 10)
         },
-        items: allFb.map((it, idx) => ({ ...it, rank: idx + 1 }))
+        items: [
+          byApp.netflix.all[0],
+          byApp.disney.all[0],
+          byApp.hbomax.all[0],
+          byApp.primevideo.all[0],
+          byApp.netflix.all[1],
+          byApp.disney.all[1]
+        ].filter(Boolean).map((it, idx) => ({ ...it, rank: idx + 1 }))
       };
     }
 
-    function getAppItems(appId, catKey) {
-      const appObj = trendingByApp[appId] || {};
-      if (catKey === 'movie_my') return appObj.movies || [];
-      if (catKey === 'tv_my') return appObj.series || [];
-      if (catKey === 'new_in') return [...(appObj.newMovies || []), ...(appObj.newSeries || [])].slice(0, 10);
-      if (catKey === 'popcorn') return (appObj.movies || []).slice().sort((a, b) => Number(b.rating) - Number(a.rating)).slice(0, 10);
-      if (catKey === 'kdrama') return (appObj.kdrama || []).slice(0, 10);
-      if (catKey === 'rewatched') return (appObj.series || []).slice().sort((a, b) => (b.popularity * Number(b.rating)) - (a.popularity * Number(a.rating))).slice(0, 10);
-      return [...(appObj.movies || []).slice(0, 5), ...(appObj.series || []).slice(0, 5)];
-    }
-
-    function openTrendingModal(defaultCat = 'tv_my', appFilter = 'netflix') {
-      const modal = document.getElementById('trendingModal');
-      if (!modal) return;
-      if (!Object.keys(trendingByApp).length) {
+    function ensureTrendingStoreReady() {
+      if (!trendingByApp || !Object.keys(trendingByApp).length) {
         const fb = buildFallbackTrendingData();
         trendingByApp = fb.byApp;
         discoveryCategories = fb.categories;
       }
+    }
+
+    function getAppItems(appId, catKey) {
+      ensureTrendingStoreReady();
+      const appObj = trendingByApp[appId] || trendingByApp.netflix || {};
+      if (catKey === 'movie_my') return appObj.movies || appObj.all || [];
+      if (catKey === 'tv_my') return appObj.series || appObj.all || [];
+      if (catKey === 'new_in') return appObj.newReleases || appObj.all || [];
+      if (catKey === 'popcorn') return appObj.popcorn || appObj.movies || appObj.all || [];
+      if (catKey === 'kdrama') return appObj.kdrama || appObj.all || [];
+      if (catKey === 'rewatched') return appObj.rewatched || appObj.series || appObj.all || [];
+      return appObj.onlyOn || appObj.all || [];
+    }
+
+    function openTrendingModal(defaultCat = 'tv_my', appFilter = 'netflix') {
+      ensureTrendingStoreReady();
+      const modal = document.getElementById('trendingModal');
+      if (!modal) return;
       activeDiscoveryCat = CATEGORY_TITLES[defaultCat] ? defaultCat : 'tv_my';
       activeAppSubFilter = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(appFilter) ? appFilter : 'netflix';
       triggerTopLoader(420);
@@ -3039,7 +3095,14 @@
       renderTrendingModal();
     }
 
+    function renderPosterOrFallback(item) {
+      const fallbackHtml = `<div style="width:62px;height:92px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent-gold);font-weight:800;font-size:0.72rem;">🎬<span>${item.mediaType || 'SHOW'}</span></div>`;
+      if (!item.poster) return fallbackHtml;
+      return `<img src="${item.poster}" alt="${item.title}" referrerpolicy="no-referrer" style="width:62px; height:92px; object-fit:cover; border-radius:10px; flex-shrink:0;" onerror="this.outerHTML = \`${fallbackHtml.replace(/"/g, '&quot;')}\`;" />`;
+    }
+
     function renderTrendingModal() {
+      ensureTrendingStoreReady();
       const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
       const baseTitle = CATEGORY_TITLES[activeDiscoveryCat] || 'Streaming Picks';
       const titleEl = document.getElementById('trendingModalTitle');
@@ -3074,15 +3137,16 @@
       body.innerHTML = list.map((item, idx) => `
         <div class="discovery-row-card" style="display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
           <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${idx + 1}</div>
-          ${item.poster ? `<img src="${item.poster}" referrerpolicy="no-referrer" style="width:62px; height:92px; object-fit:cover; border-radius:10px; flex-shrink:0;" onerror="this.outerHTML='<div style=\'width:62px;height:92px;border-radius:10px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;\'>🎬</div>';" />` : `<div style="width:62px;height:92px;border-radius:10px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;">🎬</div>`}
+          ${renderPosterOrFallback(item)}
           <div style="flex:1; min-width:0;">
-            <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;">
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap;">
               <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel}</span>
+              <span style="font-size:0.64rem; color:var(--accent-cyan); font-weight:700;">${item.mediaType}</span>
               <span style="font-size:0.68rem; color:var(--accent-gold); font-weight:700;">★ ${item.rating}</span>
             </div>
             <div style="font-weight:700; font-size:0.9rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
             <div style="font-size:0.73rem; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px;">${item.overview || ''}</div>
-            <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId}');">Order ${item.platformLabel} • RM${item.price} ✓</button>
+            <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId}');">Order ${item.platformLabel} • RM${Number(item.price).toFixed(2)} ✓</button>
           </div>
         </div>
       `).join('');
@@ -3094,17 +3158,18 @@
       const body = document.getElementById('showDetailBody');
       if (!modal || !body) return;
       const prod = products.find(p => p.id === item.platformId) || products[0];
+      const priceVal = prod ? Number(prod.price) : Number(item.price || 10);
       body.innerHTML = `
         <div class="spec-hero">
-          ${item.poster ? `<img src="${item.poster}" alt="${item.title}" class="spec-poster" />` : ''}
+          ${item.poster ? `<img src="${item.poster}" alt="${item.title}" class="spec-poster" onerror="this.style.display='none';" />` : ''}
           <div style="flex:1; min-width:0;">
             <div class="spec-title">${item.title}</div>
-            <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700; margin-bottom:6px;">${item.mediaType || 'SHOW'} • ★ ${item.rating || 'N/A'}</div>
+            <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700; margin-bottom:6px;">${item.platformLabel || prod.name} • ${item.mediaType || 'SHOW'} • ★ ${item.rating || 'N/A'}</div>
             <div style="font-size:0.8rem; color:var(--text-secondary);">${item.overview || ''}</div>
           </div>
         </div>
         <div class="spec-actions">
-          <button type="button" class="primary-submit" style="width:auto; flex:1; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${prod.id}');">Order ${item.platformLabel || prod.name} • RM${prod.price} →</button>
+          <button type="button" class="primary-submit" style="width:auto; flex:1; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${prod.id}');">Order ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} →</button>
           <button type="button" class="back-btn" style="margin-bottom:0;" onclick="closeShowDetailModal()">Close</button>
         </div>
       `;
@@ -3126,7 +3191,9 @@
       if (!track || !dotsWrap || !items.length) return;
       track.innerHTML = items.map((item, idx) => {
         const prod = products.find(p => p.id === item.platformId) || products[0];
-        const bgStyle = item.backdrop ? `style="background-image:url('${item.backdrop}'); cursor:pointer;"` : 'style="cursor:pointer;"';
+        const bgStyle = item.backdrop
+          ? `style="background-image:url('${item.backdrop}'); cursor:pointer;"`
+          : `style="background:linear-gradient(135deg,#0b132b 0%,#172554 58%,#09152b 100%); cursor:pointer;"`;
         return `
           <section class="hero-slide trending-slide" ${bgStyle} onclick="openTrendingModal('tv_my', '${item.platformId}')">
             <div class="trending-meta">
@@ -3135,7 +3202,7 @@
             </div>
             <h1>${item.title}</h1>
             <p>${item.overview || ''}</p>
-            <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${item.platformLabel} • RM${prod.price} →</button>
+            <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${item.platformLabel} • RM${Number(item.price).toFixed(2)} →</button>
           </section>
         `;
       }).join('');
@@ -3143,47 +3210,111 @@
       currentSlide = 0;
       dotsWrap.innerHTML = items.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i + 1}"></button>`).join('');
     }
-        function closeTrendingModal() { const m = document.getElementById('trendingModal'); if (m) m.style.display = 'none'; }
+
     function openShowSearchModal() {
       const m = document.getElementById('showSearchModal');
       if (m) m.classList.add('open');
-      setTimeout(() => { const i = document.getElementById('showSearchInput'); if (i) i.focus(); }, 100);
+      setTimeout(() => {
+        const i = document.getElementById('showSearchInput');
+        if (i) {
+          i.focus();
+          if (i.value.trim()) runShowSearch();
+        }
+      }, 100);
     }
-    function closeShowSearchModal() { const m = document.getElementById('showSearchModal'); if (m) m.classList.remove('open'); }
-    function closeShowDetailModal() { const m = document.getElementById('showDetailModal'); if (m) m.classList.remove('open'); }
+
+    function closeShowSearchModal() {
+      const m = document.getElementById('showSearchModal');
+      if (m) m.classList.remove('open');
+    }
+
+    function closeShowDetailModal() {
+      const m = document.getElementById('showDetailModal');
+      if (m) m.classList.remove('open');
+    }
+
+    function collectAllShowCatalog() {
+      ensureTrendingStoreReady();
+      const extraShows = [
+        { title: 'Ultraman Trigger', year: '2021', mediaType: 'SERIES', rating: '7.6', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Kengo Manaka bonds with Ultraman Trigger to defend Earth from dark giants.' },
+        { title: 'Ultraman Blazar', year: '2023', mediaType: 'SERIES', rating: '8.1', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Captain Gento Hiruma transforms into Ultraman Blazar to protect humanity.' },
+        { title: 'Ultraman Z', year: '2020', mediaType: 'SERIES', rating: '8.4', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Haruki Natsuki teams up with Ultraman Z using Ultra Medals.' },
+        { title: 'Lupin', year: '2021', mediaType: 'SERIES', rating: '7.5', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Assane Diop is inspired by gentleman thief Arsene Lupin.' },
+        { title: 'Doraemon: Stand by Me', year: '2014', mediaType: 'MOVIE', rating: '7.6', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Doraemon helps Nobita gain confidence and happiness.' },
+        { title: 'Demon Slayer: Kimetsu no Yaiba', year: '2019', mediaType: 'SERIES', rating: '8.7', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Tanjiro Kamado fights demons to turn his sister Nezuko human again.' },
+        { title: 'Spider-Man: No Way Home', year: '2021', mediaType: 'MOVIE', rating: '8.0', platformId: 'disney', platformLabel: 'Disney+', overview: 'Peter Parker seeks help from Doctor Strange after his identity is revealed.' },
+        { title: 'Avatar: The Way of Water', year: '2022', mediaType: 'MOVIE', rating: '7.6', platformId: 'disney', platformLabel: 'Disney+', overview: 'Jake Sully and Neytiri protect their family across Pandora’s oceans.' },
+        { title: 'The Flash', year: '2023', mediaType: 'MOVIE', rating: '6.7', platformId: 'hbomax', platformLabel: 'HBO Max', overview: 'Barry Allen travels through time with unintended multiverse consequences.' },
+        { title: 'John Wick: Chapter 4', year: '2023', mediaType: 'MOVIE', rating: '7.8', platformId: 'primevideo', platformLabel: 'Prime Video', overview: 'John Wick faces the High Table in an action-packed showdown.' }
+      ];
+
+      const trendingShows = [];
+      Object.values(trendingByApp || {}).forEach(appObj => {
+        (appObj.all || []).forEach(it => trendingShows.push(it));
+      });
+
+      const merged = [...trendingShows, ...extraShows];
+      const seen = new Set();
+      return merged.filter(item => {
+        const key = `${String(item.title || '').toLowerCase()}|${String(item.platformId || '')}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function findMatchingShows(query) {
+      const ql = String(query || '').trim().toLowerCase();
+      if (!ql) return [];
+      const all = collectAllShowCatalog();
+      return all.filter(item =>
+        String(item.title || '').toLowerCase().includes(ql) ||
+        String(item.platformLabel || '').toLowerCase().includes(ql) ||
+        String(item.mediaType || '').toLowerCase().includes(ql) ||
+        String(item.overview || '').toLowerCase().includes(ql)
+      );
+    }
+
+    window._lastSearchedShows = [];
+
+    function openSearchedShowDetail(idx) {
+      const list = Array.isArray(window._lastSearchedShows) ? window._lastSearchedShows : [];
+      if (list[idx]) openShowDetailModal(list[idx]);
+    }
 
     function searchShowFromMainBox() {
       const inp = document.getElementById('searchInput');
       const box = document.getElementById('inlineShowResultsBox');
       if (!inp || !box) return;
       const q = inp.value.trim();
-      if (!q) return;
-      const ql = q.toLowerCase();
-      const catalog = [
-        { title: 'Ultraman Trigger', year: '2021', type: 'SERIES', rating: '7.6', app: 'Netflix' },
-        { title: 'Ultraman Blazar', year: '2023', type: 'SERIES', rating: '8.1', app: 'Netflix' },
-        { title: 'Lupin', year: '2021', type: 'SERIES', rating: '7.5', app: 'Netflix' },
-        { title: 'Squid Game', year: '2021', type: 'SERIES', rating: '7.9', app: 'Netflix' },
-        { title: 'Doraemon: Stand by Me', year: '2014', type: 'MOVIE', rating: '7.6', app: 'Netflix' },
-        { title: 'Avengers: Endgame', year: '2019', type: 'MOVIE', rating: '8.3', app: 'Disney+' },
-        { title: 'The Boys', year: '2019', type: 'SERIES', rating: '8.5', app: 'Prime Video' }
-      ];
-      const matches = catalog.filter(x => x.title.toLowerCase().includes(ql) || x.app.toLowerCase().includes(ql));
+      if (!q) {
+        box.style.display = 'none';
+        box.innerHTML = '';
+        return;
+      }
+
+      const matches = findMatchingShows(q);
+      window._lastSearchedShows = matches;
       box.style.display = 'block';
+
       box.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 Search: "${q}" (${matches.length})</span>
+          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 Show / Movie Search: "${q}" (${matches.length})</span>
           <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
         </div>
-        ${matches.length ? matches.map(m => `
-          <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <div style="font-weight:700; font-size:0.82rem;">${m.title} <small style="color:var(--text-muted);">(${m.year})</small></div>
-              <div style="font-size:0.68rem; color:var(--accent-cyan);">${m.type} • ★ ${m.rating} • ${m.app}</div>
+        ${matches.length ? matches.slice(0, 8).map((m, idx) => {
+          const prod = products.find(p => p.id === m.platformId) || products[0];
+          const priceVal = prod ? Number(prod.price) : Number(m.price || 10);
+          return `
+            <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="openSearchedShowDetail(${idx})">
+              <div style="min-width:0;">
+                <div style="font-weight:700; font-size:0.82rem; color:var(--text-primary);">${m.title} ${m.year ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}</div>
+                <div style="font-size:0.68rem; color:var(--accent-cyan);">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • ${m.platformLabel || prod.name}</div>
+              </div>
+              <button type="button" onclick="event.stopPropagation(); openCheckout('${prod.id}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer; white-space:nowrap;">RM${priceVal.toFixed(2)} ✓</button>
             </div>
-            <button type="button" onclick="openCheckout('${m.app.toLowerCase().replace(/[^a-z]/g,'')}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer;">Order ✓</button>
-          </div>
-        `).join('') : `<div style="font-size:0.76rem; color:var(--text-muted);">No matching show found for "${q}".</div>`}
+          `;
+        }).join('') : `<div style="font-size:0.76rem; color:var(--text-muted);">No matching movie or show found for "${q}".</div>`}
       `;
     }
 
@@ -3191,19 +3322,28 @@
       const inp = document.getElementById('showSearchInput');
       const box = document.getElementById('showSearchResults');
       if (!inp || !box) return;
-      const q = inp.value.trim().toLowerCase();
-      if (!q) return;
-      const catalog = [
-        { title: 'Ultraman Trigger', year: '2021', type: 'SERIES', rating: '7.6', app: 'Netflix' },
-        { title: 'Ultraman Blazar', year: '2023', type: 'SERIES', rating: '8.1', app: 'Netflix' },
-        { title: 'Lupin', year: '2021', type: 'SERIES', rating: '7.5', app: 'Netflix' },
-        { title: 'Squid Game', year: '2021', type: 'SERIES', rating: '7.9', app: 'Netflix' },
-        { title: 'Avengers: Endgame', year: '2019', type: 'MOVIE', rating: '8.3', app: 'Disney+' }
-      ];
-      const matches = catalog.filter(x => x.title.toLowerCase().includes(q) || x.app.toLowerCase().includes(q));
-      box.innerHTML = matches.length
-        ? matches.map(m => `<div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:10px;"><strong>${m.title}</strong> (${m.year}) • ${m.app}</div>`).join('')
-        : `<div style="font-size:0.78rem; color:var(--text-muted);">No matching show found.</div>`;
+      const q = inp.value.trim();
+      if (!q) {
+        box.innerHTML = `<div style="font-size:0.76rem; color:var(--text-muted);">Type a movie or show title to check availability.</div>`;
+        return;
+      }
+
+      const matches = findMatchingShows(q);
+      window._lastSearchedShows = matches;
+
+      box.innerHTML = matches.length ? matches.map((m, idx) => {
+        const prod = products.find(p => p.id === m.platformId) || products[0];
+        const priceVal = prod ? Number(prod.price) : Number(m.price || 10);
+        return `
+          <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;" onclick="openSearchedShowDetail(${idx})">
+            <div style="min-width:0;">
+              <div style="font-weight:700; font-size:0.84rem; color:var(--text-primary);">${m.title} ${m.year ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}</div>
+              <div style="font-size:0.7rem; color:var(--accent-cyan); margin-top:2px;">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • Available on <strong>${m.platformLabel || prod.name}</strong></div>
+            </div>
+            <button type="button" onclick="event.stopPropagation(); closeShowSearchModal(); openCheckout('${prod.id}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:5px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; white-space:nowrap;">Order • RM${priceVal.toFixed(2)}</button>
+          </div>
+        `;
+      }).join('') : `<div style="font-size:0.78rem; color:var(--text-muted);">No matching movie or show found for "${q}".</div>`;
     }
 
     function copyReceiptSummary() {
