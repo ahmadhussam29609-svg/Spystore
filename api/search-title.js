@@ -65,7 +65,7 @@ async function queryJustWatchMY(query) {
       searchTitlesFilter: { searchQuery: query },
       country: 'MY',
       language: 'en',
-      first: 6,
+      first: 24,
       formatPoster: 'JPG',
       profile: 'S718'
     },
@@ -100,7 +100,7 @@ async function queryJustWatchMY(query) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'User-Agent': 'SPYSTORE-Catalog-Checker/3.1'
+      'User-Agent': 'SPYSTORE-Catalog-Checker/3.2'
     },
     body: JSON.stringify(gql)
   });
@@ -162,7 +162,7 @@ export default async function handler(req, res) {
         const sData = await sRes.json();
         const rawResults = (sData.results || [])
           .filter(r => r.media_type === 'movie' || r.media_type === 'tv')
-          .slice(0, 6);
+          .slice(0, 20);
 
         items = await Promise.all(
           rawResults.map(async (r) => {
