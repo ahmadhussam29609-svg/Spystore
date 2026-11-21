@@ -8,7 +8,7 @@
     :root {
       --bg: #070b14;
       --bg-soft: #0d1424;
-      --card: rgba(16, 24, 42, 0.9);
+      --card: rgba(16, 24, 42, 0.92);
       --card-hover: rgba(24, 36, 63, 0.98);
       --text: #f3f6fc;
       --muted: #9aa7bf;
@@ -23,7 +23,7 @@
     body.light-mode {
       --bg: #f4f7fb;
       --bg-soft: #e9eff8;
-      --card: rgba(255, 255, 255, 0.94);
+      --card: rgba(255, 255, 255, 0.95);
       --card-hover: rgba(255, 255, 255, 1);
       --text: #0f172a;
       --muted: #475569;
@@ -39,6 +39,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html {
@@ -74,7 +75,7 @@
     }
 
     .anim-up {
-      animation: fadeSlideUp 0.4s ease both;
+      animation: fadeSlideUp 0.38s ease both;
     }
 
     header {
@@ -82,7 +83,7 @@
       top: 0;
       z-index: 40;
       backdrop-filter: blur(14px);
-      background: rgba(7, 11, 20, 0.85);
+      background: rgba(7, 11, 20, 0.86);
       border-bottom: 1px solid var(--border);
     }
 
@@ -150,7 +151,7 @@
       font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -947,6 +948,14 @@
     const statusMsg = document.getElementById('statusMsg');
     const paymentNotice = document.getElementById('paymentNotice');
 
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
     function getActiveDurations() {
       if (selectedApp.subPlans && selectedSubPlan) {
         return selectedSubPlan.durations;
@@ -965,14 +974,14 @@
       catalogGrid.innerHTML = filtered.map(app => {
         const isSel = selectedApp && selectedApp.id === app.id;
         return `
-          <div class="app-card ${isSel ? 'selected' : ''}" data-app-id="${app.id}">
+          <div class="app-card ${isSel ? 'selected' : ''}" data-app-id="${escapeHtml(app.id)}">
             <div>
               <div class="app-top">
-                <div class="app-icon">${app.icon}</div>
-                <span class="badge">${app.subPlans ? 'Share • Private' : app.mode}</span>
+                <div class="app-icon">${escapeHtml(app.icon)}</div>
+                <span class="badge">${escapeHtml(app.subPlans ? 'Share • Private' : app.mode)}</span>
               </div>
-              <div class="app-name">${app.name}</div>
-              <div class="app-desc">${app.desc}</div>
+              <div class="app-name">${escapeHtml(app.name)}</div>
+              <div class="app-desc">${escapeHtml(app.desc)}</div>
             </div>
             <div class="hidden-price-cta">
               <span>Tap to view price &amp; order</span>
@@ -1032,9 +1041,9 @@
               <button
                 type="button"
                 class="plan-option ${selectedSubPlan && selectedSubPlan.id === sp.id ? 'active' : ''}"
-                data-sub-id="${sp.id}"
+                data-sub-id="${escapeHtml(sp.id)}"
               >
-                <div style="font-weight:800;">${sp.label}</div>
+                <div style="font-weight:800;">${escapeHtml(sp.label)}</div>
               </button>
             `).join('')}
           </div>
@@ -1052,7 +1061,7 @@
             class="plan-option ${isAct ? 'active' : ''}"
             data-dur-idx="${idx}"
           >
-            <div style="font-weight:700;">${d.label}</div>
+            <div style="font-weight:700;">${escapeHtml(d.label)}</div>
             <div class="plan-price">RM${Number(d.price).toFixed(2)}</div>
           </button>
         `;
@@ -1064,7 +1073,6 @@
       totalPayableEl.textContent = `RM${price.toFixed(2)}`;
     }
 
-    // Event delegation for catalog cards
     catalogGrid.addEventListener('click', (e) => {
       const card = e.target.closest('.app-card');
       if (!card) return;
@@ -1072,21 +1080,18 @@
       if (appId) selectApp(appId, true);
     });
 
-    // Event delegation for sub-plans
     subPlanContainer.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-sub-id]');
       if (!btn) return;
       selectSubPlan(btn.getAttribute('data-sub-id'));
     });
 
-    // Event delegation for duration plans
     durationGrid.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-dur-idx]');
       if (!btn) return;
       selectDuration(Number(btn.getAttribute('data-dur-idx')));
     });
 
-    // Event delegation for show search item buttons
     document.getElementById('showSearchResults').addEventListener('click', (e) => {
       const btn = e.target.closest('[data-pick-app]');
       if (!btn) return;
@@ -1147,7 +1152,7 @@
         return;
       }
       box.classList.add('active');
-      box.innerHTML = `<div style="font-size:0.85rem; color:var(--muted);">Mencari cerita/movie "<strong>${query}</strong>"...</div>`;
+      box.innerHTML = `<div style="font-size:0.85rem; color:var(--muted);">Mencari cerita/movie "<strong>${escapeHtml(query)}</strong>"...</div>`;
 
       try {
         const res = await fetch(`/api/search-title?q=${encodeURIComponent(query)}`);
@@ -1156,7 +1161,7 @@
         if (results.length === 0) {
           box.innerHTML = `
             <div style="font-size:0.85rem; color:var(--muted);">
-              Tiada padanan cerita dijumpai untuk "<strong>${query}</strong>". Anda boleh pilih aplikasi di bawah:
+              Tiada padanan cerita dijumpai untuk "<strong>${escapeHtml(query)}</strong>". Anda boleh pilih aplikasi di bawah:
               <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
                 <button type="button" class="btn btn-primary" data-pick-app="netflix">Netflix UHD →</button>
                 <button type="button" class="btn" data-pick-app="disney">Disney+ Premium →</button>
@@ -1166,12 +1171,12 @@
           return;
         }
         box.innerHTML = `
-          <div style="font-size:0.84rem; font-weight:700;">Hasil Carian Cerita/Movie: "${query}"</div>
+          <div style="font-size:0.84rem; font-weight:700;">Hasil Carian Cerita/Movie: "${escapeHtml(query)}"</div>
           ${results.map(item => `
             <div class="show-item">
               <div>
-                <div style="font-weight:800;">${item.title || query}</div>
-                <div style="font-size:0.78rem; color:var(--muted);">Platform: ${(item.platforms || ['Netflix', 'Disney+']).join(', ')}</div>
+                <div style="font-weight:800;">${escapeHtml(item.title || query)}</div>
+                <div style="font-size:0.78rem; color:var(--muted);">Platform: ${escapeHtml((item.platforms || ['Netflix', 'Disney+']).join(', '))}</div>
               </div>
               <button type="button" class="btn btn-primary" data-pick-app="netflix">Pilih App →</button>
             </div>
@@ -1180,7 +1185,7 @@
       } catch {
         box.innerHTML = `
           <div style="font-size:0.84rem;">
-            Carian cerita untuk "<strong>${query}</strong>" boleh ditonton melalui aplikasi penstriman seperti <strong>Netflix UHD</strong> atau <strong>Disney+ Premium</strong>.
+            Carian cerita untuk "<strong>${escapeHtml(query)}</strong>" boleh ditonton melalui aplikasi penstriman seperti <strong>Netflix UHD</strong> atau <strong>Disney+ Premium</strong>.
           </div>
         `;
       }
@@ -1264,7 +1269,7 @@
         box.classList.add('active');
         box.innerHTML = `
           <div style="font-weight:800; color:#4ade80; font-size:1rem;">✅ Pembayaran Billplz Berjaya Diterima</div>
-          <div style="font-size:0.85rem; margin-top:6px;">Rujukan Bil: <strong>${billId || 'Tercatat'}</strong>. Tempahan anda sedang diproses dan stok telah diselaraskan.</div>
+          <div style="font-size:0.85rem; margin-top:6px;">Rujukan Bil: <strong>${escapeHtml(billId || 'Tercatat')}</strong>. Tempahan anda sedang diproses dan stok telah diselaraskan.</div>
         `;
       }
     })();
