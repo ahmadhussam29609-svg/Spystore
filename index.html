@@ -2578,7 +2578,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(dismissSplash, 1150);
     });
-    setTimeout(dismissSplash, 1600);
+    setTimeout(dismissSplash, 1400);
 
     let loaderTimer = null;
     function triggerTopLoader(durationMs = 650) {
@@ -3825,7 +3825,7 @@
 
       const activeAppName = getActiveDisplayAppName();
       const planAmount = getActiveUnitPrice() * selectedMonths;
-      const feeAmount = selectedPaymentMethod === 'fpx' ? 1.00 : 0.00;
+      const feeAmount = 1.00;
       const totalAmount = planAmount + feeAmount;
 
       localStorage.setItem('spystore_pending_order', JSON.stringify({
@@ -3838,85 +3838,8 @@
         customerPhone,
         customerDevice,
         customerEmail,
-        paymentMethod: selectedPaymentMethod
+        paymentMethod: 'fpx'
       }));
-
-      const btn = document.getElementById('payNowBtn');
-        btn.disabled = true;
-        btn.textContent = currentLang === 'en' ? 'Generating Billplz QR...' : 'Menjana Bil Billplz...';
-
-        saveLocalOrder({
-          app: activeAppName,
-          months: selectedMonths,
-          total: totalAmount.toFixed(2),
-          date: new Date().toLocaleDateString('en-MY')
-        });
-
-        try {
-          const res = await fetch('/api/create-billplz', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              appId: currentProduct.id,
-              appName: activeAppName,
-              months: selectedMonths,
-              planAmount,
-              feeAmount,
-              totalAmount,
-              customerName,
-              customerPhone,
-              customerDevice,
-              customerEmail,
-              paymentMethod: 'duitnow'
-            })
-          });
-
-          const data = await res.json();
-          if (res.ok && data.paymentUrl) {
-            window.location.href = data.paymentUrl;
-            return;
-          } else {
-            showToast(data.error || 'Failed to create Billplz bill.');
-            btn.disabled = false;
-            btn.textContent = I18N[currentLang].payNowBtn;
-            return;
-          }
-        } catch (err) {
-          showToast('Network error connecting to Billplz server.');
-          btn.disabled = false;
-          btn.textContent = I18N[currentLang].payNowBtn;
-          return;
-        }
-      }
-
-      if (selectedPaymentMethod === 'ewallet') {
-        saveLocalOrder({
-          app: activeAppName,
-          months: selectedMonths,
-          total: totalAmount.toFixed(2),
-          date: new Date().toLocaleDateString('en-MY')
-        });
-
-        const waMsg = [
-          '*TEMPAHAN BAHARU — SPYSTORE BY SAMS*',
-          '━━━━━━━━━━━━━━━━━━━━',
-          '• *Kaedah Bayaran:* eWallet',
-          `• *Produk:* ${activeAppName} (${selectedMonths} Bulan)`,
-          `• *Jumlah Bayaran:* RM${totalAmount.toFixed(2)}`,
-          `• *Nama:* ${customerName}`,
-          `• *No. WhatsApp:* ${customerPhone}`,
-          ...(needsDevice ? [`• *Peranti:* ${customerDevice}`] : []),
-          ...(needsEmail ? [`• *E-mel Akaun:* ${customerEmail}`] : []),
-          '━━━━━━━━━━━━━━━━━━━━',
-          'Saya akan lampirkan resit pembayaran di sini. Mohon semak & proses akaun saya. Terima kasih!'
-        ].join('\n');
-
-        window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waMsg)}`, '_blank');
-        showToast(currentLang === 'en'
-          ? 'Opening WhatsApp to send eWallet order & proof...'
-          : 'Membuka WhatsApp untuk hantar tempahan & bukti eWallet...');
-        return;
-      }
 
       const btn = document.getElementById('payNowBtn');
       btn.disabled = true;
