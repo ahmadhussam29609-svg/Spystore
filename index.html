@@ -2358,32 +2358,14 @@
             <span class="fee-tag">+RM1.00 Fee</span>
           </div>
 
-          <div class="pay-choice-card" id="payOpt_duitnow" onclick="selectPaymentMethod('duitnow')">
+          <div class="pay-choice-card" id="payOpt_coming_soon" aria-disabled="true" onclick="showToast(currentLang === 'en' ? 'DuitNow QR & eWallet are Coming Soon.' : 'DuitNow QR & eWallet akan datang (Coming Soon).')" style="opacity:0.58; cursor:not-allowed; border-style:dashed;">
             <div class="pay-info">
-              <h4 data-i18n="duitnowTitle">DuitNow QR</h4>
-              <p data-i18n="duitnowDesc">Pay via Billplz DuitNow QR &amp; online payment channels</p>
+              <h4>DuitNow QR &amp; eWallet</h4>
+              <p id="comingSoonPayDesc">Not available yet — currently in setup.</p>
             </div>
-            <span class="fee-tag" style="background:rgba(34,197,94,0.15); color:#4ade80;" data-i18n="noFeeTag">No Fee</span>
+            <span class="fee-tag" style="background:rgba(250,204,21,0.14); color:var(--accent-gold); border:1px solid rgba(250,204,21,0.35);">Coming Soon</span>
           </div>
-
-          <div class="pay-choice-card" id="payOpt_ewallet" onclick="selectPaymentMethod('ewallet')">
-            <div class="pay-info">
-              <h4 data-i18n="ewalletTitle">eWallet (TNG / GrabPay / Boost)</h4>
-              <p data-i18n="ewalletDesc">Pay via Touch 'n Go eWallet, GrabPay, Boost or ShopeePay &amp; confirm via WhatsApp</p>
-            </div>
-            <span class="fee-tag" style="background:rgba(34,197,94,0.15); color:#4ade80;" data-i18n="noFeeTag2">No Fee</span>
-          </div>
-        </div>
-
-        <div class="qr-ewallet-box" id="manualPayInstructionBox">
-          <div style="font-weight:700; color:var(--accent-gold); margin-bottom:4px;" id="manualPayHeading">DuitNow QR Payment</div>
-          <p style="color:var(--text-secondary); font-size:0.75rem;" id="manualPayText">
-            Scan the DuitNow QR code below (optional `duitnow-qr.png` in repo) or transfer the exact amount, then tap Pay Now to send your order details to WhatsApp Admin.
-          </p>
-          <div class="qr-preview-wrap" id="qrImageWrap" style="display:none;">
-            <img src="duitnow-qr.png" alt="DuitNow QR" onload="document.getElementById('qrImageWrap').style.display='block';" onerror="this.parentElement.style.display='none';" />
-          </div>
-        </div>
+        </div></div>
       </div>
     </div>
 
@@ -3787,40 +3769,21 @@
 
     function updatePayTotalDisplay() {
       if (!currentProduct) return;
+      selectedPaymentMethod = 'fpx';
       const planAmt = getActiveUnitPrice() * selectedMonths;
-      const feeAmt = selectedPaymentMethod === 'fpx' ? 1.00 : 0.00;
+      const feeAmt = 1.00;
       const total = planAmt + feeAmt;
       document.getElementById('totalPayableText').textContent = `RM${total.toFixed(2)}`;
     }
 
     function selectPaymentMethod(method) {
-      selectedPaymentMethod = method;
-      ['fpx', 'duitnow', 'ewallet'].forEach(m => {
-        const el = document.getElementById(`payOpt_${m}`);
-        if (el) el.classList.toggle('selected', m === method);
-      });
-
-      const box = document.getElementById('manualPayInstructionBox');
-      const heading = document.getElementById('manualPayHeading');
-      const text = document.getElementById('manualPayText');
-
-      if (!box || !heading || !text) return;
-      if (method === 'duitnow') {
-        box.classList.add('show');
-        heading.textContent = currentLang === 'en' ? 'DuitNow QR Payment' : 'Pembayaran DuitNow QR';
-        text.textContent = currentLang === 'en'
-          ? 'Pay via Billplz DuitNow QR & online payment channels with no extra fee.'
-          : 'Bayar melalui Billplz DuitNow QR & saluran bayaran dalam talian tanpa caj tambahan.';
-      } else if (method === 'ewallet') {
-        box.classList.add('show');
-        heading.textContent = currentLang === 'en' ? "eWallet (Touch 'n Go / GrabPay / Boost)" : "eWallet (Touch 'n Go / GrabPay / Boost)";
-        text.textContent = currentLang === 'en'
-          ? "Pay via Touch 'n Go eWallet, GrabPay, Boost, or ShopeePay with no extra fee, then tap Pay Now to confirm your order on WhatsApp."
-          : "Bayar melalui Touch 'n Go eWallet, GrabPay, Boost atau ShopeePay tanpa caj tambahan, kemudian tekan Bayar Sekarang untuk sahkan tempahan di WhatsApp.";
-      } else {
-        box.classList.remove('show');
+      if (method !== 'fpx') {
+        showToast(currentLang === 'en' ? 'Coming Soon — not available yet.' : 'Coming Soon — belum boleh digunakan.');
+        return;
       }
-
+      selectedPaymentMethod = 'fpx';
+      const el = document.getElementById('payOpt_fpx');
+      if (el) el.classList.add('selected');
       updatePayTotalDisplay();
     }
 
@@ -3878,8 +3841,7 @@
         paymentMethod: selectedPaymentMethod
       }));
 
-      if (selectedPaymentMethod === 'duitnow') {
-        const btn = document.getElementById('payNowBtn');
+      const btn = document.getElementById('payNowBtn');
         btn.disabled = true;
         btn.textContent = currentLang === 'en' ? 'Generating Billplz QR...' : 'Menjana Bil Billplz...';
 
