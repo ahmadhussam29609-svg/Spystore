@@ -2235,7 +2235,7 @@
           <input type="text" id="searchInput" style="padding-left:36px;" placeholder="Search app or show (e.g. Doraemon)..." oninput="renderProducts()" onkeydown="if(event.key==='Enter'){ event.preventDefault(); searchShowFromMainBox(); }" />
         </div>
       </div>
-      <div id="inlineShowResultsBox" style="display:none; background:var(--bg-card); border:1px solid var(--border-strong); border-radius:14px; padding:12px; margin-bottom:14px;"></div>
+      <div id="inlineShowResultsBox" style="display:none; background:var(--bg-card); border:1px solid var(--border-strong); border-radius:14px; padding:12px; margin-bottom:14px; max-height:none; overflow:visible;"></div>
 
       <div class="filter-row" id="filterRow">
         <button class="filter-chip active" onclick="setCategory('All', this)" data-i18n="catAll">All (8)</button>
@@ -2440,7 +2440,7 @@
         <input type="text" class="form-control" id="showSearchInput" placeholder="e.g. Doraemon, Squid Game, Avengers..." onkeydown="if(event.key==='Enter') runShowSearch()" />
       </div>
       <button type="button" class="primary-submit" onclick="runShowSearch()" data-i18n="runShowSearchBtn">Search Availability</button>
-      <div id="showSearchResults" style="margin-top:14px; display:flex; flex-direction:column; gap:10px; max-height:58vh; overflow-y:auto;"></div>
+      <div id="showSearchResults" style="margin-top:14px; display:flex; flex-direction:column; gap:10px; max-height:none; overflow:visible;"></div>
     </div>
   </div>
 
@@ -3057,6 +3057,70 @@
 
 
 
+    let _inlineSearchShowAll = false;
+
+    function toggleInlineSearchShowAll() {
+      _inlineSearchShowAll = !_inlineSearchShowAll;
+      renderInlineSearchResultsBox();
+    }
+
+    function renderInlineSearchResultsBox() {
+      const inp = document.getElementById('searchInput');
+      const box = document.getElementById('inlineShowResultsBox');
+      if (!inp || !box) return;
+      const q = inp.value.trim();
+      const items = Array.isArray(window._lastShowSearchItems) ? window._lastShowSearchItems : [];
+
+      if (!items.length) {
+        box.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 "${q}"</span>
+            <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
+          </div>
+          <div style="font-size:0.76rem; color:var(--text-muted);">${currentLang === 'en' ? 'No matching show/movie found in current MY catalog.' : 'Tiada cerita/movie sepadan ditemui dalam katalog MY semasa.'}</div>
+        `;
+        return;
+      }
+
+      const initialLimit = 3;
+      const visibleItems = _inlineSearchShowAll ? items : items.slice(0, initialLimit);
+      const hasMore = items.length > initialLimit;
+
+      const rowsHtml = visibleItems.map(it => {
+        const apps = Array.isArray(it.availableApps) ? it.availableApps : [];
+        const chips = apps.length
+          ? apps.map(ap => renderVerifiedAppChipHtml(ap, false)).join('')
+          : `<span style="font-size:0.69rem; color:#f87171; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.28); padding:3px 8px; border-radius:999px;">${currentLang === 'en' ? 'Not on MY subscription apps (Removed / Rent only)' : 'Tiada dalam langganan MY semasa (Tamat tempoh / Sewa sahaja)'}</span>`;
+
+        return `
+          <div style="display:flex; gap:10px; align-items:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:8px; cursor:pointer;" onclick="openSearchDetailByIndex(${items.indexOf(it)})">
+            ${it.poster ? `<img src="${it.poster}" alt="${it.title}" style="width:42px; height:62px; object-fit:cover; border-radius:7px; flex-shrink:0;" />` : ''}
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:700; font-size:0.82rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.title} ${it.year ? `<small style="color:var(--text-muted); font-weight:500;">(${it.year})</small>` : ''}</div>
+              <div style="font-size:0.66rem; color:var(--accent-cyan); margin:2px 0 5px 0;">${it.mediaType} • ★ ${it.rating} • MY Live</div>
+              <div style="display:flex; flex-wrap:wrap; gap:5px;">${chips}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const showMoreBtnHtml = hasMore
+        ? `<button type="button" onclick="toggleInlineSearchShowAll()" style="width:100%; margin-top:4px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); color:var(--accent-cyan); padding:8px 12px; border-radius:10px; font-size:0.74rem; font-weight:800; cursor:pointer;">${
+            _inlineSearchShowAll
+              ? (currentLang === 'en' ? 'Show Less ▲' : 'Tutup Sebahagian ▲')
+              : (currentLang === 'en' ? `Show More (${items.length - initialLimit} more) ▼` : `Show More (${items.length - initialLimit} lagi) ▼`)
+          }</button>`
+        : '';
+
+      box.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Verified MY Catalog:' : 'Katalog MY Disahkan:'} "${q}"</span>
+          <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">${rowsHtml}${showMoreBtnHtml}</div>
+      `;
+    }
+
     async function searchShowFromMainBox() {
       const inp = document.getElementById('searchInput');
       const box = document.getElementById('inlineShowResultsBox');
@@ -3067,6 +3131,7 @@
         return;
       }
 
+      _inlineSearchShowAll = false;
       triggerTopLoader(650);
       box.style.display = 'block';
       animateElementEnter(box, 'view-animate-in');
@@ -3083,47 +3148,7 @@
         const data = await res.json();
         const items = data.items || [];
         window._lastShowSearchItems = items;
-
-        if (!items.length) {
-          box.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 "${q}"</span>
-              <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
-            </div>
-            <div style="font-size:0.76rem; color:var(--text-muted);">${currentLang === 'en' ? 'No matching show/movie found in current MY catalog.' : 'Tiada cerita/movie sepadan ditemui dalam katalog MY semasa.'}</div>
-          `;
-          return;
-        }
-
-        const rowsHtml = items.slice(0, 5).map(it => {
-          const apps = Array.isArray(it.availableApps) ? it.availableApps : [];
-          const chips = apps.length
-            ? apps.map(ap => `
-                <button type="button" onclick="openCheckout('${ap.id}');" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer;">
-                  ✓ ${ap.shortLabel} →
-                </button>
-              `).join('')
-            : `<span style="font-size:0.69rem; color:#f87171; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.28); padding:3px 8px; border-radius:999px;">${currentLang === 'en' ? 'Not on MY subscription apps (Removed / Rent only)' : 'Tiada dalam langganan MY semasa (Tamat tempoh / Sewa sahaja)'}</span>`;
-
-          return `
-            <div style="display:flex; gap:10px; align-items:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:8px; cursor:pointer;" onclick="openSearchDetailByIndex(${items.indexOf(it)})">
-              ${it.poster ? `<img src="${it.poster}" alt="${it.title}" style="width:42px; height:62px; object-fit:cover; border-radius:7px; flex-shrink:0;" />` : ''}
-              <div style="flex:1; min-width:0;">
-                <div style="font-weight:700; font-size:0.82rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.title} ${it.year ? `<small style="color:var(--text-muted); font-weight:500;">(${it.year})</small>` : ''}</div>
-                <div style="font-size:0.66rem; color:var(--accent-cyan); margin:2px 0 5px 0;">${it.mediaType} • ★ ${it.rating} • MY Live</div>
-                <div style="display:flex; flex-wrap:wrap; gap:5px;">${chips}</div>
-              </div>
-            </div>
-          `;
-        }).join('');
-
-        box.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Verified MY Catalog:' : 'Katalog MY Disahkan:'} "${q}"</span>
-            <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:8px;">${rowsHtml}</div>
-        `;
+        renderInlineSearchResultsBox();
       } catch (e) {
         box.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -3176,11 +3201,7 @@
         box.innerHTML = items.map(it => {
           const apps = Array.isArray(it.availableApps) ? it.availableApps : [];
           const appChipsHtml = apps.length
-            ? apps.map(ap => `
-                <button type="button" onclick="closeShowSearchModal(); openCheckout('${ap.id}');" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer;">
-                  ✓ ${ap.shortLabel} • RM${ap.price} →
-                </button>
-              `).join('')
+            ? apps.map(ap => renderVerifiedAppChipHtml(ap, true)).join('')
             : `<span style="font-size:0.69rem; color:#f87171; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.28); padding:3px 8px; border-radius:999px;">${currentLang === 'en' ? 'Not currently streaming in MY (Removed / Rent only)' : 'Tiada dalam katalog MY semasa (Tamat tempoh / Sewa sahaja)'}</span>`;
 
           return `
@@ -3201,6 +3222,25 @@
 
 
     window._lastShowSearchItems = [];
+
+
+    function renderVerifiedAppChipHtml(ap, includePrice = false) {
+      const prod = products.find(p => p.id === ap.id) || {};
+      const logo = prod.logo || `${ap.id}.png`;
+      const badge = prod.badge || (ap.shortLabel || ap.id).slice(0, 2).toUpperCase();
+      const bg = prod.bg || '#111827';
+      const color = prod.color || '#facc15';
+      const priceText = includePrice && ap.price ? ` • RM${ap.price}` : '';
+      return `
+        <button type="button" onclick="event.stopPropagation(); openCheckout('${ap.id}');" style="display:inline-flex; align-items:center; gap:6px; background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:5px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; line-height:1;">
+          <span style="width:18px; height:18px; border-radius:5px; background:${bg}; color:${color}; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; font-size:0.62rem; font-weight:800;">
+            <img src="${logo}" alt="${ap.shortLabel}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+            <span style="display:none;">${badge}</span>
+          </span>
+          <span>${ap.shortLabel}${priceText} ✓&gt;</span>
+        </button>
+      `;
+    }
 
     function openShowDetailModal(item) {
       if (!item) return;
