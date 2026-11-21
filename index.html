@@ -2003,6 +2003,109 @@
       gap: 4px;
     }
 
+
+    .show-detail-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.86);
+      backdrop-filter: blur(8px);
+      z-index: 10050;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .show-detail-backdrop.open {
+      display: flex;
+      animation: backdropFadeIn 0.2s ease both;
+    }
+
+    .show-detail-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 460px;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 18px;
+      box-shadow: 0 28px 60px -12px rgba(0, 0, 0, 0.85);
+      animation: modalSheetIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .spec-hero {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .spec-poster {
+      width: 92px;
+      height: 136px;
+      object-fit: cover;
+      border-radius: 12px;
+      flex-shrink: 0;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    .spec-title {
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+
+    .spec-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .spec-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .spec-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .spec-val {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .spec-synopsis {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 14px;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .spec-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
   </style>
 </head>
 <body>
@@ -2131,7 +2234,6 @@
           <span class="search-icon">🔍</span>
           <input type="text" id="searchInput" style="padding-left:36px;" placeholder="Search app or show (e.g. Doraemon)..." oninput="renderProducts()" onkeydown="if(event.key==='Enter'){ event.preventDefault(); searchShowFromMainBox(); }" />
         </div>
-        <button type="button" id="inlineShowSearchBtn" onclick="searchShowFromMainBox()" style="background:rgba(56,189,248,0.16); border:1px solid rgba(56,189,248,0.4); color:var(--accent-cyan); padding:11px 12px; border-radius:12px; font-size:0.74rem; font-weight:800; cursor:pointer; white-space:nowrap; flex-shrink:0;" data-i18n="inlineShowBtn">🎬 Show</button>
       </div>
       <div id="inlineShowResultsBox" style="display:none; background:var(--bg-card); border:1px solid var(--border-strong); border-radius:14px; padding:12px; margin-bottom:14px;"></div>
 
@@ -2375,6 +2477,17 @@
       </div>
 
       <div id="trendingModalBody" style="padding:14px 16px 28px 16px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:11px; background:#0c1018;"></div>
+    </div>
+  </div>
+
+  <!-- Show Detail Specification Modal -->
+  <div class="show-detail-backdrop" id="showDetailModal" onclick="if(event.target===this) closeShowDetailModal()">
+    <div class="show-detail-card" id="showDetailCard">
+      <div class="modal-top" style="margin-bottom:12px;">
+        <span style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:var(--accent-gold); text-transform:uppercase;" id="specModalHeaderTag">SPESIFIKASI CERITA</span>
+        <button type="button" class="close-modal" onclick="closeShowDetailModal()">✕</button>
+      </div>
+      <div id="showDetailBody"></div>
     </div>
   </div>
 
@@ -2778,7 +2891,7 @@
       body.innerHTML = list.map((item, idx) => {
         const displayRank = idx + 1;
         return `
-          <div class="discovery-row-card" style="animation-delay:${Math.min(idx * 35, 320)}ms; display:flex; gap:12px; align-items:center; background:#141b29; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px 12px;">
+          <div class="discovery-row-card" style="animation-delay:${Math.min(idx * 35, 320)}ms; display:flex; gap:12px; align-items:center; background:#141b29; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
             <div style="font-weight:800; font-size:0.9rem; color:#facc15; min-width:26px; text-align:center;">#${displayRank}</div>
             ${item.poster ? `<img src="${item.poster}" style="width:64px; height:94px; object-fit:cover; border-radius:10px; flex-shrink:0; box-shadow:0 6px 16px rgba(0,0,0,0.45);" />` : ''}
             <div style="flex:1; min-width:0;">
@@ -2873,6 +2986,7 @@
       }
       try {
         const items = data.items || [];
+        window._lastShowSearchItems = items;
         trendingByApp = data.byApp || {};
         if (data.categories) {
           discoveryCategories = { ...discoveryCategories, ...data.categories };
@@ -2958,16 +3072,17 @@
       animateElementEnter(box, 'view-animate-in');
       box.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Searching show:' : 'Mencari cerita:'} "${q}"</span>
+          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Live MY Catalog Check:' : 'Semakan Katalog MY Terkini:'} "${q}"</span>
           <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
         </div>
-        <div style="font-size:0.78rem; color:var(--text-secondary); padding:8px 0;">${currentLang === 'en' ? 'Checking available apps...' : 'Menyemak aplikasi tersedia...'}</div>
+        <div style="font-size:0.78rem; color:var(--text-secondary); padding:8px 0;">${currentLang === 'en' ? 'Verifying active Malaysian subscriptions...' : 'Menyemak langganan aktif Malaysia semasa...'}</div>
       `;
 
       try {
-        const res = await fetch(`/api/search-title?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`/api/search-title?q=${encodeURIComponent(q)}&region=MY&mode=flatrate&_t=${Date.now()}`, { cache: 'no-store' });
         const data = await res.json();
         const items = data.items || [];
+        window._lastShowSearchItems = items;
 
         if (!items.length) {
           box.innerHTML = `
@@ -2975,7 +3090,7 @@
               <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 "${q}"</span>
               <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
             </div>
-            <div style="font-size:0.76rem; color:var(--text-muted);">${currentLang === 'en' ? 'No matching show/movie found.' : 'Tiada cerita/movie sepadan ditemui.'}</div>
+            <div style="font-size:0.76rem; color:var(--text-muted);">${currentLang === 'en' ? 'No matching show/movie found in current MY catalog.' : 'Tiada cerita/movie sepadan ditemui dalam katalog MY semasa.'}</div>
           `;
           return;
         }
@@ -2985,17 +3100,17 @@
           const chips = apps.length
             ? apps.map(ap => `
                 <button type="button" onclick="openCheckout('${ap.id}');" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer;">
-                  ${ap.shortLabel} →
+                  ✓ ${ap.shortLabel} →
                 </button>
               `).join('')
-            : `<span style="font-size:0.7rem; color:var(--text-muted);">${currentLang === 'en' ? 'Ask Admin on WhatsApp' : 'Tanya Admin di WhatsApp'}</span>`;
+            : `<span style="font-size:0.69rem; color:#f87171; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.28); padding:3px 8px; border-radius:999px;">${currentLang === 'en' ? 'Not on MY subscription apps (Removed / Rent only)' : 'Tiada dalam langganan MY semasa (Tamat tempoh / Sewa sahaja)'}</span>`;
 
           return `
-            <div style="display:flex; gap:10px; align-items:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:8px;">
+            <div style="display:flex; gap:10px; align-items:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:8px; cursor:pointer;" onclick="openSearchDetailByIndex(${items.indexOf(it)})">
               ${it.poster ? `<img src="${it.poster}" alt="${it.title}" style="width:42px; height:62px; object-fit:cover; border-radius:7px; flex-shrink:0;" />` : ''}
               <div style="flex:1; min-width:0;">
                 <div style="font-weight:700; font-size:0.82rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.title} ${it.year ? `<small style="color:var(--text-muted); font-weight:500;">(${it.year})</small>` : ''}</div>
-                <div style="font-size:0.66rem; color:var(--accent-cyan); margin:2px 0 5px 0;">${it.mediaType} • ★ ${it.rating}</div>
+                <div style="font-size:0.66rem; color:var(--accent-cyan); margin:2px 0 5px 0;">${it.mediaType} • ★ ${it.rating} • MY Live</div>
                 <div style="display:flex; flex-wrap:wrap; gap:5px;">${chips}</div>
               </div>
             </div>
@@ -3004,7 +3119,7 @@
 
         box.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Show Results:' : 'Hasil Cerita:'} "${q}"</span>
+            <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Verified MY Catalog:' : 'Katalog MY Disahkan:'} "${q}"</span>
             <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
           </div>
           <div style="display:flex; flex-direction:column; gap:8px;">${rowsHtml}</div>
@@ -3012,7 +3127,7 @@
       } catch (e) {
         box.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:0.75rem; color:#f87171;">${currentLang === 'en' ? 'Failed to search show.' : 'Gagal mencari cerita.'}</span>
+            <span style="font-size:0.75rem; color:#f87171;">${currentLang === 'en' ? 'Failed to verify live catalog.' : 'Gagal menyemak katalog terkini.'}</span>
             <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
           </div>
         `;
@@ -3046,15 +3161,15 @@
       }
 
       triggerTopLoader(650);
-      box.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:0.8rem;">${currentLang === 'en' ? 'Searching...' : 'Sedang mencari...'}</div>`;
+      box.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:0.8rem;">${currentLang === 'en' ? 'Verifying live MY catalog...' : 'Menyemak katalog MY terkini...'}</div>`;
 
       try {
-        const res = await fetch(`/api/search-title?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`/api/search-title?q=${encodeURIComponent(q)}&region=MY&mode=flatrate&_t=${Date.now()}`, { cache: 'no-store' });
         const data = await res.json();
         const items = data.items || [];
 
         if (!items.length) {
-          box.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.8rem;">${currentLang === 'en' ? 'No matching titles found.' : 'Tiada cerita sepadan ditemui.'}</div>`;
+          box.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.8rem;">${currentLang === 'en' ? 'No matching titles found in MY catalog.' : 'Tiada cerita sepadan ditemui dalam katalog MY.'}</div>`;
           return;
         }
 
@@ -3063,17 +3178,17 @@
           const appChipsHtml = apps.length
             ? apps.map(ap => `
                 <button type="button" onclick="closeShowSearchModal(); openCheckout('${ap.id}');" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer;">
-                  ${ap.shortLabel} • RM${ap.price} →
+                  ✓ ${ap.shortLabel} • RM${ap.price} →
                 </button>
               `).join('')
-            : `<span style="font-size:0.7rem; color:var(--text-muted);">${currentLang === 'en' ? 'Check with Admin on WhatsApp' : 'Semak dengan Admin di WhatsApp'}</span>`;
+            : `<span style="font-size:0.69rem; color:#f87171; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.28); padding:3px 8px; border-radius:999px;">${currentLang === 'en' ? 'Not currently streaming in MY (Removed / Rent only)' : 'Tiada dalam katalog MY semasa (Tamat tempoh / Sewa sahaja)'}</span>`;
 
           return `
-            <div style="display:flex; gap:10px; align-items:flex-start; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px;">
+            <div style="display:flex; gap:10px; align-items:flex-start; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px; cursor:pointer;" onclick="openSearchDetailByIndex(${items.indexOf(it)})">
               ${it.poster ? `<img src="${it.poster}" alt="${it.title}" style="width:52px; height:76px; object-fit:cover; border-radius:8px; flex-shrink:0;" />` : ''}
               <div style="flex:1; min-width:0;">
                 <div style="font-weight:700; font-size:0.86rem; color:var(--text-primary);">${it.title} ${it.year ? `<small style="color:var(--text-muted); font-weight:500;">(${it.year})</small>` : ''}</div>
-                <div style="font-size:0.68rem; color:var(--accent-cyan); margin:2px 0 6px 0;">${it.mediaType} • ★ ${it.rating}</div>
+                <div style="font-size:0.68rem; color:var(--accent-cyan); margin:2px 0 6px 0;">${it.mediaType} • ★ ${it.rating} • MY Live</div>
                 <div style="display:flex; flex-wrap:wrap; gap:5px;">${appChipsHtml}</div>
               </div>
             </div>
@@ -3081,6 +3196,99 @@
         }).join('');
       } catch (e) {
         box.innerHTML = `<div style="text-align:center; padding:16px; color:#f87171; font-size:0.8rem;">${currentLang === 'en' ? 'Search failed. Try again.' : 'Carian gagal. Cuba lagi.'}</div>`;
+      }
+    }
+
+
+    window._lastShowSearchItems = [];
+
+    function openShowDetailModal(item) {
+      if (!item) return;
+      const modal = document.getElementById('showDetailModal');
+      const body = document.getElementById('showDetailBody');
+      const tag = document.getElementById('specModalHeaderTag');
+      if (!modal || !body) return;
+
+      if (tag) {
+        tag.textContent = currentLang === 'en' ? 'SHOW SPECIFICATION' : 'SPESIFIKASI CERITA';
+      }
+
+      const title = item.title || 'Untitled';
+      const year = item.year || '-';
+      const mediaType = item.mediaType || 'SHOW';
+      const rating = item.rating && item.rating !== 'N/A' ? `★ ${item.rating} / 10` : 'N/A';
+      const platformLabel = item.platformLabel || (Array.isArray(item.availableApps) && item.availableApps.length ? item.availableApps.map(a => a.shortLabel).join(', ') : (currentLang === 'en' ? 'Check MY Catalog' : 'Semak Katalog MY'));
+      const platformId = item.platformId || (Array.isArray(item.availableApps) && item.availableApps[0] ? item.availableApps[0].id : '');
+      const overview = item.overview || (currentLang === 'en' ? 'No synopsis available for this title.' : 'Tiada sinopsis terperinci direkodkan untuk cerita ini.');
+      const posterHtml = item.poster
+        ? `<img src="${item.poster}" alt="${title}" class="spec-poster" />`
+        : `<div class="spec-poster" style="display:flex;align-items:center;justify-content:center;background:var(--bg-input);color:var(--accent-gold);font-weight:800;">${mediaType}</div>`;
+
+      const orderBtnHtml = platformId
+        ? `<button type="button" class="primary-submit" style="width:auto; flex:1; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); closeShowSearchModal(); openCheckout('${platformId}');">${currentLang === 'en' ? `Order ${platformLabel} →` : `Tempah ${platformLabel} →`}</button>`
+        : '';
+
+      body.innerHTML = `
+        <div class="spec-hero">
+          ${posterHtml}
+          <div style="flex:1; min-width:0;">
+            <div class="spec-title">${title}</div>
+            <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700; margin-bottom:6px;">${mediaType} • ${year}</div>
+            <div style="font-size:0.74rem; color:var(--text-secondary);"><strong>${currentLang === 'en' ? 'Platform:' : 'Platform:'}</strong> ${platformLabel}</div>
+          </div>
+        </div>
+
+        <div class="spec-meta-grid">
+          <div class="spec-box">
+            <div class="spec-label">${currentLang === 'en' ? 'Format / Type' : 'Jenis / Format'}</div>
+            <div class="spec-val">${mediaType}</div>
+          </div>
+          <div class="spec-box">
+            <div class="spec-label">${currentLang === 'en' ? 'Release Year' : 'Tahun Keluaran'}</div>
+            <div class="spec-val">${year}</div>
+          </div>
+          <div class="spec-box">
+            <div class="spec-label">${currentLang === 'en' ? 'Rating' : 'Penarafan'}</div>
+            <div class="spec-val" style="color:var(--accent-gold);">${rating}</div>
+          </div>
+          <div class="spec-box">
+            <div class="spec-label">${currentLang === 'en' ? 'Platform / Access' : 'Platform / Akses'}</div>
+            <div class="spec-val" style="color:var(--accent-cyan);">${platformLabel}</div>
+          </div>
+        </div>
+
+        <div class="spec-synopsis">
+          <div class="spec-label" style="margin-bottom:4px;">${currentLang === 'en' ? 'Synopsis / Overview' : 'Sinopsis / Ringkasan Cerita'}</div>
+          <div>${overview}</div>
+        </div>
+
+        <div class="spec-actions">
+          ${orderBtnHtml}
+          <button type="button" class="back-btn" style="margin-bottom:0;" onclick="closeShowDetailModal()">${currentLang === 'en' ? 'Close' : 'Tutup'}</button>
+        </div>
+      `;
+
+      modal.classList.add('open');
+    }
+
+    function closeShowDetailModal() {
+      const modal = document.getElementById('showDetailModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function openShowDetailByIndex(appKey, catKey, idx) {
+      const catList = (discoveryCategories[catKey] || []).filter(it => it.platformId === appKey);
+      const appSpecificList = getAppItems(appKey, catKey);
+      const list = appSpecificList.length ? appSpecificList : catList;
+      if (list && list[idx]) {
+        openShowDetailModal(list[idx]);
+      }
+    }
+
+    function openSearchDetailByIndex(idx) {
+      const items = window._lastShowSearchItems || [];
+      if (items[idx]) {
+        openShowDetailModal(items[idx]);
       }
     }
 
