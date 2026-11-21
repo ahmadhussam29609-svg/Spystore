@@ -3217,12 +3217,65 @@
       const year = item.year || '-';
       const mediaType = item.mediaType || 'SHOW';
       const rating = item.rating && item.rating !== 'N/A' ? `★ ${item.rating} / 10` : 'N/A';
-      const platformLabel = item.platformLabel || (Array.isArray(item.availableApps) && item.availableApps.length ? item.availableApps.map(a => a.shortLabel).join(', ') : (currentLang === 'en' ? 'Check MY Catalog' : 'Semak Katalog MY'));
-      const platformId = item.platformId || (Array.isArray(item.availableApps) && item.availableApps[0] ? item.availableApps[0].id : '');
-      const overview = item.overview || (currentLang === 'en' ? 'No synopsis available for this title.' : 'Tiada sinopsis terperinci direkodkan untuk cerita ini.');
+
+      // Build list of available apps with their product icons/logos
+      let appEntries = [];
+      if (Array.isArray(item.availableApps) && item.availableApps.length > 0) {
+        appEntries = item.availableApps.map(ap => {
+          const prod = products.find(p => p.id === ap.id) || {};
+          return {
+            id: ap.id,
+            shortLabel: ap.shortLabel || prod.name || ap.id,
+            logo: prod.logo || `${ap.id}.png`,
+            badge: prod.badge || (ap.shortLabel || ap.id).slice(0, 2).toUpperCase(),
+            bg: prod.bg || '#111827',
+            color: prod.color || '#facc15'
+          };
+        });
+      } else if (item.platformId) {
+        const prod = products.find(p => p.id === item.platformId) || {};
+        appEntries = [{
+          id: item.platformId,
+          shortLabel: item.platformLabel || prod.name || item.platformId,
+          logo: prod.logo || `${item.platformId}.png`,
+          badge: prod.badge || (item.platformLabel || item.platformId).slice(0, 2).toUpperCase(),
+          bg: prod.bg || '#111827',
+          color: prod.color || '#facc15'
+        }];
+      }
+
+      const platformLabel = appEntries.length
+        ? appEntries.map(a => a.shortLabel).join(', ')
+        : (currentLang === 'en' ? 'Not in current MY catalog' : 'Tiada dalam katalog MY semasa');
+
+      const platformId = appEntries.length ? appEntries[0].id : '';
+
+      // Short, clean synopsis summary (auto-generated concise summary if item.overview is missing or too long)
+      let rawOverview = String(item.overview || '').trim();
+      if (!rawOverview) {
+        rawOverview = currentLang === 'en'
+          ? `${title} (${year !== '-' ? year : 'Title'}) is a ${mediaType.toLowerCase()} currently checked for subscription availability.`
+          : `${title} (${year !== '-' ? year : 'Tajuk'}) ialah sebuah ${mediaType === 'MOVIE' ? 'filem' : 'siri'} yang disemak ketersediaan langganannya.`;
+      }
+      const shortSynopsis = rawOverview.length > 165 ? rawOverview.slice(0, 162).trim() + '...' : rawOverview;
+
       const posterHtml = item.poster
         ? `<img src="${item.poster}" alt="${title}" class="spec-poster" />`
         : `<div class="spec-poster" style="display:flex;align-items:center;justify-content:center;background:var(--bg-input);color:var(--accent-gold);font-weight:800;">${mediaType}</div>`;
+
+      const availableAppsLogosHtml = appEntries.length
+        ? `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;">` +
+            appEntries.map(ap => `
+              <div style="display:inline-flex; align-items:center; gap:7px; background:var(--bg-card); border:1px solid var(--border-strong); border-radius:10px; padding:5px 10px;">
+                <span style="width:24px; height:24px; border-radius:7px; background:${ap.bg}; color:${ap.color}; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; font-size:0.7rem; font-weight:800;">
+                  <img src="${ap.logo}" alt="${ap.shortLabel}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+                  <span style="display:none;">${ap.badge}</span>
+                </span>
+                <span style="font-size:0.78rem; font-weight:700; color:var(--text-primary);">${ap.shortLabel}</span>
+              </div>
+            `).join('') +
+          `</div>`
+        : `<div style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">${currentLang === 'en' ? 'No active subscription app found.' : 'Tiada aplikasi langganan aktif ditemui.'}</div>`;
 
       const orderBtnHtml = platformId
         ? `<button type="button" class="primary-submit" style="width:auto; flex:1; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); closeShowSearchModal(); openCheckout('${platformId}');">${currentLang === 'en' ? `Order ${platformLabel} →` : `Tempah ${platformLabel} →`}</button>`
@@ -3234,7 +3287,8 @@
           <div style="flex:1; min-width:0;">
             <div class="spec-title">${title}</div>
             <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700; margin-bottom:6px;">${mediaType} • ${year}</div>
-            <div style="font-size:0.74rem; color:var(--text-secondary);"><strong>${currentLang === 'en' ? 'Platform:' : 'Platform:'}</strong> ${platformLabel}</div>
+            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">${currentLang === 'en' ? 'Available On' : 'Tersedia Di'}</div>
+            ${availableAppsLogosHtml}
           </div>
         </div>
 
@@ -3258,8 +3312,8 @@
         </div>
 
         <div class="spec-synopsis">
-          <div class="spec-label" style="margin-bottom:4px;">${currentLang === 'en' ? 'Synopsis / Overview' : 'Sinopsis / Ringkasan Cerita'}</div>
-          <div>${overview}</div>
+          <div class="spec-label" style="margin-bottom:4px;">${currentLang === 'en' ? 'Short Synopsis' : 'Sinopsis Ringkas'}</div>
+          <div>${shortSynopsis}</div>
         </div>
 
         <div class="spec-actions">
