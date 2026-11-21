@@ -3099,7 +3099,9 @@
 
         return `
           <div style="display:flex; gap:10px; align-items:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:8px; cursor:pointer;" onclick="openSearchDetailByIndex(${items.indexOf(it)})">
-            ${it.poster ? `<img src="${it.poster}" alt="${it.title}" style="width:42px; height:62px; object-fit:cover; border-radius:7px; flex-shrink:0;" />` : ''}
+            ${it.poster
+  ? `<img src="${it.poster}" alt="${it.title}" referrerpolicy="no-referrer" style="width:42px; height:62px; object-fit:cover; border-radius:7px; flex-shrink:0; background:var(--bg-card);" onerror="this.outerHTML='<div style=\'width:42px;height:62px;border-radius:7px;background:var(--bg-card);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0;\'>🎬</div>';" />`
+  : `<div style="width:42px;height:62px;border-radius:7px;background:var(--bg-card);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0;">🎬</div>`}
             <div style="flex:1; min-width:0;">
               <div style="font-weight:700; font-size:0.82rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.title} ${it.year ? `<small style="color:var(--text-muted); font-weight:500;">(${it.year})</small>` : ''}</div>
               <div style="font-size:0.66rem; color:var(--accent-cyan); margin:2px 0 5px 0;">${it.mediaType} • ★ ${it.rating} • MY Live</div>
@@ -3215,7 +3217,9 @@
 
           return `
             <div style="display:flex; gap:10px; align-items:flex-start; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px; cursor:pointer;" onclick="openSearchDetailByIndex(${items.indexOf(it)})">
-              ${it.poster ? `<img src="${it.poster}" alt="${it.title}" style="width:52px; height:76px; object-fit:cover; border-radius:8px; flex-shrink:0;" />` : ''}
+              ${it.poster
+  ? `<img src="${it.poster}" alt="${it.title}" referrerpolicy="no-referrer" style="width:52px; height:76px; object-fit:cover; border-radius:8px; flex-shrink:0; background:var(--bg-card);" onerror="this.outerHTML='<div style=\'width:52px;height:76px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;\'>🎬</div>';" />`
+  : `<div style="width:52px;height:76px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🎬</div>`}
               <div style="flex:1; min-width:0;">
                 <div style="font-weight:700; font-size:0.86rem; color:var(--text-primary);">${it.title} ${it.year ? `<small style="color:var(--text-muted); font-weight:500;">(${it.year})</small>` : ''}</div>
                 <div style="font-size:0.68rem; color:var(--accent-cyan); margin:2px 0 6px 0;">${it.mediaType} • ★ ${it.rating} • MY Live</div>
