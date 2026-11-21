@@ -2133,18 +2133,6 @@
       <span class="splash-brand">SPYSTORE BY SAMS</span>
     </div>
   </div>
-  <script>
-    (function() {
-      function hideSplashNow() {
-        var el = document.getElementById('splashIntro');
-        if (!el) return;
-        el.classList.add('hide');
-        setTimeout(function() { if (el && el.parentNode) el.style.display = 'none'; }, 400);
-      }
-      setTimeout(hideSplashNow, 950);
-      window.addEventListener('load', function() { setTimeout(hideSplashNow, 400); });
-    })();
-  </script>
   <!-- Side Drawer Navigation -->
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
   <aside class="side-drawer" id="sideDrawer" style="padding:18px 15px; overflow-y:auto;">
@@ -3516,4 +3504,951 @@
     const payMethod = txn.paymentMethod || 'FPX';
     const statusLabel = txn.status || 'PAID / CONFIRMED';
     const dateStr = txn.date || new Date().toLocaleDateString('en-MY');
-    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>Invoice ${invNo} — SPYSTORE BY SAMS</title><style>body{font-family:'Plus Jakarta Sans',Arial,sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:28px}.inv-box{max-width:640px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px}.inv-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0f172a;padding-bottom:16px;margin-bottom:20px}.brand{font-size:20px;font-weight:800}.brand span{color:#ca8a04}.inv-meta{text-align:right;font-size:13px;color:#475569}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;font-size:13px}.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px}.card h4{margin:0 0 6px 0;font-size:11px;text-transform:uppercase;color:#64748b}table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:13px}th,td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left}th{background:#f1f5f9}.total-row td{font-weight:800;font-size:15px;border-top:2px solid #0f172a;border-bottom:none}.foot{font-size:12px;color:#64748b;border-top:1px dashed #cbd5e1;padding-top:14px;display:flex;justify-content:space-between}</style></head><body><div class="inv-box"><div class="inv-head"><div><div class="brand">SPYSTORE <span>BY SAMS</span></div><div style="font-size:12px;color:#475569">Official Digital Subscription Receipt &amp; Invoice</div></div><div class="inv-meta"><div><strong>Invoice No:</strong> ${invNo}</div><div><strong>Date:</strong> ${dateStr}</div><div><strong>Status:</strong> ${statusLabel}</div></div></div><div class="grid-2"><div class="card"><h4>Billed To</h4><div><strong>${custName}</strong></div><div>WhatsApp: ${custPhone}</div><div>Email: ${custEmail}</div>${custDevice ? `<div>Device: ${custDevice}</div>` : ''}</div><div class="card"><h4>Store Info</h4><div>Store: <strong>SPYSTORE BY SAMS</strong></div><div>Method: ${payMethod}</div><div>Support WA: +60189066291</div></div></div><table><thead><tr><th>Item</th><th>Duration</th><th style="text-align:right">Total</th></tr></thead><tbody><tr><td><strong>${txn.app || 'Subscription'}</strong></td><td>${monthsNum} Month(s)</td><td style="text-align:right">${amountStr}</td></tr><tr class="total-row"><td colspan="2">Total Amount</td><td style="text-align:right;color:#b45309">${amountStr}</td></tr></tbody></table><div class="foot"><span>Thank you for purchasing from SPYSTORE BY SAMS.</span><span>100% Warranty throughout active subscription.</span></div></div></body></html>
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>Invoice ${invNo} — SPYSTORE BY SAMS</title><style>body{font-family:'Plus Jakarta Sans',Arial,sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:28px}.inv-box{max-width:640px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px}.inv-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0f172a;padding-bottom:16px;margin-bottom:20px}.brand{font-size:20px;font-weight:800}.brand span{color:#ca8a04}.inv-meta{text-align:right;font-size:13px;color:#475569}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;font-size:13px}.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px}.card h4{margin:0 0 6px 0;font-size:11px;text-transform:uppercase;color:#64748b}table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:13px}th,td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left}th{background:#f1f5f9}.total-row td{font-weight:800;font-size:15px;border-top:2px solid #0f172a;border-bottom:none}.foot{font-size:12px;color:#64748b;border-top:1px dashed #cbd5e1;padding-top:14px;display:flex;justify-content:space-between}</style></head><body><div class="inv-box"><div class="inv-head"><div><div class="brand">SPYSTORE <span>BY SAMS</span></div><div style="font-size:12px;color:#475569">Official Digital Subscription Receipt &amp; Invoice</div></div><div class="inv-meta"><div><strong>Invoice No:</strong> ${invNo}</div><div><strong>Date:</strong> ${dateStr}</div><div><strong>Status:</strong> ${statusLabel}</div></div></div><div class="grid-2"><div class="card"><h4>Billed To</h4><div><strong>${custName}</strong></div><div>WhatsApp: ${custPhone}</div><div>Email: ${custEmail}</div>${custDevice ? `<div>Device: ${custDevice}</div>` : ''}</div><div class="card"><h4>Store Info</h4><div>Store: <strong>SPYSTORE BY SAMS</strong></div><div>Method: ${payMethod}</div><div>Support WA: +60189066291</div></div></div><table><thead><tr><th>Item</th><th>Duration</th><th style="text-align:right">Total</th></tr></thead><tbody><tr><td><strong>${txn.app || 'Subscription'}</strong></td><td>${monthsNum} Month(s)</td><td style="text-align:right">${amountStr}</td></tr><tr class="total-row"><td colspan="2">Total Amount</td><td style="text-align:right;color:#b45309">${amountStr}</td></tr></tbody></table><div class="foot"><span>Thank you for purchasing from SPYSTORE BY SAMS.</span><span>100% Warranty throughout active subscription.</span></div></div></body></html>`;
+  }
+
+  function downloadInvoiceObject(txn) {
+    if (!txn) return;
+    const invNo = txn.invoiceNo || txn.ref || generateInvoiceNumber();
+    const blob = new Blob([buildInvoiceHtmlDocument(txn)], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${invNo}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast(`Invoice ${invNo} downloaded!`);
+  }
+
+  function downloadInvoiceByIndex(idx) {
+    const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
+    if (list[idx]) downloadInvoiceObject(list[idx]);
+  }
+
+  function downloadGlobalTxnInvoice(tIdx) {
+    const list = getAllTransactionsDB();
+    if (list[tIdx]) downloadInvoiceObject(list[tIdx]);
+  }
+
+  function downloadLatestInvoice() {
+    if (window._latestReceiptInvoice) { downloadInvoiceObject(window._latestReceiptInvoice); return; }
+    try {
+      const p = JSON.parse(localStorage.getItem('spystore_pending_order') || 'null');
+      if (p && p.appName) {
+        downloadInvoiceObject({ invoiceNo: p.invoiceNo || generateInvoiceNumber(), app: p.appName, months: p.months || 1, total: p.totalAmount || '0.00', date: new Date().toLocaleDateString('en-MY'), customerName: p.customerName || '-', customerPhone: p.customerPhone || '-', customerEmail: p.customerEmail || '-', customerDevice: p.customerDevice || '-', paymentMethod: 'FPX', status: 'PAID' });
+        return;
+      }
+    } catch (e) {}
+    const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
+    if (list[0]) downloadInvoiceObject(list[0]);
+    else showToast('No invoice available yet.');
+  }
+
+  function renderOrderHistory() {
+    const container = document.getElementById('orderHistoryList');
+    const user = getCurrentUser();
+    let list = [];
+    if (user && user.email) {
+      syncCurrentUserSavedData();
+      const saved = loadUserSavedData(user.email);
+      list = Array.isArray(saved.orders) ? saved.orders : [];
+    } else {
+      try { list = JSON.parse(localStorage.getItem('spystore_orders') || '[]'); } catch (e) {}
+    }
+    window._currentAccountOrders = list;
+    if (!list.length) {
+      container.innerHTML = `<p style="font-size:0.78rem; color:var(--text-muted);">No transaction history saved for this account yet.</p>`;
+      return;
+    }
+    container.innerHTML = list.map((o, idx) => `
+      <div class="order-item" style="cursor:pointer;" onclick="openTransactionDetail(${idx})">
+        <div style="display:flex; justify-content:space-between; font-weight:700;">
+          <span>${o.app} (${o.months} Mo)</span>
+          <span style="color:var(--accent-gold);">RM${o.total}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; color:var(--text-muted); font-size:0.72rem; margin-top:4px; gap:6px; flex-wrap:wrap;">
+          <span>${o.invoiceNo ? `${o.invoiceNo} • ` : ''}${o.date}</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button type="button" onclick="event.stopPropagation(); downloadInvoiceByIndex(${idx});" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">📄 Invois</button>
+            <span style="color:var(--accent-cyan); font-weight:700;">Details ›</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openTransactionDetail(idx) {
+    const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
+    const o = list[idx];
+    if (!o) return;
+    const user = getCurrentUser();
+    const container = document.getElementById('orderHistoryList');
+    const refCode = o.ref || o.refno || `SPY-${String(idx + 1).padStart(3, '0')}`;
+    const invNo = o.invoiceNo || refCode;
+    container.innerHTML = `
+      <div class="order-item" style="border-color:var(--accent-cyan); padding:13px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:800; font-size:0.86rem;">🧾 Purchase &amp; Invoice Details</span>
+          <button type="button" onclick="renderOrderHistory()" style="background:var(--bg-card); border:1px solid var(--border-color); color:var(--accent-cyan); padding:4px 9px; border-radius:8px; font-size:0.7rem; font-weight:700; cursor:pointer;">← Back</button>
+        </div>
+        <p style="margin-bottom:4px;"><strong>Invoice No:</strong> <span style="color:var(--accent-cyan); font-weight:800;">${invNo}</span></p>
+        <p style="margin-bottom:4px;"><strong>Product:</strong> ${o.app || '-'}</p>
+        <p style="margin-bottom:4px;"><strong>Duration:</strong> ${o.months || 1} Month(s)</p>
+        <p style="margin-bottom:4px;"><strong>Total Amount:</strong> <span style="color:var(--accent-gold); font-weight:800;">RM${o.total || '0.00'}</span></p>
+        <p style="margin-bottom:4px;"><strong>Date:</strong> ${o.date || '-'}</p>
+        <p style="margin-bottom:4px;"><strong>Customer:</strong> ${o.customerName || user?.name || '-'}</p>
+        <p style="margin-bottom:10px;"><strong>WhatsApp:</strong> ${o.customerPhone || user?.phone || '-'}</p>
+        <button type="button" onclick="downloadInvoiceByIndex(${idx})" style="width:100%; background:rgba(250,204,21,0.16); border:1px solid var(--accent-gold); color:var(--accent-gold); padding:9px 12px; border-radius:10px; font-size:0.78rem; font-weight:800; cursor:pointer;">📄 Download Invoice (${invNo})</button>
+      </div>
+    `;
+  }
+
+  function refreshCheckoutLoginReminder() {
+    const box = document.getElementById('checkoutLoginReminder');
+    if (!box) return;
+    box.style.display = getCurrentUser() ? 'none' : 'block';
+  }
+
+  function updateAuthUI() {
+    const user = getCurrentUser();
+    const navBtn = document.getElementById('authNavBtn');
+    if (navBtn) {
+      if (user) {
+        const firstName = (user.name || user.email || 'Account').split(' ')[0];
+        navBtn.textContent = `👤 ${firstName}`;
+        navBtn.classList.add('auth-active');
+      } else {
+        navBtn.textContent = 'Sign Up';
+        navBtn.classList.remove('auth-active');
+      }
+    }
+    const drawerAccSpan = document.querySelector('#sideDrawer [data-i18n="navAccount"]');
+    if (drawerAccSpan) {
+      drawerAccSpan.textContent = user ? (currentLang === 'en' ? 'Account' : 'Akaun') : (I18N[currentLang] || I18N.en).navAccount;
+    }
+    refreshCheckoutLoginReminder();
+  }
+
+  function switchAuthMode(mode = 'signup') {
+    const isSignup = mode === 'signup';
+    const isForgot = mode === 'forgot';
+    document.getElementById('authModeSignupBtn')?.classList.toggle('active', isSignup);
+    document.getElementById('authModeLoginBtn')?.classList.toggle('active', !isSignup && !isForgot);
+    if (document.getElementById('simpleSignupForm')) document.getElementById('simpleSignupForm').style.display = isSignup ? 'block' : 'none';
+    if (document.getElementById('simpleLoginForm')) document.getElementById('simpleLoginForm').style.display = (!isSignup && !isForgot) ? 'block' : 'none';
+    if (document.getElementById('forgotPasswordForm')) document.getElementById('forgotPasswordForm').style.display = isForgot ? 'block' : 'none';
+  }
+
+  function openForgotPasswordView() { switchAuthMode('forgot'); }
+
+  function handleForgotPasswordSubmit(e) {
+    e.preventDefault();
+    const email = String(document.getElementById('forgotEmailInput')?.value || '').trim().toLowerCase();
+    const uname = normalizeUsername(document.getElementById('forgotUsernameInput')?.value || '');
+    const newPass = String(document.getElementById('forgotNewPasswordInput')?.value || '');
+    const users = getUsersDB();
+    const idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === email && normalizeUsername(u.username || (u.email || '').split('@')[0]) === uname);
+    if (idx === -1) { showToast('Account not found!'); return; }
+    users[idx].password = newPass;
+    saveUsersDB(users);
+    switchAuthMode('login');
+    showToast('Password updated! Please log in.');
+  }
+
+  function renderProfileCardHtml(user) {
+    return `
+      <p><strong>Username:</strong> ${user.username || (user.email ? user.email.split('@')[0] : user.name)}</p>
+      <p><strong>Full Name:</strong> ${user.name}</p>
+      <p><strong>Email:</strong> ${user.email}</p>
+      <p><strong>Country:</strong> Malaysia</p>
+      <p style="margin-bottom:0;"><strong>WhatsApp:</strong> ${user.phone || '-'}</p>
+    `;
+  }
+
+  function toggleProfileEditMode() {
+    const user = getCurrentUser();
+    const form = document.getElementById('editProfileForm');
+    if (!user || !form) return;
+    const opening = form.style.display === 'none';
+    form.style.display = opening ? 'block' : 'none';
+    if (opening) {
+      document.getElementById('editFullNameInput').value = user.name || '';
+      document.getElementById('editUsernameInput').value = user.username || (user.email ? user.email.split('@')[0] : '');
+      document.getElementById('editPhoneInput').value = user.phone || '';
+    }
+  }
+
+  function saveProfileEdits(e) {
+    e.preventDefault();
+    const user = getCurrentUser();
+    if (!user || !user.email) return;
+    const newName = String(document.getElementById('editFullNameInput')?.value || '').trim();
+    const newUsername = normalizeUsername(document.getElementById('editUsernameInput')?.value || '');
+    const newPhone = String(document.getElementById('editPhoneInput')?.value || '').trim();
+    if (!newName || !newUsername) { showToast('Enter valid name and username.'); return; }
+    const users = getUsersDB();
+    const taken = users.some(u => String(u.email || '').trim().toLowerCase() !== String(user.email).trim().toLowerCase() && normalizeUsername(u.username || '') === newUsername);
+    if (taken) { showToast('Username already taken.'); return; }
+    const updated = { ...user, name: newName, username: newUsername, phone: newPhone };
+    const idx = users.findIndex(u => u.email === user.email);
+    if (idx !== -1) users[idx] = { ...users[idx], ...updated };
+    else users.push(updated);
+    saveUsersDB(users);
+    localStorage.setItem('spystore_current_user', JSON.stringify(updated));
+    syncCurrentUserSavedData();
+    updateAuthUI();
+    document.getElementById('profileDetailsBox').innerHTML = renderProfileCardHtml(updated);
+    document.getElementById('editProfileForm').style.display = 'none';
+    showToast('Profile details updated!');
+  }
+
+  function openAuthModal() {
+    const modal = document.getElementById('authModal');
+    const user = getCurrentUser();
+    modal.classList.add('open');
+    if (user) {
+      document.getElementById('authModalTitle').textContent = 'SPYSTORE PROFILE';
+      document.getElementById('authFormsView').style.display = 'none';
+      document.getElementById('loggedInView').style.display = 'block';
+      if (document.getElementById('editProfileForm')) document.getElementById('editProfileForm').style.display = 'none';
+      document.getElementById('profileDetailsBox').innerHTML = renderProfileCardHtml(user);
+      renderOrderHistory();
+    } else {
+      document.getElementById('authModalTitle').textContent = 'SPYSTORE ACCOUNT';
+      document.getElementById('authFormsView').style.display = 'block';
+      document.getElementById('loggedInView').style.display = 'none';
+      switchAuthMode('signup');
+      setTimeout(() => {
+        if (initAndRenderGoogleButton()) {
+          const fb = document.getElementById('customGoogleFallbackBtn');
+          if (fb) fb.style.display = 'none';
+        }
+      }, 80);
+    }
+  }
+
+  function closeAuthModal() { document.getElementById('authModal').classList.remove('open'); }
+
+  function handleSignupSubmit(e) {
+    e.preventDefault();
+    const username = normalizeUsername(document.getElementById('signupUsernameInput')?.value || '');
+    const email = String(document.getElementById('signupEmailInput')?.value || '').trim().toLowerCase();
+    const fullName = String(document.getElementById('signupFullNameInput')?.value || '').trim();
+    const password = String(document.getElementById('signupPasswordInput')?.value || '');
+    if (!username || !email || !fullName || password.length < 6) { showToast('Please complete all fields.'); return; }
+    const users = getUsersDB();
+    const taken = users.some(u => normalizeUsername(u.username || '') === username && String(u.email || '').trim().toLowerCase() !== email);
+    if (taken) { showToast('Username already used.'); return; }
+    const existing = users.find(u => u.email === email);
+    const account = { username, name: fullName, email, password, phone: existing?.phone || '', provider: 'email' };
+    if (existing) Object.assign(existing, account);
+    else users.push(account);
+    saveUsersDB(users);
+    localStorage.setItem('spystore_current_user', JSON.stringify(account));
+    syncCurrentUserSavedData();
+    updateAuthUI();
+    closeAuthModal();
+    showToast(`Account created: @${account.username}`);
+  }
+
+  function handleAccountLoginSubmit(e) {
+    e.preventDefault();
+    const idf = String(document.getElementById('loginEmailInput')?.value || '').trim().toLowerCase();
+    const cleanUname = normalizeUsername(idf);
+    const pass = String(document.getElementById('loginPasswordInput')?.value || '');
+    const users = getUsersDB();
+    const found = users.find(u => (String(u.email || '').trim().toLowerCase() === idf || (cleanUname && normalizeUsername(u.username || '') === cleanUname)) && u.password === pass);
+    if (!found) { showToast('Invalid login details.'); return; }
+    localStorage.setItem('spystore_current_user', JSON.stringify(found));
+    syncCurrentUserSavedData();
+    updateAuthUI();
+    closeAuthModal();
+    showToast(`Logged in as ${found.email}`);
+  }
+
+  function decodeJwtPayload(token) {
+    try {
+      const p = String(token || '').split('.');
+      if (p.length !== 3) return null;
+      const b64 = p[1].replace(/-/g, '+').replace(/_/g, '/').padEnd(p[1].length + ((4 - (p[1].length % 4)) % 4), '=');
+      return JSON.parse(atob(b64));
+    } catch (e) { return null; }
+  }
+
+  function completeGoogleLoginWithProfile(name, email, phone = '') {
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) return;
+    const username = cleanEmail.split('@')[0];
+    const derivedName = String(name || '').trim() || username.replace(/[._-]+/g, ' ').replace(/\w/g, c => c.toUpperCase());
+    const users = getUsersDB();
+    const existing = users.find(u => u.email === cleanEmail);
+    const gUser = { username, name: existing?.name || derivedName, email: cleanEmail, phone: phone || existing?.phone || '', provider: 'google' };
+    if (existing) Object.assign(existing, gUser);
+    else users.push(gUser);
+    saveUsersDB(users);
+    localStorage.setItem('spystore_current_user', JSON.stringify(gUser));
+    syncCurrentUserSavedData();
+    updateAuthUI();
+    closeAuthModal();
+    showToast(`Signed in with Google: ${gUser.email}`);
+  }
+
+  function handleGoogleCredentialResponse(resp) {
+    if (!resp || !resp.credential) return;
+    const payload = decodeJwtPayload(resp.credential);
+    if (payload && payload.email) completeGoogleLoginWithProfile(payload.name || payload.given_name || '', payload.email);
+  }
+
+  function initAndRenderGoogleButton() {
+    const clientId = String(window.GOOGLE_CLIENT_ID || '').trim();
+    const host = document.getElementById('officialGoogleBtnContainer');
+    if (!clientId || !window.google?.accounts?.id) return false;
+    try {
+      window.google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredentialResponse, auto_select: false });
+      if (host) {
+        host.innerHTML = '';
+        window.google.accounts.id.renderButton(host, { type: 'standard', theme: 'outline', size: 'large', text: 'continue_with', shape: 'pill', width: 300 });
+      }
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function handleGoogleSignIn() {
+    if (initAndRenderGoogleButton()) {
+      try { window.google.accounts.id.prompt(); return; } catch (e) {}
+    }
+    showToast('Loading Google Sign-In... please try again.');
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('spystore_current_user');
+    updateAuthUI();
+    closeAuthModal();
+    showToast('Logged out.');
+  }
+
+  // Drawer & Owner/Admin Tools
+  function refreshDrawerRoleTools() {
+    const role = getUserRole();
+    const sec = document.getElementById('drawerOwnerAdminSection');
+    const tagEl = document.getElementById('drawerCurrentRoleTag');
+    const custBtn = document.getElementById('drawerCustomersToolBtn');
+    const verifyBtn = document.getElementById('drawerVerifyToolBtn');
+    if (sec) sec.style.display = 'block';
+    if (tagEl) tagEl.textContent = role.toUpperCase();
+    if (custBtn) custBtn.style.display = role === 'owner' ? 'flex' : 'none';
+    if (verifyBtn) verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
+  }
+
+  function openDrawer() {
+    refreshDrawerRoleTools();
+    document.getElementById('drawerBackdrop').classList.add('open');
+    document.getElementById('sideDrawer').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawerBackdrop').classList.remove('open');
+    document.getElementById('sideDrawer').classList.remove('open');
+  }
+
+  function getManagerTargetOptions() {
+    const opts = [];
+    products.forEach(p => {
+      if (p.mode === 'dual' && Array.isArray(p.subPlans)) {
+        p.subPlans.forEach(sp => opts.push({ value: `${p.id}:${sp.key}`, label: `${p.name} (${sp.label})`, target: sp, parent: p }));
+      } else {
+        opts.push({ value: p.id, label: p.name, target: p, parent: p });
+      }
+    });
+    return opts;
+  }
+
+  function getStatusValueFromObj(obj, mo) {
+    if (!obj) return 'active';
+    if (mo === 1) return obj.comingSoon1Mo ? 'coming_soon' : (obj.disabled1Mo ? 'off' : 'active');
+    return obj.comingSoon2Mo ? 'coming_soon' : (obj.disabled2Mo ? 'off' : 'active');
+  }
+
+  function applyStatusValueToObj(obj, mo, val) {
+    if (mo === 1) { obj.comingSoon1Mo = val === 'coming_soon'; obj.disabled1Mo = val === 'off'; }
+    else { obj.comingSoon2Mo = val === 'coming_soon'; obj.disabled2Mo = val === 'off'; }
+    obj.comingSoon = Boolean(obj.comingSoon1Mo && obj.comingSoon2Mo);
+  }
+
+  function syncDrawerMgrFromSelect() {
+    const sel = document.getElementById('drawerMgrTargetSelect');
+    const opts = getManagerTargetOptions();
+    const found = opts.find(o => o.value === sel?.value) || opts[0];
+    if (!found) return;
+    const t = found.target;
+    document.getElementById('drawerMgrStockInput').value = Number(t.stock ?? 0);
+    document.getElementById('drawerMgrPrice1MoInput').value = Number(t.price ?? 0);
+    document.getElementById('drawerMgrPrice2MoInput').value = typeof t.price2Mo === 'number' && !isNaN(t.price2Mo) && t.price2Mo > 0 ? Number(t.price2Mo) : '';
+    document.getElementById('drawerMgrStatus1MoSelect').value = getStatusValueFromObj(t, 1);
+    document.getElementById('drawerMgrStatus2MoSelect').value = getStatusValueFromObj(t, 2);
+  }
+
+  function saveDrawerCatalogChanges() {
+    const role = getUserRole();
+    if (role !== 'owner' && role !== 'admin') { showToast('Owner or Admin access required.'); return; }
+    const sel = document.getElementById('drawerMgrTargetSelect');
+    const opts = getManagerTargetOptions();
+    const found = opts.find(o => o.value === sel?.value);
+    if (!found) return;
+    const t = found.target;
+    const stockVal = Math.max(0, parseInt(document.getElementById('drawerMgrStockInput')?.value || '0', 10) || 0);
+    const p1Val = parseFloat(document.getElementById('drawerMgrPrice1MoInput')?.value || '0');
+    const p2Raw = String(document.getElementById('drawerMgrPrice2MoInput')?.value || '').trim();
+    const p2Val = p2Raw ? parseFloat(p2Raw) : NaN;
+    const st1 = document.getElementById('drawerMgrStatus1MoSelect')?.value || 'active';
+    const st2 = document.getElementById('drawerMgrStatus2MoSelect')?.value || 'active';
+    if (!isNaN(p1Val) && p1Val > 0) t.price = p1Val;
+    if (!isNaN(p2Val) && p2Val > 0) t.price2Mo = p2Val;
+    else delete t.price2Mo;
+    t.stock = stockVal;
+    applyStatusValueToObj(t, 1, st1);
+    applyStatusValueToObj(t, 2, st2);
+    if (found.parent && found.parent.mode === 'dual') recomputeDualProductStock(found.parent);
+    saveCatalogState();
+    syncWebsiteCatalog();
+    closeOwnerAdminToolsModal();
+    showToast(`Updated ${found.label}!`);
+  }
+
+  function renderDrawerTransactionsList() {
+    const box = document.getElementById('drawerAllTransactionsBody');
+    if (!box) return;
+    const allTxns = getAllTransactionsDB();
+    if (!allTxns.length) {
+      box.innerHTML = `<div style="font-size:0.76rem; color:var(--text-muted); padding:10px; background:var(--bg-input); border-radius:10px;">No transactions recorded yet.</div>`;
+      return;
+    }
+    box.innerHTML = allTxns.slice(0, 30).map((t, tIdx) => `
+      <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:9px 11px;">
+        <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.82rem;">
+          <span>${t.app} (${t.months} Bln)</span>
+          <span style="color:var(--accent-gold);">RM${t.total}</span>
+        </div>
+        <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:2px;">${t.invoiceNo || t.ref || '-'} • ${t.customerName || '-'} (${t.customerPhone || '-'}) • ${t.date || '-'}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+          <span style="font-size:0.66rem; font-weight:700; color:var(--accent-cyan);">${t.status || 'PAID'} • ${t.paymentMethod || 'FPX'}</span>
+          <button type="button" onclick="downloadGlobalTxnInvoice(${tIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">📄 Invois</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function refreshVerifyRoleListUI() {
+    ensureOwnerAccountSeeded();
+    const users = getUsersDB().filter(u => !isDesignatedOwner(u));
+    const custBox = document.getElementById('registeredCustomersListBox');
+    const listBox = document.getElementById('verifiedAdminsListBox');
+    if (custBox) {
+      custBox.innerHTML = `<div style="font-weight:800; color:var(--accent-gold); margin-bottom:4px;">Registered Customers (${users.length})</div>` +
+        (users.length ? users.map(u => `<div>• <strong>${u.name || u.username || u.email}</strong> (@${u.username || '-'}) • ${u.email} • [${String(u.role || 'customer').toUpperCase()}]</div>`).join('') : '<div>No registered customers yet.</div>');
+    }
+    if (listBox) {
+      const admins = users.filter(u => String(u.role || '').toLowerCase() === 'admin');
+      listBox.innerHTML = `<div style="font-weight:800; color:var(--accent-cyan); margin-bottom:4px;">Active Admins (${admins.length})</div>` +
+        (admins.length ? admins.map(a => `<div>• <strong>${a.username || a.email}</strong> (${a.email})</div>`).join('') : '<div>No verified admins yet.</div>');
+    }
+  }
+
+  function verifyUserToAdminRole() {
+    if (getUserRole() !== 'owner') { showToast('Only Owner can verify admins.'); return; }
+    const rawQ = String(document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
+    const cleanU = normalizeUsername(rawQ);
+    if (!rawQ) { showToast('Enter an email or username.'); return; }
+    ensureOwnerAccountSeeded();
+    const users = getUsersDB();
+    const idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === rawQ || (cleanU && normalizeUsername(u.username || '') === cleanU));
+    if (idx === -1) { showToast('User account not found.'); return; }
+    if (isDesignatedOwner(users[idx])) { showToast('Owner role cannot be changed.'); return; }
+    users[idx].role = 'admin';
+    saveUsersDB(users);
+    if (document.getElementById('verifyEmailOrUsernameInput')) document.getElementById('verifyEmailOrUsernameInput').value = '';
+    refreshVerifyRoleListUI();
+    showToast(`${users[idx].username || users[idx].email} verified as ADMIN!`);
+  }
+
+  function openOwnerAdminManagerModal(tab = 'catalog') {
+    const role = getUserRole();
+    if (role !== 'owner' && role !== 'admin') { showToast('Owner or Admin access required.'); return; }
+    if ((tab === 'customers' || tab === 'verify') && role !== 'owner') { showToast('Owner access required.'); return; }
+    const modal = document.getElementById('ownerAdminToolsModal');
+    const catView = document.getElementById('drawerCatalogToolView');
+    const txnView = document.getElementById('drawerTransactionsToolView');
+    const custView = document.getElementById('drawerCustomersOnlyView');
+    const verView = document.getElementById('drawerVerifyRoleToolView');
+    const titleEl = document.getElementById('ownerAdminToolsTitle');
+    if (!modal || !catView || !txnView || !custView || !verView) return;
+    catView.style.display = tab === 'catalog' ? 'block' : 'none';
+    txnView.style.display = tab === 'transactions' ? 'block' : 'none';
+    custView.style.display = tab === 'customers' ? 'block' : 'none';
+    verView.style.display = tab === 'verify' ? 'block' : 'none';
+    if (tab === 'catalog') {
+      if (titleEl) titleEl.textContent = 'WEBSITE CATALOG MANAGER';
+      const sel = document.getElementById('drawerMgrTargetSelect');
+      const opts = getManagerTargetOptions();
+      if (sel) sel.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+      syncDrawerMgrFromSelect();
+    } else if (tab === 'transactions') {
+      if (titleEl) titleEl.textContent = 'ALL TRANSACTIONS';
+      renderDrawerTransactionsList();
+    } else if (tab === 'customers') {
+      if (titleEl) titleEl.textContent = 'REGISTERED CUSTOMERS';
+      refreshVerifyRoleListUI();
+    } else if (tab === 'verify') {
+      if (titleEl) titleEl.textContent = 'ADD ADMIN ROLE';
+      refreshVerifyRoleListUI();
+    }
+    modal.classList.add('open');
+  }
+
+  function closeOwnerAdminToolsModal() {
+    document.getElementById('ownerAdminToolsModal')?.classList.remove('open');
+  }
+
+  // Fresh Trending Discovery & Show/Movie Search Implementation
+  function buildFallbackTrendingData() {
+    const rawByApp = {
+      netflix: [
+        { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', popularity: 98, isNew: true, isKdrama: true, overview: 'Hundreds of cash-strapped players compete in high-stakes survival games.', backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
+        { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', popularity: 95, isNew: true, overview: 'Wednesday Addams investigates a mystery at Nevermore Academy.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
+        { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', popularity: 96, overview: 'A small town uncovers secret experiments and supernatural forces.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' },
+        { id: 76669, title: 'Doraemon: Stand by Me', mediaType: 'MOVIE', rating: '7.6', popularity: 89, overview: 'Nobita and Doraemon embark on an emotional journey for a brighter future.', backdrop: '', poster: '' },
+        { id: 204082, title: 'The Glory', mediaType: 'SERIES', rating: '8.3', popularity: 91, isKdrama: true, overview: 'A former bullying victim plans an intricate revenge years later.', backdrop: '', poster: '' },
+        { id: 902640, title: 'Extraction 2', mediaType: 'MOVIE', rating: '7.5', popularity: 88, isNew: true, overview: 'Mercenary Tyler Rake takes on another deadly extraction mission.', backdrop: '', poster: '' }
+      ],
+      disney: [
+        { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', popularity: 97, overview: 'The Avengers assemble once more to reverse Thanos’s actions.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg' },
+        { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', popularity: 94, overview: 'A lone bounty hunter travels across the galaxy protecting Grogu.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
+        { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', popularity: 95, isNew: true, overview: 'Riley’s mind headquarters welcomes brand-new emotions.', backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' },
+        { id: 205940, title: 'Moving', mediaType: 'SERIES', rating: '8.4', popularity: 90, isKdrama: true, overview: 'Teens with hidden superpowers protect their secrets with their parents.', backdrop: '', poster: '' },
+        { id: 508943, title: 'Luca', mediaType: 'MOVIE', rating: '7.9', popularity: 86, overview: 'Two sea monster friends enjoy a summer on the Italian Riviera.', backdrop: '', poster: '' }
+      ],
+      hbomax: [
+        { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', popularity: 95, isNew: true, overview: 'The Targaryen civil war unfolds before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
+        { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', popularity: 94, isNew: true, overview: 'Paul Atreides joins Chani and the Fremen on Arrakis.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
+        { id: 87472, title: 'The Last of Us', mediaType: 'SERIES', rating: '8.7', popularity: 93, overview: 'Joel and Ellie cross a post-pandemic America where survival is brutal.', backdrop: '', poster: '' },
+        { id: 414906, title: 'The Batman', mediaType: 'MOVIE', rating: '7.7', popularity: 89, overview: 'Batman uncovers corruption in Gotham City.', backdrop: '', poster: '' }
+      ],
+      primevideo: [
+        { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', popularity: 95, isNew: true, overview: 'Vigilantes confront corrupt superheroes who abuse their power.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg' },
+        { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', popularity: 91, isNew: true, overview: 'Jack Reacher takes down criminals across town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' },
+        { id: 609681, title: 'The Idea of You', mediaType: 'MOVIE', rating: '7.4', popularity: 87, isNew: true, overview: 'A single mother begins an unexpected romance with a young singer.', backdrop: '', poster: '' },
+        { id: 823464, title: 'Air', mediaType: 'MOVIE', rating: '7.5', popularity: 84, overview: 'The story behind the partnership that launched Air Jordan.', backdrop: '', poster: '' }
+      ]
+    };
+
+    const appMeta = {
+      netflix: { label: 'Netflix', price: 18 },
+      disney: { label: 'Disney+', price: 16 },
+      hbomax: { label: 'HBO Max', price: 16 },
+      primevideo: { label: 'Prime Video', price: 10 }
+    };
+
+    const byApp = {};
+    const allFlat = [];
+    Object.keys(appMeta).forEach(appKey => {
+      const meta = appMeta[appKey];
+      const prod = products.find(p => p.id === appKey);
+      const unitPrice = prod ? Number(prod.price) : meta.price;
+      const list = (rawByApp[appKey] || []).map((x, i) => ({
+        rank: i + 1,
+        id: x.id,
+        title: x.title,
+        mediaType: x.mediaType,
+        platformId: appKey,
+        platformLabel: meta.label,
+        price: unitPrice,
+        rating: x.rating,
+        popularity: x.popularity || (95 - i * 4),
+        isNew: Boolean(x.isNew),
+        isKdrama: Boolean(x.isKdrama),
+        overview: x.overview,
+        backdrop: x.backdrop || '',
+        poster: x.poster || ''
+      }));
+      const movies = list.filter(i => i.mediaType === 'MOVIE');
+      const series = list.filter(i => i.mediaType === 'SERIES');
+      const newReleases = list.filter(i => i.isNew);
+      const kdramaList = list.filter(i => i.isKdrama);
+      byApp[appKey] = {
+        label: meta.label,
+        price: unitPrice,
+        all: list,
+        movies: movies.length ? movies : list,
+        series: series.length ? series : list,
+        newReleases: newReleases.length ? newReleases : list.slice(0, 4),
+        popcorn: (movies.length ? movies : list).slice().sort((a, b) => Number(b.rating) - Number(a.rating)),
+        kdrama: kdramaList.length ? kdramaList : list.slice(0, 4),
+        rewatched: (series.length ? series : list).slice().sort((a, b) => (b.popularity * Number(b.rating)) - (a.popularity * Number(a.rating))),
+        onlyOn: list.slice(0, 6)
+      };
+      allFlat.push(...list);
+    });
+
+    return {
+      byApp,
+      categories: {
+        tv_my: allFlat.filter(i => i.mediaType === 'SERIES').slice(0, 10),
+        movie_my: allFlat.filter(i => i.mediaType === 'MOVIE').slice(0, 10),
+        new_in: allFlat.filter(i => i.isNew).slice(0, 10),
+        popcorn: allFlat.filter(i => i.mediaType === 'MOVIE').sort((a, b) => Number(b.rating) - Number(a.rating)).slice(0, 10),
+        kdrama: allFlat.filter(i => i.isKdrama).slice(0, 10),
+        rewatched: allFlat.filter(i => i.mediaType === 'SERIES').sort((a, b) => b.popularity - a.popularity).slice(0, 10),
+        only_on: allFlat.slice(0, 10)
+      },
+      items: [byApp.netflix.all[0], byApp.disney.all[0], byApp.hbomax.all[0], byApp.primevideo.all[0], byApp.netflix.all[1], byApp.disney.all[1]].filter(Boolean).map((it, idx) => ({ ...it, rank: idx + 1 }))
+    };
+  }
+
+  function ensureTrendingStoreReady() {
+    if (!trendingByApp || !Object.keys(trendingByApp).length) {
+      const fb = buildFallbackTrendingData();
+      trendingByApp = fb.byApp;
+      discoveryCategories = fb.categories;
+    }
+  }
+
+  function getAppItems(appId, catKey) {
+    ensureTrendingStoreReady();
+    const appObj = trendingByApp[appId] || trendingByApp.netflix || {};
+    if (catKey === 'movie_my') return appObj.movies || appObj.all || [];
+    if (catKey === 'tv_my') return appObj.series || appObj.all || [];
+    if (catKey === 'new_in') return appObj.newReleases || appObj.all || [];
+    if (catKey === 'popcorn') return appObj.popcorn || appObj.movies || appObj.all || [];
+    if (catKey === 'kdrama') return appObj.kdrama || appObj.all || [];
+    if (catKey === 'rewatched') return appObj.rewatched || appObj.series || appObj.all || [];
+    return appObj.onlyOn || appObj.all || [];
+  }
+
+  function openTrendingModal(defaultCat = 'tv_my', appFilter = 'netflix') {
+    ensureTrendingStoreReady();
+    const modal = document.getElementById('trendingModal');
+    if (!modal) return;
+    activeDiscoveryCat = CATEGORY_TITLES[defaultCat] ? defaultCat : 'tv_my';
+    activeAppSubFilter = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(appFilter) ? appFilter : 'netflix';
+    triggerTopLoader(400);
+    modal.style.display = 'flex';
+    renderTrendingModal();
+  }
+
+  function closeTrendingModal() {
+    const modal = document.getElementById('trendingModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function switchDiscoveryCategory(catKey) {
+    activeDiscoveryCat = catKey;
+    renderTrendingModal();
+  }
+
+  function switchAppSubFilter(appKey) {
+    activeAppSubFilter = appKey;
+    renderTrendingModal();
+  }
+
+  function renderPosterOrFallback(item) {
+    const fallbackHtml = `<div style="width:62px;height:92px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent-gold);font-weight:800;font-size:0.72rem;">🎬<span>${item.mediaType || 'SHOW'}</span></div>`;
+    if (!item.poster) return fallbackHtml;
+    return `<img src="${item.poster}" alt="${item.title}" referrerpolicy="no-referrer" style="width:62px; height:92px; object-fit:cover; border-radius:10px; flex-shrink:0;" onerror="this.outerHTML = \`${fallbackHtml.replace(/"/g, '&quot;')}\`;" />`;
+  }
+
+  function renderTrendingModal() {
+    ensureTrendingStoreReady();
+    const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
+    const baseTitle = CATEGORY_TITLES[activeDiscoveryCat] || 'Streaming Picks';
+    const titleEl = document.getElementById('trendingModalTitle');
+    if (titleEl) titleEl.textContent = `${appLabels[activeAppSubFilter] || 'Netflix'} • ${baseTitle}`;
+    ['netflix', 'disney', 'hbomax', 'primevideo'].forEach(appId => {
+      const sBtn = document.getElementById(`appSub_${appId}`);
+      if (!sBtn) return;
+      const active = activeAppSubFilter === appId;
+      sBtn.style.background = active ? 'var(--accent-blue)' : 'var(--bg-card)';
+      sBtn.style.color = active ? '#ffffff' : 'var(--text-secondary)';
+      sBtn.style.border = active ? 'none' : '1px solid var(--border-color)';
+    });
+    Object.keys(CATEGORY_TITLES).forEach(key => {
+      const btn = document.getElementById(`catTab_${key}`);
+      if (!btn) return;
+      const isActive = key === activeDiscoveryCat;
+      btn.style.background = isActive ? 'var(--accent-gold)' : 'var(--bg-card)';
+      btn.style.color = isActive ? '#09090b' : 'var(--text-secondary)';
+      btn.style.border = isActive ? 'none' : '1px solid var(--border-color)';
+    });
+    const body = document.getElementById('trendingModalBody');
+    if (!body) return;
+    const list = getAppItems(activeAppSubFilter, activeDiscoveryCat);
+    if (!list || !list.length) {
+      body.innerHTML = `<div style="text-align:center; padding:22px; color:var(--text-muted); font-size:0.8rem;">No titles available for this selection right now.</div>`;
+      return;
+    }
+    body.innerHTML = list.map((item, idx) => `
+      <div class="discovery-row-card" style="display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
+        <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${idx + 1}</div>
+        ${renderPosterOrFallback(item)}
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap;">
+            <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel}</span>
+            <span style="font-size:0.64rem; color:var(--accent-cyan); font-weight:700;">${item.mediaType}</span>
+            <span style="font-size:0.68rem; color:var(--accent-gold); font-weight:700;">★ ${item.rating}</span>
+          </div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
+          <div style="font-size:0.73rem; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px;">${item.overview || ''}</div>
+          <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId}');">Order ${item.platformLabel} • RM${Number(item.price).toFixed(2)} ✓</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openShowDetailModal(item) {
+    if (!item) return;
+    const modal = document.getElementById('showDetailModal');
+    const body = document.getElementById('showDetailBody');
+    if (!modal || !body) return;
+    const prod = products.find(p => p.id === item.platformId) || products[0];
+    const priceVal = prod ? Number(prod.price) : Number(item.price || 10);
+    body.innerHTML = `
+      <div class="spec-hero">
+        ${item.poster ? `<img src="${item.poster}" alt="${item.title}" class="spec-poster" onerror="this.style.display='none';" />` : ''}
+        <div style="flex:1; min-width:0;">
+          <div class="spec-title">${item.title}</div>
+          <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700; margin-bottom:6px;">${item.platformLabel || prod.name} • ${item.mediaType || 'SHOW'} • ★ ${item.rating || 'N/A'}</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary);">${item.overview || ''}</div>
+        </div>
+      </div>
+      <div class="spec-actions">
+        <button type="button" class="primary-submit" style="width:auto; flex:1; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${prod.id}');">Order ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} →</button>
+        <button type="button" class="back-btn" style="margin-bottom:0;" onclick="closeShowDetailModal()">Close</button>
+      </div>
+    `;
+    modal.classList.add('open');
+  }
+
+  function openShowDetailByIndex(appKey, catKey, idx) {
+    const list = getAppItems(appKey, catKey);
+    if (list && list[idx]) openShowDetailModal(list[idx]);
+  }
+
+  function loadTrendingHero() {
+    const fb = buildFallbackTrendingData();
+    trendingByApp = fb.byApp;
+    discoveryCategories = fb.categories;
+    const items = fb.items.slice(0, 6);
+    const track = document.getElementById('heroTrack');
+    const dotsWrap = document.getElementById('heroDots');
+    if (!track || !dotsWrap || !items.length) return;
+    track.innerHTML = items.map((item, idx) => {
+      const prod = products.find(p => p.id === item.platformId) || products[0];
+      const bgStyle = item.backdrop ? `style="background-image:url('${item.backdrop}'); cursor:pointer;"` : `style="background:linear-gradient(135deg,#0b132b 0%,#172554 58%,#09152b 100%); cursor:pointer;"`;
+      return `
+        <section class="hero-slide trending-slide" ${bgStyle} onclick="openTrendingModal('tv_my', '${item.platformId}')">
+          <div class="trending-meta">
+            <span class="hero-pill">🔥 #${idx + 1} TRENDING</span>
+            <span class="platform-badge">${item.platformLabel}</span>
+          </div>
+          <h1>${item.title}</h1>
+          <p>${item.overview || ''}</p>
+          <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${item.platformLabel} • RM${Number(item.price).toFixed(2)} →</button>
+        </section>
+      `;
+    }).join('');
+    totalSlides = items.length;
+    currentSlide = 0;
+    dotsWrap.innerHTML = items.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i + 1}"></button>`).join('');
+  }
+
+  function goToSlide(index) {
+    const track = document.getElementById('heroTrack');
+    if (!track) return;
+    currentSlide = index;
+    track.scrollTo({ left: track.clientWidth * index, behavior: 'smooth' });
+    document.querySelectorAll('#heroDots .hero-dot').forEach((d, i) => d.classList.toggle('active', i === index));
+  }
+
+  function handleHeroScroll() {
+    const track = document.getElementById('heroTrack');
+    if (!track || !track.clientWidth) return;
+    const idx = Math.round(track.scrollLeft / track.clientWidth);
+    if (idx !== currentSlide) {
+      currentSlide = idx;
+      document.querySelectorAll('#heroDots .hero-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+  }
+
+  function collectAllShowCatalog() {
+    ensureTrendingStoreReady();
+    const extraShows = [
+      { title: 'Ultraman Trigger', year: '2021', mediaType: 'SERIES', rating: '7.6', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Kengo Manaka bonds with Ultraman Trigger to defend Earth.' },
+      { title: 'Ultraman Blazar', year: '2023', mediaType: 'SERIES', rating: '8.1', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Captain Gento Hiruma transforms into Ultraman Blazar.' },
+      { title: 'Ultraman Z', year: '2020', mediaType: 'SERIES', rating: '8.4', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Haruki Natsuki teams up with Ultraman Z.' },
+      { title: 'Lupin', year: '2021', mediaType: 'SERIES', rating: '7.5', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Assane Diop is inspired by gentleman thief Arsene Lupin.' },
+      { title: 'Doraemon: Stand by Me', year: '2014', mediaType: 'MOVIE', rating: '7.6', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Doraemon helps Nobita gain confidence and happiness.' },
+      { title: 'Demon Slayer: Kimetsu no Yaiba', year: '2019', mediaType: 'SERIES', rating: '8.7', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Tanjiro Kamado fights demons to save his sister.' },
+      { title: 'Spider-Man: No Way Home', year: '2021', mediaType: 'MOVIE', rating: '8.0', platformId: 'disney', platformLabel: 'Disney+', overview: 'Peter Parker seeks help from Doctor Strange.' },
+      { title: 'Avatar: The Way of Water', year: '2022', mediaType: 'MOVIE', rating: '7.6', platformId: 'disney', platformLabel: 'Disney+', overview: 'Jake Sully and Neytiri protect their family across Pandora.' },
+      { title: 'The Flash', year: '2023', mediaType: 'MOVIE', rating: '6.7', platformId: 'hbomax', platformLabel: 'HBO Max', overview: 'Barry Allen travels through time.' },
+      { title: 'John Wick: Chapter 4', year: '2023', mediaType: 'MOVIE', rating: '7.8', platformId: 'primevideo', platformLabel: 'Prime Video', overview: 'John Wick faces the High Table.' }
+    ];
+    const trendingShows = [];
+    Object.values(trendingByApp || {}).forEach(appObj => (appObj.all || []).forEach(it => trendingShows.push(it)));
+    const seen = new Set();
+    return [...trendingShows, ...extraShows].filter(item => {
+      const key = `${String(item.title || '').toLowerCase()}|${String(item.platformId || '')}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function findMatchingShows(query) {
+    const ql = String(query || '').trim().toLowerCase();
+    if (!ql) return [];
+    return collectAllShowCatalog().filter(item =>
+      String(item.title || '').toLowerCase().includes(ql) ||
+      String(item.platformLabel || '').toLowerCase().includes(ql) ||
+      String(item.mediaType || '').toLowerCase().includes(ql) ||
+      String(item.overview || '').toLowerCase().includes(ql)
+    );
+  }
+
+  window._lastSearchedShows = [];
+
+  function openSearchedShowDetail(idx) {
+    const list = Array.isArray(window._lastSearchedShows) ? window._lastSearchedShows : [];
+    if (list[idx]) openShowDetailModal(list[idx]);
+  }
+
+  function searchShowFromMainBox() {
+    const inp = document.getElementById('searchInput');
+    const box = document.getElementById('inlineShowResultsBox');
+    if (!inp || !box) return;
+    const q = inp.value.trim();
+    if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    const matches = findMatchingShows(q);
+    window._lastSearchedShows = matches;
+    box.style.display = 'block';
+    box.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 Show / Movie Search: "${q}" (${matches.length})</span>
+        <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
+      </div>
+      ${matches.length ? matches.slice(0, 8).map((m, idx) => {
+        const prod = products.find(p => p.id === m.platformId) || products[0];
+        const priceVal = prod ? Number(prod.price) : Number(m.price || 10);
+        return `
+          <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="openSearchedShowDetail(${idx})">
+            <div style="min-width:0;">
+              <div style="font-weight:700; font-size:0.82rem; color:var(--text-primary);">${m.title} ${m.year ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}</div>
+              <div style="font-size:0.68rem; color:var(--accent-cyan);">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • ${m.platformLabel || prod.name}</div>
+            </div>
+            <button type="button" onclick="event.stopPropagation(); openCheckout('${prod.id}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer; white-space:nowrap;">RM${priceVal.toFixed(2)} ✓</button>
+          </div>
+        `;
+      }).join('') : `<div style="font-size:0.76rem; color:var(--text-muted);">No matching movie or show found for "${q}".</div>`}
+    `;
+  }
+
+  function openShowSearchModal() {
+    const m = document.getElementById('showSearchModal');
+    if (m) m.classList.add('open');
+    setTimeout(() => {
+      const i = document.getElementById('showSearchInput');
+      if (i) { i.focus(); if (i.value.trim()) runShowSearch(); }
+    }, 80);
+  }
+
+  function closeShowSearchModal() { document.getElementById('showSearchModal')?.classList.remove('open'); }
+  function closeShowDetailModal() { document.getElementById('showDetailModal')?.classList.remove('open'); }
+
+  function runShowSearch() {
+    const inp = document.getElementById('showSearchInput');
+    const box = document.getElementById('showSearchResults');
+    if (!inp || !box) return;
+    const q = inp.value.trim();
+    if (!q) { box.innerHTML = `<div style="font-size:0.76rem; color:var(--text-muted);">Type a movie or show title to check availability.</div>`; return; }
+    const matches = findMatchingShows(q);
+    window._lastSearchedShows = matches;
+    box.innerHTML = matches.length ? matches.map((m, idx) => {
+      const prod = products.find(p => p.id === m.platformId) || products[0];
+      const priceVal = prod ? Number(prod.price) : Number(m.price || 10);
+      return `
+        <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;" onclick="openSearchedShowDetail(${idx})">
+          <div style="min-width:0;">
+            <div style="font-weight:700; font-size:0.84rem; color:var(--text-primary);">${m.title} ${m.year ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}</div>
+            <div style="font-size:0.7rem; color:var(--accent-cyan); margin-top:2px;">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • Available on <strong>${m.platformLabel || prod.name}</strong></div>
+          </div>
+          <button type="button" onclick="event.stopPropagation(); closeShowSearchModal(); openCheckout('${prod.id}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:5px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; white-space:nowrap;">Order • RM${priceVal.toFixed(2)}</button>
+        </div>
+      `;
+    }).join('') : `<div style="font-size:0.78rem; color:var(--text-muted);">No matching movie or show found for "${q}".</div>`;
+  }
+
+  function copyReceiptSummary() {
+    if (lastReceiptPlainText && navigator.clipboard) {
+      navigator.clipboard.writeText(lastReceiptPlainText).catch(() => {});
+      showToast('Order summary copied!');
+    }
+  }
+
+  (async function checkPaymentReturn() {
+    const params = new URLSearchParams(window.location.search);
+    const bpPaid = params.get('billplz[paid]');
+    const bpId = params.get('billplz[id]');
+    const statusId = params.get('status_id') || (bpPaid === 'true' ? '1' : '');
+    const ref = params.get('ref') || params.get('order_id') || bpId || '';
+    const billCode = params.get('billcode') || bpId || '-';
+    if (statusId === '1' && ref) {
+      let pending = {};
+      try { pending = JSON.parse(localStorage.getItem('spystore_pending_order') || '{}'); } catch (e) {}
+      const appName = params.get('app') || pending.appName || 'Subscription';
+      const months = params.get('mo') || pending.months || '1';
+      const custName = params.get('name') || pending.customerName || '-';
+      const custPhone = pending.customerPhone || '-';
+      const custDevice = pending.customerDevice || '-';
+      const totalPaid = pending.totalAmount || '-';
+      const banner = document.getElementById('receiptBanner');
+      banner.classList.add('show');
+      document.getElementById('receiptTitle').textContent = `✅ Payment Confirmed • ${ref}`;
+      document.getElementById('receiptDesc').textContent = `${appName} (${months} Month) — Admin has been notified. Tap below to receive your account on WhatsApp.`;
+      const cleanTotal = (totalPaid && totalPaid !== '-' && !isNaN(parseFloat(totalPaid))) ? `RM${parseFloat(totalPaid).toFixed(2)}` : '-';
+      const waText = [
+        '✨ *RESIT TEMPAHAN — SPYSTORE BY SAMS* ✨',
+        '━━━━━━━━━━━━━━━━━━━━━━',
+        `🧾 *No. Rujukan:* \`${ref}\``,
+        '✅ *Status:* Pembayaran Berjaya (FPX)',
+        `📱 *Produk:* ${appName} (${months} Bulan)`,
+        `💰 *Jumlah Bayaran:* ${cleanTotal}`,
+        `👤 *Nama:* ${custName}`,
+        `📲 *WhatsApp:* ${custPhone}`,
+        ...(custDevice && custDevice !== '-' ? [`💻 *Peranti:* ${custDevice}`] : []),
+        '━━━━━━━━━━━━━━━━━━━━━━',
+        'Mohon admin semak & proses pengaktifan akaun saya. Terima kasih!'
+      ].join('\n');
+      const confirmedTxn = recordGlobalTransaction({
+        invoiceNo: pending.invoiceNo || generateInvoiceNumber(),
+        ref, app: appName, months, total: totalPaid,
+        date: new Date().toLocaleDateString('en-MY'),
+        customerName: custName, customerPhone: custPhone,
+        customerEmail: pending.customerEmail || getCurrentUser()?.email || '-',
+        customerDevice: custDevice, paymentMethod: 'FPX', status: 'PAID'
+      });
+      window._latestReceiptInvoice = confirmedTxn;
+      lastReceiptPlainText = waText;
+      document.getElementById('receiptWaLink').href = `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waText)}`;
+    }
+  })();
+
+  ensureOwnerAccountSeeded();
+  applyLanguage();
+  updateAuthUI();
+  refreshDrawerRoleTools();
+  syncWebsiteCatalog();
+  loadTrendingHero();
+</script>
+</body>
+</html>
