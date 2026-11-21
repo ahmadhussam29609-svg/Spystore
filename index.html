@@ -4262,7 +4262,21 @@
     `;
   }
 
-  // Gambar 2 style: SHOW SPECIFICATION modal with poster, metadata grid, short synopsis & order button
+  function renderPlatformLogoOnly(plat) {
+    const prod = products.find(p => p.id === plat.id);
+    const logoSrc = prod ? prod.logo : `${plat.id}.png`;
+    const badgeTxt = prod ? prod.badge : (plat.label || 'APP').slice(0, 2).toUpperCase();
+    const bgCol = prod ? prod.bg : '#18181b';
+    const fgCol = prod ? prod.color : '#ef4444';
+    return `
+      <span title="${plat.label}" style="display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:6px; background:${bgCol}; color:${fgCol}; overflow:hidden; flex-shrink:0; border:1px solid var(--border-color);">
+        <img src="${logoSrc}" alt="${plat.label}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+        <span style="display:none; font-size:0.65rem; font-weight:800;">${badgeTxt}</span>
+      </span>
+    `;
+  }
+
+  // SHOW SPECIFICATION modal: logo moved into PLATFORM / ACCESS box, no "AVAILABLE ON", no text inside platform box, no bottom Close button
   function openShowDetailModal(item) {
     if (!item) return;
     const modal = document.getElementById('showDetailModal');
@@ -4289,11 +4303,7 @@
           : `<div class="spec-poster" style="background:var(--bg-input); display:flex; align-items:center; justify-content:center; color:var(--accent-gold); font-weight:800;">🎬</div>`}
         <div style="flex:1; min-width:0;">
           <div class="spec-title">${item.title}</div>
-          <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700; margin-bottom:8px;">${mediaTypeStr} • ${yearStr}</div>
-          <div style="font-size:0.64rem; font-weight:800; letter-spacing:0.06em; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px;">AVAILABLE ON</div>
-          <div style="display:flex; flex-wrap:wrap; gap:6px;">
-            ${plats.map(pl => renderSmallPlatformChip(pl)).join('')}
-          </div>
+          <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700;">${mediaTypeStr} • ${yearStr}</div>
         </div>
       </div>
 
@@ -4312,7 +4322,9 @@
         </div>
         <div class="spec-box">
           <div class="spec-label">PLATFORM / ACCESS</div>
-          <div class="spec-val" style="color:var(--accent-cyan);">${platNamesStr}</div>
+          <div class="spec-val" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:2px;">
+            ${plats.map(pl => renderPlatformLogoOnly(pl)).join('')}
+          </div>
         </div>
       </div>
 
@@ -4322,8 +4334,7 @@
       </div>
 
       <div class="spec-actions">
-        <button type="button" class="primary-submit" style="width:auto; flex:1; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${prod.id}');">Order ${platNamesStr} →</button>
-        <button type="button" class="back-btn" style="margin-bottom:0;" onclick="closeShowDetailModal()">Close</button>
+        <button type="button" class="primary-submit" style="width:100%; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${prod.id}');">Order ${platNamesStr} →</button>
       </div>
     `;
     modal.classList.add('open');
