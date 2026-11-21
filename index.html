@@ -2106,6 +2106,18 @@
       align-items: center;
     }
 
+
+    @media (max-width: 470px) {
+      .brand-sub { display: none; }
+      .brand-title { font-size: 0.78rem; max-width: 78px; }
+      .pill-btn { max-width: 112px; overflow: hidden; text-overflow: ellipsis; padding: 6px 8px; font-size: 0.68rem; }
+      .logo-box { width: 32px; height: 32px; }
+      .menu-btn { width: 30px; height: 30px; }
+      .lang-btn { padding: 5px 7px; font-size: 0.68rem; }
+      .icon-btn { width: 28px; height: 28px; font-size: 0.78rem; }
+      .nav-actions { gap: 4px; }
+    }
+
   </style>
 </head>
 <body>
@@ -2395,15 +2407,20 @@
     </svg>
   </a>
 
-  <!-- Sign Up / Account Modal (GameJus-inspired) -->
+  <!-- Sign Up / Login / Account Modal -->
   <div class="modal-backdrop" id="authModal">
     <div class="modal-card">
       <div class="modal-top">
-        <h3 id="authModalTitle">SPYSTORE SIGN UP</h3>
+        <h3 id="authModalTitle">SPYSTORE ACCOUNT</h3>
         <button type="button" class="close-modal" onclick="closeAuthModal()">✕</button>
       </div>
 
       <div id="authFormsView" class="auth-form-anim">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" id="authModeSignupBtn" onclick="switchAuthMode('signup')">Sign Up</button>
+          <button type="button" class="auth-tab" id="authModeLoginBtn" onclick="switchAuthMode('login')">Login</button>
+        </div>
+
         <div id="officialGoogleBtnContainer" style="display:flex; justify-content:center; align-items:center; min-height:44px; margin-bottom:8px;"></div>
         <button type="button" id="customGoogleFallbackBtn" onclick="handleGoogleSignIn('signup')" style="width:100%; background:#ffffff; color:#0f172a; border:1.5px solid var(--border-strong); padding:12px 14px; border-radius:12px; font-weight:800; font-size:0.86rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
           <span id="gSignupSvgSlot"></span>
@@ -2418,27 +2435,53 @@
 
         <form id="simpleSignupForm" onsubmit="handleSignupSubmit(event)">
           <div class="form-group">
-            <label>Username / Email Address *</label>
-            <div style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;">
-              <input type="text" class="form-control" id="signupUserOrEmail" placeholder="e.g. ahmad or ahmad@gmail.com" required />
-              <span style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:10px 11px; border-radius:10px; font-size:0.78rem; font-weight:700; white-space:nowrap;">@ email.com</span>
-            </div>
+            <label>Email Address *</label>
+            <input type="email" class="form-control" id="signupEmailInput" placeholder="e.g. ahmad@gmail.com" required />
           </div>
-          <button type="submit" class="primary-submit">CONTINUE SIGN UP →</button>
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" class="form-control" id="signupFullNameInput" placeholder="e.g. Ahmad Hussam" required />
+          </div>
+          <div class="form-group">
+            <label>Password *</label>
+            <input type="password" class="form-control" id="signupPasswordInput" placeholder="Minimum 6 characters" minlength="6" required />
+          </div>
+          <button type="submit" class="primary-submit">CREATE ACCOUNT →</button>
         </form>
 
-        <div class="warranty-rules-box" style="margin-top:14px;">
-          <strong>Easy Steps to Join SPYSTORE</strong>
-          <ol class="warranty-rules-list">
-            <li>Sign in with Google or enter your email/username to create your account.</li>
-            <li>Your account profile and transaction history stay saved automatically.</li>
-            <li>Enjoy instant digital subscription ordering with full warranty.</li>
-          </ol>
-        </div>
+        <form id="simpleLoginForm" style="display:none;" onsubmit="handleAccountLoginSubmit(event)">
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" class="form-control" id="loginEmailInput" placeholder="e.g. ahmad@gmail.com" required />
+          </div>
+          <div class="form-group">
+            <label>Password *</label>
+            <input type="password" class="form-control" id="loginPasswordInput" placeholder="Enter your password" required />
+          </div>
+          <button type="submit" class="primary-submit">LOGIN TO ACCOUNT →</button>
+        </form>
       </div>
 
       <div id="loggedInView" style="display:none;">
         <div class="profile-box" id="profileDetailsBox"></div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+          <button type="button" onclick="toggleProfileEditMode()" id="editProfileBtn" style="background:var(--bg-input); border:1px solid var(--border-strong); color:var(--accent-cyan); padding:6px 12px; border-radius:9px; font-size:0.76rem; font-weight:700; cursor:pointer;">✏️ Edit Details</button>
+        </div>
+        <form id="editProfileForm" style="display:none; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:12px; margin-bottom:12px;" onsubmit="saveProfileEdits(event)">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" class="form-control" id="editFullNameInput" required />
+          </div>
+          <div class="form-group">
+            <label>Username *</label>
+            <input type="text" class="form-control" id="editUsernameInput" required />
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>WhatsApp Number</label>
+            <input type="tel" class="form-control" id="editPhoneInput" placeholder="e.g. 0189066291" />
+          </div>
+          <button type="submit" class="primary-submit" style="margin-top:0;">Save Profile Changes</button>
+        </form>
         <h4 style="font-size:0.85rem; margin-bottom:8px;">Transaction History</h4>
         <div id="orderHistoryList"></div>
         <button type="button" class="logout-btn" onclick="handleLogout()">Log Out</button>
@@ -2997,23 +3040,24 @@
       const dList = mapApp('disney', 'Disney+', 16);
       const hList = mapApp('hbomax', 'HBO Max', 16);
       const pList = mapApp('primevideo', 'Prime Video', 10);
+      const allFb = [nList[0], nList[1], dList[0], dList[1], hList[0], pList[0], dList[2], hList[1]];
       return {
         byApp: {
-          netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: nList, price: 18, label: 'Netflix' },
-          disney: { movies: dList.filter(i => i.mediaType === 'MOVIE'), series: dList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: dList, price: 16, label: 'Disney+' },
-          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: hList, price: 16, label: 'HBO Max' },
-          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [], kdrama: pList, price: 10, label: 'Prime Video' }
+          netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [nList[1]], newSeries: [nList[0]], kdrama: [nList[0], nList[1]], price: 18, label: 'Netflix' },
+          disney: { movies: dList.filter(i => i.mediaType === 'MOVIE'), series: dList.filter(i => i.mediaType === 'SERIES'), newMovies: [dList[2]], newSeries: [dList[1]], kdrama: [dList[1]], price: 16, label: 'Disney+' },
+          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: [hList[1]], newSeries: [hList[0]], kdrama: [hList[0]], price: 16, label: 'HBO Max' },
+          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: [pList[2]], newSeries: [pList[0]], kdrama: [pList[1]], price: 10, label: 'Prime Video' }
         },
         categories: {
           tv_my: [nList[0], dList[1], hList[0], pList[0]],
           movie_my: [dList[0], hList[1], dList[2], pList[2]],
           new_in: [nList[1], dList[2], hList[1], pList[1]],
           popcorn: [dList[0], hList[1], hList[2], pList[2]],
-          kdrama: [nList[0], nList[1], dList[0]],
+          kdrama: [nList[0], nList[1], dList[1]],
           rewatched: [hList[0], nList[2], dList[1], pList[0]],
           only_on: [nList[0], dList[0], hList[0], pList[0]]
         },
-        items: [nList[0], dList[0], hList[0], pList[0]].map((it, idx) => ({ ...it, rank: idx + 1 }))
+        items: allFb.map((it, idx) => ({ ...it, rank: idx + 1 }))
       };
     }
 
@@ -3968,40 +4012,73 @@
       refreshCheckoutLoginReminder();
     }
 
-    function renderAuthSignupCardHtml() {
+    function switchAuthMode(mode = 'signup') {
+      const isSignup = mode === 'signup';
+      const sBtn = document.getElementById('authModeSignupBtn');
+      const lBtn = document.getElementById('authModeLoginBtn');
+      const sForm = document.getElementById('simpleSignupForm');
+      const lForm = document.getElementById('simpleLoginForm');
+      if (sBtn) sBtn.classList.toggle('active', isSignup);
+      if (lBtn) lBtn.classList.toggle('active', !isSignup);
+      if (sForm) sForm.style.display = isSignup ? 'block' : 'none';
+      if (lForm) lForm.style.display = isSignup ? 'none' : 'block';
+    }
+
+    function renderProfileCardHtml(user) {
       return `
-        <div id="officialGoogleBtnContainer" style="display:flex; justify-content:center; align-items:center; min-height:44px; margin-bottom:8px;"></div>
-        <button type="button" id="customGoogleFallbackBtn" onclick="handleGoogleSignIn('signup')" style="width:100%; background:#ffffff; color:#0f172a; border:1.5px solid var(--border-strong); padding:12px 14px; border-radius:12px; font-weight:800; font-size:0.86rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
-          <span id="gSignupSvgSlot"></span>
-          <span>Continue with Google</span>
-        </button>
-
-        <div style="display:flex; align-items:center; gap:10px; margin:14px 0; color:var(--text-muted); font-size:0.72rem; font-weight:800; letter-spacing:0.06em;">
-          <span style="flex:1; height:1px; background:var(--border-color);"></span>
-          <span>OR</span>
-          <span style="flex:1; height:1px; background:var(--border-color);"></span>
-        </div>
-
-        <form id="simpleSignupForm" onsubmit="handleSignupSubmit(event)">
-          <div class="form-group">
-            <label>Username / Email Address *</label>
-            <div style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;">
-              <input type="text" class="form-control" id="signupUserOrEmail" placeholder="e.g. ahmad or ahmad@gmail.com" required />
-              <span style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:10px 11px; border-radius:10px; font-size:0.78rem; font-weight:700; white-space:nowrap;">@ email.com</span>
-            </div>
-          </div>
-          <button type="submit" class="primary-submit">CONTINUE SIGN UP →</button>
-        </form>
-
-        <div class="warranty-rules-box" style="margin-top:14px;">
-          <strong>Easy Steps to Join SPYSTORE</strong>
-          <ol class="warranty-rules-list">
-            <li>Sign in with Google or enter your email/username to create your account.</li>
-            <li>Your account profile and transaction history stay saved automatically.</li>
-            <li>Enjoy instant digital subscription ordering with full warranty.</li>
-          </ol>
-        </div>
+        <p><strong>Username:</strong> ${user.username || (user.email ? user.email.split('@')[0] : user.name)}</p>
+        <p><strong>Full Name:</strong> ${user.name}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <p><strong>Country:</strong> Malaysia</p>
+        <p style="margin-bottom:0;"><strong>WhatsApp:</strong> ${user.phone || '-'}</p>
       `;
+    }
+
+    function toggleProfileEditMode() {
+      const user = getCurrentUser();
+      const form = document.getElementById('editProfileForm');
+      if (!user || !form) return;
+      const opening = form.style.display === 'none';
+      form.style.display = opening ? 'block' : 'none';
+      if (opening) {
+        document.getElementById('editFullNameInput').value = user.name || '';
+        document.getElementById('editUsernameInput').value = user.username || (user.email ? user.email.split('@')[0] : '');
+        document.getElementById('editPhoneInput').value = user.phone || '';
+      }
+    }
+
+    function saveProfileEdits(e) {
+      e.preventDefault();
+      const user = getCurrentUser();
+      if (!user || !user.email) return;
+
+      const newName = String(document.getElementById('editFullNameInput')?.value || '').trim();
+      const newUsername = String(document.getElementById('editUsernameInput')?.value || '').trim();
+      const newPhone = String(document.getElementById('editPhoneInput')?.value || '').trim();
+      if (!newName || !newUsername) return;
+
+      const updated = {
+        ...user,
+        name: newName,
+        username: newUsername,
+        phone: newPhone
+      };
+
+      const users = getUsersDB();
+      const idx = users.findIndex(u => u.email === user.email);
+      if (idx !== -1) {
+        users[idx] = { ...users[idx], ...updated };
+      } else {
+        users.push(updated);
+      }
+      saveUsersDB(users);
+      localStorage.setItem('spystore_current_user', JSON.stringify(updated));
+      syncCurrentUserSavedData();
+      updateAuthUI();
+
+      document.getElementById('profileDetailsBox').innerHTML = renderProfileCardHtml(updated);
+      document.getElementById('editProfileForm').style.display = 'none';
+      showToast('Profile details updated!');
     }
 
     function openAuthModal() {
@@ -4013,20 +4090,15 @@
         document.getElementById('authModalTitle').textContent = 'SPYSTORE PROFILE';
         document.getElementById('authFormsView').style.display = 'none';
         document.getElementById('loggedInView').style.display = 'block';
-        document.getElementById('profileDetailsBox').innerHTML = `
-          <p><strong>Username:</strong> ${user.username || (user.email ? user.email.split('@')[0] : user.name)}</p>
-          <p><strong>Full Name:</strong> ${user.name}</p>
-          <p><strong>Email:</strong> ${user.email}</p>
-          <p><strong>Country:</strong> Malaysia</p>
-          <p style="margin-bottom:0;"><strong>WhatsApp:</strong> ${user.phone || '-'}</p>
-        `;
+        const editForm = document.getElementById('editProfileForm');
+        if (editForm) editForm.style.display = 'none';
+        document.getElementById('profileDetailsBox').innerHTML = renderProfileCardHtml(user);
         renderOrderHistory();
       } else {
-        document.getElementById('authModalTitle').textContent = 'SPYSTORE SIGN UP';
-        const formsView = document.getElementById('authFormsView');
-        formsView.innerHTML = renderAuthSignupCardHtml();
-        formsView.style.display = 'block';
+        document.getElementById('authModalTitle').textContent = 'SPYSTORE ACCOUNT';
+        document.getElementById('authFormsView').style.display = 'block';
         document.getElementById('loggedInView').style.display = 'none';
+        switchAuthMode('signup');
         hydrateGoogleButtonLogos();
         setTimeout(() => {
           if (typeof initAndRenderGoogleButton === 'function') {
@@ -4042,34 +4114,57 @@
 
     function handleSignupSubmit(e) {
       e.preventDefault();
-      const rawInput = String(document.getElementById('signupUserOrEmail')?.value || '').trim().toLowerCase();
-      if (!rawInput) return;
+      const email = String(document.getElementById('signupEmailInput')?.value || '').trim().toLowerCase();
+      const fullName = String(document.getElementById('signupFullNameInput')?.value || '').trim();
+      const password = String(document.getElementById('signupPasswordInput')?.value || '');
+      if (!email || !fullName || password.length < 6) {
+        showToast('Fill email, full name & password (min 6 chars).');
+        return;
+      }
 
-      const email = rawInput.includes('@') ? rawInput : `${rawInput.replace(/[^a-z0-9._-]/g, '')}@gmail.com`;
       const username = email.split('@')[0];
-      const name = username.replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
       const users = getUsersDB();
       const existing = users.find(u => u.email === email);
       const account = {
         username,
-        name: existing?.name || name,
+        name: fullName,
         email,
+        password,
         phone: existing?.phone || '',
-        provider: existing?.provider || 'signup'
+        provider: 'email'
       };
-      if (!existing) {
-        users.push(account);
-        saveUsersDB(users);
-      } else {
+
+      if (existing) {
         Object.assign(existing, account);
-        saveUsersDB(users);
+      } else {
+        users.push(account);
       }
+      saveUsersDB(users);
       localStorage.setItem('spystore_current_user', JSON.stringify(account));
       syncCurrentUserSavedData();
       updateAuthUI();
       closeAuthModal();
-      showToast(`Signed up as ${account.email}`);
+      showToast(`Account created: ${account.email}`);
+    }
+
+    function handleAccountLoginSubmit(e) {
+      e.preventDefault();
+      const email = String(document.getElementById('loginEmailInput')?.value || '').trim().toLowerCase();
+      const password = String(document.getElementById('loginPasswordInput')?.value || '');
+      if (!email || !password) return;
+
+      const users = getUsersDB();
+      const found = users.find(u => u.email === email && u.password === password);
+      if (!found) {
+        showToast('Invalid email or password.');
+        return;
+      }
+
+      localStorage.setItem('spystore_current_user', JSON.stringify(found));
+      syncCurrentUserSavedData();
+      updateAuthUI();
+      closeAuthModal();
+      showToast(`Logged in as ${found.email}`);
     }
 
     let _pendingGoogleAuthMode = 'signup';
