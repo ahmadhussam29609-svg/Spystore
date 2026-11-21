@@ -3647,9 +3647,11 @@
 
     (async function checkPaymentReturn() {
       const params = new URLSearchParams(window.location.search);
-      const statusId = params.get('status_id');
-      const ref = params.get('ref') || params.get('order_id');
-      const billCode = params.get('billcode') || '-';
+      const bpPaid = params.get('billplz[paid]');
+      const bpId = params.get('billplz[id]');
+      const statusId = params.get('status_id') || (bpPaid === 'true' ? '1' : '');
+      const ref = params.get('ref') || params.get('order_id') || bpId || '';
+      const billCode = params.get('billcode') || bpId || '-';
 
       if (statusId === '1' && ref) {
         let pending = {};
