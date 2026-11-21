@@ -2159,7 +2159,6 @@
           <span id="drawerCurrentRoleTag" style="font-size:0.62rem; font-weight:800; padding:2px 7px; border-radius:999px; background:rgba(56,189,248,0.14); color:var(--accent-cyan);">STAFF</span>
         </div>
         <div class="drawer-links" style="gap:6px;">
-          <button type="button" id="drawerRoleAccessBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('access');">🔑 <span>Role &amp; Staff Access</span></button>
           <button type="button" id="drawerMgrToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('catalog');">🛠️ <span>Website Catalog Manager</span></button>
           <button type="button" id="drawerTxnsToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('transactions');">🧾 <span>All Transactions</span></button>
           <button type="button" id="drawerCustomersToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('customers');">👥 <span>Registered Customers</span></button>
@@ -2532,24 +2531,6 @@
       <div class="modal-top">
         <h3 id="ownerAdminToolsTitle">OWNER / ADMIN</h3>
         <button type="button" class="close-modal" onclick="closeOwnerAdminToolsModal()">✕</button>
-      </div>
-
-      <!-- 1. Role & Staff Access -->
-      <div id="drawerRoleAccessView" style="display:none;">
-        <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:12px; margin-bottom:10px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <strong style="font-size:0.84rem; color:var(--accent-gold);">🔑 Role &amp; Staff Access</strong>
-            <span id="modalRoleBadge" style="font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:999px; background:rgba(56,189,248,0.14); color:var(--accent-cyan);">CUSTOMER</span>
-          </div>
-          <p style="font-size:0.74rem; color:var(--text-secondary); margin-bottom:8px;">
-            Owner account: <strong>ahmadhussam29609@gmail.com</strong> (<code>ahmadhussam29609</code>). Enter passcode to activate Owner or Admin role.
-          </p>
-          <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <input type="password" class="form-control" id="drawerStaffPasscodeInput" placeholder="Passcode (ADMIN2026 / OWNER2026)" style="flex:1; min-width:160px;" />
-            <button type="button" onclick="unlockStaffRoleFromDrawer()" style="background:var(--accent-blue); color:#fff; border:none; padding:9px 13px; border-radius:10px; font-size:0.76rem; font-weight:800; cursor:pointer;">Activate</button>
-          </div>
-        </div>
-        <div id="drawerOwnerSummaryCard" style="display:none; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:11px; font-size:0.75rem; color:var(--text-secondary);"></div>
       </div>
 
       <!-- 2. Website Catalog Manager (Stok, Harga & Status) -->
@@ -2958,26 +2939,49 @@
     };
 
     function buildFallbackTrendingData() {
+      const mk = (id, title, mediaType, rating, overview, poster, backdrop, popularity = 90) => ({
+        id,
+        title,
+        mediaType,
+        rating,
+        overview,
+        poster,
+        backdrop: backdrop || poster,
+        popularity
+      });
+
       const fb = {
         netflix: [
-          { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', overview: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games.", backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
-          { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', overview: 'Wednesday Addams investigates a murder spree while making new friends at Nevermore.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
-          { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', overview: 'A small town uncovers a mystery involving secret experiments and supernatural forces.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' }
+          mk(93405, 'Squid Game', 'SERIES', '7.9', "Hundreds of cash-strapped players accept a strange invitation to compete in children's games.", 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg', 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', 99),
+          mk(119051, 'Wednesday', 'SERIES', '8.5', 'Wednesday Addams investigates a murder spree while making new friends at Nevermore.', 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg', 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', 96),
+          mk(66732, 'Stranger Things', 'SERIES', '8.6', 'A small town uncovers a mystery involving secret experiments and supernatural forces.', 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg', 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', 95),
+          mk(71446, 'Money Heist', 'SERIES', '8.3', 'Eight thieves take hostages and lock themselves in the Royal Mint of Spain.', 'https://image.tmdb.org/t/p/w342/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg', 'https://image.tmdb.org/t/p/w780/gFZ87PFXm4QCxOltwSOz34F7H5o.jpg', 92),
+          mk(42009, 'Black Mirror', 'SERIES', '8.4', 'An anthology series exploring a twisted, high-tech multiverse.', 'https://image.tmdb.org/t/p/w342/5o4i1X0tX0z2u2d3l2u3r3w3z3s.jpg', 'https://image.tmdb.org/t/p/w780/7PRddO6zWAW0M2b2d3l2u3r3w3z3s.jpg', 89),
+          mk(76669, 'Extraction', 'MOVIE', '7.4', 'A black-market mercenary embarks on a deadly extraction mission.', 'https://image.tmdb.org/t/p/w342/nyg1Hmtxb5S4oSjPI50y8H7x8b8.jpg', 'https://image.tmdb.org/t/p/w780/1R6cvRtZgsZFH83733G2p8w2h2b.jpg', 91),
+          mk(724495, 'The Gray Man', 'MOVIE', '7.0', 'When the CIA’s most skilled operative uncovers dark agency secrets, a hit is placed on him.', 'https://image.tmdb.org/t/p/w342/8cXUyWQCTurmdWOundeasVV9yr.jpg', 'https://image.tmdb.org/t/p/w780/27ft86l8l2u3r3w3z3s.jpg', 88)
         ],
         disney: [
-          { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg' },
-          { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'A lone gunfighter makes his way through the outer reaches of the galaxy.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
-          { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: "Riley's mind headquarters makes room for new Emotions.", backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' }
+          mk(299534, 'Avengers: Endgame', 'MOVIE', '8.3', 'After the devastating events of Avengers: Infinity War, the universe is in ruins.', 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg', 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', 98),
+          mk(1022796, 'Inside Out 2', 'MOVIE', '7.6', "Riley's mind headquarters makes room for new Emotions.", 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg', 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', 95),
+          mk(299536, 'Avengers: Infinity War', 'MOVIE', '8.4', 'The Avengers and their allies must be willing to sacrifice all to defeat Thanos.', 'https://image.tmdb.org/t/p/w342/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg', 'https://image.tmdb.org/t/p/w780/lmZ8G98p9p7o7w7x7y7z7a7b7c7.jpg', 96),
+          mk(109445, 'Frozen', 'MOVIE', '7.3', 'A fearless optimist sets off on an epic journey to find her sister.', 'https://image.tmdb.org/t/p/w342/kgwj9a2K2j2m2n2o2p2q2r2s2t2u.jpg', 'https://image.tmdb.org/t/p/w780/fup1G98p9p7o7w7x7y7z7a7b7c7.jpg', 87),
+          mk(82684, 'The Mandalorian', 'SERIES', '8.5', 'A lone gunfighter makes his way through the outer reaches of the galaxy.', 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg', 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', 94),
+          mk(92749, 'Moon Knight', 'SERIES', '7.8', 'A mild-mannered gift-shop clerk is plagued by blackouts and memories of another life.', 'https://image.tmdb.org/t/p/w342/vBp0b7o7w7x7y7z7a7b7c7d7e7f.jpg', 'https://image.tmdb.org/t/p/w780/1r1o7w7x7y7z7a7b7c7d7e7f7g.jpg', 88)
         ],
         hbomax: [
-          { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The Targaryen civil war about 200 years before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
-          { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Paul Atreides unites with Chani and the Fremen on a path of revenge.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' }
+          mk(693134, 'Dune: Part Two', 'MOVIE', '8.1', 'Paul Atreides unites with Chani and the Fremen on a path of revenge.', 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg', 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', 97),
+          mk(155, 'The Dark Knight', 'MOVIE', '8.5', 'Batman raises the stakes in his war on crime in Gotham City.', 'https://image.tmdb.org/t/p/w342/qJ2tW6WMUDux911r6m7haRef0WH.jpg', 'https://image.tmdb.org/t/p/w780/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', 96),
+          mk(94997, 'House of the Dragon', 'SERIES', '8.4', 'The Targaryen civil war about 200 years before Game of Thrones.', 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg', 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', 95),
+          mk(1399, 'Game of Thrones', 'SERIES', '8.5', 'Nine noble families fight for control over the lands of Westeros.', 'https://image.tmdb.org/t/p/w342/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg', 'https://image.tmdb.org/t/p/w780/suopoADq0k8YZr4dQXcU6pToj6s.jpg', 94)
         ],
         primevideo: [
-          { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', overview: 'A group of vigilantes set out to take down corrupt superheroes.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg' },
-          { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', overview: 'Jack Reacher investigates a conspiracy in a small town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' }
+          mk(76600, 'The Boys', 'SERIES', '8.5', 'A group of vigilantes set out to take down corrupt superheroes.', 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg', 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', 96),
+          mk(84621, 'Reacher', 'SERIES', '8.1', 'Jack Reacher investigates a conspiracy in a small town.', 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg', 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', 93),
+          mk(605722, 'The Tomorrow War', 'MOVIE', '7.5', 'A family man is drafted to fight in a future war against alien invaders.', 'https://image.tmdb.org/t/p/w342/34nDCQZ3u3uN3n4x3n4o4Z3P9k7.jpg', 'https://image.tmdb.org/t/p/w780/8Y43pPCjBBGV3exGpWM5bDB1C6W.jpg', 90),
+          mk(585244, 'The Idea of You', 'MOVIE', '7.4', 'A single mother begins an unexpected romance with a young pop star.', 'https://image.tmdb.org/t/p/w342/Y5EEId4l1r1o7w7x7y7z7a7b7c7.jpg', 'https://image.tmdb.org/t/p/w780/8p1o7w7x7y7z7a7b7c7d7e7f7g.jpg', 86)
         ]
       };
+
       const mapApp = (key, label, price) => (fb[key] || []).map((x, idx) => ({
         rank: idx + 1,
         id: x.id,
@@ -2987,58 +2991,108 @@
         platformLabel: label,
         price,
         rating: x.rating,
-        popularity: 100 - idx * 10,
+        popularity: x.popularity || (100 - idx * 5),
         overview: x.overview,
         backdrop: x.backdrop || '',
         poster: x.poster || ''
       }));
+
       const nList = mapApp('netflix', 'Netflix', 18);
       const dList = mapApp('disney', 'Disney+', 16);
       const hList = mapApp('hbomax', 'HBO Max', 16);
       const pList = mapApp('primevideo', 'Prime Video', 10);
-      const allFb = [nList[0], nList[1], dList[0], dList[1], hList[0], pList[0], dList[2], hList[1]];
+      const allFb = [nList[0], nList[1], dList[0], dList[4], hList[0], pList[0], dList[1], hList[2]];
+
       return {
         byApp: {
-          netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [nList[1]], newSeries: [nList[0]], kdrama: [nList[0], nList[1]], price: 18, label: 'Netflix' },
-          disney: { movies: dList.filter(i => i.mediaType === 'MOVIE'), series: dList.filter(i => i.mediaType === 'SERIES'), newMovies: [dList[2]], newSeries: [dList[1]], kdrama: [dList[1]], price: 16, label: 'Disney+' },
-          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: [hList[1]], newSeries: [hList[0]], kdrama: [hList[0]], price: 16, label: 'HBO Max' },
-          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [pList[0], pList[1]], kdrama: [pList[1]], price: 10, label: 'Prime Video' }
+          netflix: {
+            movies: nList.filter(i => i.mediaType === 'MOVIE'),
+            series: nList.filter(i => i.mediaType === 'SERIES'),
+            newMovies: nList.filter(i => i.mediaType === 'MOVIE'),
+            newSeries: nList.slice(0, 3),
+            kdrama: [nList[0], nList[1]],
+            price: 18,
+            label: 'Netflix'
+          },
+          disney: {
+            movies: dList.filter(i => i.mediaType === 'MOVIE'),
+            series: dList.filter(i => i.mediaType === 'SERIES'),
+            newMovies: dList.slice(0, 2),
+            newSeries: dList.filter(i => i.mediaType === 'SERIES'),
+            kdrama: [dList[4], dList[0]],
+            price: 16,
+            label: 'Disney+'
+          },
+          hbomax: {
+            movies: hList.filter(i => i.mediaType === 'MOVIE'),
+            series: hList.filter(i => i.mediaType === 'SERIES'),
+            newMovies: hList.filter(i => i.mediaType === 'MOVIE'),
+            newSeries: hList.filter(i => i.mediaType === 'SERIES'),
+            kdrama: [hList[2], hList[0]],
+            price: 16,
+            label: 'HBO Max'
+          },
+          primevideo: {
+            movies: pList.filter(i => i.mediaType === 'MOVIE'),
+            series: pList.filter(i => i.mediaType === 'SERIES'),
+            newMovies: pList.filter(i => i.mediaType === 'MOVIE'),
+            newSeries: pList.filter(i => i.mediaType === 'SERIES'),
+            kdrama: [pList[0], pList[1]],
+            price: 10,
+            label: 'Prime Video'
+          }
         },
         categories: {
-          tv_my: [nList[0], dList[1], hList[0], pList[0]],
-          movie_my: [dList[0], hList[1], dList[2]],
-          new_in: [nList[1], dList[2], hList[1], pList[1]],
-          popcorn: [dList[0], hList[1], dList[2]],
-          kdrama: [nList[0], nList[1], dList[1]],
-          rewatched: [hList[0], nList[2], dList[1], pList[0]],
-          only_on: [nList[0], dList[0], hList[0], pList[0]]
+          tv_my: [...nList.filter(i => i.mediaType === 'SERIES'), ...dList.filter(i => i.mediaType === 'SERIES')],
+          movie_my: [...dList.filter(i => i.mediaType === 'MOVIE'), ...hList.filter(i => i.mediaType === 'MOVIE')],
+          new_in: allFb.slice(0, 6),
+          popcorn: [...dList.filter(i => i.mediaType === 'MOVIE'), ...nList.filter(i => i.mediaType === 'MOVIE')],
+          kdrama: [nList[0], nList[1], dList[4]],
+          rewatched: [...nList.filter(i => i.mediaType === 'SERIES'), ...pList.filter(i => i.mediaType === 'SERIES')],
+          only_on: allFb
         },
         items: allFb.map((it, idx) => ({ ...it, rank: idx + 1 }))
       };
     }
 
     function getAppItems(appId, catKey) {
-      const appObj = trendingByApp[appId] || {};
-      if (catKey === 'movie_my') return appObj.movies || [];
-      if (catKey === 'tv_my') return appObj.series || [];
-      if (catKey === 'new_in') return [...(appObj.newMovies || []), ...(appObj.newSeries || [])].slice(0, 10);
-      if (catKey === 'popcorn') return (appObj.movies || []).slice().sort((a, b) => Number(b.rating) - Number(a.rating)).slice(0, 10);
-      if (catKey === 'kdrama') return (appObj.kdrama || []).slice(0, 10);
-      if (catKey === 'rewatched') return (appObj.series || []).slice().sort((a, b) => (b.popularity * Number(b.rating)) - (a.popularity * Number(a.rating))).slice(0, 10);
-      return [...(appObj.movies || []).slice(0, 5), ...(appObj.series || []).slice(0, 5)];
+      const fbData = buildFallbackTrendingData();
+      const appObj = (trendingByApp && trendingByApp[appId]) ? trendingByApp[appId] : fbData.byApp[appId];
+      const allAppList = [...(appObj.movies || []), ...(appObj.series || [])];
+
+      if (catKey === 'movie_my') {
+        return (appObj.movies && appObj.movies.length) ? appObj.movies : allAppList;
+      }
+      if (catKey === 'tv_my') {
+        return (appObj.series && appObj.series.length) ? appObj.series : allAppList;
+      }
+      if (catKey === 'new_in') {
+        const comb = [...(appObj.newMovies || []), ...(appObj.newSeries || [])];
+        return comb.length ? comb : allAppList;
+      }
+      if (catKey === 'popcorn') {
+        const m = (appObj.movies && appObj.movies.length) ? appObj.movies : allAppList;
+        return m.slice().sort((a, b) => Number(b.rating) - Number(a.rating));
+      }
+      if (catKey === 'kdrama') {
+        return (appObj.kdrama && appObj.kdrama.length) ? appObj.kdrama : allAppList;
+      }
+      if (catKey === 'rewatched') {
+        const s = (appObj.series && appObj.series.length) ? appObj.series : allAppList;
+        return s.slice().sort((a, b) => ((b.popularity || 80) * Number(b.rating || 7.5)) - ((a.popularity || 80) * Number(a.rating || 7.5)));
+      }
+      return allAppList.length ? allAppList : (fbData.categories[catKey] || []);
     }
 
     function openTrendingModal(defaultCat = 'tv_my', appFilter = 'netflix') {
       const modal = document.getElementById('trendingModal');
       if (!modal) return;
-      if (!Object.keys(trendingByApp).length) {
-        const fb = buildFallbackTrendingData();
-        trendingByApp = fb.byApp;
-        discoveryCategories = fb.categories;
-      }
+      const fb = buildFallbackTrendingData();
+      trendingByApp = fb.byApp;
+      discoveryCategories = fb.categories;
       activeDiscoveryCat = CATEGORY_TITLES[defaultCat] ? defaultCat : 'tv_my';
       activeAppSubFilter = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(appFilter) ? appFilter : 'netflix';
-      triggerTopLoader(420);
+      triggerTopLoader(380);
       modal.style.display = 'flex';
       renderTrendingModal();
     }
@@ -3093,7 +3147,7 @@
       body.innerHTML = list.map((item, idx) => `
         <div class="discovery-row-card" style="display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
           <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${idx + 1}</div>
-          ${item.poster ? `<img src="${item.poster}" referrerpolicy="no-referrer" style="width:62px; height:92px; object-fit:cover; border-radius:10px; flex-shrink:0;" onerror="this.outerHTML='<div style=\'width:62px;height:92px;border-radius:10px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;\'>🎬</div>';" />` : `<div style="width:62px;height:92px;border-radius:10px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;">🎬</div>`}
+          ${item.poster ? `<img src="${item.poster}" referrerpolicy="no-referrer" style="width:62px; height:92px; object-fit:cover; border-radius:10px; flex-shrink:0;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" /><div style="display:none; width:62px; height:92px; border-radius:10px; background:var(--bg-input); border:1px solid var(--border-color); align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">🎬</div />` : `<div style="width:62px;height:92px;border-radius:10px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;">🎬</div>`}
           <div style="flex:1; min-width:0;">
             <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;">
               <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel}</span>
@@ -3171,57 +3225,130 @@
     function closeShowSearchModal() { const m = document.getElementById('showSearchModal'); if (m) m.classList.remove('open'); }
     function closeShowDetailModal() { const m = document.getElementById('showDetailModal'); if (m) m.classList.remove('open'); }
 
-    function searchShowFromMainBox() {
+    const FULL_SHOW_CATALOG = [
+      { title: 'Avengers: Endgame', year: '2019', type: 'MOVIE', rating: '8.3', app: 'Disney+', appId: 'disney', tags: 'marvel mcu superhero' },
+      { title: 'Avengers: Infinity War', year: '2018', type: 'MOVIE', rating: '8.4', app: 'Disney+', appId: 'disney', tags: 'marvel mcu superhero' },
+      { title: 'The Avengers', year: '2012', type: 'MOVIE', rating: '7.8', app: 'Disney+', appId: 'disney', tags: 'marvel mcu superhero' },
+      { title: 'Spider-Man: No Way Home', year: '2021', type: 'MOVIE', rating: '8.2', app: 'Disney+', appId: 'disney', tags: 'marvel mcu spiderman' },
+      { title: 'Iron Man', year: '2008', type: 'MOVIE', rating: '7.6', app: 'Disney+', appId: 'disney', tags: 'marvel mcu tony stark' },
+      { title: 'Thor: Ragnarok', year: '2017', type: 'MOVIE', rating: '7.6', app: 'Disney+', appId: 'disney', tags: 'marvel mcu thor' },
+      { title: 'Loki', year: '2021', type: 'SERIES', rating: '8.2', app: 'Disney+', appId: 'disney', tags: 'marvel mcu series' },
+      { title: 'Black Panther', year: '2018', type: 'MOVIE', rating: '7.4', app: 'Disney+', appId: 'disney', tags: 'marvel mcu wakanda' },
+      { title: 'Captain America: Civil War', year: '2016', type: 'MOVIE', rating: '7.4', app: 'Disney+', appId: 'disney', tags: 'marvel mcu avengers' },
+      { title: 'Lupin', year: '2021', type: 'SERIES', rating: '7.5', app: 'Netflix', appId: 'netflix', tags: 'french crime drama' },
+      { title: 'Squid Game', year: '2021', type: 'SERIES', rating: '7.9', app: 'Netflix', appId: 'netflix', tags: 'kdrama korean thriller' },
+      { title: 'Wednesday', year: '2022', type: 'SERIES', rating: '8.5', app: 'Netflix', appId: 'netflix', tags: 'fantasy mystery' },
+      { title: 'Stranger Things', year: '2016', type: 'SERIES', rating: '8.6', app: 'Netflix', appId: 'netflix', tags: 'sci-fi horror' },
+      { title: 'Doraemon: Stand by Me', year: '2014', type: 'MOVIE', rating: '7.6', app: 'Netflix', appId: 'netflix', tags: 'anime family' },
+      { title: 'House of the Dragon', year: '2022', type: 'SERIES', rating: '8.4', app: 'HBO Max', appId: 'hbomax', tags: 'fantasy drama' },
+      { title: 'Dune: Part Two', year: '2024', type: 'MOVIE', rating: '8.1', app: 'HBO Max', appId: 'hbomax', tags: 'sci-fi action' },
+      { title: 'The Boys', year: '2019', type: 'SERIES', rating: '8.5', app: 'Prime Video', appId: 'primevideo', tags: 'action superhero' },
+      { title: 'Reacher', year: '2022', type: 'SERIES', rating: '8.1', app: 'Prime Video', appId: 'primevideo', tags: 'action thriller' }
+    ];
+
+    function findLocalShowMatches(queryText) {
+      const ql = String(queryText || '').trim().toLowerCase();
+      if (!ql) return [];
+      return FULL_SHOW_CATALOG.filter(x =>
+        x.title.toLowerCase().includes(ql) ||
+        x.app.toLowerCase().includes(ql) ||
+        (x.tags && x.tags.toLowerCase().includes(ql))
+      );
+    }
+
+    async function searchShowFromMainBox() {
       const inp = document.getElementById('searchInput');
       const box = document.getElementById('inlineShowResultsBox');
       if (!inp || !box) return;
       const q = inp.value.trim();
-      if (!q) return;
-      const ql = q.toLowerCase();
-      const catalog = [
-        { title: 'Ultraman Trigger', year: '2021', type: 'SERIES', rating: '7.6', app: 'Netflix' },
-        { title: 'Ultraman Blazar', year: '2023', type: 'SERIES', rating: '8.1', app: 'Netflix' },
-        { title: 'Lupin', year: '2021', type: 'SERIES', rating: '7.5', app: 'Netflix' },
-        { title: 'Squid Game', year: '2021', type: 'SERIES', rating: '7.9', app: 'Netflix' },
-        { title: 'Doraemon: Stand by Me', year: '2014', type: 'MOVIE', rating: '7.6', app: 'Netflix' },
-        { title: 'Avengers: Endgame', year: '2019', type: 'MOVIE', rating: '8.3', app: 'Disney+' },
-        { title: 'The Boys', year: '2019', type: 'SERIES', rating: '8.5', app: 'Prime Video' }
-      ];
-      const matches = catalog.filter(x => x.title.toLowerCase().includes(ql) || x.app.toLowerCase().includes(ql));
+      if (!q) {
+        openShowSearchModal();
+        return;
+      }
+
       box.style.display = 'block';
+      box.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 Searching "${q}"...</span>
+          <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
+        </div>
+      `;
+
+      let matches = findLocalShowMatches(q);
+      try {
+        const res = await fetch(`/api/search-title?q=${encodeURIComponent(q)}&region=MY&_t=${Date.now()}`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.items) && data.items.length > 0) {
+            matches = data.items.map(it => {
+              const firstApp = Array.isArray(it.availableApps) && it.availableApps[0] ? it.availableApps[0] : null;
+              return {
+                title: it.title,
+                year: it.year || '',
+                type: it.mediaType || 'SHOW',
+                rating: it.rating || 'N/A',
+                app: firstApp ? firstApp.shortLabel : 'Netflix',
+                appId: firstApp ? firstApp.id : 'netflix'
+              };
+            });
+          }
+        }
+      } catch (e) {}
+
       box.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
           <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 Search: "${q}" (${matches.length})</span>
           <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
         </div>
         ${matches.length ? matches.map(m => `
-          <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
             <div>
-              <div style="font-weight:700; font-size:0.82rem;">${m.title} <small style="color:var(--text-muted);">(${m.year})</small></div>
+              <div style="font-weight:700; font-size:0.82rem;">${m.title} ${m.year ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}</div>
               <div style="font-size:0.68rem; color:var(--accent-cyan);">${m.type} • ★ ${m.rating} • ${m.app}</div>
             </div>
-            <button type="button" onclick="openCheckout('${m.app.toLowerCase().replace(/[^a-z]/g,'')}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer;">Order ✓</button>
+            <button type="button" onclick="openCheckout('${m.appId || 'disney'}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer; white-space:nowrap;">Order ✓</button>
           </div>
         `).join('') : `<div style="font-size:0.76rem; color:var(--text-muted);">No matching show found for "${q}".</div>`}
       `;
     }
 
-    function runShowSearch() {
+    async function runShowSearch() {
       const inp = document.getElementById('showSearchInput');
       const box = document.getElementById('showSearchResults');
       if (!inp || !box) return;
-      const q = inp.value.trim().toLowerCase();
+      const q = inp.value.trim();
       if (!q) return;
-      const catalog = [
-        { title: 'Ultraman Trigger', year: '2021', type: 'SERIES', rating: '7.6', app: 'Netflix' },
-        { title: 'Ultraman Blazar', year: '2023', type: 'SERIES', rating: '8.1', app: 'Netflix' },
-        { title: 'Lupin', year: '2021', type: 'SERIES', rating: '7.5', app: 'Netflix' },
-        { title: 'Squid Game', year: '2021', type: 'SERIES', rating: '7.9', app: 'Netflix' },
-        { title: 'Avengers: Endgame', year: '2019', type: 'MOVIE', rating: '8.3', app: 'Disney+' }
-      ];
-      const matches = catalog.filter(x => x.title.toLowerCase().includes(q) || x.app.toLowerCase().includes(q));
+
+      let matches = findLocalShowMatches(q);
+      try {
+        const res = await fetch(`/api/search-title?q=${encodeURIComponent(q)}&region=MY&_t=${Date.now()}`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.items) && data.items.length > 0) {
+            matches = data.items.map(it => {
+              const firstApp = Array.isArray(it.availableApps) && it.availableApps[0] ? it.availableApps[0] : null;
+              return {
+                title: it.title,
+                year: it.year || '',
+                type: it.mediaType || 'SHOW',
+                rating: it.rating || 'N/A',
+                app: firstApp ? firstApp.shortLabel : 'Disney+',
+                appId: firstApp ? firstApp.id : 'disney'
+              };
+            });
+          }
+        }
+      } catch (e) {}
+
       box.innerHTML = matches.length
-        ? matches.map(m => `<div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:10px;"><strong>${m.title}</strong> (${m.year}) • ${m.app}</div>`).join('')
+        ? matches.map(m => `
+            <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div>
+                <strong>${m.title}</strong> ${m.year ? `(${m.year})` : ''} • <span style="color:var(--accent-cyan);">${m.app}</span>
+              </div>
+              <button type="button" onclick="closeShowSearchModal(); openCheckout('${m.appId || 'disney'}');" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer;">Order ✓</button>
+            </div>
+          `).join('')
         : `<div style="font-size:0.78rem; color:var(--text-muted);">No matching show found.</div>`;
     }
 
@@ -4891,52 +5018,29 @@
     function openOwnerAdminManagerModal(tab = 'catalog') {
       const role = getUserRole();
       const isStaff = role === 'owner' || role === 'admin';
-      if (tab !== 'access' && !isStaff) {
-        showToast(currentLang === 'en' ? 'Activate Owner or Admin role first.' : 'Aktifkan peranan Owner atau Admin dahulu.');
-        tab = 'access';
+      if (!isStaff) {
+        showToast(currentLang === 'en' ? 'Owner or Admin access required.' : 'Perlu akses Owner atau Admin.');
+        return;
       }
-      if (tab === 'verify' && role !== 'owner') {
-        showToast(currentLang === 'en' ? 'Owner role required.' : 'Perlu peranan Owner.');
-        tab = 'access';
+      if ((tab === 'customers' || tab === 'verify') && role !== 'owner') {
+        showToast(currentLang === 'en' ? 'Owner access required.' : 'Perlu akses Owner.');
+        return;
       }
 
       const modal = document.getElementById('ownerAdminToolsModal');
-      const accView = document.getElementById('drawerRoleAccessView');
       const catView = document.getElementById('drawerCatalogToolView');
       const txnView = document.getElementById('drawerTransactionsToolView');
       const custView = document.getElementById('drawerCustomersOnlyView');
       const verView = document.getElementById('drawerVerifyRoleToolView');
       const titleEl = document.getElementById('ownerAdminToolsTitle');
-      const badgeEl = document.getElementById('modalRoleBadge');
-      if (!modal || !accView || !catView || !txnView || !custView || !verView) return;
+      if (!modal || !catView || !txnView || !custView || !verView) return;
 
-      accView.style.display = tab === 'access' ? 'block' : 'none';
       catView.style.display = tab === 'catalog' ? 'block' : 'none';
       txnView.style.display = tab === 'transactions' ? 'block' : 'none';
       custView.style.display = tab === 'customers' ? 'block' : 'none';
       verView.style.display = tab === 'verify' ? 'block' : 'none';
-      if (badgeEl) badgeEl.textContent = role.toUpperCase();
 
-      if (tab === 'access') {
-        if (titleEl) titleEl.textContent = 'ROLE & STAFF ACCESS';
-        const sumCard = document.getElementById('drawerOwnerSummaryCard');
-        if (sumCard) {
-          if (role === 'owner') {
-            const totalStock = products.reduce((acc, p) => acc + Number(p.stock || 0), 0);
-            const allTxns = getAllTransactionsDB();
-            const totalSales = allTxns.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
-            sumCard.style.display = 'block';
-            sumCard.innerHTML = `
-              <div style="font-weight:800; color:var(--accent-cyan); margin-bottom:4px;">👑 Owner Overview</div>
-              <div>• Total Active Stock: <strong>${totalStock}</strong></div>
-              <div>• Total Transactions: <strong>RM${totalSales.toFixed(2)}</strong> (${allTxns.length})</div>
-              <div>• Partner Split: <strong>Owner &amp; Adik</strong></div>
-            `;
-          } else {
-            sumCard.style.display = 'none';
-          }
-        }
-      } else if (tab === 'catalog') {
+      if (tab === 'catalog') {
         if (titleEl) titleEl.textContent = 'WEBSITE CATALOG MANAGER';
         const sel = document.getElementById('drawerMgrTargetSelect');
         const opts = getManagerTargetOptions();
