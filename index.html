@@ -2740,6 +2740,290 @@
       el.classList.add(className);
     }
 
+    let products = [
+      { id: 'netflix', logo: 'netflix.png', frontName: 'Netflix', name: 'Netflix Premium', mode: 'private', category: 'Streaming', price: 18, stock: 5, badge: 'N', bg: '#18181b', color: '#ef4444' },
+      { id: 'disney', logo: 'disney.png', frontName: 'Disney+', name: 'Disney+ Premium', mode: 'private', category: 'Streaming', price: 16, stock: 4, badge: 'D+', bg: '#0c1d3d', color: '#38bdf8' },
+      { id: 'hbomax', logo: 'hbomax.png', frontName: 'HBO Max', name: 'HBO Max', mode: 'private', category: 'Streaming', price: 16, stock: 4, badge: 'MAX', bg: '#1e1b4b', color: '#a78bfa' },
+      { id: 'primevideo', logo: 'primevideo.png', frontName: 'Prime Video', name: 'Prime Video', mode: 'private', category: 'Streaming', price: 10, stock: 4, badge: 'PV', bg: '#091a2c', color: '#38bdf8' },
+      { id: 'youtube', logo: 'youtube.png', frontName: 'YouTube', name: 'YouTube Premium', mode: 'invite', category: 'Streaming', price: 5, stock: 4, badge: 'YT', bg: '#271313', color: '#f87171' },
+      { id: 'spotify', logo: 'spotify.png', frontName: 'Spotify', name: 'Spotify Premium', mode: 'invite', category: 'Music', price: 13, stock: 4, badge: 'SP', bg: '#0d2618', color: '#22c55e' },
+      { id: 'canva', logo: 'canva.png', frontName: 'Canva', name: 'Canva Pro', mode: 'invite', category: 'Creative', price: 5, stock: 20, badge: 'C', bg: '#0e2933', color: '#22d3ee' },
+      { id: 'capcut', logo: 'capcut.png', frontName: 'CapCut', name: 'CapCut Pro', mode: 'dual', subPlans: [{ key: 'share', label: 'Share', price: 10, stock: 5 }, { key: 'private', label: 'Private', price: 15, stock: 3 }], category: 'Creative', price: 10, stock: 8, badge: 'CC', bg: '#18181b', color: '#facc15' }
+    ];
+
+    let selectedCategory = 'All';
+    let currentProduct = null;
+    let selectedMonths = 1;
+    let selectedSubPlan = 'share';
+    let selectedPaymentMethod = 'fpx';
+    let currentSlide = 0;
+    let currentLang = localStorage.getItem('spystore_lang') || 'en';
+
+    const I18N = {
+      en: {
+        brandSub: 'Digital Subscription Hub',
+        navCatalog: 'App Catalog',
+        navShowSearch: 'Search Show / Movie',
+        navTrending: 'Trending Discovery',
+        navAccount: 'Login / Register Account',
+        navSupport: 'WhatsApp Admin Support',
+        warrantyTitle: '🛡️ 100% Full Warranty Policy',
+        warrantyDesc: 'Every subscription is covered throughout your active plan duration. Instant replacement if any login issue occurs.',
+        systemOnline: 'System Online • Fast Delivery',
+        slide1Pill: 'Full Warranty • Fast Delivery',
+        slide1Title: 'Netflix, Disney+, HBO Max, Spotify, Canva & CapCut',
+        slide1Desc: '100% warranty throughout your subscription period with live stock updates and instant admin alerts.',
+        slide2Pill: 'Instant FPX Online Banking',
+        slide2Title: 'Premium Digital Subscriptions at Best Local Prices',
+        slide2Desc: 'Pay securely via FPX online banking. Account details delivered straight to your WhatsApp right after payment.',
+        trust1Title: '100% Warranty',
+        trust1Desc: 'Full duration cover',
+        trust2Title: 'Fast Delivery',
+        trust2Desc: '5–15 mins via WA',
+        trust3Title: 'Auto FPX',
+        trust3Desc: 'All MY Banks',
+        catAll: 'All (8)',
+        catStreaming: 'Streaming (5)',
+        catMusic: 'Music (1)',
+        catCreative: 'Creative (2)',
+        selectAppTitle: 'Select Subscription App',
+        tapToOrder: 'Tap app to order',
+        showSearchTitle: 'Search Show or Movie',
+        runShowSearchBtn: 'Search Availability',
+        backCatalog: 'Back to Catalog',
+        step1Title: 'Customer Delivery Details',
+        labelName: 'Full Name *',
+        labelPhone: 'WhatsApp Number (For Account Delivery) *',
+        labelDevice: 'Device Used *',
+        step2Title: 'Select Duration Plan',
+        labelAccountType: 'Account Plan Type *',
+        mo1: '1 Month',
+        mo2: '2 Months',
+        step3Title: 'Payment Method',
+        fpxTitle: 'Online Banking (FPX)',
+        fpxDesc: 'Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank & all MY banks via ToyyibPay',
+        labelEmail: 'Account Email Address *',
+        noExtraInfoNote: 'No extra account details required for this plan.',
+        totalLabel: 'Total Payable (incl. RM1 FPX fee)',
+        payNowBtn: 'Pay Now →',
+        warrantyRulesTitle: 'Full Duration Warranty Terms',
+        rule1: 'Covered throughout active plan duration for all apps.',
+        rule2: 'Do not change preset account settings or payment details.',
+        rule3: 'No attempts to steal or damage account data; follow device rules.',
+        copyOrderBtn: 'Copy Order Summary',
+        claimWaBtn: 'Send Receipt & Claim on WhatsApp →'
+      },
+      my: {
+        brandSub: 'Hab Langganan Digital',
+        navCatalog: 'Katalog Aplikasi',
+        navShowSearch: 'Cari Cerita / Movie',
+        navTrending: 'Senarai Trending',
+        navAccount: 'Log Masuk / Daftar Akaun',
+        navSupport: 'Sokongan Admin WhatsApp',
+        warrantyTitle: '🛡️ Polisi Waranti Penuh 100%',
+        warrantyDesc: 'Setiap langganan dilindungi sepanjang tempoh aktif. Gantian segera sekiranya berlaku masalah log masuk.',
+        systemOnline: 'Sistem Aktif • Penghantaran Pantas',
+        slide1Pill: 'Waranti Penuh • Penghantaran Pantas',
+        slide1Title: 'Netflix, Disney+, HBO Max, Spotify, Canva & CapCut',
+        slide1Desc: 'Waranti penuh 100% sepanjang tempoh langganan dengan kemas kini stok langsung dan notifikasi pantas.',
+        slide2Pill: 'Perbankan Dalam Talian FPX',
+        slide2Title: 'Langganan Digital Premium pada Harga Berbaloi',
+        slide2Desc: 'Bayar dengan selamat melalui FPX. Butiran akaun dihantar terus ke WhatsApp anda selepas bayaran.',
+        trust1Title: 'Waranti 100%',
+        trust1Desc: 'Perlindungan penuh',
+        trust2Title: 'Serahan Pantas',
+        trust2Desc: '5–15 minit via WA',
+        trust3Title: 'FPX Automatik',
+        trust3Desc: 'Semua Bank MY',
+        catAll: 'Semua (8)',
+        catStreaming: 'Penstriman (5)',
+        catMusic: 'Muzik (1)',
+        catCreative: 'Kreatif (2)',
+        selectAppTitle: 'Pilih Aplikasi Langganan',
+        tapToOrder: 'Tekan aplikasi untuk tempah',
+        showSearchTitle: 'Cari Tajuk Cerita atau Movie',
+        runShowSearchBtn: 'Semak Aplikasi Tersedia',
+        backCatalog: 'Kembali ke Katalog',
+        step1Title: 'Maklumat Penghantaran Pelanggan',
+        labelName: 'Nama Penuh *',
+        labelPhone: 'Nombor WhatsApp (Untuk Terima Akaun) *',
+        labelDevice: 'Peranti Digunakan *',
+        step2Title: 'Pilih Tempoh Langganan',
+        labelAccountType: 'Jenis Pelan Akaun *',
+        mo1: '1 Bulan',
+        mo2: '2 Bulan',
+        step3Title: 'Kaedah Pembayaran',
+        fpxTitle: 'Perbankan Dalam Talian (FPX)',
+        fpxDesc: 'Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank & semua bank MY melalui ToyyibPay',
+        labelEmail: 'Alamat E-mel Akaun *',
+        noExtraInfoNote: 'Tiada maklumat tambahan khusus diperlukan untuk langganan ini.',
+        totalLabel: 'Jumlah Perlu Dibayar (termasuk caj FPX RM1)',
+        payNowBtn: 'Bayar Sekarang →',
+        warrantyRulesTitle: 'Syarat Waranti Sepanjang Tempoh Penggunaan',
+        rule1: 'Waranti sepanjang tempoh langganan aktif untuk semua aplikasi.',
+        rule2: 'Jangan ubah tetapan akaun yang ditetapkan atau maklumat pembayaran.',
+        rule3: 'Tiada cubaan mencuri atau merosakkan maklumat akaun serta patuhi peraturan peranti.',
+        copyOrderBtn: 'Salin Ringkasan Tempahan',
+        claimWaBtn: 'Hantar Resit & Tuntut di WhatsApp →'
+      }
+    };
+
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      if (!box) return;
+      box.textContent = msg;
+      box.classList.add('show');
+      setTimeout(() => box.classList.remove('show'), 3200);
+    }
+
+    function applyLanguage() {
+      const dict = I18N[currentLang] || I18N.en;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+      const langBtn = document.getElementById('langToggleBtn');
+      if (langBtn) langBtn.textContent = currentLang.toUpperCase();
+      const dLang = document.getElementById('drawerLangLabel');
+      if (dLang) dLang.textContent = currentLang === 'en' ? 'Tukar ke Bahasa Melayu' : 'Switch to English';
+      const dTheme = document.getElementById('drawerThemeLabel');
+      if (dTheme) {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        dTheme.textContent = currentLang === 'en'
+          ? (isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode')
+          : (isDark ? 'Tukar ke Mod Siang' : 'Tukar ke Mod Gelap');
+      }
+      const searchInp = document.getElementById('searchInput');
+      if (searchInp) {
+        searchInp.placeholder = currentLang === 'en'
+          ? 'Search app or show (e.g. Doraemon)...'
+          : 'Cari app atau cerita (cth. Doraemon)...';
+      }
+      if (typeof refreshCheckoutLoginReminder === 'function') {
+        refreshCheckoutLoginReminder();
+      }
+    }
+
+    function toggleLang() {
+      currentLang = currentLang === 'en' ? 'my' : 'en';
+      localStorage.setItem('spystore_lang', currentLang);
+      triggerTopLoader(500);
+      applyLanguage();
+      renderProducts();
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      const tBtn = document.getElementById('themeBtn');
+      if (tBtn) tBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('spystore_theme', next);
+      applyLanguage();
+    }
+
+    (function initTheme() {
+      const saved = localStorage.getItem('spystore_theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        const tBtn = document.getElementById('themeBtn');
+        if (tBtn) tBtn.textContent = saved === 'dark' ? '☀️' : '🌙';
+      }
+    })();
+
+    function goToSlide(index) {
+      const track = document.getElementById('heroTrack');
+      if (!track) return;
+      currentSlide = index;
+      track.scrollTo({ left: track.clientWidth * index, behavior: 'smooth' });
+      const dots = document.querySelectorAll('#heroDots .hero-dot');
+      dots.forEach((d, i) => d.classList.toggle('active', i === index));
+    }
+
+    function handleHeroScroll() {
+      const track = document.getElementById('heroTrack');
+      if (!track || !track.clientWidth) return;
+      const idx = Math.round(track.scrollLeft / track.clientWidth);
+      if (idx !== currentSlide) {
+        currentSlide = idx;
+        const dots = document.querySelectorAll('#heroDots .hero-dot');
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+    }
+
+    function loadTrendingHero() {}
+    function openTrendingModal() { showToast('Trending Discovery'); }
+    function closeTrendingModal() { const m = document.getElementById('trendingModal'); if (m) m.style.display = 'none'; }
+    function openShowSearchModal() {
+      const m = document.getElementById('showSearchModal');
+      if (m) m.classList.add('open');
+      setTimeout(() => { const i = document.getElementById('showSearchInput'); if (i) i.focus(); }, 100);
+    }
+    function closeShowSearchModal() { const m = document.getElementById('showSearchModal'); if (m) m.classList.remove('open'); }
+    function closeShowDetailModal() { const m = document.getElementById('showDetailModal'); if (m) m.classList.remove('open'); }
+
+    function searchShowFromMainBox() {
+      const inp = document.getElementById('searchInput');
+      const box = document.getElementById('inlineShowResultsBox');
+      if (!inp || !box) return;
+      const q = inp.value.trim();
+      if (!q) return;
+      const ql = q.toLowerCase();
+      const catalog = [
+        { title: 'Ultraman Trigger', year: '2021', type: 'SERIES', rating: '7.6', app: 'Netflix' },
+        { title: 'Ultraman Blazar', year: '2023', type: 'SERIES', rating: '8.1', app: 'Netflix' },
+        { title: 'Lupin', year: '2021', type: 'SERIES', rating: '7.5', app: 'Netflix' },
+        { title: 'Squid Game', year: '2021', type: 'SERIES', rating: '7.9', app: 'Netflix' },
+        { title: 'Doraemon: Stand by Me', year: '2014', type: 'MOVIE', rating: '7.6', app: 'Netflix' },
+        { title: 'Avengers: Endgame', year: '2019', type: 'MOVIE', rating: '8.3', app: 'Disney+' },
+        { title: 'The Boys', year: '2019', type: 'SERIES', rating: '8.5', app: 'Prime Video' }
+      ];
+      const matches = catalog.filter(x => x.title.toLowerCase().includes(ql) || x.app.toLowerCase().includes(ql));
+      box.style.display = 'block';
+      box.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 Search: "${q}" (${matches.length})</span>
+          <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
+        </div>
+        ${matches.length ? matches.map(m => `
+          <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:0.82rem;">${m.title} <small style="color:var(--text-muted);">(${m.year})</small></div>
+              <div style="font-size:0.68rem; color:var(--accent-cyan);">${m.type} • ★ ${m.rating} • ${m.app}</div>
+            </div>
+            <button type="button" onclick="openCheckout('${m.app.toLowerCase().replace(/[^a-z]/g,'')}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer;">Order ✓</button>
+          </div>
+        `).join('') : `<div style="font-size:0.76rem; color:var(--text-muted);">No matching show found for "${q}".</div>`}
+      `;
+    }
+
+    function runShowSearch() {
+      const inp = document.getElementById('showSearchInput');
+      const box = document.getElementById('showSearchResults');
+      if (!inp || !box) return;
+      const q = inp.value.trim().toLowerCase();
+      if (!q) return;
+      const catalog = [
+        { title: 'Ultraman Trigger', year: '2021', type: 'SERIES', rating: '7.6', app: 'Netflix' },
+        { title: 'Ultraman Blazar', year: '2023', type: 'SERIES', rating: '8.1', app: 'Netflix' },
+        { title: 'Lupin', year: '2021', type: 'SERIES', rating: '7.5', app: 'Netflix' },
+        { title: 'Squid Game', year: '2021', type: 'SERIES', rating: '7.9', app: 'Netflix' },
+        { title: 'Avengers: Endgame', year: '2019', type: 'MOVIE', rating: '8.3', app: 'Disney+' }
+      ];
+      const matches = catalog.filter(x => x.title.toLowerCase().includes(q) || x.app.toLowerCase().includes(q));
+      box.innerHTML = matches.length
+        ? matches.map(m => `<div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:10px;"><strong>${m.title}</strong> (${m.year}) • ${m.app}</div>`).join('')
+        : `<div style="font-size:0.78rem; color:var(--text-muted);">No matching show found.</div>`;
+    }
+
+    function copyReceiptSummary() {
+      if (window._lastReceiptText && navigator.clipboard) {
+        navigator.clipboard.writeText(window._lastReceiptText).catch(() => {});
+        showToast('Order summary copied!');
+      }
+    }
+
     const CATALOG_STORAGE_KEY = 'spystore_catalog_v1';
     const ROLE_KEYS_STORAGE = 'spystore_staff_keys_v1';
 
