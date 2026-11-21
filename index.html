@@ -2509,6 +2509,9 @@
     </div>
   </div>
 
+<script>
+  window.GOOGLE_CLIENT_ID = '912753010767-des0po3rhva859np643rn1onu47up2d0.apps.googleusercontent.com';
+</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
 
@@ -4042,7 +4045,7 @@
         }
       } catch (e) {}
       if (window.GOOGLE_CLIENT_ID) return String(window.GOOGLE_CLIENT_ID).trim();
-      return String(localStorage.getItem('spystore_google_client_id') || '').trim();
+      return String(localStorage.getItem('spystore_google_client_id') || '912753010767-des0po3rhva859np643rn1onu47up2d0.apps.googleusercontent.com').trim();
     }
 
     function completeGoogleLoginWithProfile(name, email, phone = '') {
