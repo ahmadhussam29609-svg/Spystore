@@ -2162,7 +2162,8 @@
           <button type="button" id="drawerRoleAccessBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('access');">🔑 <span>Role &amp; Staff Access</span></button>
           <button type="button" id="drawerMgrToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('catalog');">🛠️ <span>Website Catalog Manager</span></button>
           <button type="button" id="drawerTxnsToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('transactions');">🧾 <span>All Transactions</span></button>
-          <button type="button" id="drawerVerifyToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('verify');">👥 <span>Registered Customers &amp; Role</span></button>
+          <button type="button" id="drawerCustomersToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('customers');">👥 <span>Registered Customers</span></button>
+          <button type="button" id="drawerVerifyToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('verify');">👑 <span>Add Admin Role</span></button>
         </div>
       </div>
 
@@ -2603,25 +2604,25 @@
         <div id="drawerAllTransactionsBody" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
 
-      <!-- 4. Registered Customers & Role Verification (Owner Only) -->
+      <!-- 4A. Registered Customers Only (Owner Only) -->
+      <div id="drawerCustomersOnlyView" style="display:none;">
+        <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">
+          Senarai pelanggan yang telah mendaftar masuk ke laman web.
+        </div>
+        <div id="registeredCustomersListBox" style="font-size:0.76rem; color:var(--text-secondary);"></div>
+      </div>
+
+      <!-- 4B. Add Admin Role Only (Owner Only — Type Email / Username Directly) -->
       <div id="drawerVerifyRoleToolView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
-          <strong>Registered Customers &amp; Role Verification:</strong> Lihat pelanggan berdaftar dan sahkan peranan <strong>Customer → Admin</strong>.
-        </div>
-        <div class="form-group" style="margin-bottom:8px;">
-          <label>Select Registered Account</label>
-          <select class="form-control" id="verifyUserSelect" onchange="onVerifyUserSelectChange()"></select>
+          Taip <strong>username</strong> atau <strong>email</strong> pengguna untuk dijadikan <strong>Admin</strong>.
         </div>
         <div class="form-group" style="margin-bottom:10px;">
-          <label>Or Enter Email / Username *</label>
+          <label>Email or Username *</label>
           <input type="text" class="form-control" id="verifyEmailOrUsernameInput" placeholder="e.g. user@gmail.com or username" />
         </div>
-        <div style="display:flex; gap:8px; margin-bottom:12px;">
-          <button type="button" class="primary-submit" style="margin-top:0; flex:1;" onclick="verifyUserToAdminRole()">Verify as Admin ✓</button>
-          <button type="button" style="background:rgba(239,68,68,0.14); color:#f87171; border:1px solid rgba(239,68,68,0.35); padding:10px 12px; border-radius:12px; font-size:0.78rem; font-weight:700; cursor:pointer;" onclick="demoteAdminToCustomerRole()">Set Customer</button>
-        </div>
-        <div id="registeredCustomersListBox" style="margin-bottom:10px; padding-top:8px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
-        <div id="verifiedAdminsListBox" style="padding-top:8px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
+        <button type="button" class="primary-submit" style="margin-top:0; width:100%;" onclick="verifyUserToAdminRole()">Verify as Admin ✓</button>
+        <div id="verifiedAdminsListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
       </div>
     </div>
   </div>
@@ -3161,8 +3162,7 @@
       currentSlide = 0;
       dotsWrap.innerHTML = items.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i + 1}"></button>`).join('');
     }
-        function openTrendingModal() { showToast('Trending Discovery'); }
-    function closeTrendingModal() { const m = document.getElementById('trendingModal'); if (m) m.style.display = 'none'; }
+        function closeTrendingModal() { const m = document.getElementById('trendingModal'); if (m) m.style.display = 'none'; }
     function openShowSearchModal() {
       const m = document.getElementById('showSearchModal');
       if (m) m.classList.add('open');
@@ -3880,6 +3880,14 @@
       } else {
         navBtn.textContent = 'Sign Up';
         navBtn.classList.remove('auth-active');
+      }
+      const drawerAccSpan = document.querySelector('#sideDrawer [data-i18n="navAccount"]');
+      if (drawerAccSpan) {
+        if (user) {
+          drawerAccSpan.textContent = currentLang === 'en' ? 'Account' : 'Akaun';
+        } else {
+          drawerAccSpan.textContent = (I18N[currentLang] || I18N.en).navAccount;
+        }
       }
       refreshCheckoutLoginReminder();
     }
@@ -4822,9 +4830,9 @@
       // Always display the OWNER / ADMIN block neatly in the 3-line drawer so Role & Staff Access can be activated or used directly
       sec.style.display = 'block';
       if (tagEl) tagEl.textContent = role.toUpperCase();
-      if (verifyBtn) {
-        verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
-      }
+      const custBtn = document.getElementById('drawerCustomersToolBtn');
+      if (custBtn) custBtn.style.display = role === 'owner' ? 'flex' : 'none';
+      if (verifyBtn) verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
     }
 
     function unlockStaffRoleFromDrawer() {
@@ -4896,14 +4904,16 @@
       const accView = document.getElementById('drawerRoleAccessView');
       const catView = document.getElementById('drawerCatalogToolView');
       const txnView = document.getElementById('drawerTransactionsToolView');
+      const custView = document.getElementById('drawerCustomersOnlyView');
       const verView = document.getElementById('drawerVerifyRoleToolView');
       const titleEl = document.getElementById('ownerAdminToolsTitle');
       const badgeEl = document.getElementById('modalRoleBadge');
-      if (!modal || !accView || !catView || !txnView || !verView) return;
+      if (!modal || !accView || !catView || !txnView || !custView || !verView) return;
 
       accView.style.display = tab === 'access' ? 'block' : 'none';
       catView.style.display = tab === 'catalog' ? 'block' : 'none';
       txnView.style.display = tab === 'transactions' ? 'block' : 'none';
+      custView.style.display = tab === 'customers' ? 'block' : 'none';
       verView.style.display = tab === 'verify' ? 'block' : 'none';
       if (badgeEl) badgeEl.textContent = role.toUpperCase();
 
@@ -4937,8 +4947,11 @@
       } else if (tab === 'transactions') {
         if (titleEl) titleEl.textContent = 'ALL TRANSACTIONS';
         renderDrawerTransactionsList();
+      } else if (tab === 'customers') {
+        if (titleEl) titleEl.textContent = 'REGISTERED CUSTOMERS';
+        refreshVerifyRoleListUI();
       } else if (tab === 'verify') {
-        if (titleEl) titleEl.textContent = 'REGISTERED CUSTOMERS & ROLE';
+        if (titleEl) titleEl.textContent = 'ADD ADMIN ROLE';
         refreshVerifyRoleListUI();
       }
 
