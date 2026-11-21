@@ -2275,6 +2275,16 @@
 
       <div class="step-card" id="selectedAppHeader"></div>
 
+      <div id="checkoutLoginReminder" style="display:none; background:rgba(250, 204, 21, 0.12); border:1.5px solid rgba(250, 204, 21, 0.5); border-radius:14px; padding:12px 14px; margin-bottom:14px;">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px;">
+            <div style="font-size:0.8rem; font-weight:800; color:var(--accent-gold); margin-bottom:2px;" id="checkoutReminderTitle">⚠️ Login Sebelum Bayar Supaya Data &amp; Rekod Tidak Hilang</div>
+            <div style="font-size:0.74rem; color:var(--text-secondary);" id="checkoutReminderDesc">Sila log masuk akaun anda terlebih dahulu supaya maklumat profil dan sejarah transaksi/tempahan disimpan dengan selamat dalam akaun anda.</div>
+          </div>
+          <button type="button" onclick="openAuthModal()" style="background:var(--accent-gold); color:#09090b; border:none; padding:8px 13px; border-radius:10px; font-size:0.74rem; font-weight:800; cursor:pointer; white-space:nowrap;" id="checkoutReminderBtn">Login Sekarang →</button>
+        </div>
+      </div>
+
       <div class="step-card">
         <div class="step-head">
           <span class="step-num">1</span>
@@ -2410,7 +2420,7 @@
           </div>
           <button type="submit" class="primary-submit">Sign In to Account</button>
           <button type="button" onclick="handleGoogleSignIn('login')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-            <span style="font-weight:900; color:#4285F4;">G</span> Continue with Google
+            <span id="gLoginSvgSlot"></span> Continue with Google
           </button>
         </form>
 
@@ -2433,7 +2443,7 @@
           </div>
           <button type="submit" class="primary-submit">Create Account</button>
           <button type="button" onclick="handleGoogleSignIn('register')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-            <span style="font-weight:900; color:#4285F4;">G</span> Sign up with Google
+            <span id="gRegSvgSlot"></span> Sign up with Google
           </button>
         </form>
       </div>
@@ -3237,6 +3247,7 @@
       const modal = document.getElementById('showSearchModal');
       if (!modal) return;
       modal.classList.add('open');
+      hydrateGoogleButtonLogos();
       setTimeout(() => {
         const inp = document.getElementById('showSearchInput');
         if (inp) inp.focus();
@@ -3446,6 +3457,18 @@
       if (items[idx]) {
         openShowDetailModal(items[idx]);
       }
+    }
+
+
+    function googleLogoSvg(sizePx = 18) {
+      return `
+        <svg width="${sizePx}" height="${sizePx}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:block; flex-shrink:0;">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.54-1.14 2.85-2.4 3.72v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.21z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/>
+        </svg>
+      `;
     }
 
     function showToast(msg) {
@@ -3724,6 +3747,12 @@
       const customerDevice = needsDevice ? document.getElementById('custDevice').value.trim() : '-';
       const customerEmail = needsEmail ? document.getElementById('custEmail').value.trim() : '-';
 
+      if (!getCurrentUser()) {
+        refreshCheckoutLoginReminder();
+        showToast(currentLang === 'en'
+          ? 'Tip: Login first so your transaction history & data are saved to your account!'
+          : 'Peringatan: Login dahulu sebelum bayar supaya data & sejarah transaksi tidak hilang!');
+      }
       if (!customerName || !customerPhone) {
         showToast(currentLang === 'en' ? 'Please fill in Full Name and WhatsApp Number!' : 'Sila isi Nama Penuh dan No. WhatsApp!');
         return;
@@ -3885,6 +3914,38 @@
       try { return JSON.parse(localStorage.getItem('spystore_current_user') || 'null'); } catch { return null; }
     }
 
+
+    function hydrateGoogleButtonLogos() {
+      document.querySelectorAll('#gLoginSvgSlot, #gRegSvgSlot').forEach(el => {
+        if (!el.innerHTML.trim() && typeof googleLogoSvg === 'function') {
+          el.innerHTML = googleLogoSvg(18);
+        }
+      });
+    }
+
+    function refreshCheckoutLoginReminder() {
+      const box = document.getElementById('checkoutLoginReminder');
+      if (!box) return;
+      const user = getCurrentUser();
+      box.style.display = user ? 'none' : 'block';
+      const tEl = document.getElementById('checkoutReminderTitle');
+      const dEl = document.getElementById('checkoutReminderDesc');
+      const bEl = document.getElementById('checkoutReminderBtn');
+      if (tEl) {
+        tEl.textContent = currentLang === 'en'
+          ? '⚠️ Login Before Payment So Your Data & History Are Saved'
+          : '⚠️ Login Dahulu Sebelum Bayar Supaya Data & Rekod Tak Hilang';
+      }
+      if (dEl) {
+        dEl.textContent = currentLang === 'en'
+          ? 'Please sign in first so your profile details and order/transaction history stay saved to your account.'
+          : 'Sila log masuk dahulu supaya data profil serta sejarah transaksi/tempahan kekal tersimpan dalam akaun anda.';
+      }
+      if (bEl) {
+        bEl.textContent = currentLang === 'en' ? 'Login Now →' : 'Login Sekarang →';
+      }
+    }
+
     function updateAuthUI() {
       const user = getCurrentUser();
       const navBtn = document.getElementById('authNavBtn');
@@ -3896,6 +3957,7 @@
         navBtn.textContent = 'Login';
         navBtn.classList.remove('auth-active');
       }
+      refreshCheckoutLoginReminder();
     }
 
     function openAuthModal() {
@@ -3933,7 +3995,7 @@
               </div>
               <button type="submit" class="primary-submit">Sign In to Account</button>
               <button type="button" onclick="handleGoogleSignIn('login')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-                <span style="font-weight:900; color:#4285F4;">G</span> Continue with Google
+                <span id="gLoginSvgSlot"></span> Continue with Google
               </button>
             </form>
             <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
@@ -3955,7 +4017,7 @@
               </div>
               <button type="submit" class="primary-submit">Create Account</button>
               <button type="button" onclick="handleGoogleSignIn('register')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-                <span style="font-weight:900; color:#4285F4;">G</span> Sign up with Google
+                <span id="gRegSvgSlot"></span> Sign up with Google
               </button>
             </form>
           `;
@@ -3998,6 +4060,7 @@
       saveUsersDB(users);
       localStorage.setItem('spystore_current_user', JSON.stringify(newUser));
       updateAuthUI();
+    hydrateGoogleButtonLogos();
       closeAuthModal();
       showToast(`Welcome to SPYSTORE BY SAMS, ${name}!`);
     }
@@ -4015,6 +4078,7 @@
       }
 
       localStorage.setItem('spystore_current_user', JSON.stringify(found));
+      syncCurrentUserSavedData();
       updateAuthUI();
       closeAuthModal();
       showToast(`Logged in as ${found.name}`);
@@ -4071,6 +4135,7 @@
         saveUsersDB(users);
       }
       localStorage.setItem('spystore_current_user', JSON.stringify(googleUser));
+      syncCurrentUserSavedData();
       updateAuthUI();
       closeAuthModal();
       showToast(_pendingGoogleAuthMode === 'register'
@@ -4168,21 +4233,77 @@
       showToast('Logged out successfully.');
     }
 
+
+    function getUserDataKey(email) {
+      return `spystore_user_data_${String(email || 'guest').trim().toLowerCase()}`;
+    }
+
+    function loadUserSavedData(email) {
+      try {
+        return JSON.parse(localStorage.getItem(getUserDataKey(email)) || '{"orders":[],"profile":{}}');
+      } catch (e) {
+        return { orders: [], profile: {} };
+      }
+    }
+
+    function syncCurrentUserSavedData(orderItem = null) {
+      const user = getCurrentUser();
+      if (!user || !user.email) return;
+      const key = getUserDataKey(user.email);
+      let current = { orders: [], profile: {} };
+      try { current = JSON.parse(localStorage.getItem(key) || '{"orders":[],"profile":{}}'); } catch (e) {}
+
+      current.profile = {
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        provider: user.provider || 'local',
+        updatedAt: new Date().toISOString()
+      };
+
+      let globalOrders = [];
+      try { globalOrders = JSON.parse(localStorage.getItem('spystore_orders') || '[]'); } catch (e) {}
+
+      const mergedMap = new Map();
+      const allCandidates = [
+        ...(orderItem ? [orderItem] : []),
+        ...(Array.isArray(current.orders) ? current.orders : []),
+        ...(Array.isArray(globalOrders) ? globalOrders : [])
+      ];
+
+      allCandidates.forEach(o => {
+        if (!o) return;
+        const sig = `${o.app || ''}|${o.months || ''}|${o.total || ''}|${o.date || ''}`;
+        if (!mergedMap.has(sig)) mergedMap.set(sig, o);
+      });
+
+      current.orders = Array.from(mergedMap.values()).slice(0, 25);
+      localStorage.setItem(key, JSON.stringify(current));
+    }
+
     function saveLocalOrder(order) {
       try {
         const list = JSON.parse(localStorage.getItem('spystore_orders') || '[]');
         list.unshift(order);
-        localStorage.setItem('spystore_orders', JSON.stringify(list.slice(0, 15)));
+        localStorage.setItem('spystore_orders', JSON.stringify(list.slice(0, 25)));
       } catch {}
+      syncCurrentUserSavedData(order);
     }
 
     function renderOrderHistory() {
       const container = document.getElementById('orderHistoryList');
+      const user = getCurrentUser();
       let list = [];
-      try { list = JSON.parse(localStorage.getItem('spystore_orders') || '[]'); } catch {}
+      if (user && user.email) {
+        syncCurrentUserSavedData();
+        const saved = loadUserSavedData(user.email);
+        list = Array.isArray(saved.orders) ? saved.orders : [];
+      } else {
+        try { list = JSON.parse(localStorage.getItem('spystore_orders') || '[]'); } catch {}
+      }
 
       if (!list.length) {
-        container.innerHTML = `<p style="font-size:0.78rem; color:var(--text-muted);">No orders placed on this device yet.</p>`;
+        container.innerHTML = `<p style="font-size:0.78rem; color:var(--text-muted);">No transaction history saved for this account yet.</p>`;
         return;
       }
 
@@ -4192,7 +4313,10 @@
             <span>${o.app} (${o.months} Mo)</span>
             <span style="color:var(--accent-gold);">RM${o.total}</span>
           </div>
-          <div style="color:var(--text-muted); font-size:0.72rem; margin-top:2px;">Date: ${o.date}</div>
+          <div style="display:flex; justify-content:space-between; color:var(--text-muted); font-size:0.72rem; margin-top:2px;">
+            <span>Date: ${o.date}</span>
+            <span style="color:#4ade80;">Saved ✓</span>
+          </div>
         </div>
       `).join('');
     }
