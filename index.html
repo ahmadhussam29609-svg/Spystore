@@ -14,8 +14,6 @@
       --muted: #9aa7bf;
       --accent: #facc15;
       --accent-2: #38bdf8;
-      --success: #22c55e;
-      --warning: #f59e0b;
       --border: rgba(148, 163, 184, 0.16);
       --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
     }
@@ -29,8 +27,6 @@
       --muted: #475569;
       --accent: #d97706;
       --accent-2: #0284c7;
-      --success: #16a34a;
-      --warning: #d97706;
       --border: rgba(15, 23, 42, 0.12);
       --shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
     }
@@ -55,7 +51,6 @@
       line-height: 1.55;
       min-height: 100vh;
       overflow-x: hidden;
-      transition: background 0.25s ease, color 0.25s ease;
     }
 
     @keyframes floatSlow {
@@ -64,14 +59,8 @@
     }
 
     @keyframes fadeSlideUp {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .anim-up {
@@ -151,7 +140,7 @@
       font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+      transition: transform 0.14s ease, background 0.14s ease;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -161,10 +150,6 @@
     .btn:hover {
       background: var(--card-hover);
       transform: translateY(-1px);
-    }
-
-    .btn:active {
-      transform: scale(0.98);
     }
 
     .btn-primary {
@@ -692,7 +677,72 @@
       <button class="chip" data-filter="Share" type="button">Share</button>
     </div>
 
-    <div class="grid" id="catalogGrid"></div>
+    <div class="grid" id="catalogGrid">
+      <div class="app-card" data-app-id="netflix">
+        <div>
+          <div class="app-top"><div class="app-icon">🎬</div><span class="badge">Private</span></div>
+          <div class="app-name">Netflix UHD</div>
+          <div class="app-desc">Akaun Private 4K UHD dengan waranti sepanjang tempoh aktif.</div>
+        </div>
+        <div class="hidden-price-cta"><span>Tap to view price &amp; order</span><span>→</span></div>
+      </div>
+      <div class="app-card selected" data-app-id="disney">
+        <div>
+          <div class="app-top"><div class="app-icon">✨</div><span class="badge">Private</span></div>
+          <div class="app-name">Disney+ Premium</div>
+          <div class="app-desc">Akaun Private penstriman filem, animasi &amp; siri popular.</div>
+        </div>
+        <div class="hidden-price-cta"><span>Tap to view price &amp; order</span><span>→</span></div>
+      </div>
+      <div class="app-card" data-app-id="hbomax">
+        <div>
+          <div class="app-top"><div class="app-icon">🎭</div><span class="badge">Private</span></div>
+          <div class="app-name">HBO Max</div>
+          <div class="app-desc">Akaun Private siri blockbuster, filem &amp; dokumentari.</div>
+        </div>
+        <div class="hidden-price-cta"><span>Tap to view price &amp; order</span><span>→</span></div>
+      </div>
+      <div class="app-card" data-app-id="primevideo">
+        <div>
+          <div class="app-top"><div class="app-icon">📺</div><span class="badge">Private</span></div>
+          <div class="app-name">Prime Video</div>
+          <div class="app-desc">Akaun Private penstriman filem dan siri antarabangsa.</div>
+        </div>
+        <div class="hidden-price-cta"><span>Tap to view price &amp; order</span><span>→</span></div>
+      </div>
+      <div class="app-card" data-app-id="capcut">
+        <div>
+          <div class="app-top"><div class="app-icon">✂️</div><span class="badge">Share • Private</span></div>
+          <div class="app-name">CapCut Pro</div>
+          <div class="app-desc">Suntingan video Pro — pilih pelan Share (RM10/bln) atau Private (RM15/bln).</div>
+        </div>
+        <div class="hidden-price-cta"><span>Tap to view price &amp; order</span><span>→</span></div>
+      </div>
+      <div class="app-card" data-app-id="youtube">
+        <div>
+          <div class="app-top"><div class="app-icon">▶️</div><span class="badge">Via Invite</span></div>
+          <div class="app-name">YouTube Premium</div>
+          <div class="app-desc">Akses tanpa iklan &amp; YouTube Music melalui jemputan (Via Invite).</div>
+        </div>
+        <div class="hidden-price-cta"><span>Tap to view price &amp; order</span><span>→</span></div>
+      </div>
+      <div class="app-card" data-app-id="spotify">
+        <div>
+          <div class="app-top"><div class="app-icon">🎵</div><span class="badge">Via Invite</span></div>
+          <div class="app-name">Spotify Individual</div>
+          <div class="app-desc">Penstriman muzik &amp; podcast tanpa iklan melalui jemputan (Via Invite).</div>
+        </div>
+        <div class="hidden-price-cta"><span>Tap to view price &amp; order</span><span>→</span></div>
+      </div>
+      <div class="app-card" data-app-id="canva">
+        <div>
+          <div class="app-top"><div class="app-icon">🎨</div><span class="badge">Via Invite</span></div>
+          <div class="app-name">Canva Pro</div>
+          <div class="app-desc">Templat premium, penghilang latar &amp; eksport reka bentuk (Via Invite).</div>
+        </div>
+        <div class="hidden-price-cta"><span>Tap to view price &amp; order</span><span>→</span></div>
+      </div>
+    </div>
 
     <section class="checkout-card anim-up" id="checkout-section">
       <div class="section-head">
@@ -702,7 +752,7 @@
             Saluran <strong>Online Banking</strong> melalui Billplz aktif sekarang. Saluran <strong>QR / Wallet / Card / BNPL</strong> sedang dalam proses pengaktifan rasmi Billplz.
           </p>
         </div>
-        <span class="pill" id="selectedAppBadge">Dipilih: -</span>
+        <span class="pill" id="selectedAppBadge">Dipilih: Disney+ Premium</span>
       </div>
 
       <div id="orderReceipt" class="receipt-box"></div>
@@ -713,7 +763,16 @@
           <span>Pilih Pelan &amp; Tempoh</span>
         </div>
         <div id="subPlanContainer" style="margin-bottom:12px;"></div>
-        <div class="plan-grid" id="durationGrid"></div>
+        <div class="plan-grid" id="durationGrid">
+          <button type="button" class="plan-option active" data-dur-idx="0">
+            <div style="font-weight:700;">1 Bulan</div>
+            <div class="plan-price">RM16.00</div>
+          </button>
+          <button type="button" class="plan-option" data-dur-idx="1">
+            <div style="font-weight:700;">2 Bulan</div>
+            <div class="plan-price">RM32.00</div>
+          </button>
+        </div>
       </div>
 
       <div class="step-box">
@@ -816,441 +875,469 @@
 
   <script>
     (function () {
-      const APPS = [
-        {
-          id: 'netflix',
-          name: 'Netflix UHD',
-          icon: '🎬',
-          mode: 'Private',
-          desc: 'Akaun Private 4K UHD dengan waranti sepanjang tempoh aktif.',
-          durations: [
-            { label: '1 Bulan', months: 1, price: 18 },
-            { label: '2 Bulan', months: 2, price: 35 }
-          ]
-        },
-        {
-          id: 'disney',
-          name: 'Disney+ Premium',
-          icon: '✨',
-          mode: 'Private',
-          desc: 'Akaun Private penstriman filem, animasi & siri popular.',
-          durations: [
-            { label: '1 Bulan', months: 1, price: 16 },
-            { label: '2 Bulan', months: 2, price: 32 }
-          ]
-        },
-        {
-          id: 'hbomax',
-          name: 'HBO Max',
-          icon: '🎭',
-          mode: 'Private',
-          desc: 'Akaun Private siri blockbuster, filem & dokumentari.',
-          durations: [
-            { label: '1 Bulan', months: 1, price: 15 },
-            { label: '3 Bulan', months: 3, price: 42 }
-          ]
-        },
-        {
-          id: 'primevideo',
-          name: 'Prime Video',
-          icon: '📺',
-          mode: 'Private',
-          desc: 'Akaun Private penstriman filem dan siri antarabangsa.',
-          durations: [
-            { label: '1 Bulan', months: 1, price: 12 },
-            { label: '3 Bulan', months: 3, price: 32 }
-          ]
-        },
-        {
-          id: 'capcut',
-          name: 'CapCut Pro',
-          icon: '✂️',
-          mode: 'Share',
-          desc: 'Suntingan video Pro — pilih pelan Share (RM10/bln) atau Private (RM15/bln).',
-          subPlans: [
-            {
-              id: 'share',
-              label: 'Share (RM10/bln)',
-              durations: [
-                { label: '1 Bulan', months: 1, price: 10 },
-                { label: '3 Bulan', months: 3, price: 28 }
-              ]
-            },
-            {
-              id: 'private',
-              label: 'Private (RM15/bln)',
-              durations: [
-                { label: '1 Bulan', months: 1, price: 15 },
-                { label: '3 Bulan', months: 3, price: 42 }
-              ]
-            }
-          ]
-        },
-        {
-          id: 'youtube',
-          name: 'YouTube Premium',
-          icon: '▶️',
-          mode: 'Via Invite',
-          desc: 'Akses tanpa iklan & YouTube Music melalui jemputan (Via Invite).',
-          durations: [
-            { label: '1 Bulan', months: 1, price: 12 },
-            { label: '3 Bulan', months: 3, price: 34 }
-          ]
-        },
-        {
-          id: 'spotify',
-          name: 'Spotify Individual',
-          icon: '🎵',
-          mode: 'Via Invite',
-          desc: 'Penstriman muzik & podcast tanpa iklan melalui jemputan (Via Invite).',
-          durations: [
-            { label: '1 Bulan', months: 1, price: 12 },
-            { label: '3 Bulan', months: 3, price: 33 }
-          ]
-        },
-        {
-          id: 'canva',
-          name: 'Canva Pro',
-          icon: '🎨',
-          mode: 'Via Invite',
-          desc: 'Templat premium, penghilang latar & eksport reka bentuk (Via Invite).',
-          durations: [
-            { label: '1 Bulan', months: 1, price: 10 },
-            { label: '12 Bulan', months: 12, price: 35 }
-          ]
-        }
-      ];
-
-      let currentFilter = 'all';
-      let selectedApp = APPS[1];
-      let selectedSubPlan = null;
-      let selectedDuration = selectedApp.durations[0];
-      let selectedPayment = 'billplz_fpx';
-
-      const catalogGrid = document.getElementById('catalogGrid');
-      const subPlanContainer = document.getElementById('subPlanContainer');
-      const durationGrid = document.getElementById('durationGrid');
-      const totalPayableEl = document.getElementById('totalPayable');
-      const selectedAppBadge = document.getElementById('selectedAppBadge');
-      const statusMsg = document.getElementById('statusMsg');
-      const paymentNotice = document.getElementById('paymentNotice');
-
-      function escapeHtml(str) {
-        return String(str || '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      }
-
-      function getActiveDurations() {
-        if (selectedApp && selectedApp.subPlans && selectedSubPlan) {
-          return selectedSubPlan.durations;
-        }
-        return (selectedApp && selectedApp.durations) || [];
-      }
-
-      function renderCatalog() {
-        if (!catalogGrid) return;
-        const inputEl = document.getElementById('mainSearchInput');
-        const q = (inputEl ? inputEl.value : '').trim().toLowerCase();
-        const filtered = APPS.filter(function (app) {
-          const matchesFilter = currentFilter === 'all' || app.mode === currentFilter || (currentFilter === 'Share' && app.subPlans);
-          const matchesQuery = !q || app.name.toLowerCase().indexOf(q) !== -1 || app.desc.toLowerCase().indexOf(q) !== -1;
-          return matchesFilter && matchesQuery;
-        });
-
-        catalogGrid.innerHTML = filtered.map(function (app) {
-          const isSel = selectedApp && selectedApp.id === app.id;
-          return (
-            '<div class="app-card ' + (isSel ? 'selected' : '') + '" data-app-id="' + escapeHtml(app.id) + '">' +
-              '<div>' +
-                '<div class="app-top">' +
-                  '<div class="app-icon">' + escapeHtml(app.icon) + '</div>' +
-                  '<span class="badge">' + escapeHtml(app.subPlans ? 'Share • Private' : app.mode) + '</span>' +
-                '</div>' +
-                '<div class="app-name">' + escapeHtml(app.name) + '</div>' +
-                '<div class="app-desc">' + escapeHtml(app.desc) + '</div>' +
-              '</div>' +
-              '<div class="hidden-price-cta">' +
-                '<span>Tap to view price &amp; order</span>' +
-                '<span>→</span>' +
-              '</div>' +
-            '</div>'
-          );
-        }).join('');
-      }
-
-      function selectApp(appId, shouldScroll) {
-        const found = APPS.find(function (a) { return a.id === appId; });
-        if (!found) return;
-        selectedApp = found;
-        if (found.subPlans && found.subPlans.length > 0) {
-          selectedSubPlan = found.subPlans[0];
-          selectedDuration = selectedSubPlan.durations[0];
-        } else {
-          selectedSubPlan = null;
-          selectedDuration = found.durations[0];
-        }
-        renderCatalog();
-        renderCheckoutPlans();
-        updateTotal();
-        if (shouldScroll) {
-          const sec = document.getElementById('checkout-section');
-          if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-
-      function selectSubPlan(subId) {
-        if (!selectedApp || !selectedApp.subPlans) return;
-        const foundSub = selectedApp.subPlans.find(function (s) { return s.id === subId; });
-        if (!foundSub) return;
-        selectedSubPlan = foundSub;
-        selectedDuration = foundSub.durations[0];
-        renderCheckoutPlans();
-        updateTotal();
-      }
-
-      function selectDuration(index) {
-        const list = getActiveDurations();
-        if (list[index]) {
-          selectedDuration = list[index];
-          renderCheckoutPlans();
-          updateTotal();
-        }
-      }
-
-      function renderCheckoutPlans() {
-        if (selectedAppBadge && selectedApp) {
-          selectedAppBadge.textContent = 'Dipilih: ' + selectedApp.name;
-        }
-
-        if (subPlanContainer) {
-          if (selectedApp && selectedApp.subPlans) {
-            subPlanContainer.innerHTML =
-              '<div style="font-size:0.8rem; font-weight:700; color:var(--muted); margin-bottom:8px;">Jenis Pelan Akaun:</div>' +
-              '<div class="plan-grid">' +
-                selectedApp.subPlans.map(function (sp) {
-                  const active = selectedSubPlan && selectedSubPlan.id === sp.id;
-                  return (
-                    '<button type="button" class="plan-option ' + (active ? 'active' : '') + '" data-sub-id="' + escapeHtml(sp.id) + '">' +
-                      '<div style="font-weight:800;">' + escapeHtml(sp.label) + '</div>' +
-                    '</button>'
-                  );
-                }).join('') +
-              '</div>';
-          } else {
-            subPlanContainer.innerHTML = '';
+      try {
+        var APPS = [
+          {
+            id: 'netflix',
+            name: 'Netflix UHD',
+            icon: '🎬',
+            mode: 'Private',
+            desc: 'Akaun Private 4K UHD dengan waranti sepanjang tempoh aktif.',
+            durations: [
+              { label: '1 Bulan', months: 1, price: 18 },
+              { label: '2 Bulan', months: 2, price: 35 }
+            ]
+          },
+          {
+            id: 'disney',
+            name: 'Disney+ Premium',
+            icon: '✨',
+            mode: 'Private',
+            desc: 'Akaun Private penstriman filem, animasi & siri popular.',
+            durations: [
+              { label: '1 Bulan', months: 1, price: 16 },
+              { label: '2 Bulan', months: 2, price: 32 }
+            ]
+          },
+          {
+            id: 'hbomax',
+            name: 'HBO Max',
+            icon: '🎭',
+            mode: 'Private',
+            desc: 'Akaun Private siri blockbuster, filem & dokumentari.',
+            durations: [
+              { label: '1 Bulan', months: 1, price: 15 },
+              { label: '3 Bulan', months: 3, price: 42 }
+            ]
+          },
+          {
+            id: 'primevideo',
+            name: 'Prime Video',
+            icon: '📺',
+            mode: 'Private',
+            desc: 'Akaun Private penstriman filem dan siri antarabangsa.',
+            durations: [
+              { label: '1 Bulan', months: 1, price: 12 },
+              { label: '3 Bulan', months: 3, price: 32 }
+            ]
+          },
+          {
+            id: 'capcut',
+            name: 'CapCut Pro',
+            icon: '✂️',
+            mode: 'Share',
+            desc: 'Suntingan video Pro — pilih pelan Share (RM10/bln) atau Private (RM15/bln).',
+            subPlans: [
+              {
+                id: 'share',
+                label: 'Share (RM10/bln)',
+                durations: [
+                  { label: '1 Bulan', months: 1, price: 10 },
+                  { label: '3 Bulan', months: 3, price: 28 }
+                ]
+              },
+              {
+                id: 'private',
+                label: 'Private (RM15/bln)',
+                durations: [
+                  { label: '1 Bulan', months: 1, price: 15 },
+                  { label: '3 Bulan', months: 3, price: 42 }
+                ]
+              }
+            ]
+          },
+          {
+            id: 'youtube',
+            name: 'YouTube Premium',
+            icon: '▶️',
+            mode: 'Via Invite',
+            desc: 'Akses tanpa iklan & YouTube Music melalui jemputan (Via Invite).',
+            durations: [
+              { label: '1 Bulan', months: 1, price: 12 },
+              { label: '3 Bulan', months: 3, price: 34 }
+            ]
+          },
+          {
+            id: 'spotify',
+            name: 'Spotify Individual',
+            icon: '🎵',
+            mode: 'Via Invite',
+            desc: 'Penstriman muzik & podcast tanpa iklan melalui jemputan (Via Invite).',
+            durations: [
+              { label: '1 Bulan', months: 1, price: 12 },
+              { label: '3 Bulan', months: 3, price: 33 }
+            ]
+          },
+          {
+            id: 'canva',
+            name: 'Canva Pro',
+            icon: '🎨',
+            mode: 'Via Invite',
+            desc: 'Templat premium, penghilang latar & eksport reka bentuk (Via Invite).',
+            durations: [
+              { label: '1 Bulan', months: 1, price: 10 },
+              { label: '12 Bulan', months: 12, price: 35 }
+            ]
           }
+        ];
+
+        var currentFilter = 'all';
+        var selectedApp = APPS[1];
+        var selectedSubPlan = null;
+        var selectedDuration = selectedApp.durations[0];
+        var selectedPayment = 'billplz_fpx';
+
+        var catalogGrid = document.getElementById('catalogGrid');
+        var subPlanContainer = document.getElementById('subPlanContainer');
+        var durationGrid = document.getElementById('durationGrid');
+        var totalPayableEl = document.getElementById('totalPayable');
+        var selectedAppBadge = document.getElementById('selectedAppBadge');
+        var statusMsg = document.getElementById('statusMsg');
+        var paymentNotice = document.getElementById('paymentNotice');
+
+        function esc(str) {
+          return String(str || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
         }
 
-        if (durationGrid) {
-          const durations = getActiveDurations();
-          durationGrid.innerHTML = durations.map(function (d, idx) {
-            const isAct = selectedDuration && selectedDuration.label === d.label && selectedDuration.price === d.price;
+        function getActiveDurations() {
+          if (selectedApp && selectedApp.subPlans && selectedSubPlan) {
+            return selectedSubPlan.durations;
+          }
+          return (selectedApp && selectedApp.durations) || [];
+        }
+
+        function renderCatalog() {
+          if (!catalogGrid) return;
+          var inputEl = document.getElementById('mainSearchInput');
+          var q = (inputEl ? inputEl.value : '').trim().toLowerCase();
+          var filtered = APPS.filter(function (app) {
+            var matchesFilter = currentFilter === 'all' || app.mode === currentFilter || (currentFilter === 'Share' && app.subPlans);
+            var matchesQuery = !q || app.name.toLowerCase().indexOf(q) !== -1 || app.desc.toLowerCase().indexOf(q) !== -1;
+            return matchesFilter && matchesQuery;
+          });
+
+          catalogGrid.innerHTML = filtered.map(function (app) {
+            var isSel = selectedApp && selectedApp.id === app.id;
             return (
-              '<button type="button" class="plan-option ' + (isAct ? 'active' : '') + '" data-dur-idx="' + idx + '">' +
-                '<div style="font-weight:700;">' + escapeHtml(d.label) + '</div>' +
-                '<div class="plan-price">RM' + Number(d.price).toFixed(2) + '</div>' +
-              '</button>'
+              '<div class="app-card ' + (isSel ? 'selected' : '') + '" data-app-id="' + esc(app.id) + '">' +
+                '<div>' +
+                  '<div class="app-top">' +
+                    '<div class="app-icon">' + esc(app.icon) + '</div>' +
+                    '<span class="badge">' + esc(app.subPlans ? 'Share • Private' : app.mode) + '</span>' +
+                  '</div>' +
+                  '<div class="app-name">' + esc(app.name) + '</div>' +
+                  '<div class="app-desc">' + esc(app.desc) + '</div>' +
+                '</div>' +
+                '<div class="hidden-price-cta">' +
+                  '<span>Tap to view price &amp; order</span>' +
+                  '<span>→</span>' +
+                '</div>' +
+              '</div>'
             );
           }).join('');
         }
-      }
 
-      function updateTotal() {
-        if (!totalPayableEl) return;
-        const price = selectedDuration ? Number(selectedDuration.price) : 0;
-        totalPayableEl.textContent = 'RM' + price.toFixed(2);
-      }
-
-      if (catalogGrid) {
-        catalogGrid.addEventListener('click', function (e) {
-          const card = e.target.closest('.app-card');
-          if (!card) return;
-          const appId = card.getAttribute('data-app-id');
-          if (appId) selectApp(appId, true);
-        });
-      }
-
-      if (subPlanContainer) {
-        subPlanContainer.addEventListener('click', function (e) {
-          const btn = e.target.closest('[data-sub-id]');
-          if (!btn) return;
-          selectSubPlan(btn.getAttribute('data-sub-id'));
-        });
-      }
-
-      if (durationGrid) {
-        durationGrid.addEventListener('click', function (e) {
-          const btn = e.target.closest('[data-dur-idx]');
-          if (!btn) return;
-          selectDuration(Number(btn.getAttribute('data-dur-idx')));
-        });
-      }
-
-      const showResultsBox = document.getElementById('showSearchResults');
-      if (showResultsBox) {
-        showResultsBox.addEventListener('click', function (e) {
-          const btn = e.target.closest('[data-pick-app]');
-          if (!btn) return;
-          selectApp(btn.getAttribute('data-pick-app'), true);
-        });
-      }
-
-      document.querySelectorAll('#paymentMethodList .pay-card').forEach(function (card) {
-        card.addEventListener('click', function () {
-          document.querySelectorAll('#paymentMethodList .pay-card').forEach(function (c) { c.classList.remove('active'); });
-          card.classList.add('active');
-          selectedPayment = card.getAttribute('data-pay');
-
-          if (!paymentNotice) return;
-          if (selectedPayment === 'billplz_fpx') {
-            paymentNotice.innerHTML = '<strong>Online Banking (Billplz Aktif):</strong> Anda akan dibawa ke halaman bil rasmi Billplz untuk melengkapkan pembayaran perbankan dalam talian.';
-          } else if (selectedPayment === 'billplz_qr_pending') {
-            paymentNotice.innerHTML = '<strong>Status Saluran Tambahan Billplz:</strong> Permohonan pengaktifan QR / Wallet / Card / BNPL telah dihantar ke pihak Billplz. Tekan <strong>Pay Now →</strong> untuk menjana bil Billplz atau pilih <strong>eWallet via WhatsApp</strong> untuk bantuan segera.';
+        function selectApp(appId, shouldScroll) {
+          var found = null;
+          for (var i = 0; i < APPS.length; i++) {
+            if (APPS[i].id === appId) { found = APPS[i]; break; }
+          }
+          if (!found) return;
+          selectedApp = found;
+          if (found.subPlans && found.subPlans.length > 0) {
+            selectedSubPlan = found.subPlans[0];
+            selectedDuration = selectedSubPlan.durations[0];
           } else {
-            paymentNotice.innerHTML = '<strong>eWallet via WhatsApp:</strong> Butiran tempahan anda akan disusun terus ke WhatsApp admin untuk semakan dan pengesahan bayaran eWallet.';
+            selectedSubPlan = null;
+            selectedDuration = found.durations[0];
           }
-        });
-      });
-
-      document.querySelectorAll('#filterRow .chip').forEach(function (chip) {
-        chip.addEventListener('click', function () {
-          document.querySelectorAll('#filterRow .chip').forEach(function (c) { c.classList.remove('active'); });
-          chip.classList.add('active');
-          currentFilter = chip.getAttribute('data-filter');
           renderCatalog();
-        });
-      });
-
-      const mainSearchInput = document.getElementById('mainSearchInput');
-      if (mainSearchInput) {
-        mainSearchInput.addEventListener('input', renderCatalog);
-        mainSearchInput.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            searchShowFromMainBox();
+          renderCheckoutPlans();
+          updateTotal();
+          if (shouldScroll) {
+            var sec = document.getElementById('checkout-section');
+            if (sec && sec.scrollIntoView) {
+              try { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+            }
           }
-        });
-      }
-
-      const searchShowBtn = document.getElementById('searchShowBtn');
-      if (searchShowBtn) searchShowBtn.addEventListener('click', searchShowFromMainBox);
-
-      const clearSearchBtn = document.getElementById('clearSearchBtn');
-      if (clearSearchBtn) {
-        clearSearchBtn.addEventListener('click', function () {
-          if (mainSearchInput) mainSearchInput.value = '';
-          if (showResultsBox) {
-            showResultsBox.classList.remove('active');
-            showResultsBox.innerHTML = '';
-          }
-          currentFilter = 'all';
-          document.querySelectorAll('#filterRow .chip').forEach(function (c) { c.classList.remove('active'); });
-          const allChip = document.querySelector('#filterRow .chip[data-filter="all"]');
-          if (allChip) allChip.classList.add('active');
-          renderCatalog();
-        });
-      }
-
-      async function searchShowFromMainBox() {
-        const query = (mainSearchInput ? mainSearchInput.value : '').trim();
-        if (!showResultsBox) return;
-        if (!query) {
-          showResultsBox.classList.remove('active');
-          return;
         }
-        showResultsBox.classList.add('active');
-        showResultsBox.innerHTML = '<div style="font-size:0.85rem; color:var(--muted);">Mencari cerita/movie "<strong>' + escapeHtml(query) + '</strong>"...</div>';
 
-        try {
-          const res = await fetch('/api/search-title?q=' + encodeURIComponent(query));
-          const text = await res.text();
-          let data = {};
-          try { data = JSON.parse(text); } catch (e) { data = {}; }
-          const results = Array.isArray(data.results) ? data.results : [];
-          if (results.length === 0) {
-            showResultsBox.innerHTML =
-              '<div style="font-size:0.85rem; color:var(--muted);">' +
-                'Tiada padanan cerita dijumpai untuk "<strong>' + escapeHtml(query) + '</strong>". Anda boleh pilih aplikasi di bawah:' +
-                '<div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">' +
-                  '<button type="button" class="btn btn-primary" data-pick-app="netflix">Netflix UHD →</button>' +
-                  '<button type="button" class="btn" data-pick-app="disney">Disney+ Premium →</button>' +
-                '</div>' +
-              '</div>';
-            return;
+        function selectSubPlan(subId) {
+          if (!selectedApp || !selectedApp.subPlans) return;
+          var foundSub = null;
+          for (var i = 0; i < selectedApp.subPlans.length; i++) {
+            if (selectedApp.subPlans[i].id === subId) { foundSub = selectedApp.subPlans[i]; break; }
           }
-          showResultsBox.innerHTML =
-            '<div style="font-size:0.84rem; font-weight:700;">Hasil Carian Cerita/Movie: "' + escapeHtml(query) + '"</div>' +
-            results.map(function (item) {
-              const plats = Array.isArray(item.platforms) ? item.platforms.join(', ') : 'Netflix, Disney+';
+          if (!foundSub) return;
+          selectedSubPlan = foundSub;
+          selectedDuration = foundSub.durations[0];
+          renderCheckoutPlans();
+          updateTotal();
+        }
+
+        function selectDuration(index) {
+          var list = getActiveDurations();
+          if (list[index]) {
+            selectedDuration = list[index];
+            renderCheckoutPlans();
+            updateTotal();
+          }
+        }
+
+        function renderCheckoutPlans() {
+          if (selectedAppBadge && selectedApp) {
+            selectedAppBadge.textContent = 'Dipilih: ' + selectedApp.name;
+          }
+
+          if (subPlanContainer) {
+            if (selectedApp && selectedApp.subPlans) {
+              subPlanContainer.innerHTML =
+                '<div style="font-size:0.8rem; font-weight:700; color:var(--muted); margin-bottom:8px;">Jenis Pelan Akaun:</div>' +
+                '<div class="plan-grid">' +
+                  selectedApp.subPlans.map(function (sp) {
+                    var active = selectedSubPlan && selectedSubPlan.id === sp.id;
+                    return (
+                      '<button type="button" class="plan-option ' + (active ? 'active' : '') + '" data-sub-id="' + esc(sp.id) + '">' +
+                        '<div style="font-weight:800;">' + esc(sp.label) + '</div>' +
+                      '</button>'
+                    );
+                  }).join('') +
+                '</div>';
+            } else {
+              subPlanContainer.innerHTML = '';
+            }
+          }
+
+          if (durationGrid) {
+            var durations = getActiveDurations();
+            durationGrid.innerHTML = durations.map(function (d, idx) {
+              var isAct = selectedDuration && selectedDuration.label === d.label && selectedDuration.price === d.price;
               return (
-                '<div class="show-item">' +
-                  '<div>' +
-                    '<div style="font-weight:800;">' + escapeHtml(item.title || query) + '</div>' +
-                    '<div style="font-size:0.78rem; color:var(--muted);">Platform: ' + escapeHtml(plats) + '</div>' +
-                  '</div>' +
-                  '<button type="button" class="btn btn-primary" data-pick-app="netflix">Pilih App →</button>' +
-                '</div>'
+                '<button type="button" class="plan-option ' + (isAct ? 'active' : '') + '" data-dur-idx="' + idx + '">' +
+                  '<div style="font-weight:700;">' + esc(d.label) + '</div>' +
+                  '<div class="plan-price">RM' + Number(d.price).toFixed(2) + '</div>' +
+                '</button>'
               );
             }).join('');
-        } catch (err) {
-          showResultsBox.innerHTML =
-            '<div style="font-size:0.84rem;">' +
-              'Carian cerita untuk "<strong>' + escapeHtml(query) + '</strong>" boleh ditonton melalui aplikasi penstriman seperti <strong>Netflix UHD</strong> atau <strong>Disney+ Premium</strong>.' +
-            '</div>';
+          }
         }
-      }
 
-      const payNowBtn = document.getElementById('payNowBtn');
-      if (payNowBtn) {
-        payNowBtn.addEventListener('click', async function () {
-          const nameEl = document.getElementById('custName');
-          const emailEl = document.getElementById('custEmail');
-          const phoneEl = document.getElementById('custPhone');
-          const deviceEl = document.getElementById('custDevice');
+        function updateTotal() {
+          if (!totalPayableEl) return;
+          var price = selectedDuration ? Number(selectedDuration.price) : 0;
+          totalPayableEl.textContent = 'RM' + price.toFixed(2);
+        }
 
-          const name = (nameEl ? nameEl.value : '').trim();
-          const email = (emailEl ? emailEl.value : '').trim();
-          const phone = (phoneEl ? phoneEl.value : '').trim();
-          const device = deviceEl ? deviceEl.value : 'Android / Smartphone';
+        if (catalogGrid) {
+          catalogGrid.addEventListener('click', function (e) {
+            var node = e.target;
+            while (node && node !== catalogGrid) {
+              if (node.getAttribute && node.getAttribute('data-app-id')) {
+                selectApp(node.getAttribute('data-app-id'), true);
+                return;
+              }
+              node = node.parentNode;
+            }
+          });
+        }
 
-          if (!name || !email || !phone) {
-            if (statusMsg) statusMsg.textContent = 'Sila lengkapkan Nama Penuh, Emel dan No. WhatsApp terlebih dahulu.';
+        if (subPlanContainer) {
+          subPlanContainer.addEventListener('click', function (e) {
+            var node = e.target;
+            while (node && node !== subPlanContainer) {
+              if (node.getAttribute && node.getAttribute('data-sub-id')) {
+                selectSubPlan(node.getAttribute('data-sub-id'));
+                return;
+              }
+              node = node.parentNode;
+            }
+          });
+        }
+
+        if (durationGrid) {
+          durationGrid.addEventListener('click', function (e) {
+            var node = e.target;
+            while (node && node !== durationGrid) {
+              if (node.getAttribute && node.getAttribute('data-dur-idx') !== null) {
+                selectDuration(Number(node.getAttribute('data-dur-idx')));
+                return;
+              }
+              node = node.parentNode;
+            }
+          });
+        }
+
+        var showResultsBox = document.getElementById('showSearchResults');
+        if (showResultsBox) {
+          showResultsBox.addEventListener('click', function (e) {
+            var node = e.target;
+            while (node && node !== showResultsBox) {
+              if (node.getAttribute && node.getAttribute('data-pick-app')) {
+                selectApp(node.getAttribute('data-pick-app'), true);
+                return;
+              }
+              node = node.parentNode;
+            }
+          });
+        }
+
+        var payCards = document.querySelectorAll('#paymentMethodList .pay-card');
+        for (var p = 0; p < payCards.length; p++) {
+          payCards[p].addEventListener('click', function () {
+            for (var k = 0; k < payCards.length; k++) { payCards[k].classList.remove('active'); }
+            this.classList.add('active');
+            selectedPayment = this.getAttribute('data-pay');
+            if (!paymentNotice) return;
+            if (selectedPayment === 'billplz_fpx') {
+              paymentNotice.innerHTML = '<strong>Online Banking (Billplz Aktif):</strong> Anda akan dibawa ke halaman bil rasmi Billplz untuk melengkapkan pembayaran perbankan dalam talian.';
+            } else if (selectedPayment === 'billplz_qr_pending') {
+              paymentNotice.innerHTML = '<strong>Status Saluran Tambahan Billplz:</strong> Permohonan pengaktifan QR / Wallet / Card / BNPL telah dihantar ke pihak Billplz. Tekan <strong>Pay Now →</strong> untuk menjana bil Billplz atau pilih <strong>eWallet via WhatsApp</strong> untuk bantuan segera.';
+            } else {
+              paymentNotice.innerHTML = '<strong>eWallet via WhatsApp:</strong> Butiran tempahan anda akan disusun terus ke WhatsApp admin untuk semakan dan pengesahan bayaran eWallet.';
+            }
+          });
+        }
+
+        var filterChips = document.querySelectorAll('#filterRow .chip');
+        for (var f = 0; f < filterChips.length; f++) {
+          filterChips[f].addEventListener('click', function () {
+            for (var m = 0; m < filterChips.length; m++) { filterChips[m].classList.remove('active'); }
+            this.classList.add('active');
+            currentFilter = this.getAttribute('data-filter');
+            renderCatalog();
+          });
+        }
+
+        var mainSearchInput = document.getElementById('mainSearchInput');
+        if (mainSearchInput) {
+          mainSearchInput.addEventListener('input', renderCatalog);
+          mainSearchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              if (e.preventDefault) e.preventDefault();
+              searchShowFromMainBox();
+            }
+          });
+        }
+
+        var searchShowBtn = document.getElementById('searchShowBtn');
+        if (searchShowBtn) searchShowBtn.addEventListener('click', searchShowFromMainBox);
+
+        var clearSearchBtn = document.getElementById('clearSearchBtn');
+        if (clearSearchBtn) {
+          clearSearchBtn.addEventListener('click', function () {
+            if (mainSearchInput) mainSearchInput.value = '';
+            if (showResultsBox) {
+              showResultsBox.classList.remove('active');
+              showResultsBox.innerHTML = '';
+            }
+            currentFilter = 'all';
+            for (var m = 0; m < filterChips.length; m++) { filterChips[m].classList.remove('active'); }
+            if (filterChips[0]) filterChips[0].classList.add('active');
+            renderCatalog();
+          });
+        }
+
+        function searchShowFromMainBox() {
+          var query = (mainSearchInput ? mainSearchInput.value : '').trim();
+          if (!showResultsBox) return;
+          if (!query) {
+            showResultsBox.classList.remove('active');
             return;
           }
+          showResultsBox.classList.add('active');
+          showResultsBox.innerHTML = '<div style="font-size:0.85rem; color:var(--muted);">Mencari cerita/movie "<strong>' + esc(query) + '</strong>"...</div>';
 
-          const planLabel = selectedSubPlan ? (selectedSubPlan.label + ' — ' + selectedDuration.label) : selectedDuration.label;
-          const amount = Number(selectedDuration.price);
-          const orderId = 'SPY-' + Date.now();
+          fetch('/api/search-title?q=' + encodeURIComponent(query))
+            .then(function (res) { return res.text(); })
+            .then(function (text) {
+              var data = {};
+              try { data = JSON.parse(text); } catch (e) { data = {}; }
+              var results = Array.isArray(data.results) ? data.results : [];
+              if (results.length === 0) {
+                showResultsBox.innerHTML =
+                  '<div style="font-size:0.85rem; color:var(--muted);">' +
+                    'Tiada padanan cerita dijumpai untuk "<strong>' + esc(query) + '</strong>". Anda boleh pilih aplikasi di bawah:' +
+                    '<div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">' +
+                      '<button type="button" class="btn btn-primary" data-pick-app="netflix">Netflix UHD →</button>' +
+                      '<button type="button" class="btn" data-pick-app="disney">Disney+ Premium →</button>' +
+                    '</div>' +
+                  '</div>';
+                return;
+              }
+              showResultsBox.innerHTML =
+                '<div style="font-size:0.84rem; font-weight:700;">Hasil Carian Cerita/Movie: "' + esc(query) + '"</div>' +
+                results.map(function (item) {
+                  var plats = Array.isArray(item.platforms) ? item.platforms.join(', ') : 'Netflix, Disney+';
+                  return (
+                    '<div class="show-item">' +
+                      '<div>' +
+                        '<div style="font-weight:800;">' + esc(item.title || query) + '</div>' +
+                        '<div style="font-size:0.78rem; color:var(--muted);">Platform: ' + esc(plats) + '</div>' +
+                      '</div>' +
+                      '<button type="button" class="btn btn-primary" data-pick-app="netflix">Pilih App →</button>' +
+                    '</div>'
+                  );
+                }).join('');
+            })
+            .catch(function () {
+              showResultsBox.innerHTML =
+                '<div style="font-size:0.84rem;">' +
+                  'Carian cerita untuk "<strong>' + esc(query) + '</strong>" boleh ditonton melalui aplikasi penstriman seperti <strong>Netflix UHD</strong> atau <strong>Disney+ Premium</strong>.' +
+                '</div>';
+            });
+        }
 
-          if (selectedPayment === 'whatsapp_ewallet') {
-            const text = encodeURIComponent(
-              'Halo Admin SPYSTORE BY SAMS, saya ingin buat tempahan eWallet:
-' +
-              'Order ID: ' + orderId + '
-' +
-              'Aplikasi: ' + selectedApp.name + ' (' + planLabel + ')
-' +
-              'Jumlah: RM' + amount.toFixed(2) + '
-' +
-              'Nama: ' + name + '
-' +
-              'Emel: ' + email + '
-' +
-              'No. WhatsApp: ' + phone + '
-' +
-              'Peranti: ' + device
-            );
-            window.open('https://wa.me/601128496927?text=' + text, '_blank', 'noopener,noreferrer');
-            if (statusMsg) statusMsg.textContent = 'Membuka WhatsApp untuk pengesahan tempahan eWallet...';
-            return;
-          }
+        var payNowBtn = document.getElementById('payNowBtn');
+        if (payNowBtn) {
+          payNowBtn.addEventListener('click', function () {
+            var nameEl = document.getElementById('custName');
+            var emailEl = document.getElementById('custEmail');
+            var phoneEl = document.getElementById('custPhone');
+            var deviceEl = document.getElementById('custDevice');
 
-          if (statusMsg) statusMsg.textContent = 'Sedang menjana bil Billplz...';
-          try {
-            const res = await fetch('/api/create-billplz', {
+            var name = (nameEl ? nameEl.value : '').trim();
+            var email = (emailEl ? emailEl.value : '').trim();
+            var phone = (phoneEl ? phoneEl.value : '').trim();
+            var device = deviceEl ? deviceEl.value : 'Android / Smartphone';
+
+            if (!name || !email || !phone) {
+              if (statusMsg) statusMsg.textContent = 'Sila lengkapkan Nama Penuh, Emel dan No. WhatsApp terlebih dahulu.';
+              return;
+            }
+
+            var planLabel = selectedSubPlan ? (selectedSubPlan.label + ' — ' + selectedDuration.label) : selectedDuration.label;
+            var amount = Number(selectedDuration.price);
+            var orderId = 'SPY-' + Date.now();
+
+            if (selectedPayment === 'whatsapp_ewallet') {
+              var text = encodeURIComponent(
+                'Halo Admin SPYSTORE BY SAMS, saya ingin buat tempahan eWallet:
+' +
+                'Order ID: ' + orderId + '
+' +
+                'Aplikasi: ' + selectedApp.name + ' (' + planLabel + ')
+' +
+                'Jumlah: RM' + amount.toFixed(2) + '
+' +
+                'Nama: ' + name + '
+' +
+                'Emel: ' + email + '
+' +
+                'No. WhatsApp: ' + phone + '
+' +
+                'Peranti: ' + device
+              );
+              window.open('https://wa.me/601128496927?text=' + text, '_blank', 'noopener,noreferrer');
+              if (statusMsg) statusMsg.textContent = 'Membuka WhatsApp untuk pengesahan tempahan eWallet...';
+              return;
+            }
+
+            if (statusMsg) statusMsg.textContent = 'Sedang menjana bil Billplz...';
+            fetch('/api/create-billplz', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -1265,51 +1352,52 @@
                 customerPhone: phone,
                 customerDevice: device
               })
-            });
-            const rawText = await res.text();
-            let data = {};
-            try { data = JSON.parse(rawText); } catch (e) { data = {}; }
-            const billUrl = data.url || data.billUrl || data.payment_url || '';
-            if (billUrl) {
-              if (statusMsg) statusMsg.textContent = 'Bil Billplz berjaya dijana. Mengalihkan ke halaman pembayaran...';
-              window.location.href = billUrl;
-            } else {
-              if (statusMsg) statusMsg.textContent = data.error || 'Gagal menjana bil Billplz. Sila cuba semula atau pilih eWallet via WhatsApp.';
-            }
-          } catch (err) {
-            if (statusMsg) statusMsg.textContent = 'Ralat sambungan ke pelayan Billplz. Anda boleh memilih eWallet via WhatsApp sebagai alternatif.';
-          }
-        });
-      }
+            })
+              .then(function (res) { return res.text(); })
+              .then(function (rawText) {
+                var data = {};
+                try { data = JSON.parse(rawText); } catch (e) { data = {}; }
+                var billUrl = data.url || data.billUrl || data.payment_url || '';
+                if (billUrl) {
+                  if (statusMsg) statusMsg.textContent = 'Bil Billplz berjaya dijana. Mengalihkan ke halaman pembayaran...';
+                  window.location.href = billUrl;
+                } else {
+                  if (statusMsg) statusMsg.textContent = data.error || 'Gagal menjana bil Billplz. Sila cuba semula atau pilih eWallet via WhatsApp.';
+                }
+              })
+              .catch(function () {
+                if (statusMsg) statusMsg.textContent = 'Ralat sambungan ke pelayan Billplz. Anda boleh memilih eWallet via WhatsApp sebagai alternatif.';
+              });
+          });
+        }
 
-      (function checkRedirectReceipt() {
         try {
-          const params = new URLSearchParams(window.location.search);
-          const paid = params.get('billplz[paid]') || params.get('paid');
-          const billId = params.get('billplz[id]') || params.get('id') || '';
+          var params = new URLSearchParams(window.location.search);
+          var paid = params.get('billplz[paid]') || params.get('paid');
+          var billId = params.get('billplz[id]') || params.get('id') || '';
           if (paid === 'true' || paid === '1') {
-            const box = document.getElementById('orderReceipt');
+            var box = document.getElementById('orderReceipt');
             if (box) {
               box.classList.add('active');
               box.innerHTML =
                 '<div style="font-weight:800; color:#4ade80; font-size:1rem;">✅ Pembayaran Billplz Berjaya Diterima</div>' +
-                '<div style="font-size:0.85rem; margin-top:6px;">Rujukan Bil: <strong>' + escapeHtml(billId || 'Tercatat') + '</strong>. Tempahan anda sedang diproses dan stok telah diselaraskan.</div>';
+                '<div style="font-size:0.85rem; margin-top:6px;">Rujukan Bil: <strong>' + esc(billId || 'Tercatat') + '</strong>. Tempahan anda sedang diproses dan stok telah diselaraskan.</div>';
             }
           }
         } catch (e) {}
-      })();
 
-      const themeBtn = document.getElementById('themeBtn');
-      if (themeBtn) {
-        themeBtn.addEventListener('click', function () {
-          document.body.classList.toggle('light-mode');
-          themeBtn.textContent = document.body.classList.contains('light-mode') ? '🌙' : '☀️';
-        });
-      }
+        var themeBtn = document.getElementById('themeBtn');
+        if (themeBtn) {
+          themeBtn.addEventListener('click', function () {
+            document.body.classList.toggle('light-mode');
+            themeBtn.textContent = document.body.classList.contains('light-mode') ? '🌙' : '☀️';
+          });
+        }
 
-      renderCatalog();
-      renderCheckoutPlans();
-      updateTotal();
+        renderCatalog();
+        renderCheckoutPlans();
+        updateTotal();
+      } catch (e) {}
     })();
   </script>
 </body>
