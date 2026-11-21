@@ -2659,12 +2659,6 @@
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
-    const ADMIN_WA = '60189066291';
-    let lastReceiptPlainText = '';
-    function googleLogoSvg(size = 18) {
-      return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.1C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.29c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.61H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.39l3.98-3.1z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.61l3.98 3.1c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>`;
-    }
-
 
     function dismissSplash() {
       const splash = document.getElementById('splashIntro');
@@ -2947,29 +2941,22 @@
     function buildFallbackTrendingData() {
       const fb = {
         netflix: [
-          { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', overview: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games.", backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg', isNew: true, isKdrama: true },
-          { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', overview: 'Wednesday Addams investigates a murder spree while making new friends at Nevermore.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg', isNew: true, isKdrama: true },
-          { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', overview: 'A small town uncovers a mystery involving secret experiments and supernatural forces.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg', isNew: false, isKdrama: false },
-          { id: 76669, title: 'Extraction', mediaType: 'MOVIE', rating: '7.4', overview: 'A black-market mercenary embarks on the deadliest extraction of his career.', backdrop: 'https://image.tmdb.org/t/p/w780/1R6cvRtZgsYCaj8rt2cmIn9dWxt.jpg', poster: 'https://image.tmdb.org/t/p/w342/nygOUoAbdaF2B11n9x3x3x3x3x3.jpg', isNew: true, isKdrama: false },
-          { id: 545611, title: 'Glass Onion: A Knives Out Mystery', mediaType: 'MOVIE', rating: '7.1', overview: 'Detective Benoit Blanc travels to Greece for his latest mystery.', backdrop: 'https://image.tmdb.org/t/p/w780/dKqa850uvbITmpNEggEO1ULf8X.jpg', poster: 'https://image.tmdb.org/t/p/w342/vDGr1YdrlfbU9xTOdpf3J3P9k7.jpg', isNew: false, isKdrama: false }
+          { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', overview: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games.", backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
+          { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', overview: 'Wednesday Addams investigates a murder spree while making new friends at Nevermore.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
+          { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', overview: 'A small town uncovers a mystery involving secret experiments and supernatural forces.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' }
         ],
         disney: [
-          { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg', isNew: false, isKdrama: false },
-          { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'A lone gunfighter makes his way through the outer reaches of the galaxy.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg', isNew: true, isKdrama: false },
-          { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: "Riley's mind headquarters makes room for new Emotions.", backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg', isNew: true, isKdrama: false },
-          { id: 92749, title: 'Moon Knight', mediaType: 'SERIES', rating: '7.8', overview: 'A mild-mannered gift-shop clerk is plagued by blackouts and memories of another life.', backdrop: 'https://image.tmdb.org/t/p/w780/1uegR4yBatGvR1v3x3x3x3x3x3.jpg', poster: 'https://image.tmdb.org/t/p/w342/Ytkx3x3x3x3x3x3x3x3x3x3x3.jpg', isNew: false, isKdrama: true }
+          { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg' },
+          { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'A lone gunfighter makes his way through the outer reaches of the galaxy.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
+          { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: "Riley's mind headquarters makes room for new Emotions.", backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' }
         ],
         hbomax: [
-          { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The Targaryen civil war about 200 years before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg', isNew: true, isKdrama: false },
-          { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Paul Atreides unites with Chani and the Fremen on a path of revenge.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg', isNew: true, isKdrama: false },
-          { id: 155, title: 'The Dark Knight', mediaType: 'MOVIE', rating: '8.5', overview: 'Batman raises the stakes in his war on crime.', backdrop: 'https://image.tmdb.org/t/p/w780/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', poster: 'https://image.tmdb.org/t/p/w342/qJ2tW6WMUDux911r6m7haRef0WH.jpg', isNew: false, isKdrama: false },
-          { id: 87108, title: 'The Last of Us', mediaType: 'SERIES', rating: '8.7', overview: 'After a global pandemic destroys civilization, a hardened survivor takes charge of a 14-year-old girl.', backdrop: 'https://image.tmdb.org/t/p/w780/uDgy6hyPd82kOHh6I95FLtLnj6p.jpg', poster: 'https://image.tmdb.org/t/p/w342/uKvVjHNqB5VmOrdxqAt2F7278.jpg', isNew: false, isKdrama: true }
+          { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The Targaryen civil war about 200 years before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
+          { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Paul Atreides unites with Chani and the Fremen on a path of revenge.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' }
         ],
         primevideo: [
-          { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', overview: 'A group of vigilantes set out to take down corrupt superheroes.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg', isNew: true, isKdrama: false },
-          { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', overview: 'Jack Reacher investigates a conspiracy in a small town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg', isNew: true, isKdrama: true },
-          { id: 605722, title: 'The Tomorrow War', mediaType: 'MOVIE', rating: '7.5', overview: 'A family man is drafted to fight in a future war.', backdrop: 'https://image.tmdb.org/t/p/w780/8Y43pPCjBBGV3exGpWM5bDB1C6W.jpg', poster: 'https://image.tmdb.org/t/p/w342/34nDCQZ3u3uN3n4x3n4o4Z3P9k7.jpg', isNew: true, isKdrama: false },
-          { id: 335983, title: 'Venom', mediaType: 'MOVIE', rating: '6.8', overview: 'A journalist gains superpowers after being mutually aligned with an alien entity.', backdrop: 'https://image.tmdb.org/t/p/w780/VuukXkFFVC9rVuHtVFMxsGre0.jpg', poster: 'https://image.tmdb.org/t/p/w342/2uNW4WbgBXL25BAbXGLnLqX71Sw.jpg', isNew: false, isKdrama: false }
+          { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', overview: 'A group of vigilantes set out to take down corrupt superheroes.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg' },
+          { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', overview: 'Jack Reacher investigates a conspiracy in a small town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' }
         ]
       };
       const mapApp = (key, label, price) => (fb[key] || []).map((x, idx) => ({
@@ -2984,9 +2971,7 @@
         popularity: 100 - idx * 10,
         overview: x.overview,
         backdrop: x.backdrop || '',
-        poster: x.poster || '',
-        isNew: Boolean(x.isNew),
-        isKdrama: Boolean(x.isKdrama)
+        poster: x.poster || ''
       }));
       const nList = mapApp('netflix', 'Netflix', 18);
       const dList = mapApp('disney', 'Disney+', 16);
@@ -2995,17 +2980,17 @@
       const allFb = [nList[0], nList[1], dList[0], dList[1], hList[0], pList[0], dList[2], hList[1]];
       return {
         byApp: {
-          netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: nList.filter(i => i.mediaType === 'MOVIE'), newSeries: nList.filter(i => i.mediaType === 'SERIES'), kdrama: nList, price: 18, label: 'Netflix' },
-          disney: { movies: dList.filter(i => i.mediaType === 'MOVIE'), series: dList.filter(i => i.mediaType === 'SERIES'), newMovies: dList.filter(i => i.mediaType === 'MOVIE'), newSeries: dList.filter(i => i.mediaType === 'SERIES'), kdrama: dList, price: 16, label: 'Disney+' },
-          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: hList.filter(i => i.mediaType === 'MOVIE'), newSeries: hList.filter(i => i.mediaType === 'SERIES'), kdrama: hList, price: 16, label: 'HBO Max' },
-          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: pList.filter(i => i.mediaType === 'MOVIE'), newSeries: pList.filter(i => i.mediaType === 'SERIES'), kdrama: pList, price: 10, label: 'Prime Video' }
+          netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [nList[1]], newSeries: [nList[0]], kdrama: [nList[0], nList[1]], price: 18, label: 'Netflix' },
+          disney: { movies: dList.filter(i => i.mediaType === 'MOVIE'), series: dList.filter(i => i.mediaType === 'SERIES'), newMovies: [dList[2]], newSeries: [dList[1]], kdrama: [dList[1]], price: 16, label: 'Disney+' },
+          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: [hList[1]], newSeries: [hList[0]], kdrama: [hList[0]], price: 16, label: 'HBO Max' },
+          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [pList[0], pList[1]], kdrama: [pList[1]], price: 10, label: 'Prime Video' }
         },
         categories: {
           tv_my: [nList[0], dList[1], hList[0], pList[0]],
-          movie_my: [nList[3], dList[0], hList[1], pList[2]],
+          movie_my: [dList[0], hList[1], dList[2]],
           new_in: [nList[1], dList[2], hList[1], pList[1]],
-          popcorn: [nList[3], dList[0], hList[1], pList[2]],
-          kdrama: [nList[0], nList[1], dList[1], pList[1]],
+          popcorn: [dList[0], hList[1], dList[2]],
+          kdrama: [nList[0], nList[1], dList[1]],
           rewatched: [hList[0], nList[2], dList[1], pList[0]],
           only_on: [nList[0], dList[0], hList[0], pList[0]]
         },
@@ -3158,122 +3143,66 @@
       currentSlide = 0;
       dotsWrap.innerHTML = items.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i + 1}"></button>`).join('');
     }
-
+        function closeTrendingModal() { const m = document.getElementById('trendingModal'); if (m) m.style.display = 'none'; }
     function openShowSearchModal() {
       const m = document.getElementById('showSearchModal');
       if (m) m.classList.add('open');
       setTimeout(() => { const i = document.getElementById('showSearchInput'); if (i) i.focus(); }, 100);
     }
+    function closeShowSearchModal() { const m = document.getElementById('showSearchModal'); if (m) m.classList.remove('open'); }
+    function closeShowDetailModal() { const m = document.getElementById('showDetailModal'); if (m) m.classList.remove('open'); }
 
-    function closeShowSearchModal() {
-      const m = document.getElementById('showSearchModal');
-      if (m) m.classList.remove('open');
-    }
-
-    function closeShowDetailModal() {
-      const m = document.getElementById('showDetailModal');
-      if (m) m.classList.remove('open');
-    }
-
-    const LOCAL_SHOW_FALLBACK = [
-      { id: 'ultraman-trigger', title: 'Ultraman Trigger', year: '2021', mediaType: 'SERIES', rating: '7.6', overview: 'Kengo Manaka transforms into Ultraman Trigger to protect Earth from kaiju and alien threats.', poster: '', platformId: 'netflix', platformLabel: 'Netflix', availableApps: [{ id: 'netflix', shortLabel: 'Netflix', price: 18 }] },
-      { id: 'ultraman-blazar', title: 'Ultraman Blazar', year: '2023', mediaType: 'SERIES', rating: '8.1', overview: 'Gento Hiruma is appointed captain of SKaRD as Ultraman Blazar emerges from M421.', poster: '', platformId: 'netflix', platformLabel: 'Netflix', availableApps: [{ id: 'netflix', shortLabel: 'Netflix', price: 18 }] },
-      { id: 'lupin', title: 'Lupin', year: '2021', mediaType: 'SERIES', rating: '7.5', overview: 'Gentleman thief Assane Diop sets out to avenge his father for an injustice inflicted by a wealthy family.', poster: '', platformId: 'netflix', platformLabel: 'Netflix', availableApps: [{ id: 'netflix', shortLabel: 'Netflix', price: 18 }] },
-      { id: 'squid-game', title: 'Squid Game', year: '2021', mediaType: 'SERIES', rating: '7.9', overview: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games.", poster: '', platformId: 'netflix', platformLabel: 'Netflix', availableApps: [{ id: 'netflix', shortLabel: 'Netflix', price: 18 }] },
-      { id: 'wednesday', title: 'Wednesday', year: '2022', mediaType: 'SERIES', rating: '8.5', overview: 'Wednesday Addams investigates a murder spree while making new friends at Nevermore Academy.', poster: '', platformId: 'netflix', platformLabel: 'Netflix', availableApps: [{ id: 'netflix', shortLabel: 'Netflix', price: 18 }] },
-      { id: 'doraemon', title: 'Doraemon: Stand by Me', year: '2014', mediaType: 'MOVIE', rating: '7.6', overview: 'A robotic cat from the 22nd century arrives to help Nobita improve his life.', poster: '', platformId: 'netflix', platformLabel: 'Netflix', availableApps: [{ id: 'netflix', shortLabel: 'Netflix', price: 18 }] },
-      { id: 'avengers-endgame', title: 'Avengers: Endgame', year: '2019', mediaType: 'MOVIE', rating: '8.3', overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins.', poster: '', platformId: 'disney', platformLabel: 'Disney+', availableApps: [{ id: 'disney', shortLabel: 'Disney+', price: 16 }] },
-      { id: 'the-boys', title: 'The Boys', year: '2019', mediaType: 'SERIES', rating: '8.5', overview: 'A group of vigilantes sets out to take down corrupt superheroes.', poster: '', platformId: 'primevideo', platformLabel: 'Prime Video', availableApps: [{ id: 'primevideo', shortLabel: 'Prime Video', price: 10 }] }
-    ];
-
-    window._lastShowSearchItems = [];
-
-    async function fetchShowMatches(q) {
-      try {
-        const res = await fetch(`/api/search-title?q=${encodeURIComponent(q)}&region=MY&mode=flatrate&_t=${Date.now()}`, { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data.items) && data.items.length > 0) {
-            return data.items;
-          }
-        }
-      } catch (e) {}
-      const ql = String(q || '').toLowerCase();
-      return LOCAL_SHOW_FALLBACK.filter(x =>
-        x.title.toLowerCase().includes(ql) ||
-        x.overview.toLowerCase().includes(ql) ||
-        (x.platformLabel || '').toLowerCase().includes(ql)
-      );
-    }
-
-    function openSearchDetailByIndex(idx) {
-      const items = window._lastShowSearchItems || [];
-      if (items[idx]) openShowDetailModal(items[idx]);
-    }
-
-    async function searchShowFromMainBox() {
+    function searchShowFromMainBox() {
       const inp = document.getElementById('searchInput');
       const box = document.getElementById('inlineShowResultsBox');
       if (!inp || !box) return;
       const q = inp.value.trim();
       if (!q) return;
-
-      triggerTopLoader(500);
+      const ql = q.toLowerCase();
+      const catalog = [
+        { title: 'Ultraman Trigger', year: '2021', type: 'SERIES', rating: '7.6', app: 'Netflix' },
+        { title: 'Ultraman Blazar', year: '2023', type: 'SERIES', rating: '8.1', app: 'Netflix' },
+        { title: 'Lupin', year: '2021', type: 'SERIES', rating: '7.5', app: 'Netflix' },
+        { title: 'Squid Game', year: '2021', type: 'SERIES', rating: '7.9', app: 'Netflix' },
+        { title: 'Doraemon: Stand by Me', year: '2014', type: 'MOVIE', rating: '7.6', app: 'Netflix' },
+        { title: 'Avengers: Endgame', year: '2019', type: 'MOVIE', rating: '8.3', app: 'Disney+' },
+        { title: 'The Boys', year: '2019', type: 'SERIES', rating: '8.5', app: 'Prime Video' }
+      ];
+      const matches = catalog.filter(x => x.title.toLowerCase().includes(ql) || x.app.toLowerCase().includes(ql));
       box.style.display = 'block';
-      box.innerHTML = `<div style="font-size:0.76rem; color:var(--text-secondary); padding:6px 0;">Searching "${q}"...</div>`;
-
-      const items = await fetchShowMatches(q);
-      window._lastShowSearchItems = items;
-
       box.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 Search: "${q}" (${items.length})</span>
+          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 Search: "${q}" (${matches.length})</span>
           <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
         </div>
-        ${items.length ? items.map((m, i) => {
-          const firstApp = (Array.isArray(m.availableApps) && m.availableApps[0]) || { id: m.platformId || 'netflix', shortLabel: m.platformLabel || 'Netflix', price: 18 };
-          return `
-            <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="openSearchDetailByIndex(${i})">
-              <div style="min-width:0;">
-                <div style="font-weight:700; font-size:0.82rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.title} ${m.year && m.year !== '-' ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}</div>
-                <div style="font-size:0.68rem; color:var(--accent-cyan);">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • ${firstApp.shortLabel}</div>
-              </div>
-              <button type="button" onclick="event.stopPropagation(); openCheckout('${firstApp.id}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer; flex-shrink:0;">Order ✓</button>
+        ${matches.length ? matches.map(m => `
+          <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:0.82rem;">${m.title} <small style="color:var(--text-muted);">(${m.year})</small></div>
+              <div style="font-size:0.68rem; color:var(--accent-cyan);">${m.type} • ★ ${m.rating} • ${m.app}</div>
             </div>
-          `;
-        }).join('') : `<div style="font-size:0.76rem; color:var(--text-muted);">No matching show found for "${q}".</div>`}
+            <button type="button" onclick="openCheckout('${m.app.toLowerCase().replace(/[^a-z]/g,'')}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer;">Order ✓</button>
+          </div>
+        `).join('') : `<div style="font-size:0.76rem; color:var(--text-muted);">No matching show found for "${q}".</div>`}
       `;
     }
 
-    async function runShowSearch() {
+    function runShowSearch() {
       const inp = document.getElementById('showSearchInput');
       const box = document.getElementById('showSearchResults');
       if (!inp || !box) return;
-      const q = inp.value.trim();
-      if (!q) {
-        showToast('Type a show or movie name first.');
-        return;
-      }
-
-      triggerTopLoader(500);
-      box.innerHTML = `<div style="text-align:center; padding:12px; color:var(--text-secondary); font-size:0.78rem;">Searching "${q}"...</div>`;
-
-      const items = await fetchShowMatches(q);
-      window._lastShowSearchItems = items;
-
-      box.innerHTML = items.length
-        ? items.map((m, i) => {
-            const firstApp = (Array.isArray(m.availableApps) && m.availableApps[0]) || { id: m.platformId || 'netflix', shortLabel: m.platformLabel || 'Netflix', price: 18 };
-            return `
-              <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:10px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="openSearchDetailByIndex(${i})">
-                <div>
-                  <strong>${m.title}</strong> ${m.year && m.year !== '-' ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}
-                  <div style="font-size:0.7rem; color:var(--accent-cyan);">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • ${firstApp.shortLabel}</div>
-                </div>
-                <button type="button" onclick="event.stopPropagation(); closeShowSearchModal(); openCheckout('${firstApp.id}');" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:5px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer;">Order ✓</button>
-              </div>
-            `;
-          }).join('')
+      const q = inp.value.trim().toLowerCase();
+      if (!q) return;
+      const catalog = [
+        { title: 'Ultraman Trigger', year: '2021', type: 'SERIES', rating: '7.6', app: 'Netflix' },
+        { title: 'Ultraman Blazar', year: '2023', type: 'SERIES', rating: '8.1', app: 'Netflix' },
+        { title: 'Lupin', year: '2021', type: 'SERIES', rating: '7.5', app: 'Netflix' },
+        { title: 'Squid Game', year: '2021', type: 'SERIES', rating: '7.9', app: 'Netflix' },
+        { title: 'Avengers: Endgame', year: '2019', type: 'MOVIE', rating: '8.3', app: 'Disney+' }
+      ];
+      const matches = catalog.filter(x => x.title.toLowerCase().includes(q) || x.app.toLowerCase().includes(q));
+      box.innerHTML = matches.length
+        ? matches.map(m => `<div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:10px;"><strong>${m.title}</strong> (${m.year}) • ${m.app}</div>`).join('')
         : `<div style="font-size:0.78rem; color:var(--text-muted);">No matching show found.</div>`;
     }
 
@@ -3283,6 +3212,941 @@
         showToast('Order summary copied!');
       }
     }
+
+    const CATALOG_STORAGE_KEY = 'spystore_catalog_v1';
+    const ROLE_KEYS_STORAGE = 'spystore_staff_keys_v1';
+
+    function getDefaultStaffKeys() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(ROLE_KEYS_STORAGE) || 'null');
+        if (saved && saved.owner && saved.admin) return saved;
+      } catch (e) {}
+      return { owner: 'OWNER2026', admin: 'ADMIN2026' };
+    }
+
+    function saveStaffKeys(keys) {
+      localStorage.setItem(ROLE_KEYS_STORAGE, JSON.stringify(keys));
+    }
+
+    function serializeCatalogForStorage() {
+      return products.map(p => ({
+        id: p.id,
+        price: Number(p.price),
+        price2Mo: typeof p.price2Mo === 'number' && !isNaN(p.price2Mo) ? Number(p.price2Mo) : null,
+        stock: Number(p.stock || 0),
+        comingSoon: Boolean(p.comingSoon),
+        comingSoon1Mo: Boolean(p.comingSoon1Mo),
+        disabled1Mo: Boolean(p.disabled1Mo),
+        comingSoon2Mo: Boolean(p.comingSoon2Mo),
+        disabled2Mo: Boolean(p.disabled2Mo),
+        subPlans: Array.isArray(p.subPlans) ? p.subPlans.map(sp => ({
+          key: sp.key,
+          label: sp.label,
+          price: Number(sp.price),
+          price2Mo: typeof sp.price2Mo === 'number' && !isNaN(sp.price2Mo) ? Number(sp.price2Mo) : null,
+          stock: Number(sp.stock || 0),
+          comingSoon: Boolean(sp.comingSoon),
+          comingSoon1Mo: Boolean(sp.comingSoon1Mo),
+          disabled1Mo: Boolean(sp.disabled1Mo),
+          comingSoon2Mo: Boolean(sp.comingSoon2Mo),
+          disabled2Mo: Boolean(sp.disabled2Mo)
+        })) : undefined
+      }));
+    }
+
+    function saveCatalogState() {
+      try {
+        localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(serializeCatalogForStorage()));
+      } catch (e) {}
+    }
+
+    function recomputeDualProductStock(p) {
+      if (!p || p.mode !== 'dual' || !Array.isArray(p.subPlans)) return;
+      const spShare = p.subPlans.find(x => x.key === 'share');
+      const spPrivate = p.subPlans.find(x => x.key === 'private');
+      if (spShare && spPrivate) {
+        const s1 = spShare.disabled1Mo && spShare.disabled2Mo ? 0 : Number(spShare.stock || 0);
+        const s2 = spPrivate.disabled1Mo && spPrivate.disabled2Mo ? 0 : Number(spPrivate.stock || 0);
+        p.stock = Math.max(0, s1) + Math.max(0, s2);
+        p.comingSoon = Boolean(spShare.comingSoon1Mo && spShare.comingSoon2Mo && spPrivate.comingSoon1Mo && spPrivate.comingSoon2Mo);
+        p.price = Math.min(Number(spShare.price || 10), Number(spPrivate.price || 15));
+      }
+    }
+
+    function loadCatalogState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(CATALOG_STORAGE_KEY) || 'null');
+        if (!Array.isArray(saved) || !saved.length) {
+          // Seed sensible initial stock for website management
+          products.forEach(p => {
+            if (p.mode === 'dual' && Array.isArray(p.subPlans)) {
+              p.subPlans.forEach(sp => {
+                sp.stock = sp.key === 'share' ? 5 : 3;
+              });
+              recomputeDualProductStock(p);
+            } else {
+              p.stock = p.id === 'netflix' ? 5 : (p.id === 'canva' ? 20 : 4);
+            }
+          });
+          saveCatalogState();
+          return;
+        }
+
+        saved.forEach(item => {
+          const p = products.find(x => x.id === item.id);
+          if (!p) return;
+          if (typeof item.price === 'number' && !isNaN(item.price) && item.price > 0) p.price = item.price;
+          if (typeof item.price2Mo === 'number' && !isNaN(item.price2Mo) && item.price2Mo > 0) p.price2Mo = item.price2Mo;
+          if (typeof item.stock === 'number' && !isNaN(item.stock) && item.stock >= 0) p.stock = item.stock;
+          p.comingSoon = Boolean(item.comingSoon);
+          p.comingSoon1Mo = Boolean(item.comingSoon1Mo);
+          p.disabled1Mo = Boolean(item.disabled1Mo);
+          p.comingSoon2Mo = Boolean(item.comingSoon2Mo);
+          p.disabled2Mo = Boolean(item.disabled2Mo);
+
+          if (p.mode === 'dual' && Array.isArray(p.subPlans) && Array.isArray(item.subPlans)) {
+            item.subPlans.forEach(sItem => {
+              const sp = p.subPlans.find(x => x.key === sItem.key);
+              if (!sp) return;
+              if (typeof sItem.price === 'number' && !isNaN(sItem.price) && sItem.price > 0) sp.price = sItem.price;
+              if (typeof sItem.price2Mo === 'number' && !isNaN(sItem.price2Mo) && sItem.price2Mo > 0) sp.price2Mo = sItem.price2Mo;
+              if (typeof sItem.stock === 'number' && !isNaN(sItem.stock) && sItem.stock >= 0) sp.stock = sItem.stock;
+              sp.comingSoon = Boolean(sItem.comingSoon);
+              sp.comingSoon1Mo = Boolean(sItem.comingSoon1Mo);
+              sp.disabled1Mo = Boolean(sItem.disabled1Mo);
+              sp.comingSoon2Mo = Boolean(sItem.comingSoon2Mo);
+              sp.disabled2Mo = Boolean(sItem.disabled2Mo);
+            });
+            recomputeDualProductStock(p);
+          }
+        });
+      } catch (e) {}
+    }
+
+    function syncWebsiteCatalog() {
+      const statusEl = document.getElementById('liveStockStatus');
+      loadCatalogState();
+      if (statusEl) statusEl.textContent = 'Website Live ✓';
+      renderProducts();
+      if (currentProduct) {
+        const unit = getActiveUnitPrice();
+        const twoMoVal = getActiveTwoMonthPrice(unit);
+        document.getElementById('plan1Price').textContent = `RM${unit.toFixed(2)}`;
+        document.getElementById('plan2Price').textContent = `RM${twoMoVal.toFixed(2)}`;
+        refreshDurationButtonsState();
+        renderSelectedAppHeader();
+        renderSubPlanSelector();
+        updatePayTotalDisplay();
+      }
+    }
+
+    function getActivePlanTarget() {
+      if (!currentProduct) return null;
+      if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        return currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
+      }
+      return currentProduct;
+    }
+
+    function refreshDurationButtonsState() {
+      const b1 = document.getElementById('plan1Btn');
+      const b2 = document.getElementById('plan2Btn');
+      const target = getActivePlanTarget();
+      if (!b1 || !b2 || !target) return;
+
+      const cs1 = Boolean(target.comingSoon1Mo);
+      const off1 = Boolean(target.disabled1Mo);
+      const cs2 = Boolean(target.comingSoon2Mo);
+      const off2 = Boolean(target.disabled2Mo);
+
+      b1.style.opacity = (cs1 || off1) ? '0.48' : '1';
+      b1.style.cursor = (cs1 || off1) ? 'not-allowed' : 'pointer';
+      b1.setAttribute('title', cs1 ? '1 Month — Coming Soon' : (off1 ? '1 Month — Unavailable' : ''));
+
+      b2.style.opacity = (cs2 || off2) ? '0.48' : '1';
+      b2.style.cursor = (cs2 || off2) ? 'not-allowed' : 'pointer';
+      b2.setAttribute('title', cs2 ? '2 Months — Coming Soon' : (off2 ? '2 Months — Unavailable' : ''));
+
+      if (selectedMonths === 1 && (cs1 || off1) && !(cs2 || off2)) {
+        selectMonths(2);
+      } else if (selectedMonths === 2 && (cs2 || off2) && !(cs1 || off1)) {
+        selectMonths(1);
+      }
+    }
+
+    function getActiveTwoMonthPrice(unitPrice) {
+      if (currentProduct && currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        const found = currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
+        if (found && typeof found.price2Mo === 'number' && !isNaN(found.price2Mo) && found.price2Mo > 0) {
+          return found.price2Mo;
+        }
+      }
+      if (currentProduct && typeof currentProduct.price2Mo === 'number' && !isNaN(currentProduct.price2Mo) && currentProduct.price2Mo > 0) {
+        return currentProduct.price2Mo;
+      }
+      return unitPrice * 2;
+    }
+
+    function setCategory(cat, btn) {
+      selectedCategory = cat;
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      renderProducts();
+    }
+
+    function renderAppIconHtml(p, sizePx) {
+      const sizeStyle = sizePx ? `width:${sizePx}px; height:${sizePx}px; margin-bottom:0;` : '';
+      return `
+        <div class="app-icon" style="background:${p.bg}; color:${p.color}; ${sizeStyle}">
+          <img src="${p.logo}" alt="${p.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+          <span style="display:none;">${p.badge}</span>
+        </div>
+      `;
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('productGrid');
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      const filtered = products.filter(p => {
+        const matchCat = selectedCategory === 'All' || p.category === selectedCategory;
+        const matchQuery = !query || p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query);
+        return matchCat && matchQuery;
+      });
+
+      grid.innerHTML = filtered.map((p, idx) => {
+        const isComingSoon = Boolean(p.comingSoon);
+        const inStock = !isComingSoon && p.stock > 0;
+        const stockLabel = isComingSoon
+          ? 'Coming Soon'
+          : (inStock
+            ? (currentLang === 'en' ? `In Stock • ${p.stock}` : `Stok Ada • ${p.stock}`)
+            : (currentLang === 'en' ? 'Out of Stock' : 'Stok Habis'));
+        const pillClass = isComingSoon ? 'mode-invite' : (inStock ? 'stock-in' : 'stock-out');
+        const onClickAction = isComingSoon
+          ? `showToast('${p.name} — Coming Soon')`
+          : (inStock ? `openCheckout('${p.id}')` : `showToast('${p.name} out of stock')`);
+
+        return `
+          <div class="product-card card-stagger-in ${inStock ? '' : 'out-of-stock'}" style="animation-delay:${Math.min(idx * 40, 280)}ms;" onclick="${onClickAction}">
+            <span class="stock-pill ${pillClass}">${stockLabel}</span>
+            ${renderAppIconHtml(p)}
+            <div class="app-name">${p.frontName || p.name}</div>
+            <div class="app-cat">${p.category}</div>
+            <div class="app-cat" style="margin-bottom:0; color:var(--accent-cyan); font-weight:600;">${currentLang === 'en' ? 'Tap to view price & order' : 'Tekan untuk lihat harga & tempah'}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openCheckout(productId) {
+      currentProduct = products.find(p => p.id === productId);
+      if (!currentProduct) return;
+
+      selectedMonths = 1;
+      selectedSubPlan = 'share';
+      if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        const spShare = currentProduct.subPlans.find(x => x.key === 'share');
+        const spPrivate = currentProduct.subPlans.find(x => x.key === 'private');
+        if (spShare && spPrivate && isSubPlanUnavailable(spShare) && !isSubPlanUnavailable(spPrivate)) {
+          selectedSubPlan = 'private';
+        }
+      }
+      selectedPaymentMethod = 'fpx';
+      selectPaymentMethod('fpx');
+      triggerTopLoader(500);
+      document.getElementById('catalogView').style.display = 'none';
+      const coView = document.getElementById('checkoutView');
+      coView.classList.add('active');
+      animateElementEnter(coView);
+      document.getElementById('checkoutBar').classList.add('active');
+
+      renderSelectedAppHeader();
+      renderSubPlanSelector();
+
+      const user = getCurrentUser();
+      if (user) {
+        if (!document.getElementById('custName').value) document.getElementById('custName').value = user.name || '';
+        if (!document.getElementById('custPhone').value) document.getElementById('custPhone').value = user.phone || '';
+      }
+
+      const needsDevice = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(currentProduct.id);
+      const needsEmail = ['youtube', 'canva'].includes(currentProduct.id);
+
+      document.getElementById('deviceFieldGroup').style.display = needsDevice ? 'block' : 'none';
+      document.getElementById('emailFieldGroup').style.display = needsEmail ? 'block' : 'none';
+      document.getElementById('noExtraInfoNote').style.display = (!needsDevice && !needsEmail) ? 'block' : 'none';
+
+      if (user && needsEmail && !document.getElementById('custEmail').value) {
+        document.getElementById('custEmail').value = user.email || '';
+      }
+
+      const initUnit = getActiveUnitPrice();
+      const initTwoMo = getActiveTwoMonthPrice(initUnit);
+      document.getElementById('plan1Price').textContent = `RM${initUnit.toFixed(2)}`;
+      document.getElementById('plan2Price').textContent = `RM${initTwoMo.toFixed(2)}`;
+      selectMonths(1);
+      const coEl = document.getElementById('checkoutView');
+      if (coEl) coEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+
+    function getActiveUnitPrice() {
+      if (!currentProduct) return 0;
+      if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        const found = currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
+        return found ? found.price : currentProduct.price;
+      }
+      return currentProduct.price;
+    }
+
+    function getActiveDisplayAppName() {
+      if (!currentProduct) return '';
+      if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        const found = currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
+        return `${currentProduct.name} (${found.label})`;
+      }
+      return currentProduct.name;
+    }
+
+    function renderSelectedAppHeader() {
+      if (!currentProduct) return;
+      const dict = I18N[currentLang] || I18N.en;
+      let modeText = currentProduct.mode === 'invite' ? 'Via Invite' : 'Private';
+      let badgeClass = currentProduct.mode === 'invite' ? 'mode-invite' : 'mode-private';
+      if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        const found = currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
+        modeText = found.label;
+        badgeClass = found.key === 'share' ? 'mode-invite' : 'mode-private';
+      }
+      document.getElementById('selectedAppHeader').innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:48px; height:48px; flex-shrink:0;">${renderAppIconHtml(currentProduct, 48)}</div>
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span style="font-size:1.05rem; font-weight:700;">${currentProduct.name}</span>
+              <span class="mode-badge ${badgeClass}" style="margin-bottom:0;">${modeText}</span>
+            </div>
+            <div style="font-size:0.76rem; color:var(--accent-cyan);">${dict.rule1} • Stock: ${(getActivePlanTarget()?.stock ?? currentProduct.stock)}</div>
+          </div>
+        </div>
+        <div class="warranty-rules-box">
+          <strong>🛡️ ${dict.warrantyRulesTitle}</strong>
+          <ul class="warranty-rules-list">
+            <li>${dict.rule1}</li>
+            <li>${dict.rule2}</li>
+            <li>${dict.rule3}</li>
+          </ul>
+        </div>
+      `;
+    }
+
+    function isSubPlanUnavailable(sp) {
+      if (!sp) return false;
+      const bothDisabled = Boolean(sp.disabled1Mo && sp.disabled2Mo);
+      const bothComingSoon = Boolean(sp.comingSoon1Mo && sp.comingSoon2Mo);
+      const zeroStock = typeof sp.stock === 'number' && sp.stock <= 0 && !sp.comingSoon1Mo && !sp.comingSoon2Mo;
+      return bothDisabled || bothComingSoon || zeroStock;
+    }
+
+    function renderSubPlanSelector() {
+      const wrap = document.getElementById('subPlanSelectorWrap');
+      const grid = document.getElementById('subPlanGrid');
+      if (!wrap || !grid || !currentProduct) return;
+      if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        wrap.style.display = 'block';
+        const moTag = currentLang === 'en' ? '/ mo' : '/ bln';
+        grid.innerHTML = currentProduct.subPlans.map(sp => {
+          const isCS = Boolean(sp.comingSoon1Mo && sp.comingSoon2Mo);
+          const isOff = Boolean(sp.disabled1Mo && sp.disabled2Mo) || (typeof sp.stock === 'number' && sp.stock <= 0 && !isCS);
+          const statusSub = isCS ? ' • Coming Soon' : (isOff ? ' • Habis' : (typeof sp.stock === 'number' ? ` • Stok ${sp.stock}` : ''));
+          return `
+            <div class="plan-option ${selectedSubPlan === sp.key ? 'selected' : ''}" style="${(isCS || isOff) ? 'opacity:0.48; cursor:not-allowed;' : ''}" onclick="selectSubPlan('${sp.key}')">
+              <div class="plan-mo">${sp.label}${statusSub}</div>
+              <div class="plan-amt">RM${sp.price.toFixed(2)} <small style="font-size:0.68rem; font-weight:500; color:var(--text-secondary);">${moTag}</small></div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        wrap.style.display = 'none';
+        grid.innerHTML = '';
+      }
+    }
+
+    function selectSubPlan(subKey) {
+      if (currentProduct && currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        const sp = currentProduct.subPlans.find(x => x.key === subKey);
+        if (sp) {
+          if (sp.comingSoon1Mo && sp.comingSoon2Mo) {
+            showToast(`${sp.label} — Coming Soon`);
+            return;
+          }
+          if ((sp.disabled1Mo && sp.disabled2Mo) || (typeof sp.stock === 'number' && sp.stock <= 0)) {
+            showToast(currentLang === 'en' ? `${sp.label} plan is out of stock.` : `Pelan ${sp.label} kehabisan stok.`);
+            return;
+          }
+        }
+      }
+      selectedSubPlan = subKey;
+      const unit = getActiveUnitPrice();
+      const twoMo = getActiveTwoMonthPrice(unit);
+      document.getElementById('plan1Price').textContent = `RM${unit.toFixed(2)}`;
+      document.getElementById('plan2Price').textContent = `RM${twoMo.toFixed(2)}`;
+      refreshDurationButtonsState();
+      renderSelectedAppHeader();
+      renderSubPlanSelector();
+      updatePayTotalDisplay();
+    }
+
+    function closeCheckout() {
+      currentProduct = null;
+      triggerTopLoader(420);
+      document.getElementById('checkoutView').classList.remove('active');
+      document.getElementById('checkoutBar').classList.remove('active');
+      const catView = document.getElementById('catalogView');
+      catView.style.display = 'block';
+      animateElementEnter(catView);
+    }
+
+    function updatePayTotalDisplay() {
+      if (!currentProduct) return;
+      selectedPaymentMethod = 'fpx';
+      const planAmt = getActiveUnitPrice() * selectedMonths;
+      const feeAmt = 1.00;
+      const total = planAmt + feeAmt;
+      document.getElementById('totalPayableText').textContent = `RM${total.toFixed(2)}`;
+    }
+
+    function selectPaymentMethod(method) {
+      if (method !== 'fpx') {
+        showToast(currentLang === 'en' ? 'Coming Soon — not available yet.' : 'Coming Soon — belum boleh digunakan.');
+        return;
+      }
+      selectedPaymentMethod = 'fpx';
+      const el = document.getElementById('payOpt_fpx');
+      if (el) el.classList.add('selected');
+      updatePayTotalDisplay();
+    }
+
+    function selectMonths(mo) {
+      const target = getActivePlanTarget();
+      if (target) {
+        if (mo === 1 && target.comingSoon1Mo) {
+          showToast(currentLang === 'en' ? '1 Month plan is Coming Soon.' : 'Pelan 1 Bulan adalah Coming Soon.');
+          return;
+        }
+        if (mo === 1 && target.disabled1Mo) {
+          showToast(currentLang === 'en' ? '1 Month plan is currently unavailable.' : 'Pelan 1 Bulan tidak tersedia buat masa ini.');
+          return;
+        }
+        if (mo === 2 && target.comingSoon2Mo) {
+          showToast(currentLang === 'en' ? '2 Months plan is Coming Soon.' : 'Pelan 2 Bulan adalah Coming Soon.');
+          return;
+        }
+        if (mo === 2 && target.disabled2Mo) {
+          showToast(currentLang === 'en' ? '2 Months plan is currently unavailable.' : 'Pelan 2 Bulan tidak tersedia buat masa ini.');
+          return;
+        }
+      }
+      selectedMonths = mo;
+      document.getElementById('plan1Btn').classList.toggle('selected', mo === 1);
+      document.getElementById('plan2Btn').classList.toggle('selected', mo === 2);
+      updatePayTotalDisplay();
+    }
+
+    async function processPayment() {
+      if (!currentProduct) return;
+
+      const customerName = document.getElementById('custName').value.trim();
+      const customerPhone = document.getElementById('custPhone').value.trim();
+      const needsDevice = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(currentProduct.id);
+      const needsEmail = ['youtube', 'canva'].includes(currentProduct.id);
+      const customerDevice = needsDevice ? document.getElementById('custDevice').value.trim() : '-';
+      const customerEmail = needsEmail ? document.getElementById('custEmail').value.trim() : '-';
+
+      if (!getCurrentUser()) {
+        refreshCheckoutLoginReminder();
+        showToast(currentLang === 'en'
+          ? 'Tip: Login first so your transaction history & data are saved to your account!'
+          : 'Peringatan: Login dahulu sebelum bayar supaya data & sejarah transaksi tidak hilang!');
+      }
+      if (!customerName || !customerPhone) {
+        showToast(currentLang === 'en' ? 'Please fill in Full Name and WhatsApp Number!' : 'Sila isi Nama Penuh dan No. WhatsApp!');
+        return;
+      }
+      if (needsDevice && !customerDevice) {
+        showToast(currentLang === 'en' ? 'Please fill in Device Used!' : 'Sila isi Peranti Digunakan!');
+        return;
+      }
+      if (needsEmail && !customerEmail) {
+        showToast(currentLang === 'en' ? 'Please fill in Account Email Address!' : 'Sila isi Alamat E-mel Akaun!');
+        return;
+      }
+
+      const activeAppName = getActiveDisplayAppName();
+      const planAmount = getActiveUnitPrice() * selectedMonths;
+      const feeAmount = 1.00;
+      const totalAmount = planAmount + feeAmount;
+
+      localStorage.setItem('spystore_pending_order', JSON.stringify({
+        appId: currentProduct.id,
+        appName: activeAppName,
+        months: selectedMonths,
+        planAmount: planAmount.toFixed(2),
+        totalAmount: totalAmount.toFixed(2),
+        customerName,
+        customerPhone,
+        customerDevice,
+        customerEmail,
+        paymentMethod: 'fpx'
+      }));
+
+      const btn = document.getElementById('payNowBtn');
+      btn.disabled = true;
+      btn.textContent = currentLang === 'en' ? 'Generating FPX Bill...' : 'Menjana Bil FPX...';
+
+      const savedTxn = saveLocalOrder({
+        invoiceNo: generateInvoiceNumber(),
+        app: activeAppName,
+        months: selectedMonths,
+        total: totalAmount.toFixed(2),
+        date: new Date().toLocaleDateString('en-MY'),
+        customerName,
+        customerPhone,
+        customerEmail,
+        customerDevice,
+        paymentMethod: 'FPX',
+        status: 'PENDING FPX'
+      });
+      try {
+        const pendingObj = JSON.parse(localStorage.getItem('spystore_pending_order') || '{}');
+        localStorage.setItem('spystore_pending_order', JSON.stringify({
+          ...pendingObj,
+          invoiceNo: savedTxn.invoiceNo
+        }));
+      } catch (e) {}
+
+      try {
+        const res = await fetch('/api/create-bill', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            appId: currentProduct.id,
+            appName: activeAppName,
+            months: selectedMonths,
+            planAmount,
+            feeAmount,
+            totalAmount,
+            customerName,
+            customerPhone,
+            customerDevice,
+            paymentMethod: 'fpx'
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.paymentUrl) {
+          window.location.href = data.paymentUrl;
+        } else {
+          showToast(data.error || 'Failed to create ToyyibPay bill.');
+          btn.disabled = false;
+          btn.textContent = I18N[currentLang].payNowBtn;
+        }
+      } catch (err) {
+        showToast('Network error connecting to payment server.');
+        btn.disabled = false;
+        btn.textContent = I18N[currentLang].payNowBtn;
+      }
+    }
+
+    function getUsersDB() {
+      try {
+        const raw = JSON.parse(localStorage.getItem('spystore_users_db') || '[]');
+        return Array.isArray(raw)
+          ? raw.filter(u => u && u.email && String(u.email).toLowerCase() !== 'google.user@gmail.com')
+          : [];
+      } catch { return []; }
+    }
+    function saveUsersDB(users) { localStorage.setItem('spystore_users_db', JSON.stringify(users)); }
+    const OWNER_EMAIL = 'ahmadhussam29609@gmail.com';
+    const OWNER_USERNAME = 'ahmadhussam29609';
+
+    function isDesignatedOwner(user) {
+      if (!user) return false;
+      const em = String(user.email || '').trim().toLowerCase();
+      const un = normalizeUsername(user.username || '');
+      return em === OWNER_EMAIL || un === OWNER_USERNAME;
+    }
+
+    function ensureOwnerAccountSeeded() {
+      try {
+        const users = getUsersDB();
+        const existingIdx = users.findIndex(u =>
+          String(u.email || '').trim().toLowerCase() === OWNER_EMAIL ||
+          normalizeUsername(u.username || '') === OWNER_USERNAME
+        );
+        const ownerRecord = {
+          username: OWNER_USERNAME,
+          name: existingIdx !== -1 && users[existingIdx].name ? users[existingIdx].name : 'Ahmad Hussam',
+          email: OWNER_EMAIL,
+          password: existingIdx !== -1 && users[existingIdx].password ? users[existingIdx].password : undefined,
+          phone: existingIdx !== -1 ? (users[existingIdx].phone || '') : '',
+          provider: existingIdx !== -1 ? (users[existingIdx].provider || 'owner') : 'owner',
+          role: 'owner'
+        };
+        if (existingIdx !== -1) {
+          users[existingIdx] = { ...users[existingIdx], ...ownerRecord };
+        } else {
+          users.push(ownerRecord);
+        }
+        saveUsersDB(users);
+      } catch (e) {}
+    }
+
+    function getCurrentUser() {
+      try {
+        const u = JSON.parse(localStorage.getItem('spystore_current_user') || 'null');
+        if (!u) return null;
+        if (isDesignatedOwner(u)) {
+          return {
+            ...u,
+            email: u.email || OWNER_EMAIL,
+            username: OWNER_USERNAME,
+            role: 'owner'
+          };
+        }
+        return u;
+      } catch { return null; }
+    }
+
+    function hydrateGoogleButtonLogos() {
+      document.querySelectorAll('#gSignupSvgSlot').forEach(el => {
+        if (!el.innerHTML.trim() && typeof googleLogoSvg === 'function') {
+          el.innerHTML = googleLogoSvg(18);
+        }
+      });
+    }
+
+    function refreshCheckoutLoginReminder() {
+      const box = document.getElementById('checkoutLoginReminder');
+      if (!box) return;
+      const user = getCurrentUser();
+      box.style.display = user ? 'none' : 'block';
+      const tEl = document.getElementById('checkoutReminderTitle');
+      const dEl = document.getElementById('checkoutReminderDesc');
+      const bEl = document.getElementById('checkoutReminderBtn');
+      if (tEl) {
+        tEl.textContent = currentLang === 'en'
+          ? '⚠️ Sign Up / Login Before Payment So Your Data & History Are Saved'
+          : '⚠️ Sign Up / Login Dahulu Sebelum Bayar Supaya Data & Rekod Tak Hilang';
+      }
+      if (dEl) {
+        dEl.textContent = currentLang === 'en'
+          ? 'Please sign in first so your profile details and transaction history stay saved to your account.'
+          : 'Sila log masuk / daftar dahulu supaya maklumat profil serta sejarah transaksi kekal tersimpan dalam akaun anda.';
+      }
+      if (bEl) {
+        bEl.textContent = currentLang === 'en' ? 'Sign Up / Login →' : 'Sign Up / Login →';
+      }
+    }
+
+    function updateAuthUI() {
+      const user = getCurrentUser();
+      const navBtn = document.getElementById('authNavBtn');
+      if (user) {
+        const firstName = (user.name || user.email || 'Account').split(' ')[0];
+        navBtn.textContent = `👤 ${firstName}`;
+        navBtn.classList.add('auth-active');
+      } else {
+        navBtn.textContent = 'Sign Up';
+        navBtn.classList.remove('auth-active');
+      }
+      const drawerAccSpan = document.querySelector('#sideDrawer [data-i18n="navAccount"]');
+      if (drawerAccSpan) {
+        if (user) {
+          drawerAccSpan.textContent = currentLang === 'en' ? 'Account' : 'Akaun';
+        } else {
+          drawerAccSpan.textContent = (I18N[currentLang] || I18N.en).navAccount;
+        }
+      }
+      refreshCheckoutLoginReminder();
+    }
+
+    function normalizeUsername(u) {
+      return String(u || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+    }
+
+    function switchAuthMode(mode = 'signup') {
+      const isSignup = mode === 'signup';
+      const isForgot = mode === 'forgot';
+      const sBtn = document.getElementById('authModeSignupBtn');
+      const lBtn = document.getElementById('authModeLoginBtn');
+      const sForm = document.getElementById('simpleSignupForm');
+      const lForm = document.getElementById('simpleLoginForm');
+      const fForm = document.getElementById('forgotPasswordForm');
+      if (sBtn) sBtn.classList.toggle('active', isSignup);
+      if (lBtn) lBtn.classList.toggle('active', !isSignup && !isForgot);
+      if (sForm) sForm.style.display = isSignup ? 'block' : 'none';
+      if (lForm) lForm.style.display = (!isSignup && !isForgot) ? 'block' : 'none';
+      if (fForm) fForm.style.display = isForgot ? 'block' : 'none';
+    }
+
+    function openForgotPasswordView() {
+      switchAuthMode('forgot');
+      const cur = getCurrentUser();
+      const fEmail = document.getElementById('forgotEmailInput');
+      const fUser = document.getElementById('forgotUsernameInput');
+      if (fEmail && cur?.email && !fEmail.value) fEmail.value = cur.email;
+      if (fUser && cur?.username && !fUser.value) fUser.value = cur.username;
+    }
+
+    function handleForgotPasswordSubmit(e) {
+      e.preventDefault();
+      const email = String(document.getElementById('forgotEmailInput')?.value || '').trim().toLowerCase();
+      const uname = normalizeUsername(document.getElementById('forgotUsernameInput')?.value || '');
+      const newPass = String(document.getElementById('forgotNewPasswordInput')?.value || '');
+
+      if (!email || !uname || newPass.length < 6) {
+        showToast('Fill email, username & new password (min 6 chars).');
+        return;
+      }
+
+      const users = getUsersDB();
+      const idx = users.findIndex(u =>
+        String(u.email || '').trim().toLowerCase() === email &&
+        normalizeUsername(u.username || (u.email || '').split('@')[0]) === uname
+      );
+
+      if (idx === -1) {
+        showToast('Account not found! Check your email and username.');
+        return;
+      }
+
+      users[idx].password = newPass;
+      saveUsersDB(users);
+
+      const cur = getCurrentUser();
+      if (cur && String(cur.email || '').trim().toLowerCase() === email) {
+        localStorage.setItem('spystore_current_user', JSON.stringify({ ...cur, password: newPass }));
+      }
+
+      if (document.getElementById('forgotNewPasswordInput')) {
+        document.getElementById('forgotNewPasswordInput').value = '';
+      }
+      switchAuthMode('login');
+      const lEmail = document.getElementById('loginEmailInput');
+      if (lEmail) lEmail.value = email;
+      showToast('Password updated! Please log in with your new password.');
+    }
+
+    function renderProfileCardHtml(user) {
+      return `
+        <p><strong>Username:</strong> ${user.username || (user.email ? user.email.split('@')[0] : user.name)}</p>
+        <p><strong>Full Name:</strong> ${user.name}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <p><strong>Country:</strong> Malaysia</p>
+        <p style="margin-bottom:0;"><strong>WhatsApp:</strong> ${user.phone || '-'}</p>
+      `;
+    }
+
+    function toggleProfileEditMode() {
+      const user = getCurrentUser();
+      const form = document.getElementById('editProfileForm');
+      if (!user || !form) return;
+      const opening = form.style.display === 'none';
+      form.style.display = opening ? 'block' : 'none';
+      if (opening) {
+        document.getElementById('editFullNameInput').value = user.name || '';
+        document.getElementById('editUsernameInput').value = user.username || (user.email ? user.email.split('@')[0] : '');
+        document.getElementById('editPhoneInput').value = user.phone || '';
+      }
+    }
+
+    function saveProfileEdits(e) {
+      e.preventDefault();
+      const user = getCurrentUser();
+      if (!user || !user.email) return;
+
+      const newName = String(document.getElementById('editFullNameInput')?.value || '').trim();
+      const rawUsername = String(document.getElementById('editUsernameInput')?.value || '').trim();
+      const newUsername = normalizeUsername(rawUsername);
+      const newPhone = String(document.getElementById('editPhoneInput')?.value || '').trim();
+      if (!newName || !newUsername) {
+        showToast('Enter a valid username.');
+        return;
+      }
+
+      const users = getUsersDB();
+      const takenByOther = users.some(u =>
+        String(u.email || '').trim().toLowerCase() !== String(user.email).trim().toLowerCase() &&
+        normalizeUsername(u.username || (u.email || '').split('@')[0]) === newUsername
+      );
+      if (takenByOther) {
+        showToast('Username already used by another account! Please choose another.');
+        return;
+      }
+
+      const updated = {
+        ...user,
+        name: newName,
+        username: newUsername,
+        phone: newPhone
+      };
+
+      const idx = users.findIndex(u => u.email === user.email);
+      if (idx !== -1) {
+        users[idx] = { ...users[idx], ...updated };
+      } else {
+        users.push(updated);
+      }
+      saveUsersDB(users);
+      localStorage.setItem('spystore_current_user', JSON.stringify(updated));
+      syncCurrentUserSavedData();
+      updateAuthUI();
+
+      document.getElementById('profileDetailsBox').innerHTML = renderProfileCardHtml(updated);
+      document.getElementById('editProfileForm').style.display = 'none';
+      showToast('Profile details updated!');
+    }
+
+    function getUserRole(user = null) {
+      const u = user || getCurrentUser();
+      if (isDesignatedOwner(u)) return 'owner';
+      const r = String(u?.role || 'customer').toLowerCase();
+      return ['owner', 'admin', 'customer'].includes(r) ? r : 'customer';
+    }
+
+    function getManagerTargetOptions() {
+      const opts = [];
+      products.forEach(p => {
+        if (p.mode === 'dual' && Array.isArray(p.subPlans)) {
+          p.subPlans.forEach(sp => {
+            opts.push({
+              value: `${p.id}:${sp.key}`,
+              label: `${p.name} (${sp.label})`,
+              target: sp,
+              parent: p
+            });
+          });
+        } else {
+          opts.push({
+            value: p.id,
+            label: p.name,
+            target: p,
+            parent: p
+          });
+        }
+      });
+      return opts;
+    }
+
+    function getStatusValueFromObj(obj, monthNum) {
+      if (!obj) return 'active';
+      const isCS = monthNum === 1 ? Boolean(obj.comingSoon1Mo) : Boolean(obj.comingSoon2Mo);
+      const isOff = monthNum === 1 ? Boolean(obj.disabled1Mo) : Boolean(obj.disabled2Mo);
+      if (isCS) return 'coming_soon';
+      if (isOff) return 'off';
+      return 'active';
+    }
+
+    function applyStatusValueToObj(obj, monthNum, val) {
+      const clean = String(val || 'active');
+      if (monthNum === 1) {
+        obj.comingSoon1Mo = clean === 'coming_soon';
+        obj.disabled1Mo = clean === 'off';
+      } else {
+        obj.comingSoon2Mo = clean === 'coming_soon';
+        obj.disabled2Mo = clean === 'off';
+      }
+      obj.comingSoon = Boolean(obj.comingSoon1Mo && obj.comingSoon2Mo);
+    }
+
+    function loadTargetIntoManagerForm() {
+      const sel = document.getElementById('mgrTargetSelect');
+      if (!sel) return;
+      const opts = getManagerTargetOptions();
+      const found = opts.find(o => o.value === sel.value) || opts[0];
+      if (!found) return;
+      const t = found.target;
+      document.getElementById('mgrStockInput').value = Number(t.stock ?? 0);
+      document.getElementById('mgrPrice1MoInput').value = Number(t.price ?? 0);
+      document.getElementById('mgrPrice2MoInput').value =
+        typeof t.price2Mo === 'number' && !isNaN(t.price2Mo) && t.price2Mo > 0 ? Number(t.price2Mo) : '';
+      document.getElementById('mgrStatus1MoSelect').value = getStatusValueFromObj(t, 1);
+      document.getElementById('mgrStatus2MoSelect').value = getStatusValueFromObj(t, 2);
+    }
+
+    function saveCatalogManagerChanges() {
+      const role = getUserRole();
+      if (role !== 'owner' && role !== 'admin') {
+        showToast('Only Owner or Admin can edit catalog.');
+        return;
+      }
+      const sel = document.getElementById('mgrTargetSelect');
+      const opts = getManagerTargetOptions();
+      const found = opts.find(o => o.value === sel?.value);
+      if (!found) return;
+
+      const t = found.target;
+      const stockVal = Math.max(0, parseInt(document.getElementById('mgrStockInput')?.value || '0', 10) || 0);
+      const p1Val = parseFloat(document.getElementById('mgrPrice1MoInput')?.value || '0');
+      const p2Raw = String(document.getElementById('mgrPrice2MoInput')?.value || '').trim();
+      const p2Val = p2Raw ? parseFloat(p2Raw) : NaN;
+      const st1 = document.getElementById('mgrStatus1MoSelect')?.value || 'active';
+      const st2 = document.getElementById('mgrStatus2MoSelect')?.value || 'active';
+
+      if (!isNaN(p1Val) && p1Val > 0) t.price = p1Val;
+      if (!isNaN(p2Val) && p2Val > 0) {
+        t.price2Mo = p2Val;
+      } else {
+        delete t.price2Mo;
+      }
+      t.stock = stockVal;
+      applyStatusValueToObj(t, 1, st1);
+      applyStatusValueToObj(t, 2, st2);
+
+      if (found.parent && found.parent.mode === 'dual') {
+        recomputeDualProductStock(found.parent);
+      }
+
+      saveCatalogState();
+      syncWebsiteCatalog();
+      refreshRolePanelUI();
+      showToast(`Saved ${found.label} on website!`);
+    }
+
+    function unlockStaffRole() {
+      const code = String(document.getElementById('staffPasscodeInput')?.value || '').trim();
+      const keys = getDefaultStaffKeys();
+      const user = getCurrentUser();
+      if (!user) {
+        showToast('Please log in first.');
+        return;
+      }
+      let nextRole = null;
+      if (code && code === keys.owner) nextRole = 'owner';
+      else if (code && code === keys.admin) nextRole = 'admin';
+
+      if (!nextRole) {
+        showToast('Invalid passcode. Try ADMIN2026 or OWNER2026.');
+        return;
+      }
+
+      const updated = { ...user, role: nextRole };
+      localStorage.setItem('spystore_current_user', JSON.stringify(updated));
+      const users = getUsersDB();
+      const idx = users.findIndex(u => String(u.email).toLowerCase() === String(user.email).toLowerCase());
+      if (idx !== -1) {
+        users[idx] = { ...users[idx], role: nextRole };
+        saveUsersDB(users);
+      }
+      document.getElementById('staffPasscodeInput').value = '';
+      refreshRolePanelUI();
+      showToast(`Role activated: ${nextRole.toUpperCase()}`);
+    }
+
+    function refreshRolePanelUI() { refreshDrawerRoleTools(); }
 
     function openAuthModal() {
       const modal = document.getElementById('authModal');
@@ -3929,6 +4793,14 @@
       }
     })();
 
+    ensureOwnerAccountSeeded();
+    applyLanguage();
+    updateAuthUI();
+    refreshDrawerRoleTools();
+    renderProducts();
+    syncWebsiteCatalog();
+    loadTrendingHero();
+
   
     function refreshDrawerRoleTools() {
       const role = getUserRole();
@@ -4201,21 +5073,6 @@
       document.getElementById('drawerBackdrop').classList.remove('open');
       document.getElementById('sideDrawer').classList.remove('open');
     }
-
-    (function bootStorefront() {
-      try {
-        ensureOwnerAccountSeeded();
-        applyLanguage();
-        updateAuthUI();
-        refreshDrawerRoleTools();
-        loadCatalogState();
-        renderProducts();
-        syncWebsiteCatalog();
-        loadTrendingHero();
-      } catch (e) {
-        console.error('Boot error:', e);
-      }
-    })();
 </script>
 </body>
 </html>
