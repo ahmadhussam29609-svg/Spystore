@@ -2,8 +2,6 @@
 // Mengendalikan pengesahan pembayaran & menolak stok automatik pada Google Sheet (kolum slots)
 
 const SHEET_STOCK_WEBHOOK_URL = process.env.SHEET_STOCK_WEBHOOK_URL;
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 function inferAppId(rawAppId, rawAppName) {
   const candidate = String(rawAppId || '').toLowerCase().trim();
@@ -21,7 +19,9 @@ function inferAppId(rawAppId, rawAppName) {
 }
 
 async function notifyStockWebhook(payload) {
-  if (!SHEET_STOCK_WEBHOOK_URL) return { ok: false, reason: 'Missing SHEET_STOCK_WEBHOOK_URL' };
+  if (!SHEET_STOCK_WEBHOOK_URL) {
+    return { ok: false, reason: 'Missing SHEET_STOCK_WEBHOOK_URL' };
+  }
   const res = await fetch(SHEET_STOCK_WEBHOOK_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -35,92 +35,80 @@ async function notifyStockWebhook(payload) {
   }
 }
 
-async function notifyTelegramAdmin(message) {
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
-  try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: 'Markdown'
-      })
-    });
-  } catch (e) {
-    console.error('Telegram notify failed:', e);
-  }
-}
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   try {
-    let body = req.body || {};
-    if (typeof body === 'string') {
-      try {
-        body = JSON.parse(body);
-      } catch {
-        const params = new URLSearchParams(body);
-        body = Object.fromEntries(params.entries());
-      }
-    }
-
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
     const q = req.query || {};
-    const status = String(body.status || body.status_id || q.status || q.status_id || '').trim();
-    const refNo = String(body.refno || body.order_id || q.order_id || q.ref || '').trim();
-    const billCode = String(body.billcode || q.billcode || '').trim();
-    const appName = String(body.appName || q.appName || body.appId || body.app || q.app || 'Subscription').trim();
-    const appId = inferAppId(body.appId || body.app || q.app, appName);
-    const months = parseInt(body.months || q.mo || 1, 10) || 1;
-    const totalAmount = String(body.totalAmount || body.amount || q.amount || '').trim();
-    const customerName = String(body.customerName || q.name || q.customerName || '-').trim();
-    const customerPhone = String(body.customerPhone || q.phone || '-').trim();
-    const customerDevice = String(body.customerDevice || q.device || '-').trim();
-    const qty = Math.max(1, parseInt(body.qty || 1, 10));
 
-    if (status !== '1') {
+    // Support both Billplz webhook payload (billplz[paid], billplz[id]) and query/JSON confirmation
+    const bpPaid = body['billplz[paid]'] ?? q['billplz[paid]'] ?? body.billplz?.paid ?? '';
+    const bpId = body['billplz[id]'] ?? q['billplz[id]'] ?? body.billplz?.id ?? '';
+
+    const rawStatus = String(
+      body.status ??
+      body.status_id ??
+      q.status ??
+      q.status_id ??
+      (String(bpPaid) === 'true' ? '1' : '')
+    ).trim();
+
+    const isPaid = rawStatus === '1' || String(bpPaid) === 'true';
+
+    const refno = String(
+      body.refno ??
+      body.order_id ??
+      body.reference_1 ??
+      q.order_id ??
+      q.refno ??
+      bpId ??
+      ''
+    ).trim();
+
+    const appName = String(body.appName ?? body.description ?? q.appName ?? '').trim();
+    const appId = inferAppId(body.appId ?? q.app ?? '', appName);
+    const months = parseInt(body.months ?? q.mo ?? 1, 10) || 1;
+    const qty = Math.max(1, parseInt(body.qty ?? 1, 10) || 1);
+    const totalAmount = String(body.totalAmount ?? q.amount ?? '').trim();
+    const customerName = String(body.customerName ?? q.name ?? '').trim();
+    const customerPhone = String(body.customerPhone ?? '').trim();
+    const customerDevice = String(body.customerDevice ?? '').trim();
+
+    if (!isPaid) {
       return res.status(200).json({
         ok: false,
-        message: 'Payment not completed (status != 1)'
+        reason: 'Payment not marked as paid yet',
+        status: rawStatus || 'pending'
       });
     }
 
-    const stockResult = await notifyStockWebhook({
-      refno: refNo,
-      billcode: billCode,
+    const webhookResult = await notifyStockWebhook({
       status: '1',
+      status_id: '1',
+      refno,
       appId,
       appName,
-      qty
+      months,
+      qty,
+      totalAmount,
+      customerName,
+      customerPhone,
+      customerDevice,
+      source: 'spystore-callback'
     });
-
-    if (!body.clientConfirm) {
-      const tgText = [
-        '✅ *PEMBAYARAN BERJAYA — SPYSTORE BY SAMS*',
-        `• *No. Rujukan:* ${refNo || '-'}`,
-        `• *Bill Code:* ${billCode || '-'}`,
-        `• *Aplikasi:* ${appName} (${months} Bulan)`,
-        `• *Jumlah:* RM${totalAmount || '-'}`,
-        `• *Pelanggan:* ${customerName}`,
-        `• *WhatsApp:* ${customerPhone}`,
-        `• *Peranti:* ${customerDevice}`,
-        `• *Baki Stok (slots):* ${stockResult?.newStock ?? 'Dikemaskini'}`
-      ].join('\n');
-
-      await notifyTelegramAdmin(tgText);
-    }
 
     return res.status(200).json({
       ok: true,
-      refno: refNo,
+      refno,
       appId,
-      stockResult
+      qty,
+      webhook: webhookResult
     });
   } catch (err) {
     return res.status(500).json({
       ok: false,
-      error: 'Callback processing failed',
+      error: 'Callback processing error',
       detail: err.message
     });
   }
