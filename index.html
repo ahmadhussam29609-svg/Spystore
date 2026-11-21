@@ -3250,7 +3250,6 @@
 
       const platformId = appEntries.length ? appEntries[0].id : '';
 
-      // Short, clean synopsis summary (auto-generated concise summary if item.overview is missing or too long)
       let rawOverview = String(item.overview || '').trim();
       if (!rawOverview) {
         rawOverview = currentLang === 'en'
@@ -3263,19 +3262,17 @@
         ? `<img src="${item.poster}" alt="${title}" class="spec-poster" />`
         : `<div class="spec-poster" style="display:flex;align-items:center;justify-content:center;background:var(--bg-input);color:var(--accent-gold);font-weight:800;">${mediaType}</div>`;
 
-      const availableAppsLogosHtml = appEntries.length
-        ? `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;">` +
+      // Logos only (no text labels) inside the PLATFORM / ACCESS box
+      const platformLogosOnlyHtml = appEntries.length
+        ? `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; align-items:center;">` +
             appEntries.map(ap => `
-              <div style="display:inline-flex; align-items:center; gap:7px; background:var(--bg-card); border:1px solid var(--border-strong); border-radius:10px; padding:5px 10px;">
-                <span style="width:24px; height:24px; border-radius:7px; background:${ap.bg}; color:${ap.color}; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; font-size:0.7rem; font-weight:800;">
-                  <img src="${ap.logo}" alt="${ap.shortLabel}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-                  <span style="display:none;">${ap.badge}</span>
-                </span>
-                <span style="font-size:0.78rem; font-weight:700; color:var(--text-primary);">${ap.shortLabel}</span>
-              </div>
+              <span title="${ap.shortLabel}" style="width:32px; height:32px; border-radius:9px; background:${ap.bg}; color:${ap.color}; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; font-size:0.78rem; font-weight:800; border:1px solid var(--border-color); box-shadow:0 4px 10px rgba(0,0,0,0.35);">
+                <img src="${ap.logo}" alt="${ap.shortLabel}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+                <span style="display:none;">${ap.badge}</span>
+              </span>
             `).join('') +
           `</div>`
-        : `<div style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">${currentLang === 'en' ? 'No active subscription app found.' : 'Tiada aplikasi langganan aktif ditemui.'}</div>`;
+        : `<div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">-</div>`;
 
       const orderBtnHtml = platformId
         ? `<button type="button" class="primary-submit" style="width:auto; flex:1; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); closeShowSearchModal(); openCheckout('${platformId}');">${currentLang === 'en' ? `Order ${platformLabel} →` : `Tempah ${platformLabel} →`}</button>`
@@ -3287,8 +3284,6 @@
           <div style="flex:1; min-width:0;">
             <div class="spec-title">${title}</div>
             <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700; margin-bottom:6px;">${mediaType} • ${year}</div>
-            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">${currentLang === 'en' ? 'Available On' : 'Tersedia Di'}</div>
-            ${availableAppsLogosHtml}
           </div>
         </div>
 
@@ -3307,7 +3302,7 @@
           </div>
           <div class="spec-box">
             <div class="spec-label">${currentLang === 'en' ? 'Platform / Access' : 'Platform / Akses'}</div>
-            <div class="spec-val" style="color:var(--accent-cyan);">${platformLabel}</div>
+            ${platformLogosOnlyHtml}
           </div>
         </div>
 
