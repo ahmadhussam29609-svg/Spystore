@@ -2659,6 +2659,12 @@
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
+    const ADMIN_WA = '60189066291';
+    let lastReceiptPlainText = '';
+    function googleLogoSvg(size = 18) {
+      return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.1C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.29c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.61H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.39l3.98-3.1z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.61l3.98 3.1c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>`;
+    }
+
 
     function dismissSplash() {
       const splash = document.getElementById('splashIntro');
@@ -2963,7 +2969,7 @@
           { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', overview: 'A group of vigilantes set out to take down corrupt superheroes.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg', isNew: true, isKdrama: false },
           { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', overview: 'Jack Reacher investigates a conspiracy in a small town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg', isNew: true, isKdrama: true },
           { id: 605722, title: 'The Tomorrow War', mediaType: 'MOVIE', rating: '7.5', overview: 'A family man is drafted to fight in a future war.', backdrop: 'https://image.tmdb.org/t/p/w780/8Y43pPCjBBGV3exGpWM5bDB1C6W.jpg', poster: 'https://image.tmdb.org/t/p/w342/34nDCQZ3u3uN3n4x3n4o4Z3P9k7.jpg', isNew: true, isKdrama: false },
-          { id: 335983, title: 'Venom', mediaType: 'MOVIE', rating: '6.8', overview: 'A journalist gains superpowers after being mutually aligned with an alien entity.', backdrop: 'https://image.tmdb.org/t/p/w780/VuukXkFFVC9rVuHtVFMxs Gre0.jpg', poster: 'https://image.tmdb.org/t/p/w342/2uNW4WbgBXL25BAbXGLnLqX71Sw.jpg', isNew: false, isKdrama: false }
+          { id: 335983, title: 'Venom', mediaType: 'MOVIE', rating: '6.8', overview: 'A journalist gains superpowers after being mutually aligned with an alien entity.', backdrop: 'https://image.tmdb.org/t/p/w780/VuukXkFFVC9rVuHtVFMxsGre0.jpg', poster: 'https://image.tmdb.org/t/p/w342/2uNW4WbgBXL25BAbXGLnLqX71Sw.jpg', isNew: false, isKdrama: false }
         ]
       };
       const mapApp = (key, label, price) => (fb[key] || []).map((x, idx) => ({
@@ -3923,14 +3929,6 @@
       }
     })();
 
-    ensureOwnerAccountSeeded();
-    applyLanguage();
-    updateAuthUI();
-    refreshDrawerRoleTools();
-    renderProducts();
-    syncWebsiteCatalog();
-    loadTrendingHero();
-
   
     function refreshDrawerRoleTools() {
       const role = getUserRole();
@@ -4203,6 +4201,21 @@
       document.getElementById('drawerBackdrop').classList.remove('open');
       document.getElementById('sideDrawer').classList.remove('open');
     }
+
+    (function bootStorefront() {
+      try {
+        ensureOwnerAccountSeeded();
+        applyLanguage();
+        updateAuthUI();
+        refreshDrawerRoleTools();
+        loadCatalogState();
+        renderProducts();
+        syncWebsiteCatalog();
+        loadTrendingHero();
+      } catch (e) {
+        console.error('Boot error:', e);
+      }
+    })();
 </script>
 </body>
 </html>
