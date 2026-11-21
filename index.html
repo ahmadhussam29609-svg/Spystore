@@ -2404,7 +2404,8 @@
       </div>
 
       <div id="authFormsView" class="auth-form-anim">
-        <button type="button" onclick="handleGoogleSignIn('signup')" style="width:100%; background:#ffffff; color:#0f172a; border:1.5px solid var(--border-strong); padding:12px 14px; border-radius:12px; font-weight:800; font-size:0.86rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
+        <div id="officialGoogleBtnContainer" style="display:flex; justify-content:center; align-items:center; min-height:44px; margin-bottom:8px;"></div>
+        <button type="button" id="customGoogleFallbackBtn" onclick="handleGoogleSignIn('signup')" style="width:100%; background:#ffffff; color:#0f172a; border:1.5px solid var(--border-strong); padding:12px 14px; border-radius:12px; font-weight:800; font-size:0.86rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
           <span id="gSignupSvgSlot"></span>
           <span>Continue with Google</span>
         </button>
@@ -3635,7 +3636,7 @@
       }
       document.getElementById('selectedAppHeader').innerHTML = `
         <div style="display:flex; align-items:center; gap:12px;">
-          ${renderAppIconHtml(currentProduct, 48)}
+          <div style="width:48px; height:48px; flex-shrink:0;">${renderAppIconHtml(currentProduct, 48)}</div>
           <div>
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
               <span style="font-size:1.05rem; font-weight:700;">${currentProduct.name}</span>
@@ -3969,7 +3970,8 @@
 
     function renderAuthSignupCardHtml() {
       return `
-        <button type="button" onclick="handleGoogleSignIn('signup')" style="width:100%; background:#ffffff; color:#0f172a; border:1.5px solid var(--border-strong); padding:12px 14px; border-radius:12px; font-weight:800; font-size:0.86rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
+        <div id="officialGoogleBtnContainer" style="display:flex; justify-content:center; align-items:center; min-height:44px; margin-bottom:8px;"></div>
+        <button type="button" id="customGoogleFallbackBtn" onclick="handleGoogleSignIn('signup')" style="width:100%; background:#ffffff; color:#0f172a; border:1.5px solid var(--border-strong); padding:12px 14px; border-radius:12px; font-weight:800; font-size:0.86rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
           <span id="gSignupSvgSlot"></span>
           <span>Continue with Google</span>
         </button>
@@ -4026,6 +4028,13 @@
         formsView.style.display = 'block';
         document.getElementById('loggedInView').style.display = 'none';
         hydrateGoogleButtonLogos();
+        setTimeout(() => {
+          if (typeof initAndRenderGoogleButton === 'function') {
+            const ok = initAndRenderGoogleButton();
+            const fb = document.getElementById('customGoogleFallbackBtn');
+            if (ok && fb) fb.style.display = 'none';
+          }
+        }, 80);
       }
     }
 
@@ -4094,7 +4103,7 @@
     function completeGoogleLoginWithProfile(name, email, phone = '') {
       const cleanEmail = String(email || '').trim().toLowerCase();
       if (!cleanEmail || !cleanEmail.includes('@')) {
-        showToast(currentLang === 'en' ? 'Enter a valid Google Gmail address.' : 'Masukkan alamat e-mel Google yang sah.');
+        showToast(currentLang === 'en' ? 'Invalid Google email address.' : 'Alamat e-mel Google tidak sah.');
         return;
       }
       const username = cleanEmail.split('@')[0];
@@ -4132,77 +4141,49 @@
       }
     }
 
-    function selectSavedGoogleAccount(email, name) {
-      completeGoogleLoginWithProfile(name, email);
-    }
-
-    function submitCustomGoogleEmail(e) {
-      e.preventDefault();
-      const inp = document.getElementById('googleCustomEmailInput');
-      if (!inp) return;
-      completeGoogleLoginWithProfile('', inp.value.trim());
-    }
-
-    function openGoogleAccountChooser() {
-      const formsView = document.getElementById('authFormsView');
-      const titleEl = document.getElementById('authModalTitle');
-      if (!formsView) return;
-
-      if (titleEl) {
-        titleEl.textContent = currentLang === 'en' ? 'Choose a Google Account' : 'Pilih Akaun Google';
+    function initAndRenderGoogleButton() {
+      const clientId = getGoogleClientId();
+      const host = document.getElementById('officialGoogleBtnContainer');
+      if (!clientId || !window.google || !window.google.accounts || !window.google.accounts.id) return false;
+      try {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+        if (host) {
+          host.innerHTML = '';
+          window.google.accounts.id.renderButton(host, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            text: 'continue_with',
+            shape: 'pill',
+            width: Math.min(340, Math.max(240, (host.parentElement?.clientWidth || 320) - 8))
+          });
+        }
+        return true;
+      } catch (err) {
+        return false;
       }
-
-      const savedUsers = getUsersDB().filter(u => u && u.email);
-      const savedButtons = savedUsers.length
-        ? savedUsers.map(u => {
-            const initial = (u.name || u.email || 'G').charAt(0).toUpperCase();
-            return `
-              <button type="button" onclick="selectSavedGoogleAccount('${u.email.replace(/'/g, "\'")}', '${(u.name || '').replace(/'/g, "\'")}')" style="width:100%; display:flex; align-items:center; gap:10px; text-align:left; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; cursor:pointer; color:var(--text-primary);">
-                <span style="width:32px; height:32px; border-radius:50%; background:var(--accent-blue); color:#ffffff; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:0.84rem; flex-shrink:0;">${initial}</span>
-                <span style="flex:1; min-width:0;">
-                  <span style="display:block; font-weight:700; font-size:0.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${u.name || u.email.split('@')[0]}</span>
-                  <span style="display:block; font-size:0.72rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${u.email}</span>
-                </span>
-              </button>
-            `;
-          }).join('')
-        : '';
-
-      formsView.innerHTML = `
-        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
-          ${savedButtons}
-        </div>
-        <form onsubmit="submitCustomGoogleEmail(event)" style="border-top:1px solid var(--border-color); padding-top:12px;">
-          <div class="form-group">
-            <label>${currentLang === 'en' ? 'Or enter another Google Gmail address *' : 'Atau masukkan alamat Gmail Google lain *'}</label>
-            <input type="email" class="form-control" id="googleCustomEmailInput" placeholder="e.g. ahmad@gmail.com" required />
-          </div>
-          <button type="submit" class="primary-submit">${currentLang === 'en' ? 'Continue with this Gmail' : 'Teruskan dengan Gmail ini'}</button>
-          <button type="button" onclick="openAuthModal()" style="width:100%; margin-top:8px; background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); padding:9px; border-radius:10px; font-weight:700; font-size:0.78rem; cursor:pointer;">${currentLang === 'en' ? '← Back to Sign Up' : '← Kembali ke Sign Up'}</button>
-        </form>
-      `;
     }
 
     function handleGoogleSignIn(mode = 'signup') {
       _pendingGoogleAuthMode = mode;
-      const clientId = getGoogleClientId();
-
-      if (clientId && window.google && window.google.accounts && window.google.accounts.id) {
+      const ready = initAndRenderGoogleButton();
+      if (ready && window.google && window.google.accounts && window.google.accounts.id) {
         try {
-          window.google.accounts.id.initialize({
-            client_id: clientId,
-            callback: handleGoogleCredentialResponse
-          });
-          window.google.accounts.id.prompt((notification) => {
-            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-              openGoogleAccountChooser();
-            }
-          });
+          window.google.accounts.id.prompt();
           return;
         } catch (err) {}
       }
-
-      openGoogleAccountChooser();
+      showToast(currentLang === 'en'
+        ? 'Loading Google Sign-In... please wait 1 second and tap again.'
+        : 'Memuatkan Google Sign-In... sila tunggu 1 saat dan tekan semula.');
+      setTimeout(() => {
+        initAndRenderGoogleButton();
+      }, 600);
     }
 
     function handleLogout() {
@@ -4240,33 +4221,22 @@
         updatedAt: new Date().toISOString()
       };
 
-      let globalOrders = [];
-      try { globalOrders = JSON.parse(localStorage.getItem('spystore_orders') || '[]'); } catch (e) {}
-
-      const mergedMap = new Map();
-      const allCandidates = [
-        ...(orderItem ? [orderItem] : []),
-        ...(Array.isArray(current.orders) ? current.orders : []),
-        ...(Array.isArray(globalOrders) ? globalOrders : [])
-      ];
-
-      allCandidates.forEach(o => {
-        if (!o) return;
-        const sig = `${o.app || ''}|${o.months || ''}|${o.total || ''}|${o.date || ''}`;
-        if (!mergedMap.has(sig)) mergedMap.set(sig, o);
-      });
-
-      current.orders = Array.from(mergedMap.values()).slice(0, 25);
+      const existingOrders = Array.isArray(current.orders) ? current.orders : [];
+      current.orders = orderItem ? [orderItem, ...existingOrders].slice(0, 25) : existingOrders.slice(0, 25);
       localStorage.setItem(key, JSON.stringify(current));
     }
 
     function saveLocalOrder(order) {
+      const user = getCurrentUser();
+      if (user && user.email) {
+        syncCurrentUserSavedData(order);
+        return;
+      }
       try {
         const list = JSON.parse(localStorage.getItem('spystore_orders') || '[]');
         list.unshift(order);
         localStorage.setItem('spystore_orders', JSON.stringify(list.slice(0, 25)));
       } catch {}
-      syncCurrentUserSavedData(order);
     }
 
     function renderOrderHistory() {
