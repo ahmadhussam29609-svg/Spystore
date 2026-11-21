@@ -2612,14 +2612,14 @@
     const ADMIN_WA = '60189066291';
 
     let products = [
-      { id: 'netflix', logo: 'netflix.png', name: 'Netflix Premium', mode: 'private', category: 'Streaming', price: 18, stock: 0, badge: 'N', bg: '#18181b', color: '#ef4444' },
-      { id: 'disney', logo: 'disney.png', name: 'Disney+ Premium', mode: 'private', category: 'Streaming', price: 16, stock: 0, badge: 'D+', bg: '#0c1d3d', color: '#38bdf8' },
-      { id: 'hbomax', logo: 'hbomax.png', name: 'HBO Max', mode: 'private', category: 'Streaming', price: 16, stock: 0, badge: 'MAX', bg: '#1e1b4b', color: '#a78bfa' },
-      { id: 'primevideo', logo: 'primevideo.png', name: 'Prime Video', mode: 'private', category: 'Streaming', price: 10, stock: 0, badge: 'PV', bg: '#091a2c', color: '#38bdf8' },
-      { id: 'youtube', logo: 'youtube.png', name: 'YouTube Premium', mode: 'invite', category: 'Streaming', price: 5, stock: 0, badge: 'YT', bg: '#271313', color: '#f87171' },
-      { id: 'spotify', logo: 'spotify.png', name: 'Spotify Premium', mode: 'invite', category: 'Music', price: 13, stock: 0, badge: 'SP', bg: '#0d2618', color: '#22c55e' },
-      { id: 'canva', logo: 'canva.png', name: 'Canva Pro', mode: 'invite', category: 'Creative', price: 5, stock: 0, badge: 'C', bg: '#0e2933', color: '#22d3ee' },
-      { id: 'capcut', logo: 'capcut.png', name: 'CapCut Pro', mode: 'dual', subPlans: [{ key: 'share', label: 'Share', price: 10, stock: 0 }, { key: 'private', label: 'Private', price: 15, stock: 0 }], category: 'Creative', price: 10, stock: 0, badge: 'CC', bg: '#18181b', color: '#facc15' }
+      { id: 'netflix', logo: 'netflix.png', frontName: 'Netflix', name: 'Netflix Premium', mode: 'private', category: 'Streaming', price: 18, stock: 0, badge: 'N', bg: '#18181b', color: '#ef4444' },
+      { id: 'disney', logo: 'disney.png', frontName: 'Disney+', name: 'Disney+ Premium', mode: 'private', category: 'Streaming', price: 16, stock: 0, badge: 'D+', bg: '#0c1d3d', color: '#38bdf8' },
+      { id: 'hbomax', logo: 'hbomax.png', frontName: 'HBO Max', name: 'HBO Max', mode: 'private', category: 'Streaming', price: 16, stock: 0, badge: 'MAX', bg: '#1e1b4b', color: '#a78bfa' },
+      { id: 'primevideo', logo: 'primevideo.png', frontName: 'Prime Video', name: 'Prime Video', mode: 'private', category: 'Streaming', price: 10, stock: 0, badge: 'PV', bg: '#091a2c', color: '#38bdf8' },
+      { id: 'youtube', logo: 'youtube.png', frontName: 'YouTube', name: 'YouTube Premium', mode: 'invite', category: 'Streaming', price: 5, stock: 0, badge: 'YT', bg: '#271313', color: '#f87171' },
+      { id: 'spotify', logo: 'spotify.png', frontName: 'Spotify', name: 'Spotify Premium', mode: 'invite', category: 'Music', price: 13, stock: 0, badge: 'SP', bg: '#0d2618', color: '#22c55e' },
+      { id: 'canva', logo: 'canva.png', frontName: 'Canva', name: 'Canva Pro', mode: 'invite', category: 'Creative', price: 5, stock: 0, badge: 'C', bg: '#0e2933', color: '#22d3ee' },
+      { id: 'capcut', logo: 'capcut.png', frontName: 'CapCut', name: 'CapCut Pro', mode: 'dual', subPlans: [{ key: 'share', label: 'Share', price: 10, stock: 0 }, { key: 'private', label: 'Private', price: 15, stock: 0 }], category: 'Creative', price: 10, stock: 0, badge: 'CC', bg: '#18181b', color: '#facc15' }
     ];
 
     let selectedCategory = 'All';
@@ -3796,8 +3796,7 @@
           <div class="product-card card-stagger-in ${inStock ? '' : 'out-of-stock'}" style="animation-delay:${Math.min(idx * 40, 280)}ms;" onclick="${onClickAction}">
             <span class="stock-pill ${pillClass}">${stockLabel}</span>
             ${renderAppIconHtml(p)}
-            <div class="app-name">${p.name}</div>
-            <span class="mode-badge ${p.mode === 'invite' ? 'mode-invite' : 'mode-private'}">${p.mode === 'dual' ? 'Share • Private' : (p.mode === 'invite' ? 'Via Invite' : 'Private')}</span>
+            <div class="app-name">${p.frontName || p.name}</div>
             <div class="app-cat">${p.category}</div>
             <div class="app-cat" style="margin-bottom:0; color:var(--accent-cyan); font-weight:600;">${currentLang === 'en' ? 'Tap to view price & order' : 'Tekan untuk lihat harga & tempah'}</div>
           </div>
