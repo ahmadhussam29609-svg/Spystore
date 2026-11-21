@@ -4238,15 +4238,33 @@
   }
 
   function getItemPlatforms(item) {
-    if (Array.isArray(item.platforms) && item.platforms.length) {
+    if (Array.isArray(item.platforms)) {
       return item.platforms;
     }
-    if (Array.isArray(item.availableApps) && item.availableApps.length) {
+    if (Array.isArray(item.availableApps)) {
       return item.availableApps.map(a => ({ id: a.id, label: a.shortLabel || a.label || a.id }));
     }
-    const pid = item.platformId || 'netflix';
-    const prod = products.find(p => p.id === pid);
-    return [{ id: pid, label: item.platformLabel || (prod ? prod.frontName || prod.name : 'Netflix') }];
+    if (item.platformId && item.platformLabel && !item._unverifiedPlatform) {
+      return [{ id: item.platformId, label: item.platformLabel }];
+    }
+    return [];
+  }
+
+  function getAvailabilityLabel(item) {
+    const titleLower = String(item.title || '').toLowerCase();
+    const yearNum = parseInt(String(item.year || ''), 10);
+    const isFutureRelease = Boolean(item.isUnreleased) || (!isNaN(yearNum) && yearNum > 2026) || titleLower.includes('movie 3') || titleLower.includes('gur'latan');
+    if (isFutureRelease) {
+      return currentLang === 'my' ? 'Belum Release' : 'Not Yet Released';
+    }
+    const plats = getItemPlatforms(item);
+    if (plats.length > 0) {
+      return plats.map(p => p.label).join(', ');
+    }
+    if (item.availabilityNote) {
+      return item.availabilityNote;
+    }
+    return currentLang === 'my' ? 'Tiada di Platform / Belum Release' : 'Not on Platform / Unreleased';
   }
 
   function renderSmallPlatformChip(plat) {
@@ -4276,7 +4294,6 @@
     `;
   }
 
-  // SHOW SPECIFICATION modal: logo moved into PLATFORM / ACCESS box, no "AVAILABLE ON", no text inside platform box, no bottom Close button
   function openShowDetailModal(item) {
     if (!item) return;
     const modal = document.getElementById('showDetailModal');
@@ -4286,15 +4303,25 @@
     if (tagEl) tagEl.textContent = 'SHOW SPECIFICATION';
 
     const plats = getItemPlatforms(item);
-    const primaryPlat = plats[0] || { id: 'netflix', label: 'Netflix' };
-    const prod = products.find(p => p.id === primaryPlat.id) || products[0];
-    const platNamesStr = plats.map(x => x.label).join(', ');
+    const availText = getAvailabilityLabel(item);
+    const hasPlatform = plats.length > 0 && !String(availText).toLowerCase().includes('belum release') && !String(availText).toLowerCase().includes('not yet released');
+    const primaryPlat = hasPlatform ? plats[0] : null;
+    const prod = primaryPlat ? (products.find(p => p.id === primaryPlat.id) || products[0]) : null;
+    const platNamesStr = hasPlatform ? plats.map(x => x.label).join(', ') : availText;
     const mediaTypeStr = item.mediaType || 'MOVIE';
     const yearStr = (item.year && item.year !== '-') ? item.year : (item.releaseDate ? String(item.releaseDate).slice(0, 4) : '-');
-    const ratingVal = item.rating && item.rating !== 'N/A' ? `★ ${item.rating} / 10` : '★ 7.8 / 10';
+    const ratingVal = item.rating && item.rating !== 'N/A' ? `★ ${item.rating} / 10` : '★ N/A';
     const synopsisText = item.overview && item.overview.trim()
       ? item.overview.trim()
-      : `${item.title} (${yearStr}) is a ${mediaTypeStr.toLowerCase()} currently checked for subscription availability.`;
+      : `${item.title} (${yearStr}) — ${availText}.`;
+
+    const platformBoxContent = hasPlatform
+      ? `<div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:2px;">${plats.map(pl => renderPlatformLogoOnly(pl)).join('')}</div>`
+      : `<div class="spec-val" style="color:var(--accent-gold); font-size:0.78rem;">${availText}</div>`;
+
+    const actionBtnHtml = prod
+      ? `<button type="button" class="primary-submit" style="width:100%; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${prod.id}');">Order ${platNamesStr} →</button>`
+      : `<div style="width:100%; text-align:center; padding:10px 12px; border-radius:10px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent-gold); font-size:0.78rem; font-weight:700;">${availText}</div>`;
 
     body.innerHTML = `
       <div class="spec-hero">
@@ -4322,9 +4349,7 @@
         </div>
         <div class="spec-box">
           <div class="spec-label">PLATFORM / ACCESS</div>
-          <div class="spec-val" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:2px;">
-            ${plats.map(pl => renderPlatformLogoOnly(pl)).join('')}
-          </div>
+          ${platformBoxContent}
         </div>
       </div>
 
@@ -4334,7 +4359,7 @@
       </div>
 
       <div class="spec-actions">
-        <button type="button" class="primary-submit" style="width:100%; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${prod.id}');">Order ${platNamesStr} →</button>
+        ${actionBtnHtml}
       </div>
     `;
     modal.classList.add('open');
@@ -4422,19 +4447,39 @@
     return String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
+  function isNonExistentOrJunkTitle(item) {
+    const t = String(item?.title || '').trim().toLowerCase();
+    if (!t) return true;
+    const blockedPhrases = [
+      'elemental heroes',
+      'sinopsis ',
+      'synopsis ',
+      'ghost of gur',
+      'movie 3'
+    ];
+    return blockedPhrases.some(bp => t.includes(bp));
+  }
+
+  function canonicalTitleKey(item) {
+    const raw = String(item?.title || '')
+      .toLowerCase()
+      .replace(/^sinopsis\s+/i, '')
+      .replace(/^synopsis\s+/i, '')
+      .replace(/[^a-z0-9]/g, '');
+    const mType = String(item?.mediaType || 'SHOW').toUpperCase();
+    return `${raw}|${mType}`;
+  }
+
   function collectAllShowCatalog() {
     ensureTrendingStoreReady();
     const extraShows = [
-      { title: 'BoBoiBoy', year: '2011', mediaType: 'SERIES', rating: '7.2', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'A young boy named BoBoiBoy gains elemental superpowers to protect Earth from alien invaders.' },
+      { title: 'BoBoiBoy', year: '2011', mediaType: 'SERIES', rating: '7.2', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy gains elemental superpowers to protect Earth from alien invaders.' },
       { title: 'BoBoiBoy: The Movie', year: '2016', mediaType: 'MOVIE', rating: '6.8', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy and his friends travel to save Ochobot from an ancient power seeker.' },
       { title: 'BoBoiBoy Galaxy', year: '2016', mediaType: 'SERIES', rating: '7.9', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy embarks on interstellar missions across the galaxy to collect Power Spheras.' },
-      { title: 'BoBoiBoy Movie 2', year: '2019', mediaType: 'MOVIE', rating: '7.4', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'A powerful villain named Retak’ka returns to reclaim his elemental powers from BoBoiBoy.' },
+      { title: 'BoBoiBoy Movie 2', year: '2019', mediaType: 'MOVIE', rating: '7.4', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Retak’ka returns to reclaim elemental powers from BoBoiBoy.' },
       { title: 'The Hobbit: The Desolation of Smaug', year: '2013', mediaType: 'MOVIE', rating: '7.8', platformId: 'netflix', platformLabel: 'Netflix / Prime Video', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'primevideo', label: 'Prime Video' }], overview: 'Bilbo Baggins and the dwarves continue their quest toward Erebor and encounter the dragon Smaug.' },
       { title: 'X-Men: Days of Future Past', year: '2014', mediaType: 'MOVIE', rating: '7.5', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The X-Men send Wolverine to the past to change history and prevent doom for humans and mutants.' },
-      { title: 'X-Men ’97', year: '2024', mediaType: 'SERIES', rating: '8.7', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A band of mutants use their uncanny gifts to protect a world that hates and fears them.' },
-      { title: 'Ultraman Trigger', year: '2021', mediaType: 'SERIES', rating: '7.6', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Kengo Manaka bonds with Ultraman Trigger to defend Earth.' },
-      { title: 'Ultraman Blazar', year: '2023', mediaType: 'SERIES', rating: '8.1', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Captain Gento Hiruma transforms into Ultraman Blazar.' },
-      { title: 'Doraemon: Stand by Me', year: '2014', mediaType: 'MOVIE', rating: '7.6', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Doraemon helps Nobita gain confidence and happiness.' }
+      { title: 'X-Men ’97', year: '2024', mediaType: 'SERIES', rating: '8.7', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A band of mutants use their uncanny gifts to protect a world that hates and fears them.' }
     ];
     const trendingShows = [];
     Object.values(trendingByApp || {}).forEach(appObj => {
@@ -4442,7 +4487,8 @@
     });
     const seen = new Set();
     return [...extraShows, ...trendingShows].filter(item => {
-      const key = `${normalizeSearchText(item.title)}|${item.mediaType || 'SHOW'}`;
+      if (isNonExistentOrJunkTitle(item)) return false;
+      const key = canonicalTitleKey(item);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
@@ -4471,34 +4517,64 @@
       const apiItems = Array.isArray(data.items) ? data.items : [];
       if (!apiItems.length) return localMatches;
 
-      const mappedApi = apiItems.map(it => {
-        const apps = Array.isArray(it.availableApps) && it.availableApps.length ? it.availableApps : [];
-        const plats = apps.length
-          ? apps.map(a => ({ id: a.id, label: a.shortLabel || a.label || a.id }))
-          : [{ id: 'netflix', label: 'Netflix' }];
-        const primaryApp = plats[0];
-        const allAppNames = plats.map(a => a.label).join(', ');
-        return {
-          id: it.id,
-          title: it.title,
-          year: it.year || '',
-          mediaType: it.mediaType || 'SHOW',
-          rating: it.rating || 'N/A',
-          overview: it.overview || '',
-          poster: it.poster || '',
-          platformId: primaryApp.id,
-          platformLabel: allAppNames,
-          platforms: plats
-        };
+      const mappedApi = apiItems
+        .filter(it => !isNonExistentOrJunkTitle(it))
+        .map(it => {
+          const apps = Array.isArray(it.availableApps) && it.availableApps.length ? it.availableApps : [];
+          const plats = apps.map(a => ({ id: a.id, label: a.shortLabel || a.label || a.id }));
+          const yearNum = parseInt(String(it.year || ''), 10);
+          const titleL = String(it.title || '').toLowerCase();
+          const isUnreleased = (!isNaN(yearNum) && yearNum > 2026) || titleL.includes('movie 3') || titleL.includes("gur'latan");
+          return {
+            id: it.id,
+            title: it.title,
+            year: it.year || '',
+            mediaType: it.mediaType || 'SHOW',
+            rating: it.rating || 'N/A',
+            overview: it.overview || '',
+            poster: it.poster || '',
+            isUnreleased,
+            platformId: plats[0]?.id || '',
+            platformLabel: plats.map(a => a.label).join(', '),
+            platforms: isUnreleased ? [] : plats
+          };
+        });
+
+      const apiByKey = new Map();
+      mappedApi.forEach(ap => {
+        apiByKey.set(canonicalTitleKey(ap), ap);
       });
 
+      const merged = [];
       const seen = new Set();
-      return [...localMatches, ...mappedApi].filter(item => {
-        const k = `${normalizeSearchText(item.title)}|${item.mediaType || 'SHOW'}`;
-        if (seen.has(k)) return false;
+
+      localMatches.forEach(loc => {
+        const k = canonicalTitleKey(loc);
+        if (seen.has(k)) return;
         seen.add(k);
-        return true;
+        const matchedApi = apiByKey.get(k);
+        if (matchedApi) {
+          merged.push({
+            ...loc,
+            poster: matchedApi.poster || loc.poster || '',
+            overview: matchedApi.overview || loc.overview || '',
+            rating: (matchedApi.rating && matchedApi.rating !== 'N/A') ? matchedApi.rating : (loc.rating || 'N/A'),
+            year: (matchedApi.year && matchedApi.year !== '-') ? matchedApi.year : (loc.year || '')
+          });
+        } else {
+          merged.push(loc);
+        }
       });
+
+      mappedApi.forEach(ap => {
+        const k = canonicalTitleKey(ap);
+        if (!seen.has(k)) {
+          seen.add(k);
+          merged.push(ap);
+        }
+      });
+
+      return merged;
     } catch (e) {
       return localMatches;
     }
@@ -4535,12 +4611,19 @@
       ${visibleList.length ? visibleList.map((m) => {
         const globalIdx = matches.indexOf(m);
         const plats = getItemPlatforms(m);
-        const firstPlat = plats[0] || { id: 'netflix', label: 'Netflix' };
-        const prod = products.find(p => p.id === firstPlat.id) || products[0];
+        const availText = getAvailabilityLabel(m);
+        const hasPlats = plats.length > 0 && !String(availText).toLowerCase().includes('belum release') && !String(availText).toLowerCase().includes('not yet released');
         const yearStr = (m.year && m.year !== '-') ? ` (${m.year})` : '';
         const posterEl = m.poster
           ? `<img src="${m.poster}" alt="${m.title}" referrerpolicy="no-referrer" style="width:46px; height:68px; object-fit:cover; border-radius:8px; flex-shrink:0; border:1px solid var(--border-color);" onerror="this.style.display='none';" />`
           : `<div style="width:46px; height:68px; border-radius:8px; background:var(--bg-card); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.85rem;">🎬</div>`;
+
+        const statusBadgeRow = hasPlats
+          ? plats.map(pl => {
+              const pObj = products.find(x => x.id === pl.id) || products[0];
+              return `<button type="button" onclick="event.stopPropagation(); openCheckout('${pObj.id}')" style="background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">${pl.label} ✓</button>`;
+            }).join('')
+          : `<span style="background:rgba(148,163,184,0.12); border:1px solid var(--border-color); color:var(--text-secondary); padding:3px 10px; border-radius:999px; font-size:0.68rem; font-weight:700;">${availText}</span>`;
 
         return `
           <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; margin-bottom:8px; display:flex; gap:11px; align-items:center; cursor:pointer;" onclick="openSearchedShowDetail(${globalIdx})">
@@ -4549,10 +4632,7 @@
               <div style="font-weight:800; font-size:0.86rem; color:var(--text-primary); line-height:1.25;">${m.title}<span style="color:var(--text-secondary); font-weight:600;">${yearStr}</span></div>
               <div style="font-size:0.68rem; color:var(--accent-cyan); font-weight:700; margin-top:3px;">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • MY Live</div>
               <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:7px;">
-                ${plats.map(pl => {
-                  const pObj = products.find(x => x.id === pl.id) || prod;
-                  return `<button type="button" onclick="event.stopPropagation(); openCheckout('${pObj.id}')" style="background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">${pl.label} ✓</button>`;
-                }).join('')}
+                ${statusBadgeRow}
               </div>
             </div>
           </div>
@@ -4614,18 +4694,22 @@
 
     box.innerHTML = matches.length ? matches.map((m, idx) => {
       const plats = getItemPlatforms(m);
+      const availText = getAvailabilityLabel(m);
+      const hasPlats = plats.length > 0 && !String(availText).toLowerCase().includes('belum release') && !String(availText).toLowerCase().includes('not yet released');
       const yearStr = (m.year && m.year !== '-') ? ` (${m.year})` : '';
       return `
         <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; display:flex; gap:11px; align-items:center; cursor:pointer;" onclick="openSearchedShowDetail(${idx})">
-          ${m.poster ? `<img src="${m.poster}" alt="${m.title}" referrerpolicy="no-referrer" style="width:46px; height:68px; object-fit:cover; border-radius:8px; flex-shrink:0;" onerror="this.style.display='none';" />` : ''}
+          ${m.poster ? `<img src="${m.poster}" alt="${m.title}" referrerpolicy="no-referrer" style="width:46px; height:68px; object-fit:cover; border-radius:8px; flex-shrink:0;" onerror="this.style.display='none';" />` : `<div style="width:46px; height:68px; border-radius:8px; background:var(--bg-card); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.85rem;">🎬</div>`}
           <div style="flex:1; min-width:0;">
             <div style="font-weight:800; font-size:0.84rem; color:var(--text-primary);">${m.title}<span style="color:var(--text-secondary); font-weight:600;">${yearStr}</span></div>
             <div style="font-size:0.68rem; color:var(--accent-cyan); font-weight:700; margin-top:2px;">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • MY Live</div>
             <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:7px;">
-              ${plats.map(pl => {
-                const pObj = products.find(x => x.id === pl.id) || products[0];
-                return `<button type="button" onclick="event.stopPropagation(); closeShowSearchModal(); openCheckout('${pObj.id}')" style="background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer;">${pl.label} ✓</button>`;
-              }).join('')}
+              ${hasPlats
+                ? plats.map(pl => {
+                    const pObj = products.find(x => x.id === pl.id) || products[0];
+                    return `<button type="button" onclick="event.stopPropagation(); closeShowSearchModal(); openCheckout('${pObj.id}')" style="background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer;">${pl.label} ✓</button>`;
+                  }).join('')
+                : `<span style="background:rgba(148,163,184,0.12); border:1px solid var(--border-color); color:var(--text-secondary); padding:3px 10px; border-radius:999px; font-size:0.68rem; font-weight:700;">${availText}</span>`}
             </div>
           </div>
         </div>
