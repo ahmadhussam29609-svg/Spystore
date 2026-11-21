@@ -2134,6 +2134,203 @@
     </div>
   </div>
   <!-- Side Drawer Navigation -->
+    function refreshDrawerRoleTools() {
+      const role = getUserRole();
+      const sec = document.getElementById('drawerOwnerAdminSection');
+      const verifyBtn = document.getElementById('drawerVerifyToolBtn');
+      if (!sec) return;
+      const isStaff = role === 'owner' || role === 'admin';
+      sec.style.display = isStaff ? 'block' : 'none';
+      if (verifyBtn) {
+        verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
+      }
+    }
+
+    function openOwnerAdminManagerModal(tab = 'catalog') {
+      const role = getUserRole();
+      if (role !== 'owner' && role !== 'admin') {
+        showToast(currentLang === 'en' ? 'Owner or Admin login required.' : 'Perlu log masuk Owner atau Admin.');
+        openAuthModal();
+        return;
+      }
+      if (tab === 'verify' && role !== 'owner') {
+        showToast(currentLang === 'en' ? 'Only Owner can verify roles.' : 'Hanya Owner boleh mengesahkan peranan.');
+        return;
+      }
+
+      const modal = document.getElementById('ownerAdminToolsModal');
+      const catView = document.getElementById('drawerCatalogToolView');
+      const verView = document.getElementById('drawerVerifyRoleToolView');
+      const titleEl = document.getElementById('ownerAdminToolsTitle');
+      if (!modal || !catView || !verView) return;
+
+      const showVerify = tab === 'verify' && role === 'owner';
+      catView.style.display = showVerify ? 'none' : 'block';
+      verView.style.display = showVerify ? 'block' : 'none';
+      if (titleEl) {
+        titleEl.textContent = showVerify ? 'OWNER ROLE VERIFICATION' : 'OWNER / ADMIN CATALOG MANAGER';
+      }
+
+      if (!showVerify) {
+        const sel = document.getElementById('drawerMgrTargetSelect');
+        const opts = getManagerTargetOptions();
+        if (sel) {
+          sel.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+        }
+        syncDrawerMgrFromSelect();
+      } else {
+        refreshVerifyRoleListUI();
+      }
+
+      modal.classList.add('open');
+    }
+
+    function closeOwnerAdminToolsModal() {
+      const modal = document.getElementById('ownerAdminToolsModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function syncDrawerMgrFromSelect() {
+      const sel = document.getElementById('drawerMgrTargetSelect');
+      if (!sel) return;
+      const opts = getManagerTargetOptions();
+      const found = opts.find(o => o.value === sel.value) || opts[0];
+      if (!found) return;
+      const t = found.target;
+      document.getElementById('drawerMgrStockInput').value = Number(t.stock ?? 0);
+      document.getElementById('drawerMgrPrice1MoInput').value = Number(t.price ?? 0);
+      document.getElementById('drawerMgrPrice2MoInput').value =
+        typeof t.price2Mo === 'number' && !isNaN(t.price2Mo) && t.price2Mo > 0 ? Number(t.price2Mo) : '';
+      document.getElementById('drawerMgrStatus1MoSelect').value = getStatusValueFromObj(t, 1);
+      document.getElementById('drawerMgrStatus2MoSelect').value = getStatusValueFromObj(t, 2);
+    }
+
+    function saveDrawerCatalogChanges() {
+      const role = getUserRole();
+      if (role !== 'owner' && role !== 'admin') {
+        showToast('Only Owner or Admin can edit catalog.');
+        return;
+      }
+      const sel = document.getElementById('drawerMgrTargetSelect');
+      const opts = getManagerTargetOptions();
+      const found = opts.find(o => o.value === sel?.value);
+      if (!found) return;
+
+      const t = found.target;
+      const stockVal = Math.max(0, parseInt(document.getElementById('drawerMgrStockInput')?.value || '0', 10) || 0);
+      const p1Val = parseFloat(document.getElementById('drawerMgrPrice1MoInput')?.value || '0');
+      const p2Raw = String(document.getElementById('drawerMgrPrice2MoInput')?.value || '').trim();
+      const p2Val = p2Raw ? parseFloat(p2Raw) : NaN;
+      const st1 = document.getElementById('drawerMgrStatus1MoSelect')?.value || 'active';
+      const st2 = document.getElementById('drawerMgrStatus2MoSelect')?.value || 'active';
+
+      if (!isNaN(p1Val) && p1Val > 0) t.price = p1Val;
+      if (!isNaN(p2Val) && p2Val > 0) {
+        t.price2Mo = p2Val;
+      } else {
+        delete t.price2Mo;
+      }
+      t.stock = stockVal;
+      applyStatusValueToObj(t, 1, st1);
+      applyStatusValueToObj(t, 2, st2);
+
+      if (found.parent && found.parent.mode === 'dual') {
+        recomputeDualProductStock(found.parent);
+      }
+
+      saveCatalogState();
+      syncWebsiteCatalog();
+      refreshRolePanelUI();
+      closeOwnerAdminToolsModal();
+      showToast(`Updated ${found.label} (Stok, Harga & Status)!`);
+    }
+
+    function onVerifyUserSelectChange() {
+      const sel = document.getElementById('verifyUserSelect');
+      const inp = document.getElementById('verifyEmailOrUsernameInput');
+      if (sel && inp && sel.value) {
+        inp.value = sel.value;
+      }
+    }
+
+    function refreshVerifyRoleListUI() {
+      ensureOwnerAccountSeeded();
+      const users = getUsersDB().filter(u => !isDesignatedOwner(u));
+      const sel = document.getElementById('verifyUserSelect');
+      const listBox = document.getElementById('verifiedAdminsListBox');
+
+      if (sel) {
+        sel.innerHTML = `<option value="">-- Choose user --</option>` + users.map(u => {
+          const r = String(u.role || 'customer').toUpperCase();
+          return `<option value="${u.email}">${u.username || u.email} (${u.email}) • [${r}]</option>`;
+        }).join('');
+      }
+
+      if (listBox) {
+        const admins = users.filter(u => String(u.role || '').toLowerCase() === 'admin');
+        listBox.innerHTML = `
+          <div style="font-weight:800; color:var(--accent-cyan); margin-bottom:4px;">Active Admins (${admins.length})</div>
+          ${admins.length ? admins.map(a => `<div>• <strong>${a.username || a.email}</strong> (${a.email})</div>`).join('') : '<div>No verified admins yet.</div>'}
+        `;
+      }
+    }
+
+    function setTargetUserRole(targetRole) {
+      if (getUserRole() !== 'owner') {
+        showToast('Only Owner can verify or change user roles.');
+        return;
+      }
+      const rawQuery = String(document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
+      const cleanUname = normalizeUsername(rawQuery);
+      if (!rawQuery) {
+        showToast('Enter or select an email or username.');
+        return;
+      }
+
+      ensureOwnerAccountSeeded();
+      const users = getUsersDB();
+      const idx = users.findIndex(u => {
+        const em = String(u.email || '').trim().toLowerCase();
+        const un = normalizeUsername(u.username || '');
+        return em === rawQuery || (cleanUname && un === cleanUname);
+      });
+
+      if (idx === -1) {
+        showToast('User account not found. Ask the user to sign up first.');
+        return;
+      }
+      if (isDesignatedOwner(users[idx])) {
+        showToast('Owner account role cannot be changed.');
+        return;
+      }
+
+      users[idx].role = targetRole;
+      saveUsersDB(users);
+
+      const cur = getCurrentUser();
+      if (cur && String(cur.email || '').trim().toLowerCase() === String(users[idx].email).trim().toLowerCase()) {
+        localStorage.setItem('spystore_current_user', JSON.stringify({ ...cur, role: targetRole }));
+      }
+
+      refreshVerifyRoleListUI();
+      refreshDrawerRoleTools();
+      showToast(`${users[idx].username || users[idx].email} role set to ${targetRole.toUpperCase()}!`);
+    }
+
+    function verifyUserToAdminRole() {
+      setTargetUserRole('admin');
+    }
+
+    function demoteAdminToCustomerRole() {
+      setTargetUserRole('customer');
+    }
+
+    function openDrawer() {
+      refreshDrawerRoleTools();
+      document.getElementById('drawerBackdrop').classList.add('open');
+      document.getElementById('sideDrawer').classList.add('open');
+    }
+
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
   <aside class="side-drawer" id="sideDrawer" style="padding:18px 15px; overflow-y:auto;">
     <div>
@@ -2151,6 +2348,14 @@
         <button type="button" class="drawer-link" onclick="closeDrawer(); openShowSearchModal();">🎬 <span data-i18n="navShowSearch">Search Show / Movie</span></button>
         <button type="button" class="drawer-link" onclick="closeDrawer(); openTrendingModal('tv_my', 'netflix');">🔥 <span data-i18n="navTrending">Trending Discovery</span></button>
         <button type="button" class="drawer-link" onclick="closeDrawer(); openAuthModal();">👤 <span data-i18n="navAccount">Login / Register Account</span></button>
+      </div>
+
+      <div id="drawerOwnerAdminSection" style="display:none; margin-top:12px;">
+        <div style="font-size:0.65rem; font-weight:800; color:var(--accent-gold); text-transform:uppercase; letter-spacing:0.07em; margin:0 2px 6px 2px;">Owner / Admin Tools</div>
+        <div class="drawer-links" style="gap:7px;">
+          <button type="button" id="drawerMgrToolBtn" class="drawer-link" onclick="closeDrawer(); openOwnerAdminManagerModal('catalog');">🛠️ <span>Owner / Admin: Stok, Harga &amp; Status</span></button>
+          <button type="button" id="drawerVerifyToolBtn" class="drawer-link" style="display:none;" onclick="closeDrawer(); openOwnerAdminManagerModal('verify');">👑 <span>Owner: Verify Role (Customer → Admin)</span></button>
+        </div>
       </div>
 
       <div style="font-size:0.65rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.07em; margin:12px 2px 6px 2px;">Preferences &amp; Support</div>
@@ -2201,6 +2406,7 @@
       <h4 id="receiptTitle">Payment Successful!</h4>
       <p id="receiptDesc">Your order has been confirmed. Tap below to send your verified order slip to Admin on WhatsApp.</p>
       <div class="receipt-actions-row">
+        <button type="button" class="copy-order-btn" style="background:rgba(250,204,21,0.16); border-color:var(--accent-gold); color:var(--accent-gold);" id="receiptDownloadInvoiceBtn" onclick="downloadLatestInvoice()">📄 Download Invoice (Invois)</button>
         <button type="button" class="copy-order-btn" onclick="copyReceiptSummary()" data-i18n="copyOrderBtn">Copy Order Summary</button>
         <a href="https://wa.me/60189066291" target="_blank" class="receipt-wa-btn" id="receiptWaLink">
           <span data-i18n="claimWaBtn">Claim Account on WhatsApp →</span>
@@ -2491,6 +2697,61 @@
           </div>
           <button type="submit" class="primary-submit" style="margin-top:0;">Save Profile Changes</button>
         </form>
+        <div id="staffRoleAccessBox" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:12px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
+            <span style="font-size:0.78rem; font-weight:800; color:var(--accent-gold);">🔑 Role &amp; Staff Access</span>
+            <span id="currentRoleBadge" style="font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:999px; background:rgba(56,189,248,0.14); color:var(--accent-cyan);">CUSTOMER</span>
+          </div>
+          <div id="roleUnlockControls" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
+            <input type="password" class="form-control" id="staffPasscodeInput" placeholder="Staff / Owner passcode (e.g. ADMIN2026 / OWNER2026)" style="flex:1; min-width:160px; padding:8px 10px; font-size:0.78rem;" />
+            <button type="button" onclick="unlockStaffRole()" style="background:var(--accent-blue); color:#fff; border:none; padding:8px 12px; border-radius:9px; font-size:0.74rem; font-weight:800; cursor:pointer;">Activate Role</button>
+          </div>
+          <div id="ownerPartnerSummaryBox" style="display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.76rem; color:var(--text-secondary);"></div>
+        </div>
+
+        <div id="websiteCatalogManagerPanel" style="display:none; background:var(--bg-input); border:1.5px solid var(--accent-gold); border-radius:14px; padding:12px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+            <span style="font-size:0.84rem; font-weight:800; color:var(--accent-gold);">🛠️ Website Catalog Manager (Stok, Harga &amp; Status)</span>
+          </div>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label>Select Product / Plan *</label>
+            <select class="form-control" id="mgrTargetSelect" onchange="loadTargetIntoManagerForm()"></select>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Stock (Stok)</label>
+              <input type="number" min="0" class="form-control" id="mgrStockInput" />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>1-Month Price (RM)</label>
+              <input type="number" step="0.5" min="0" class="form-control" id="mgrPrice1MoInput" />
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label>2-Month Price (RM) — optional (blank = 1-Mo × 2)</label>
+            <input type="number" step="0.5" min="0" class="form-control" id="mgrPrice2MoInput" placeholder="e.g. 32" />
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>1-Month Status</label>
+              <select class="form-control" id="mgrStatus1MoSelect">
+                <option value="active">In Stock / Active</option>
+                <option value="coming_soon">Coming Soon</option>
+                <option value="off">Out of Stock / Off</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>2-Month Status</label>
+              <select class="form-control" id="mgrStatus2MoSelect">
+                <option value="active">In Stock / Active</option>
+                <option value="coming_soon">Coming Soon</option>
+                <option value="off">Out of Stock / Off</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" class="primary-submit" style="margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveCatalogManagerChanges()">Save Website Changes ✓</button>
+        </div>
+
         <h4 style="font-size:0.85rem; margin-bottom:8px;">Transaction History</h4>
         <div id="orderHistoryList"></div>
         <button type="button" class="logout-btn" onclick="handleLogout()">Log Out</button>
@@ -2514,6 +2775,78 @@
   </div>
 
   <!-- Toast -->
+    <!-- Owner / Admin Tools Modal (Catalog & Role Verification) -->
+  <div class="modal-backdrop" id="ownerAdminToolsModal" onclick="if(event.target===this) closeOwnerAdminToolsModal()">
+    <div class="modal-card" style="max-width:460px;">
+      <div class="modal-top">
+        <h3 id="ownerAdminToolsTitle">OWNER / ADMIN TOOLS</h3>
+        <button type="button" class="close-modal" onclick="closeOwnerAdminToolsModal()">✕</button>
+      </div>
+
+      <div id="drawerCatalogToolView">
+        <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
+          Kemaskini <strong>Stok</strong>, <strong>Harga (1 Bln &amp; 2 Bln)</strong>, dan <strong>Status (1 Bln &amp; 2 Bln)</strong> terus pada laman web.
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>Select Product / Plan *</label>
+          <select class="form-control" id="drawerMgrTargetSelect" onchange="syncDrawerMgrFromSelect()"></select>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Stock (Stok)</label>
+            <input type="number" min="0" class="form-control" id="drawerMgrStockInput" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>1-Month Price (RM)</label>
+            <input type="number" step="0.5" min="0" class="form-control" id="drawerMgrPrice1MoInput" />
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>2-Month Price (RM) — optional</label>
+          <input type="number" step="0.5" min="0" class="form-control" id="drawerMgrPrice2MoInput" placeholder="e.g. 32" />
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label>1-Month Status</label>
+            <select class="form-control" id="drawerMgrStatus1MoSelect">
+              <option value="active">In Stock / Active</option>
+              <option value="coming_soon">Coming Soon</option>
+              <option value="off">Out of Stock / Off</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>2-Month Status</label>
+            <select class="form-control" id="drawerMgrStatus2MoSelect">
+              <option value="active">In Stock / Active</option>
+              <option value="coming_soon">Coming Soon</option>
+              <option value="off">Out of Stock / Off</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="primary-submit" style="margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveDrawerCatalogChanges()">Save Stock, Price &amp; Status ✓</button>
+      </div>
+
+      <div id="drawerVerifyRoleToolView" style="display:none;">
+        <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
+          <strong>Owner Role Verification:</strong> Tukar akaun pelanggan biasa (<code>customer</code>) kepada peranan <strong>Admin</strong> (<code>admin</code>).
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>Select Registered Account</label>
+          <select class="form-control" id="verifyUserSelect" onchange="onVerifyUserSelectChange()"></select>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label>Or Enter Email / Username *</label>
+          <input type="text" class="form-control" id="verifyEmailOrUsernameInput" placeholder="e.g. user@gmail.com or username" />
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="primary-submit" style="margin-top:0; flex:1;" onclick="verifyUserToAdminRole()">Verify as Admin ✓</button>
+          <button type="button" style="background:rgba(239,68,68,0.14); color:#f87171; border:1px solid rgba(239,68,68,0.35); padding:10px 12px; border-radius:12px; font-size:0.78rem; font-weight:700; cursor:pointer;" onclick="demoteAdminToCustomerRole()">Set Customer</button>
+        </div>
+        <div id="verifiedAdminsListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.76rem; color:var(--text-secondary);"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toastBox"></div>
       <!-- Trending Top 10 Modal -->
   <div id="trendingModal" onclick="if(event.target===this) closeTrendingModal()" style="display:none; position:fixed; inset:0; background:rgba(2, 6, 23, 0.72); backdrop-filter:blur(6px); z-index:9999; align-items:stretch; justify-content:stretch; padding:0;">
@@ -2608,1100 +2941,130 @@
       el.classList.add(className);
     }
 
-    const SHEET_ID = '15zWwrvLk9c138m7yGSlzgPwTTNPAmwarGomu2jjDG0w';
-    const ADMIN_WA = '60189066291';
+    const CATALOG_STORAGE_KEY = 'spystore_catalog_v1';
+    const ROLE_KEYS_STORAGE = 'spystore_staff_keys_v1';
 
-    let products = [
-      { id: 'netflix', logo: 'netflix.png', frontName: 'Netflix', name: 'Netflix Premium', mode: 'private', category: 'Streaming', price: 18, stock: 0, badge: 'N', bg: '#18181b', color: '#ef4444' },
-      { id: 'disney', logo: 'disney.png', frontName: 'Disney+', name: 'Disney+ Premium', mode: 'private', category: 'Streaming', price: 16, stock: 0, badge: 'D+', bg: '#0c1d3d', color: '#38bdf8' },
-      { id: 'hbomax', logo: 'hbomax.png', frontName: 'HBO Max', name: 'HBO Max', mode: 'private', category: 'Streaming', price: 16, stock: 0, badge: 'MAX', bg: '#1e1b4b', color: '#a78bfa' },
-      { id: 'primevideo', logo: 'primevideo.png', frontName: 'Prime Video', name: 'Prime Video', mode: 'private', category: 'Streaming', price: 10, stock: 0, badge: 'PV', bg: '#091a2c', color: '#38bdf8' },
-      { id: 'youtube', logo: 'youtube.png', frontName: 'YouTube', name: 'YouTube Premium', mode: 'invite', category: 'Streaming', price: 5, stock: 0, badge: 'YT', bg: '#271313', color: '#f87171' },
-      { id: 'spotify', logo: 'spotify.png', frontName: 'Spotify', name: 'Spotify Premium', mode: 'invite', category: 'Music', price: 13, stock: 0, badge: 'SP', bg: '#0d2618', color: '#22c55e' },
-      { id: 'canva', logo: 'canva.png', frontName: 'Canva', name: 'Canva Pro', mode: 'invite', category: 'Creative', price: 5, stock: 0, badge: 'C', bg: '#0e2933', color: '#22d3ee' },
-      { id: 'capcut', logo: 'capcut.png', frontName: 'CapCut', name: 'CapCut Pro', mode: 'dual', subPlans: [{ key: 'share', label: 'Share', price: 10, stock: 0 }, { key: 'private', label: 'Private', price: 15, stock: 0 }], category: 'Creative', price: 10, stock: 0, badge: 'CC', bg: '#18181b', color: '#facc15' }
-    ];
-
-    let selectedCategory = 'All';
-    let currentProduct = null;
-    let selectedMonths = 1;
-    let selectedSubPlan = 'share';
-    let selectedPaymentMethod = 'fpx';
-    let currentSlide = 0;
-    let currentLang = localStorage.getItem('spystore_lang') || 'en';
-
-    const I18N = {
-      en: {
-        brandSub: 'Digital Subscription Hub',
-        navCatalog: 'App Catalog',
-        navShowSearch: 'Search Show / Movie',
-        navTrending: 'Trending Discovery',
-        navAccount: 'Login / Register Account',
-        navSupport: 'WhatsApp Admin Support',
-        warrantyTitle: '🛡️ 100% Full Warranty Policy',
-        warrantyDesc: 'Every subscription is covered throughout your active plan duration. Instant replacement if any login issue occurs.',
-        systemOnline: 'System Online • Fast Delivery',
-        slide1Pill: 'Full Warranty • Fast Delivery',
-        slide1Title: 'Netflix, Disney+, HBO Max, Spotify, Canva & CapCut',
-        slide1Desc: '100% warranty throughout your subscription period with live stock updates and instant admin alerts.',
-        slide2Pill: 'Instant FPX Online Banking',
-        slide2Title: 'Premium Digital Subscriptions at Best Local Prices',
-        slide2Desc: 'Pay securely via FPX online banking. Account details delivered straight to your WhatsApp right after payment.',
-        trust1Title: '100% Warranty',
-        trust1Desc: 'Full duration cover',
-        trust2Title: 'Fast Delivery',
-        trust2Desc: '5–15 mins via WA',
-        trust3Title: 'Auto FPX',
-        trust3Desc: 'All MY Banks',
-        catAll: 'All (8)',
-        catStreaming: 'Streaming (5)',
-        catMusic: 'Music (1)',
-        catCreative: 'Creative (2)',
-        selectAppTitle: 'Select Subscription App',
-        tapToOrder: 'Tap app to order',
-        inlineShowBtn: '🎬 Show',
-        showSearchTitle: 'Search Show or Movie',
-        runShowSearchBtn: 'Search Availability',
-        backCatalog: 'Back to Catalog',
-        step1Title: 'Customer Delivery Details',
-        labelName: 'Full Name *',
-        labelPhone: 'WhatsApp Number (For Account Delivery) *',
-        labelDevice: 'Device Used *',
-        step2Title: 'Select Duration Plan',
-        labelAccountType: 'Account Plan Type *',
-        mo1: '1 Month',
-        mo2: '2 Months',
-        step3Title: 'Payment Method',
-        fpxTitle: 'Online Banking (FPX)',
-        fpxDesc: 'Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank & all MY banks via ToyyibPay',
-        labelEmail: 'Account Email Address *',
-        noExtraInfoNote: 'No extra account details required for this plan.',
-        duitnowTitle: 'DuitNow QR',
-        duitnowDesc: 'Pay via Billplz DuitNow QR & online payment channels',
-        ewalletTitle: "eWallet (Touch 'n Go / GrabPay / Boost)",
-        ewalletDesc: "Pay via Touch 'n Go eWallet, GrabPay, Boost or ShopeePay & confirm via WhatsApp",
-        noFeeTag: 'No Fee',
-        noFeeTag2: 'No Fee',
-        totalLabel: 'Total Payable (incl. RM1 FPX fee)',
-        payNowBtn: 'Pay Now →',
-        modePrivate: 'Private',
-        modeInvite: 'Via Invite',
-        warrantyRulesTitle: 'Full Duration Warranty Terms',
-        rule1: 'Covered throughout active plan duration for all apps.',
-        rule2: 'Do not change preset account settings or payment details.',
-        rule3: 'No attempts to steal or damage account data; follow device rules.',
-        copyOrderBtn: 'Copy Order Summary',
-        claimWaBtn: 'Send Receipt & Claim on WhatsApp →'
-      },
-      my: {
-        brandSub: 'Hab Langganan Digital',
-        navCatalog: 'Katalog Aplikasi',
-        navShowSearch: 'Cari Cerita / Movie',
-        navTrending: 'Senarai Trending',
-        navAccount: 'Log Masuk / Daftar Akaun',
-        navSupport: 'Sokongan Admin WhatsApp',
-        warrantyTitle: '🛡️ Polisi Waranti Penuh 100%',
-        warrantyDesc: 'Setiap langganan dilindungi sepanjang tempoh aktif. Gantian segera sekiranya berlaku masalah log masuk.',
-        systemOnline: 'Sistem Aktif • Penghantaran Pantas',
-        slide1Pill: 'Waranti Penuh • Penghantaran Pantas',
-        slide1Title: 'Netflix, Disney+, HBO Max, Spotify, Canva & CapCut',
-        slide1Desc: 'Waranti penuh 100% sepanjang tempoh langganan dengan kemas kini stok langsung dan notifikasi pantas.',
-        slide2Pill: 'Perbankan Dalam Talian FPX',
-        slide2Title: 'Langganan Digital Premium pada Harga Berbaloi',
-        slide2Desc: 'Bayar dengan selamat melalui FPX. Butiran akaun dihantar terus ke WhatsApp anda selepas bayaran.',
-        trust1Title: 'Waranti 100%',
-        trust1Desc: 'Perlindungan penuh',
-        trust2Title: 'Serahan Pantas',
-        trust2Desc: '5–15 minit via WA',
-        trust3Title: 'FPX Automatik',
-        trust3Desc: 'Semua Bank MY',
-        catAll: 'Semua (8)',
-        catStreaming: 'Penstriman (5)',
-        catMusic: 'Muzik (1)',
-        catCreative: 'Kreatif (2)',
-        selectAppTitle: 'Pilih Aplikasi Langganan',
-        tapToOrder: 'Tekan aplikasi untuk tempah',
-        inlineShowBtn: '🎬 Cerita',
-        showSearchTitle: 'Cari Tajuk Cerita atau Movie',
-        runShowSearchBtn: 'Semak Aplikasi Tersedia',
-        backCatalog: 'Kembali ke Katalog',
-        step1Title: 'Maklumat Penghantaran Pelanggan',
-        labelName: 'Nama Penuh *',
-        labelPhone: 'Nombor WhatsApp (Untuk Terima Akaun) *',
-        labelDevice: 'Peranti Digunakan *',
-        step2Title: 'Pilih Tempoh Langganan',
-        labelAccountType: 'Jenis Pelan Akaun *',
-        mo1: '1 Bulan',
-        mo2: '2 Bulan',
-        step3Title: 'Kaedah Pembayaran',
-        fpxTitle: 'Perbankan Dalam Talian (FPX)',
-        fpxDesc: 'Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank & semua bank MY melalui ToyyibPay',
-        labelEmail: 'Alamat E-mel Akaun *',
-        noExtraInfoNote: 'Tiada maklumat tambahan khusus diperlukan untuk langganan ini.',
-        duitnowTitle: 'DuitNow QR',
-        duitnowDesc: 'Bayar melalui Billplz DuitNow QR & saluran bayaran dalam talian',
-        ewalletTitle: "eWallet (Touch 'n Go / GrabPay / Boost)",
-        ewalletDesc: "Bayar melalui Touch 'n Go eWallet, GrabPay, Boost atau ShopeePay & sahkan di WhatsApp",
-        noFeeTag: 'Tiada Caj',
-        noFeeTag2: 'Tiada Caj',
-        totalLabel: 'Jumlah Perlu Dibayar (termasuk caj FPX RM1)',
-        payNowBtn: 'Bayar Sekarang →',
-        modePrivate: 'Private',
-        modeInvite: 'Via Invite',
-        warrantyRulesTitle: 'Syarat Waranti Sepanjang Tempoh Penggunaan',
-        rule1: 'Waranti sepanjang tempoh langganan aktif untuk semua aplikasi.',
-        rule2: 'Jangan ubah tetapan akaun yang ditetapkan atau maklumat pembayaran.',
-        rule3: 'Tiada cubaan mencuri atau merosakkan maklumat akaun serta patuhi peraturan peranti.',
-        copyOrderBtn: 'Salin Ringkasan Tempahan',
-        claimWaBtn: 'Hantar Resit & Tuntut di WhatsApp →'
-      }
-    };
-
-    function applyLanguage() {
-      const dict = I18N[currentLang] || I18N.en;
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (dict[key]) el.textContent = dict[key];
-      });
-      document.getElementById('langToggleBtn').textContent = currentLang.toUpperCase();
-      document.getElementById('drawerLangLabel').textContent = currentLang === 'en' ? 'Tukar ke Bahasa Melayu' : 'Switch to English';
-      const dTheme = document.getElementById('drawerThemeLabel');
-      if (dTheme) {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        dTheme.textContent = currentLang === 'en'
-          ? (isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode')
-          : (isDark ? 'Tukar ke Mod Siang' : 'Tukar ke Mod Gelap');
-      }
-      document.getElementById('searchInput').placeholder = currentLang === 'en'
-        ? 'Search Netflix, Disney+, Spotify, Canva...'
-        : 'Cari Netflix, Disney+, Spotify, Canva...';
-      if (typeof refreshCheckoutLoginReminder === 'function') {
-        refreshCheckoutLoginReminder();
-      }
-    }
-
-    function toggleLang() {
-      currentLang = currentLang === 'en' ? 'my' : 'en';
-      localStorage.setItem('spystore_lang', currentLang);
-      triggerTopLoader(700);
-
-    (function sanitizeDemoGoogleAccount() {
+    function getDefaultStaffKeys() {
       try {
-        const users = getUsersDB();
-        localStorage.setItem('spystore_users_db', JSON.stringify(users));
-        const cur = JSON.parse(localStorage.getItem('spystore_current_user') || 'null');
-        if (cur && String(cur.email || '').toLowerCase() === 'google.user@gmail.com') {
-          localStorage.removeItem('spystore_current_user');
-        }
+        const saved = JSON.parse(localStorage.getItem(ROLE_KEYS_STORAGE) || 'null');
+        if (saved && saved.owner && saved.admin) return saved;
       } catch (e) {}
-    })();
-
-    applyLanguage();
-      renderProducts();
+      return { owner: 'OWNER2026', admin: 'ADMIN2026' };
     }
 
-    function openDrawer() {
-      document.getElementById('drawerBackdrop').classList.add('open');
-      document.getElementById('sideDrawer').classList.add('open');
+    function saveStaffKeys(keys) {
+      localStorage.setItem(ROLE_KEYS_STORAGE, JSON.stringify(keys));
     }
 
-    function closeDrawer() {
-      document.getElementById('drawerBackdrop').classList.remove('open');
-      document.getElementById('sideDrawer').classList.remove('open');
-    }
-
-    function goToSlide(index) {
-      const track = document.getElementById('heroTrack');
-      if (!track) return;
-      currentSlide = index;
-      track.scrollTo({
-        left: track.clientWidth * index,
-        behavior: 'smooth'
-      });
-      updateHeroDots(index);
-    }
-
-    function handleHeroScroll() {
-      const track = document.getElementById('heroTrack');
-      if (!track || !track.clientWidth) return;
-      const idx = Math.round(track.scrollLeft / track.clientWidth);
-      if (idx !== currentSlide) {
-        currentSlide = idx;
-        updateHeroDots(idx);
-      }
-    }
-
-        let totalSlides = 2;
-
-    function updateHeroDots(idx) {
-      const dots = document.querySelectorAll('#heroDots .hero-dot');
-      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-    }
-    let heroTouching = false;
-    let heroMoved = false;
-    let touchStartX = 0;
-    let autoSlideTimer = null;
-    const heroTrackEl = document.getElementById('heroTrack');
-
-    heroTrackEl.addEventListener('touchstart', (e) => {
-      heroTouching = true;
-      heroMoved = false;
-      touchStartX = e.touches[0].clientX;
-    }, { passive: true });
-
-    heroTrackEl.addEventListener('touchmove', (e) => {
-      if (Math.abs(e.touches[0].clientX - touchStartX) > 12) {
-        heroMoved = true;
-      }
-    }, { passive: true });
-
-    heroTrackEl.addEventListener('touchend', () => {
-      setTimeout(() => {
-        heroTouching = false;
-        heroMoved = false;
-      }, 4500);
-    }, { passive: true });
-
-    function startHeroAutoSlide() {
-      if (autoSlideTimer) clearInterval(autoSlideTimer);
-      autoSlideTimer = setInterval(() => {
-        if (!heroTouching && document.getElementById('catalogView').style.display !== 'none') {
-          const nextSlide = (currentSlide + 1) % totalSlides;
-          goToSlide(nextSlide);
-        }
-      }, 6500);
-    }
-    startHeroAutoSlide();
-
-    let trendingByApp = {};
-    let discoveryCategories = {
-      tv_my: [],
-      movie_my: [],
-      new_in: [],
-      popcorn: [],
-      kdrama: [],
-      rewatched: [],
-      only_on: []
-    };
-    let activeDiscoveryCat = 'tv_my';
-    let activeAppSubFilter = 'netflix';
-
-    const CATEGORY_TITLES = {
-      tv_my: 'Top 10 Tv Show in Malaysia Today',
-      movie_my: 'Top 10 Movie in Malaysia Today',
-      new_in: 'New Releases',
-      popcorn: 'Perfect Popcorn Movie',
-      kdrama: 'Kdrama',
-      rewatched: 'Most Rewatched Show',
-      only_on: 'Only On Platform'
-    };
-
-    function handleHeroCardClick(platformId, mediaType) {
-      if (heroMoved) return;
-      const defaultCat = mediaType === 'MOVIE' ? 'movie_my' : 'tv_my';
-      const appKey = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(platformId) ? platformId : 'netflix';
-      openTrendingModal(defaultCat, appKey);
-    }
-
-    function openTrendingModal(defaultCat = 'tv_my', appFilter = 'netflix') {
-      const modal = document.getElementById('trendingModal');
-      if (!modal) return;
-      activeDiscoveryCat = CATEGORY_TITLES[defaultCat] ? defaultCat : 'tv_my';
-      activeAppSubFilter = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(appFilter) ? appFilter : 'netflix';
-      triggerTopLoader(450);
-      modal.style.display = 'flex';
-      const box = modal.querySelector('.discovery-modal-box');
-      if (box) animateElementEnter(box, 'modal-sheet-in');
-      renderTrendingModal();
-    }
-
-    function closeTrendingModal() {
-      const modal = document.getElementById('trendingModal');
-      if (modal) modal.style.display = 'none';
-    }
-
-    function switchDiscoveryCategory(catKey) {
-      activeDiscoveryCat = catKey;
-      renderTrendingModal();
-    }
-
-    function switchAppSubFilter(appKey) {
-      activeAppSubFilter = appKey;
-      renderTrendingModal();
-    }
-
-    function getAppItems(appId, catKey) {
-      const appObj = trendingByApp[appId] || {};
-      if (catKey === 'movie_my') {
-        return appObj.movies || [];
-      }
-      if (catKey === 'tv_my') {
-        return appObj.series || [];
-      }
-      if (catKey === 'new_in') {
-        return [...(appObj.newMovies || []), ...(appObj.newSeries || [])].slice(0, 10);
-      }
-      if (catKey === 'popcorn') {
-        return (appObj.movies || []).slice().sort((a, b) => Number(b.rating) - Number(a.rating)).slice(0, 10);
-      }
-      if (catKey === 'kdrama') {
-        return (appObj.kdrama || []).slice(0, 10);
-      }
-      if (catKey === 'rewatched') {
-        return (appObj.series || []).slice().sort((a, b) => (b.popularity * Number(b.rating)) - (a.popularity * Number(a.rating))).slice(0, 10);
-      }
-      return [...(appObj.movies || []).slice(0, 5), ...(appObj.series || []).slice(0, 5)];
-    }
-
-    function renderTrendingModal() {
-      const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
-      const baseTitle = CATEGORY_TITLES[activeDiscoveryCat] || 'Streaming Picks';
-      document.getElementById('trendingModalTitle').textContent =
-        `${appLabels[activeAppSubFilter] || 'Netflix'} • ${baseTitle}`;
-
-      ['netflix', 'disney', 'hbomax', 'primevideo'].forEach(appId => {
-        const sBtn = document.getElementById(`appSub_${appId}`);
-        if (!sBtn) return;
-        const active = activeAppSubFilter === appId;
-        sBtn.style.background = active ? 'var(--accent-blue)' : 'var(--bg-card)';
-        sBtn.style.color = active ? '#ffffff' : 'var(--text-secondary)';
-        sBtn.style.border = active ? 'none' : '1px solid var(--border-color)';
-      });
-
-      Object.keys(CATEGORY_TITLES).forEach(key => {
-        const btn = document.getElementById(`catTab_${key}`);
-        if (!btn) return;
-        const isActive = key === activeDiscoveryCat;
-        btn.style.background = isActive ? 'var(--accent-gold)' : 'var(--bg-card)';
-        btn.style.color = isActive ? '#09090b' : 'var(--text-secondary)';
-        btn.style.border = isActive ? 'none' : '1px solid var(--border-color)';
-      });
-
-      const body = document.getElementById('trendingModalBody');
-      const catList = (discoveryCategories[activeDiscoveryCat] || []).filter(it => it.platformId === activeAppSubFilter);
-      const appSpecificList = getAppItems(activeAppSubFilter, activeDiscoveryCat);
-      const list = appSpecificList.length ? appSpecificList : catList;
-
-      if (!list || !list.length) {
-        body.innerHTML = `<div style="text-align:center; padding:22px; color:var(--text-muted); font-size:0.8rem;">${currentLang === 'en' ? 'No titles available for this selection right now.' : 'Tiada senarai untuk pilihan ini buat masa ini.'}</div>`;
-        return;
-      }
-
-      body.innerHTML = list.map((item, idx) => {
-        const displayRank = idx + 1;
-        return `
-          <div class="discovery-row-card" style="animation-delay:${Math.min(idx * 35, 320)}ms; display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
-            <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${displayRank}</div>
-            ${item.poster ? `<img src="${item.poster}" referrerpolicy="no-referrer" style="width:64px; height:94px; object-fit:cover; border-radius:10px; flex-shrink:0; box-shadow:0 6px 16px rgba(0,0,0,0.35);" onerror="this.outerHTML='<div style=\'width:64px;height:94px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;\'>🎬</div>';" />` : `<div style="width:64px;height:94px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🎬</div>`}
-            <div style="flex:1; min-width:0;">
-              <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap;">
-                <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel}</span>
-                <span style="font-size:0.68rem; color:var(--accent-gold); font-weight:700;">★ ${item.rating}</span>
-                <span style="font-size:0.64rem; color:var(--text-muted);">${item.mediaType}</span>
-              </div>
-              <div style="font-weight:700; font-size:0.9rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
-              <div style="font-size:0.74rem; line-height:1.38; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:3px;">${item.overview || 'Popular streaming title.'}</div>
-              <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId}');">${currentLang === 'en' ? `Order ${item.platformLabel} • RM${item.price} ✓` : `Tempah ${item.platformLabel} • RM${item.price} ✓`}</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function buildFallbackTrendingData() {
-      const fb = {
-        netflix: [
-          { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', overview: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games.", backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
-          { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', overview: 'Wednesday Addams investigates a murder spree while making new friends at Nevermore.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
-          { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', overview: 'A small town uncovers a mystery involving secret experiments and supernatural forces.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' }
-        ],
-        disney: [
-          { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg' },
-          { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'A lone gunfighter makes his way through the outer reaches of the galaxy.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
-          { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: "Riley's mind headquarters makes room for new Emotions.", backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' }
-        ],
-        hbomax: [
-          { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The Targaryen civil war about 200 years before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
-          { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Paul Atreides unites with Chani and the Fremen on a path of revenge.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
-          { id: 155, title: 'The Dark Knight', mediaType: 'MOVIE', rating: '8.5', overview: 'Batman raises the stakes in his war on crime.', backdrop: 'https://image.tmdb.org/t/p/w780/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', poster: 'https://image.tmdb.org/t/p/w342/qJ2tW6WMUDux911r6m7haRef0WH.jpg' }
-        ],
-        primevideo: [
-          { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', overview: 'A group of vigilantes set out to take down corrupt superheroes.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg' },
-          { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', overview: 'Jack Reacher investigates a conspiracy in a small town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' },
-          { id: 605722, title: 'The Tomorrow War', mediaType: 'MOVIE', rating: '7.5', overview: 'A family man is drafted to fight in a future war.', backdrop: 'https://image.tmdb.org/t/p/w780/8Y43pPCjBBGV3exGpWM5bDB1C6W.jpg', poster: 'https://image.tmdb.org/t/p/w342/34nDCQZ3u3uN3n4x3n4o4Z3P9k7.jpg' }
-        ]
-      };
-      const mapApp = (key, label, price) => (fb[key] || []).map((x, idx) => ({
-        rank: idx + 1,
-        id: x.id,
-        title: x.title,
-        mediaType: x.mediaType,
-        platformId: key,
-        platformLabel: label,
-        price,
-        rating: x.rating,
-        popularity: 100 - idx * 10,
-        overview: x.overview,
-        backdrop: x.backdrop || '',
-        poster: x.poster || ''
+    function serializeCatalogForStorage() {
+      return products.map(p => ({
+        id: p.id,
+        price: Number(p.price),
+        price2Mo: typeof p.price2Mo === 'number' && !isNaN(p.price2Mo) ? Number(p.price2Mo) : null,
+        stock: Number(p.stock || 0),
+        comingSoon: Boolean(p.comingSoon),
+        comingSoon1Mo: Boolean(p.comingSoon1Mo),
+        disabled1Mo: Boolean(p.disabled1Mo),
+        comingSoon2Mo: Boolean(p.comingSoon2Mo),
+        disabled2Mo: Boolean(p.disabled2Mo),
+        subPlans: Array.isArray(p.subPlans) ? p.subPlans.map(sp => ({
+          key: sp.key,
+          label: sp.label,
+          price: Number(sp.price),
+          price2Mo: typeof sp.price2Mo === 'number' && !isNaN(sp.price2Mo) ? Number(sp.price2Mo) : null,
+          stock: Number(sp.stock || 0),
+          comingSoon: Boolean(sp.comingSoon),
+          comingSoon1Mo: Boolean(sp.comingSoon1Mo),
+          disabled1Mo: Boolean(sp.disabled1Mo),
+          comingSoon2Mo: Boolean(sp.comingSoon2Mo),
+          disabled2Mo: Boolean(sp.disabled2Mo)
+        })) : undefined
       }));
-      const nList = mapApp('netflix', 'Netflix', 18);
-      const dList = mapApp('disney', 'Disney+', 16);
-      const hList = mapApp('hbomax', 'HBO Max', 16);
-      const pList = mapApp('primevideo', 'Prime Video', 10);
-      const allFb = [nList[0], nList[1], dList[0], dList[1], hList[0], pList[0], dList[2], hList[1]];
-      return {
-        byApp: {
-          netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [nList[1]], newSeries: [nList[0]], kdrama: [nList[0], nList[1]], price: 18, label: 'Netflix' },
-          disney: { movies: dList.filter(i => i.mediaType === 'MOVIE'), series: dList.filter(i => i.mediaType === 'SERIES'), newMovies: [dList[2]], newSeries: [dList[1]], kdrama: [dList[1]], price: 16, label: 'Disney+' },
-          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: [hList[1]], newSeries: [hList[0]], kdrama: [hList[0]], price: 16, label: 'HBO Max' },
-          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: [pList[2]], newSeries: [pList[0]], kdrama: [pList[1]], price: 10, label: 'Prime Video' }
-        },
-        categories: {
-          tv_my: [nList[0], dList[1], hList[0], pList[0]],
-          movie_my: [dList[0], hList[1], dList[2], pList[2]],
-          new_in: [nList[1], dList[2], hList[1], pList[1]],
-          popcorn: [dList[0], hList[1], hList[2], pList[2]],
-          kdrama: [nList[0], nList[1], dList[1]],
-          rewatched: [hList[0], nList[2], dList[1], pList[0]],
-          only_on: [nList[0], dList[0], hList[0], pList[0]]
-        },
-        items: allFb.map((it, idx) => ({ ...it, rank: idx + 1 }))
-      };
     }
 
-    async function loadTrendingHero() {
-      let data = null;
+    function saveCatalogState() {
       try {
-        const res = await fetch('/api/trending');
-        if (res.ok) {
-          const json = await res.json();
-          if (json && Array.isArray(json.items) && json.items.length > 0) {
-            data = json;
-          }
-        }
-      } catch (e) {}
-      if (!data) {
-        data = buildFallbackTrendingData();
-      }
-      try {
-        const fallbackSet = buildFallbackTrendingData();
-        trendingByApp = (data.byApp && Object.keys(data.byApp).length) ? data.byApp : fallbackSet.byApp;
-        discoveryCategories = {
-          ...fallbackSet.categories,
-          ...(data.categories || {})
-        };
-
-        const rawTopItems = (Array.isArray(data.items) && data.items.length >= 4)
-          ? data.items.slice(0, 12)
-          : fallbackSet.items;
-
-        const kdramaPool = (Array.isArray(discoveryCategories.kdrama) && discoveryCategories.kdrama.length)
-          ? discoveryCategories.kdrama
-          : fallbackSet.categories.kdrama;
-        const newInPool = (Array.isArray(discoveryCategories.new_in) && discoveryCategories.new_in.length)
-          ? discoveryCategories.new_in
-          : fallbackSet.categories.new_in;
-        const popcornPool = (Array.isArray(discoveryCategories.popcorn) && discoveryCategories.popcorn.length)
-          ? discoveryCategories.popcorn
-          : fallbackSet.categories.popcorn;
-
-        const mixedShowcase = [];
-        const seenKeys = new Set();
-        const pushPick = (obj, tagPill, targetCat) => {
-          if (!obj || !obj.title) return;
-          const k = `${obj.platformId || 'app'}:${String(obj.title).toLowerCase()}`;
-          if (seenKeys.has(k)) return;
-          seenKeys.add(k);
-          mixedShowcase.push({
-            ...obj,
-            _tagPill: tagPill,
-            _targetCat: targetCat
-          });
-        };
-
-        if (rawTopItems[0]) pushPick(rawTopItems[0], '🔥 #1 TOP TRENDING', 'tv_my');
-        if (kdramaPool[0]) pushPick(kdramaPool[0], '🇰🇷 K-DRAMA PICK', 'kdrama');
-        if (rawTopItems[1]) pushPick(rawTopItems[1], '🔥 #2 TOP TRENDING', 'movie_my');
-        if (newInPool[0]) pushPick(newInPool[0], '✨ NEW RELEASE', 'new_in');
-        if (kdramaPool[1]) pushPick(kdramaPool[1], '🇰🇷 K-DRAMA PICK', 'kdrama');
-        if (popcornPool[0]) pushPick(popcornPool[0], '🍿 POPCORN MOVIE', 'popcorn');
-        if (rawTopItems[2]) pushPick(rawTopItems[2], '🔥 #3 TOP TRENDING', 'tv_my');
-        if (newInPool[1]) pushPick(newInPool[1], '✨ NEW RELEASE', 'new_in');
-
-        // Guarantee at least 8 slides using fallback items if API returned fewer
-        for (const fbIt of fallbackSet.items) {
-          if (mixedShowcase.length >= 8) break;
-          pushPick(fbIt, `🔥 #${mixedShowcase.length + 1} TRENDING`, 'tv_my');
-        }
-
-        const items = mixedShowcase.slice(0, 8);
-        window._lastShowSearchItems = items;
-        if (!items.length) return;
-
-        const track = document.getElementById('heroTrack');
-        const dotsWrap = document.getElementById('heroDots');
-
-        track.innerHTML = items.map((item, idx) => {
-          const prod = products.find(p => p.id === item.platformId) || products[0];
-          const bgStyle = item.backdrop ? `style="background-image:url('${item.backdrop}'); cursor:pointer;"` : 'style="cursor:pointer;"';
-          const shortDesc = item.overview
-            ? (item.overview.length > 95 ? item.overview.slice(0, 95) + '...' : item.overview)
-            : (currentLang === 'en' ? `Stream now on ${item.platformLabel} with full warranty.` : `Tonton sekarang di ${item.platformLabel} dengan waranti penuh.`);
-          const btnLabel = currentLang === 'en'
-            ? `Watch on ${item.platformLabel} • RM${prod.price}`
-            : `Tonton di ${item.platformLabel} • RM${prod.price}`;
-          const pillText = item._tagPill || `🔥 #${item.rank || (idx + 1)} TRENDING`;
-          const openCat = item._targetCat || (item.mediaType === 'MOVIE' ? 'movie_my' : 'tv_my');
-
-          return `
-            <section class="hero-slide trending-slide" ${bgStyle} onclick="openTrendingModal('${openCat}', '${item.platformId}')">
-              <div class="trending-meta">
-                <span class="hero-pill" style="margin-bottom:0;">${pillText}</span>
-                <span class="platform-badge">${item.platformLabel}</span>
-              </div>
-              <h1>${item.title}</h1>
-              <p>${shortDesc}</p>
-              <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${btnLabel} →</button>
-            </section>
-          `;
-        }).join('');
-
-        totalSlides = items.length;
-        currentSlide = 0;
-        dotsWrap.innerHTML = items.map((_, i) =>
-          `<button class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i + 1}"></button>`
-        ).join('');
+        localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(serializeCatalogForStorage()));
       } catch (e) {}
     }
 
-    function toggleTheme() {
-      const html = document.documentElement;
-      const isDark = html.getAttribute('data-theme') === 'dark';
-      const next = isDark ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
-      localStorage.setItem('spystore_theme', next);
-    }
-
-    (function initTheme() {
-      const saved = localStorage.getItem('spystore_theme');
-      if (saved) {
-        document.documentElement.setAttribute('data-theme', saved);
-        document.getElementById('themeBtn').textContent = saved === 'dark' ? '☀️' : '🌙';
-      }
-    })();
-
-
-    let lastReceiptPlainText = '';
-    function copyReceiptSummary() {
-      if (!lastReceiptPlainText) return;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(lastReceiptPlainText).then(() => {
-          showToast(currentLang === 'en' ? 'Order summary copied!' : 'Ringkasan tempahan disalin!');
-        }).catch(() => {});
+    function recomputeDualProductStock(p) {
+      if (!p || p.mode !== 'dual' || !Array.isArray(p.subPlans)) return;
+      const spShare = p.subPlans.find(x => x.key === 'share');
+      const spPrivate = p.subPlans.find(x => x.key === 'private');
+      if (spShare && spPrivate) {
+        const s1 = spShare.disabled1Mo && spShare.disabled2Mo ? 0 : Number(spShare.stock || 0);
+        const s2 = spPrivate.disabled1Mo && spPrivate.disabled2Mo ? 0 : Number(spPrivate.stock || 0);
+        p.stock = Math.max(0, s1) + Math.max(0, s2);
+        p.comingSoon = Boolean(spShare.comingSoon1Mo && spShare.comingSoon2Mo && spPrivate.comingSoon1Mo && spPrivate.comingSoon2Mo);
+        p.price = Math.min(Number(spShare.price || 10), Number(spPrivate.price || 15));
       }
     }
 
-
-
-    let _inlineSearchVisibleCount = 3;
-
-    function revealMoreInlineSearchResults() {
-      const total = Array.isArray(window._lastShowSearchItems) ? window._lastShowSearchItems.length : 0;
-      if (_inlineSearchVisibleCount >= total) {
-        _inlineSearchVisibleCount = 3;
-      } else {
-        _inlineSearchVisibleCount = Math.min(total, _inlineSearchVisibleCount + 10);
-      }
-      renderInlineSearchResultsBox();
-    }
-
-    function renderInlineSearchResultsBox() {
-      const inp = document.getElementById('searchInput');
-      const box = document.getElementById('inlineShowResultsBox');
-      if (!inp || !box) return;
-      const q = inp.value.trim();
-      const items = Array.isArray(window._lastShowSearchItems) ? window._lastShowSearchItems.slice(0, 20) : [];
-
-      if (!items.length) {
-        box.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 "${q}"</span>
-            <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
-          </div>
-          <div style="font-size:0.76rem; color:var(--text-muted);">${currentLang === 'en' ? 'No matching show/movie found in current MY catalog.' : 'Tiada cerita/movie sepadan ditemui dalam katalog MY semasa.'}</div>
-        `;
-        return;
-      }
-
-      const limit = Math.min(items.length, Math.max(3, _inlineSearchVisibleCount));
-      const visibleItems = items.slice(0, limit);
-      const remaining = items.length - visibleItems.length;
-
-      const rowsHtml = visibleItems.map(it => {
-        const apps = Array.isArray(it.availableApps) ? it.availableApps : [];
-        const chips = apps.length
-          ? apps.map(ap => renderVerifiedAppChipHtml(ap, false)).join('')
-          : `<span style="font-size:0.69rem; color:#f87171; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.28); padding:3px 8px; border-radius:999px;">${currentLang === 'en' ? 'Not on MY subscription apps (Removed / Rent only)' : 'Tiada dalam langganan MY semasa (Tamat tempoh / Sewa sahaja)'}</span>`;
-
-        return `
-          <div style="display:flex; gap:10px; align-items:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:8px; cursor:pointer;" onclick="openSearchDetailByIndex(${items.indexOf(it)})">
-            ${it.poster
-  ? `<img src="${it.poster}" alt="${it.title}" referrerpolicy="no-referrer" style="width:42px; height:62px; object-fit:cover; border-radius:7px; flex-shrink:0; background:var(--bg-card);" onerror="this.outerHTML='<div style=\'width:42px;height:62px;border-radius:7px;background:var(--bg-card);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0;\'>🎬</div>';" />`
-  : `<div style="width:42px;height:62px;border-radius:7px;background:var(--bg-card);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0;">🎬</div>`}
-            <div style="flex:1; min-width:0;">
-              <div style="font-weight:700; font-size:0.82rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.title} ${it.year ? `<small style="color:var(--text-muted); font-weight:500;">(${it.year})</small>` : ''}</div>
-              <div style="font-size:0.66rem; color:var(--accent-cyan); margin:2px 0 5px 0;">${it.mediaType} • ★ ${it.rating} • MY Live</div>
-              <div style="display:flex; flex-wrap:wrap; gap:5px;">${chips}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      let stepBtnHtml = '';
-      if (items.length > 3) {
-        const nextBatch = Math.min(10, remaining);
-        stepBtnHtml = remaining > 0
-          ? `<button type="button" onclick="revealMoreInlineSearchResults()" style="width:100%; margin-top:4px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); color:var(--accent-cyan); padding:8px 12px; border-radius:10px; font-size:0.74rem; font-weight:800; cursor:pointer;">${
-              currentLang === 'en' ? `Show More (+${nextBatch} of ${remaining} left) ▼` : `Show More (+${nextBatch} daripada ${remaining} lagi) ▼`
-            }</button>`
-          : `<button type="button" onclick="revealMoreInlineSearchResults()" style="width:100%; margin-top:4px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); color:var(--accent-cyan); padding:8px 12px; border-radius:10px; font-size:0.74rem; font-weight:800; cursor:pointer;">${
-              currentLang === 'en' ? 'Show Less ▲' : 'Tutup Sebahagian ▲'
-            }</button>`;
-      }
-
-      box.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Verified MY Catalog:' : 'Katalog MY Disahkan:'} "${q}" (${items.length})</span>
-          <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:8px;">${rowsHtml}${stepBtnHtml}</div>
-      `;
-    }
-
-    async function searchShowFromMainBox() {
-      const inp = document.getElementById('searchInput');
-      const box = document.getElementById('inlineShowResultsBox');
-      if (!inp || !box) return;
-      const q = inp.value.trim();
-      if (!q) {
-        openShowSearchModal();
-        return;
-      }
-
-      _inlineSearchVisibleCount = 3;
-      triggerTopLoader(650);
-      box.style.display = 'block';
-      animateElementEnter(box, 'view-animate-in');
-      box.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Live MY Catalog Check:' : 'Semakan Katalog MY Terkini:'} "${q}"</span>
-          <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
-        </div>
-        <div style="font-size:0.78rem; color:var(--text-secondary); padding:8px 0;">${currentLang === 'en' ? 'Verifying active Malaysian subscriptions...' : 'Menyemak langganan aktif Malaysia semasa...'}</div>
-      `;
-
+    function loadCatalogState() {
       try {
-        const res = await fetch(`/api/search-title?q=${encodeURIComponent(q)}&region=MY&mode=flatrate&_t=${Date.now()}`, { cache: 'no-store' });
-        const data = await res.json();
-        const items = data.items || [];
-        window._lastShowSearchItems = items;
-        renderInlineSearchResultsBox();
-      } catch (e) {
-        box.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:0.75rem; color:#f87171;">${currentLang === 'en' ? 'Failed to verify live catalog.' : 'Gagal menyemak katalog terkini.'}</span>
-            <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
-          </div>
-        `;
-      }
-    }
-
-    function openShowSearchModal() {
-      triggerTopLoader(400);
-      const modal = document.getElementById('showSearchModal');
-      if (!modal) return;
-      modal.classList.add('open');
-      hydrateGoogleButtonLogos();
-      setTimeout(() => {
-        const inp = document.getElementById('showSearchInput');
-        if (inp) inp.focus();
-      }, 120);
-    }
-
-    function closeShowSearchModal() {
-      const modal = document.getElementById('showSearchModal');
-      if (modal) modal.classList.remove('open');
-    }
-
-    async function runShowSearch() {
-      const inp = document.getElementById('showSearchInput');
-      const box = document.getElementById('showSearchResults');
-      if (!inp || !box) return;
-      const q = inp.value.trim();
-      if (!q) {
-        showToast(currentLang === 'en' ? 'Type a show or movie name first.' : 'Taipkan nama cerita atau movie dahulu.');
-        return;
-      }
-
-      triggerTopLoader(650);
-      box.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-secondary); font-size:0.8rem;">${currentLang === 'en' ? 'Verifying live MY catalog...' : 'Menyemak katalog MY terkini...'}</div>`;
-
-      try {
-        const res = await fetch(`/api/search-title?q=${encodeURIComponent(q)}&region=MY&mode=flatrate&_t=${Date.now()}`, { cache: 'no-store' });
-        const data = await res.json();
-        const items = data.items || [];
-
-        if (!items.length) {
-          box.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.8rem;">${currentLang === 'en' ? 'No matching titles found in MY catalog.' : 'Tiada cerita sepadan ditemui dalam katalog MY.'}</div>`;
-          return;
-        }
-
-        box.innerHTML = items.map(it => {
-          const apps = Array.isArray(it.availableApps) ? it.availableApps : [];
-          const appChipsHtml = apps.length
-            ? apps.map(ap => renderVerifiedAppChipHtml(ap, true)).join('')
-            : `<span style="font-size:0.69rem; color:#f87171; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.28); padding:3px 8px; border-radius:999px;">${currentLang === 'en' ? 'Not currently streaming in MY (Removed / Rent only)' : 'Tiada dalam katalog MY semasa (Tamat tempoh / Sewa sahaja)'}</span>`;
-
-          return `
-            <div style="display:flex; gap:10px; align-items:flex-start; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px; cursor:pointer;" onclick="openSearchDetailByIndex(${items.indexOf(it)})">
-              ${it.poster
-  ? `<img src="${it.poster}" alt="${it.title}" referrerpolicy="no-referrer" style="width:52px; height:76px; object-fit:cover; border-radius:8px; flex-shrink:0; background:var(--bg-card);" onerror="this.outerHTML='<div style=\'width:52px;height:76px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;\'>🎬</div>';" />`
-  : `<div style="width:52px;height:76px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🎬</div>`}
-              <div style="flex:1; min-width:0;">
-                <div style="font-weight:700; font-size:0.86rem; color:var(--text-primary);">${it.title} ${it.year ? `<small style="color:var(--text-muted); font-weight:500;">(${it.year})</small>` : ''}</div>
-                <div style="font-size:0.68rem; color:var(--accent-cyan); margin:2px 0 6px 0;">${it.mediaType} • ★ ${it.rating} • MY Live</div>
-                <div style="display:flex; flex-wrap:wrap; gap:5px;">${appChipsHtml}</div>
-              </div>
-            </div>
-          `;
-        }).join('');
-      } catch (e) {
-        box.innerHTML = `<div style="text-align:center; padding:16px; color:#f87171; font-size:0.8rem;">${currentLang === 'en' ? 'Search failed. Try again.' : 'Carian gagal. Cuba lagi.'}</div>`;
-      }
-    }
-
-
-    window._lastShowSearchItems = [];
-
-
-    function renderVerifiedAppChipHtml(ap, includePrice = false) {
-      const priceText = includePrice && ap.price ? ` • RM${ap.price}` : '';
-      return `
-        <button type="button" onclick="event.stopPropagation(); openCheckout('${ap.id}');" style="display:inline-flex; align-items:center; gap:5px; background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:5px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; line-height:1.15;">
-          <span>${ap.shortLabel}${priceText}</span>
-          <span style="display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:999px; background:var(--accent-gold); color:#09090b; font-size:0.64rem; font-weight:900;">✓</span>
-        </button>
-      `;
-    }
-
-    function openShowDetailModal(item) {
-      if (!item) return;
-      const modal = document.getElementById('showDetailModal');
-      const body = document.getElementById('showDetailBody');
-      const tag = document.getElementById('specModalHeaderTag');
-      if (!modal || !body) return;
-
-      if (tag) {
-        tag.textContent = currentLang === 'en' ? 'SHOW SPECIFICATION' : 'SPESIFIKASI CERITA';
-      }
-
-      const title = item.title || 'Untitled';
-      const year = item.year || '-';
-      const mediaType = item.mediaType || 'SHOW';
-      const rating = item.rating && item.rating !== 'N/A' ? `★ ${item.rating} / 10` : 'N/A';
-
-      // Build list of available apps with their product icons/logos
-      let appEntries = [];
-      if (Array.isArray(item.availableApps) && item.availableApps.length > 0) {
-        appEntries = item.availableApps.map(ap => {
-          const prod = products.find(p => p.id === ap.id) || {};
-          return {
-            id: ap.id,
-            shortLabel: ap.shortLabel || prod.name || ap.id,
-            logo: prod.logo || `${ap.id}.png`,
-            badge: prod.badge || (ap.shortLabel || ap.id).slice(0, 2).toUpperCase(),
-            bg: prod.bg || '#111827',
-            color: prod.color || '#facc15'
-          };
-        });
-      } else if (item.platformId) {
-        const prod = products.find(p => p.id === item.platformId) || {};
-        appEntries = [{
-          id: item.platformId,
-          shortLabel: item.platformLabel || prod.name || item.platformId,
-          logo: prod.logo || `${item.platformId}.png`,
-          badge: prod.badge || (item.platformLabel || item.platformId).slice(0, 2).toUpperCase(),
-          bg: prod.bg || '#111827',
-          color: prod.color || '#facc15'
-        }];
-      }
-
-      const platformLabel = appEntries.length
-        ? appEntries.map(a => a.shortLabel).join(', ')
-        : (currentLang === 'en' ? 'Not in current MY catalog' : 'Tiada dalam katalog MY semasa');
-
-      const platformId = appEntries.length ? appEntries[0].id : '';
-
-      let rawOverview = String(item.overview || '').trim();
-      if (!rawOverview) {
-        rawOverview = currentLang === 'en'
-          ? `${title} (${year !== '-' ? year : 'Title'}) is a ${mediaType.toLowerCase()} currently checked for subscription availability.`
-          : `${title} (${year !== '-' ? year : 'Tajuk'}) ialah sebuah ${mediaType === 'MOVIE' ? 'filem' : 'siri'} yang disemak ketersediaan langganannya.`;
-      }
-      const shortSynopsis = rawOverview.length > 165 ? rawOverview.slice(0, 162).trim() + '...' : rawOverview;
-
-      const posterHtml = item.poster
-        ? `<img src="${item.poster}" alt="${title}" class="spec-poster" />`
-        : `<div class="spec-poster" style="display:flex;align-items:center;justify-content:center;background:var(--bg-input);color:var(--accent-gold);font-weight:800;">${mediaType}</div>`;
-
-      // Logos only (no text labels) inside the PLATFORM / ACCESS box
-      const platformLogosOnlyHtml = appEntries.length
-        ? `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; align-items:center;">` +
-            appEntries.map(ap => `
-              <span title="${ap.shortLabel}" style="width:32px; height:32px; border-radius:9px; background:${ap.bg}; color:${ap.color}; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; font-size:0.78rem; font-weight:800; border:1px solid var(--border-color); box-shadow:0 4px 10px rgba(0,0,0,0.35);">
-                <img src="${ap.logo}" alt="${ap.shortLabel}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-                <span style="display:none;">${ap.badge}</span>
-              </span>
-            `).join('') +
-          `</div>`
-        : `<div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">-</div>`;
-
-      const orderBtnHtml = platformId
-        ? `<button type="button" class="primary-submit" style="width:auto; flex:1; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); closeShowSearchModal(); openCheckout('${platformId}');">${currentLang === 'en' ? `Order ${platformLabel} →` : `Tempah ${platformLabel} →`}</button>`
-        : '';
-
-      body.innerHTML = `
-        <div class="spec-hero">
-          ${posterHtml}
-          <div style="flex:1; min-width:0;">
-            <div class="spec-title">${title}</div>
-            <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700; margin-bottom:6px;">${mediaType} • ${year}</div>
-          </div>
-        </div>
-
-        <div class="spec-meta-grid">
-          <div class="spec-box">
-            <div class="spec-label">${currentLang === 'en' ? 'Format / Type' : 'Jenis / Format'}</div>
-            <div class="spec-val">${mediaType}</div>
-          </div>
-          <div class="spec-box">
-            <div class="spec-label">${currentLang === 'en' ? 'Release Year' : 'Tahun Keluaran'}</div>
-            <div class="spec-val">${year}</div>
-          </div>
-          <div class="spec-box">
-            <div class="spec-label">${currentLang === 'en' ? 'Rating' : 'Penarafan'}</div>
-            <div class="spec-val" style="color:var(--accent-gold);">${rating}</div>
-          </div>
-          <div class="spec-box">
-            <div class="spec-label">${currentLang === 'en' ? 'Platform / Access' : 'Platform / Akses'}</div>
-            ${platformLogosOnlyHtml}
-          </div>
-        </div>
-
-        <div class="spec-synopsis">
-          <div class="spec-label" style="margin-bottom:4px;">${currentLang === 'en' ? 'Short Synopsis' : 'Sinopsis Ringkas'}</div>
-          <div>${shortSynopsis}</div>
-        </div>
-
-        <div class="spec-actions">
-          ${orderBtnHtml}
-          <button type="button" class="back-btn" style="margin-bottom:0;" onclick="closeShowDetailModal()">${currentLang === 'en' ? 'Close' : 'Tutup'}</button>
-        </div>
-      `;
-
-      modal.classList.add('open');
-    }
-
-    function closeShowDetailModal() {
-      const modal = document.getElementById('showDetailModal');
-      if (modal) modal.classList.remove('open');
-    }
-
-    function openShowDetailByIndex(appKey, catKey, idx) {
-      const catList = (discoveryCategories[catKey] || []).filter(it => it.platformId === appKey);
-      const appSpecificList = getAppItems(appKey, catKey);
-      const list = appSpecificList.length ? appSpecificList : catList;
-      if (list && list[idx]) {
-        openShowDetailModal(list[idx]);
-      }
-    }
-
-    function openSearchDetailByIndex(idx) {
-      const items = window._lastShowSearchItems || [];
-      if (items[idx]) {
-        openShowDetailModal(items[idx]);
-      }
-    }
-
-
-    function googleLogoSvg(sizePx = 18) {
-      return `
-        <svg width="${sizePx}" height="${sizePx}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:block; flex-shrink:0;">
-          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.54-1.14 2.85-2.4 3.72v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.21z"/>
-          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/>
-          <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/>
-          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/>
-        </svg>
-      `;
-    }
-
-    function showToast(msg) {
-      const box = document.getElementById('toastBox');
-      box.textContent = msg;
-      box.classList.add('show');
-      setTimeout(() => box.classList.remove('show'), 3200);
-    }
-
-    function parseLocalizedNumber(raw) {
-      if (typeof raw === 'number') return raw;
-      const cleaned = String(raw ?? '')
-        .replace(/[^0-9,.-]/g, '')
-        .trim();
-      if (!cleaned) return NaN;
-      if (cleaned.includes(',') && cleaned.includes('.')) {
-        return parseFloat(cleaned.replace(/,/g, ''));
-      }
-      if (cleaned.includes(',')) {
-        return parseFloat(cleaned.replace(',', '.'));
-      }
-      return parseFloat(cleaned);
-    }
-
-    function parseDurationStatus(statusRaw, fallbackIsComingSoon = false, fallbackIsOff = false) {
-      const st = String(statusRaw || '').trim().toLowerCase().replace(/\s+/g, '_');
-      if (!st) {
-        return {
-          comingSoon: Boolean(fallbackIsComingSoon),
-          disabledOut: Boolean(fallbackIsOff)
-        };
-      }
-      if (['coming_soon', 'comingsoon', 'comming_soon', 'commingsoon', 'soon', 'akan_datang'].includes(st)) {
-        return { comingSoon: true, disabledOut: false };
-      }
-      if (['off', 'disabled', 'hidden', 'tutup', 'out', 'out_of_stock', 'outofstock', 'habis'].includes(st)) {
-        return { comingSoon: false, disabledOut: true };
-      }
-      if (['active', 'aktif', 'on', 'available', 'in_stock', 'instock', 'buka', 'ready'].includes(st)) {
-        return { comingSoon: false, disabledOut: false };
-      }
-      return { comingSoon: Boolean(fallbackIsComingSoon), disabledOut: Boolean(fallbackIsOff) };
-    }
-
-    function applyDurationStatusToTarget(target, status1MoRaw, rowStock, status2MoRaw = '') {
-      const s1 = parseDurationStatus(status1MoRaw, false, false);
-      const hasExplicit2Mo = String(status2MoRaw || '').trim() !== '';
-      const s2 = hasExplicit2Mo
-        ? parseDurationStatus(status2MoRaw, false, false)
-        : parseDurationStatus(status1MoRaw, false, false);
-
-      target.comingSoon1Mo = s1.comingSoon;
-      target.disabled1Mo = s1.disabledOut;
-      target.comingSoon2Mo = s2.comingSoon;
-      target.disabled2Mo = s2.disabledOut;
-      target.comingSoon = Boolean(s1.comingSoon && s2.comingSoon);
-
-      if (!isNaN(rowStock) && rowStock >= 0) {
-        target.stock = rowStock;
-      } else if (s1.disabledOut && s2.disabledOut) {
-        target.stock = 0;
-      }
-    }
-
-    function applySheetStatusToProduct(p, status1MoRaw, rowStock, status2MoRaw = '') {
-      applyDurationStatusToTarget(p, status1MoRaw, rowStock, status2MoRaw);
-    }
-
-    function applySheetRowToProducts(rowNameRaw, rowPriceRaw, rowStockRaw, row2MoPriceRaw, rowStatus1MoRaw, rowStatus2MoRaw) {
-      const rowName = String(rowNameRaw || '').trim().toLowerCase();
-      if (!rowName) return;
-
-      const rowPrice = parseLocalizedNumber(rowPriceRaw);
-      const rowStock = parseInt(parseLocalizedNumber(rowStockRaw), 10);
-      const row2MoPrice = parseLocalizedNumber(row2MoPriceRaw);
-
-      products.forEach(p => {
-        const isCapcutSub = p.id === 'capcut' && (
-          rowName.includes('share') || rowName.includes('private') || rowName.includes('capcut')
-        );
-        const matchesMain = rowName === p.id || rowName === p.name.toLowerCase() || p.name.toLowerCase().includes(rowName) || rowName.includes(p.id);
-
-        if (p.mode === 'dual' && Array.isArray(p.subPlans) && isCapcutSub) {
-          const spShare = p.subPlans.find(x => x.key === 'share');
-          const spPrivate = p.subPlans.find(x => x.key === 'private');
-
-          if (rowName.includes('share') && spShare) {
-            if (!isNaN(rowPrice) && rowPrice > 0) spShare.price = rowPrice;
-            if (!isNaN(row2MoPrice) && row2MoPrice > 0) spShare.price2Mo = row2MoPrice;
-            applyDurationStatusToTarget(spShare, rowStatus1MoRaw, rowStock, rowStatus2MoRaw);
-          } else if (rowName.includes('private') && spPrivate) {
-            if (!isNaN(rowPrice) && rowPrice > 0) spPrivate.price = rowPrice;
-            if (!isNaN(row2MoPrice) && row2MoPrice > 0) spPrivate.price2Mo = row2MoPrice;
-            applyDurationStatusToTarget(spPrivate, rowStatus1MoRaw, rowStock, rowStatus2MoRaw);
-          } else if (matchesMain) {
-            if (!isNaN(rowPrice) && rowPrice > 0) p.price = rowPrice;
-            if (!isNaN(row2MoPrice) && row2MoPrice > 0) p.price2Mo = row2MoPrice;
-            applyDurationStatusToTarget(p, rowStatus1MoRaw, rowStock, rowStatus2MoRaw);
-          }
-
-          if (spShare && spPrivate) {
-            const s1 = Number(spShare.stock || 0);
-            const s2 = Number(spPrivate.stock || 0);
-            if (!isNaN(s1) || !isNaN(s2)) {
-              p.stock = (spShare.disabled1Mo && spShare.disabled2Mo ? 0 : s1) + (spPrivate.disabled1Mo && spPrivate.disabled2Mo ? 0 : s2);
+        const saved = JSON.parse(localStorage.getItem(CATALOG_STORAGE_KEY) || 'null');
+        if (!Array.isArray(saved) || !saved.length) {
+          // Seed sensible initial stock for website management
+          products.forEach(p => {
+            if (p.mode === 'dual' && Array.isArray(p.subPlans)) {
+              p.subPlans.forEach(sp => {
+                sp.stock = sp.key === 'share' ? 5 : 3;
+              });
+              recomputeDualProductStock(p);
+            } else {
+              p.stock = p.id === 'netflix' ? 5 : (p.id === 'canva' ? 20 : 4);
             }
-            p.comingSoon = Boolean(spShare.comingSoon && spPrivate.comingSoon);
-            p.price = Math.min(spShare.price || 10, spPrivate.price || 15);
-          }
+          });
+          saveCatalogState();
           return;
         }
 
-        if (matchesMain) {
-          if (!isNaN(rowPrice) && rowPrice > 0) p.price = rowPrice;
-          if (!isNaN(row2MoPrice) && row2MoPrice > 0) p.price2Mo = row2MoPrice;
-          applySheetStatusToProduct(p, rowStatus1MoRaw, rowStock, rowStatus2MoRaw);
-        }
-      });
+        saved.forEach(item => {
+          const p = products.find(x => x.id === item.id);
+          if (!p) return;
+          if (typeof item.price === 'number' && !isNaN(item.price) && item.price > 0) p.price = item.price;
+          if (typeof item.price2Mo === 'number' && !isNaN(item.price2Mo) && item.price2Mo > 0) p.price2Mo = item.price2Mo;
+          if (typeof item.stock === 'number' && !isNaN(item.stock) && item.stock >= 0) p.stock = item.stock;
+          p.comingSoon = Boolean(item.comingSoon);
+          p.comingSoon1Mo = Boolean(item.comingSoon1Mo);
+          p.disabled1Mo = Boolean(item.disabled1Mo);
+          p.comingSoon2Mo = Boolean(item.comingSoon2Mo);
+          p.disabled2Mo = Boolean(item.disabled2Mo);
+
+          if (p.mode === 'dual' && Array.isArray(p.subPlans) && Array.isArray(item.subPlans)) {
+            item.subPlans.forEach(sItem => {
+              const sp = p.subPlans.find(x => x.key === sItem.key);
+              if (!sp) return;
+              if (typeof sItem.price === 'number' && !isNaN(sItem.price) && sItem.price > 0) sp.price = sItem.price;
+              if (typeof sItem.price2Mo === 'number' && !isNaN(sItem.price2Mo) && sItem.price2Mo > 0) sp.price2Mo = sItem.price2Mo;
+              if (typeof sItem.stock === 'number' && !isNaN(sItem.stock) && sItem.stock >= 0) sp.stock = sItem.stock;
+              sp.comingSoon = Boolean(sItem.comingSoon);
+              sp.comingSoon1Mo = Boolean(sItem.comingSoon1Mo);
+              sp.disabled1Mo = Boolean(sItem.disabled1Mo);
+              sp.comingSoon2Mo = Boolean(sItem.comingSoon2Mo);
+              sp.disabled2Mo = Boolean(sItem.disabled2Mo);
+            });
+            recomputeDualProductStock(p);
+          }
+        });
+      } catch (e) {}
     }
 
-    async function syncGoogleSheetStock() {
+    function syncWebsiteCatalog() {
       const statusEl = document.getElementById('liveStockStatus');
-      try {
-        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&_t=${Date.now()}`;
-        const res = await fetch(url, { cache: 'no-store' });
-        const text = await res.text();
-        const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-        const data = JSON.parse(jsonStr);
-        const rows = data.table?.rows || [];
-
-        rows.forEach(r => {
-          const cells = r.c || [];
-          applySheetRowToProducts(
-            cells[0]?.v,
-            cells[2]?.v,
-            cells[1]?.v,
-            cells[3]?.v,
-            cells[4]?.v,
-            cells[5]?.v
-          );
-        });
-
-        if (statusEl) statusEl.textContent = 'Live Stock ✓';
-        renderProducts();
-        if (currentProduct) {
-          const unit = getActiveUnitPrice();
-          const twoMoVal = getActiveTwoMonthPrice(unit);
-          document.getElementById('plan1Price').textContent = `RM${unit.toFixed(2)}`;
-          document.getElementById('plan2Price').textContent = `RM${twoMoVal.toFixed(2)}`;
-          refreshDurationButtonsState();
-          renderSelectedAppHeader();
-          renderSubPlanSelector();
-          updatePayTotalDisplay();
-        }
-      } catch (e) {
-        if (statusEl) statusEl.textContent = 'Live Stock ✓';
-        renderProducts();
+      loadCatalogState();
+      if (statusEl) statusEl.textContent = 'Website Live ✓';
+      renderProducts();
+      if (currentProduct) {
+        const unit = getActiveUnitPrice();
+        const twoMoVal = getActiveTwoMonthPrice(unit);
+        document.getElementById('plan1Price').textContent = `RM${unit.toFixed(2)}`;
+        document.getElementById('plan2Price').textContent = `RM${twoMoVal.toFixed(2)}`;
+        refreshDurationButtonsState();
+        renderSelectedAppHeader();
+        renderSubPlanSelector();
+        updatePayTotalDisplay();
       }
     }
 
@@ -4071,12 +3434,26 @@
       btn.disabled = true;
       btn.textContent = currentLang === 'en' ? 'Generating FPX Bill...' : 'Menjana Bil FPX...';
 
-      saveLocalOrder({
+      const savedTxn = saveLocalOrder({
+        invoiceNo: generateInvoiceNumber(),
         app: activeAppName,
         months: selectedMonths,
         total: totalAmount.toFixed(2),
-        date: new Date().toLocaleDateString('en-MY')
+        date: new Date().toLocaleDateString('en-MY'),
+        customerName,
+        customerPhone,
+        customerEmail,
+        customerDevice,
+        paymentMethod: 'FPX',
+        status: 'PENDING FPX'
       });
+      try {
+        const pendingObj = JSON.parse(localStorage.getItem('spystore_pending_order') || '{}');
+        localStorage.setItem('spystore_pending_order', JSON.stringify({
+          ...pendingObj,
+          invoiceNo: savedTxn.invoiceNo
+        }));
+      } catch (e) {}
 
       try {
         const res = await fetch('/api/create-bill', {
@@ -4120,8 +3497,55 @@
       } catch { return []; }
     }
     function saveUsersDB(users) { localStorage.setItem('spystore_users_db', JSON.stringify(users)); }
+    const OWNER_EMAIL = 'ahmadhussam29609@gmail.com';
+    const OWNER_USERNAME = 'ahmadhussam29609';
+
+    function isDesignatedOwner(user) {
+      if (!user) return false;
+      const em = String(user.email || '').trim().toLowerCase();
+      const un = normalizeUsername(user.username || '');
+      return em === OWNER_EMAIL || un === OWNER_USERNAME;
+    }
+
+    function ensureOwnerAccountSeeded() {
+      try {
+        const users = getUsersDB();
+        const existingIdx = users.findIndex(u =>
+          String(u.email || '').trim().toLowerCase() === OWNER_EMAIL ||
+          normalizeUsername(u.username || '') === OWNER_USERNAME
+        );
+        const ownerRecord = {
+          username: OWNER_USERNAME,
+          name: existingIdx !== -1 && users[existingIdx].name ? users[existingIdx].name : 'Ahmad Hussam',
+          email: OWNER_EMAIL,
+          password: existingIdx !== -1 && users[existingIdx].password ? users[existingIdx].password : undefined,
+          phone: existingIdx !== -1 ? (users[existingIdx].phone || '') : '',
+          provider: existingIdx !== -1 ? (users[existingIdx].provider || 'owner') : 'owner',
+          role: 'owner'
+        };
+        if (existingIdx !== -1) {
+          users[existingIdx] = { ...users[existingIdx], ...ownerRecord };
+        } else {
+          users.push(ownerRecord);
+        }
+        saveUsersDB(users);
+      } catch (e) {}
+    }
+
     function getCurrentUser() {
-      try { return JSON.parse(localStorage.getItem('spystore_current_user') || 'null'); } catch { return null; }
+      try {
+        const u = JSON.parse(localStorage.getItem('spystore_current_user') || 'null');
+        if (!u) return null;
+        if (isDesignatedOwner(u)) {
+          return {
+            ...u,
+            email: u.email || OWNER_EMAIL,
+            username: OWNER_USERNAME,
+            role: 'owner'
+          };
+        }
+        return u;
+      } catch { return null; }
     }
 
     function hydrateGoogleButtonLogos() {
@@ -4306,6 +3730,221 @@
       showToast('Profile details updated!');
     }
 
+    function getUserRole(user = null) {
+      const u = user || getCurrentUser();
+      if (isDesignatedOwner(u)) return 'owner';
+      const r = String(u?.role || 'customer').toLowerCase();
+      return ['owner', 'admin', 'customer'].includes(r) ? r : 'customer';
+    }
+
+    function getManagerTargetOptions() {
+      const opts = [];
+      products.forEach(p => {
+        if (p.mode === 'dual' && Array.isArray(p.subPlans)) {
+          p.subPlans.forEach(sp => {
+            opts.push({
+              value: `${p.id}:${sp.key}`,
+              label: `${p.name} (${sp.label})`,
+              target: sp,
+              parent: p
+            });
+          });
+        } else {
+          opts.push({
+            value: p.id,
+            label: p.name,
+            target: p,
+            parent: p
+          });
+        }
+      });
+      return opts;
+    }
+
+    function getStatusValueFromObj(obj, monthNum) {
+      if (!obj) return 'active';
+      const isCS = monthNum === 1 ? Boolean(obj.comingSoon1Mo) : Boolean(obj.comingSoon2Mo);
+      const isOff = monthNum === 1 ? Boolean(obj.disabled1Mo) : Boolean(obj.disabled2Mo);
+      if (isCS) return 'coming_soon';
+      if (isOff) return 'off';
+      return 'active';
+    }
+
+    function applyStatusValueToObj(obj, monthNum, val) {
+      const clean = String(val || 'active');
+      if (monthNum === 1) {
+        obj.comingSoon1Mo = clean === 'coming_soon';
+        obj.disabled1Mo = clean === 'off';
+      } else {
+        obj.comingSoon2Mo = clean === 'coming_soon';
+        obj.disabled2Mo = clean === 'off';
+      }
+      obj.comingSoon = Boolean(obj.comingSoon1Mo && obj.comingSoon2Mo);
+    }
+
+    function loadTargetIntoManagerForm() {
+      const sel = document.getElementById('mgrTargetSelect');
+      if (!sel) return;
+      const opts = getManagerTargetOptions();
+      const found = opts.find(o => o.value === sel.value) || opts[0];
+      if (!found) return;
+      const t = found.target;
+      document.getElementById('mgrStockInput').value = Number(t.stock ?? 0);
+      document.getElementById('mgrPrice1MoInput').value = Number(t.price ?? 0);
+      document.getElementById('mgrPrice2MoInput').value =
+        typeof t.price2Mo === 'number' && !isNaN(t.price2Mo) && t.price2Mo > 0 ? Number(t.price2Mo) : '';
+      document.getElementById('mgrStatus1MoSelect').value = getStatusValueFromObj(t, 1);
+      document.getElementById('mgrStatus2MoSelect').value = getStatusValueFromObj(t, 2);
+    }
+
+    function saveCatalogManagerChanges() {
+      const role = getUserRole();
+      if (role !== 'owner' && role !== 'admin') {
+        showToast('Only Owner or Admin can edit catalog.');
+        return;
+      }
+      const sel = document.getElementById('mgrTargetSelect');
+      const opts = getManagerTargetOptions();
+      const found = opts.find(o => o.value === sel?.value);
+      if (!found) return;
+
+      const t = found.target;
+      const stockVal = Math.max(0, parseInt(document.getElementById('mgrStockInput')?.value || '0', 10) || 0);
+      const p1Val = parseFloat(document.getElementById('mgrPrice1MoInput')?.value || '0');
+      const p2Raw = String(document.getElementById('mgrPrice2MoInput')?.value || '').trim();
+      const p2Val = p2Raw ? parseFloat(p2Raw) : NaN;
+      const st1 = document.getElementById('mgrStatus1MoSelect')?.value || 'active';
+      const st2 = document.getElementById('mgrStatus2MoSelect')?.value || 'active';
+
+      if (!isNaN(p1Val) && p1Val > 0) t.price = p1Val;
+      if (!isNaN(p2Val) && p2Val > 0) {
+        t.price2Mo = p2Val;
+      } else {
+        delete t.price2Mo;
+      }
+      t.stock = stockVal;
+      applyStatusValueToObj(t, 1, st1);
+      applyStatusValueToObj(t, 2, st2);
+
+      if (found.parent && found.parent.mode === 'dual') {
+        recomputeDualProductStock(found.parent);
+      }
+
+      saveCatalogState();
+      syncWebsiteCatalog();
+      refreshRolePanelUI();
+      showToast(`Saved ${found.label} on website!`);
+    }
+
+    function unlockStaffRole() {
+      const code = String(document.getElementById('staffPasscodeInput')?.value || '').trim();
+      const keys = getDefaultStaffKeys();
+      const user = getCurrentUser();
+      if (!user) {
+        showToast('Please log in first.');
+        return;
+      }
+      let nextRole = null;
+      if (code && code === keys.owner) nextRole = 'owner';
+      else if (code && code === keys.admin) nextRole = 'admin';
+
+      if (!nextRole) {
+        showToast('Invalid passcode. Try ADMIN2026 or OWNER2026.');
+        return;
+      }
+
+      const updated = { ...user, role: nextRole };
+      localStorage.setItem('spystore_current_user', JSON.stringify(updated));
+      const users = getUsersDB();
+      const idx = users.findIndex(u => String(u.email).toLowerCase() === String(user.email).toLowerCase());
+      if (idx !== -1) {
+        users[idx] = { ...users[idx], role: nextRole };
+        saveUsersDB(users);
+      }
+      document.getElementById('staffPasscodeInput').value = '';
+      refreshRolePanelUI();
+      showToast(`Role activated: ${nextRole.toUpperCase()}`);
+    }
+
+    function refreshRolePanelUI() {
+      const user = getCurrentUser();
+      const role = getUserRole(user);
+      const badge = document.getElementById('currentRoleBadge');
+      const mgrPanel = document.getElementById('websiteCatalogManagerPanel');
+      const ownerBox = document.getElementById('ownerPartnerSummaryBox');
+      if (badge) badge.textContent = role.toUpperCase();
+
+      const isStaff = role === 'owner' || role === 'admin';
+      if (mgrPanel) {
+        mgrPanel.style.display = isStaff ? 'block' : 'none';
+        if (isStaff) {
+          const sel = document.getElementById('mgrTargetSelect');
+          const opts = getManagerTargetOptions();
+          const prev = sel?.value;
+          if (sel) {
+            sel.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+            if (prev && opts.some(o => o.value === prev)) sel.value = prev;
+          }
+          loadTargetIntoManagerForm();
+        }
+      }
+
+      if (ownerBox) {
+        if (role === 'owner' || role === 'admin') {
+          ownerBox.style.display = 'block';
+          const allTxns = getAllTransactionsDB();
+          const totalStock = products.reduce((acc, p) => acc + Number(p.stock || 0), 0);
+          const totalSales = allTxns.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
+
+          const registeredCustomers = getUsersDB().filter(u => !isDesignatedOwner(u));
+          const customersHtml = role === 'owner' ? `
+            <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color);">
+              <div style="font-weight:800; color:var(--accent-gold); margin-bottom:5px;">👥 Registered Customers (${registeredCustomers.length})</div>
+              ${registeredCustomers.length ? registeredCustomers.map(c => `
+                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:7px 9px; margin-bottom:5px;">
+                  <div style="font-weight:700; color:var(--text-primary);">${c.name || c.username || c.email} <span style="color:var(--accent-cyan); font-size:0.68rem;">(@${c.username || '-'})</span></div>
+                  <div style="font-size:0.69rem; color:var(--text-muted);">${c.email || '-'} • WA: ${c.phone || '-'} • [${String(c.role || 'customer').toUpperCase()}]</div>
+                </div>
+              `).join('') : '<div style="font-size:0.72rem; color:var(--text-muted);">No registered customers yet.</div>'}
+            </div>
+          ` : '';
+
+          const txnsHtml = `
+            <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color);">
+              <div style="font-weight:800; color:var(--accent-cyan); margin-bottom:5px;">🧾 All Transactions (${allTxns.length})</div>
+              ${allTxns.length ? allTxns.slice(0, 20).map((t, tIdx) => `
+                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px 9px; margin-bottom:6px;">
+                  <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--text-primary);">
+                    <span>${t.app} (${t.months} Bln)</span>
+                    <span style="color:var(--accent-gold);">RM${t.total}</span>
+                  </div>
+                  <div style="font-size:0.69rem; color:var(--text-secondary); margin-top:2px;">
+                    ${t.invoiceNo || t.ref || '-'} • ${t.customerName || '-'} (${t.customerPhone || '-'}) • ${t.date || '-'}
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                    <span style="font-size:0.66rem; font-weight:700; color:var(--accent-cyan);">${t.status || 'PAID'} • ${t.paymentMethod || 'FPX'}</span>
+                    <button type="button" onclick="downloadGlobalTxnInvoice(${tIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:2px 8px; border-radius:6px; font-size:0.66rem; font-weight:800; cursor:pointer;">📄 Invois</button>
+                  </div>
+                </div>
+              `).join('') : '<div style="font-size:0.72rem; color:var(--text-muted);">No transactions recorded yet.</div>'}
+            </div>
+          `;
+
+          ownerBox.innerHTML = `
+            <div style="font-weight:800; color:var(--accent-cyan); margin-bottom:4px;">${role === 'owner' ? '👑 Owner Panel (SPYSTORE BY SAMS)' : '🛡️ Admin Panel (SPYSTORE BY SAMS)'}</div>
+            <div>• Total Active Stock: <strong>${totalStock}</strong> slots across ${products.length} apps</div>
+            <div>• All Transactions Sum: <strong>RM${totalSales.toFixed(2)}</strong> (${allTxns.length} txns)</div>
+            ${role === 'owner' ? '<div>• Partner Split: <strong>Owner &amp; Adik</strong> profit-sharing active</div>' : ''}
+            ${customersHtml}
+            ${txnsHtml}
+          `;
+        } else {
+          ownerBox.style.display = 'none';
+          ownerBox.innerHTML = '';
+        }
+      }
+    }
+
     function openAuthModal() {
       const modal = document.getElementById('authModal');
       const user = getCurrentUser();
@@ -4319,6 +3958,7 @@
         if (editForm) editForm.style.display = 'none';
         document.getElementById('profileDetailsBox').innerHTML = renderProfileCardHtml(user);
         renderOrderHistory();
+        refreshRolePanelUI();
       } else {
         document.getElementById('authModalTitle').textContent = 'SPYSTORE ACCOUNT';
         document.getElementById('authFormsView').style.display = 'block';
@@ -4563,17 +4203,77 @@
       localStorage.setItem(key, JSON.stringify(current));
     }
 
+    const ALL_TXNS_STORAGE_KEY = 'spystore_all_transactions_v1';
+
+    function generateInvoiceNumber() {
+      const now = new Date();
+      const y = String(now.getFullYear()).slice(-2);
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const rand = String(Math.floor(1000 + Math.random() * 9000));
+      return `INV-SPY-${y}${m}${d}-${rand}`;
+    }
+
+    function getAllTransactionsDB() {
+      try {
+        const list = JSON.parse(localStorage.getItem(ALL_TXNS_STORAGE_KEY) || '[]');
+        return Array.isArray(list) ? list : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function recordGlobalTransaction(txn) {
+      try {
+        const existing = getAllTransactionsDB();
+        const invoiceNo = txn.invoiceNo || generateInvoiceNumber();
+        const item = {
+          invoiceNo,
+          ref: txn.ref || invoiceNo,
+          app: txn.app || 'Subscription',
+          months: txn.months || 1,
+          total: txn.total || '0.00',
+          date: txn.date || new Date().toLocaleDateString('en-MY'),
+          customerName: txn.customerName || '-',
+          customerPhone: txn.customerPhone || '-',
+          customerEmail: txn.customerEmail || '-',
+          customerDevice: txn.customerDevice || '-',
+          paymentMethod: txn.paymentMethod || 'FPX',
+          status: txn.status || 'CONFIRMED'
+        };
+        const deduped = existing.filter(x => x.invoiceNo !== invoiceNo && !(txn.ref && x.ref === txn.ref && x.app === item.app && x.total === item.total && x.date === item.date));
+        deduped.unshift(item);
+        localStorage.setItem(ALL_TXNS_STORAGE_KEY, JSON.stringify(deduped.slice(0, 100)));
+        return item;
+      } catch (e) {
+        return txn;
+      }
+    }
+
     function saveLocalOrder(order) {
       const user = getCurrentUser();
+      const enrichedOrder = {
+        ...order,
+        invoiceNo: order.invoiceNo || generateInvoiceNumber(),
+        customerName: order.customerName || user?.name || '-',
+        customerPhone: order.customerPhone || user?.phone || '-',
+        customerEmail: order.customerEmail || user?.email || '-',
+        customerDevice: order.customerDevice || '-',
+        paymentMethod: order.paymentMethod || 'FPX',
+        status: order.status || 'PAID'
+      };
+      recordGlobalTransaction(enrichedOrder);
+
       if (user && user.email) {
-        syncCurrentUserSavedData(order);
-        return;
+        syncCurrentUserSavedData(enrichedOrder);
+        return enrichedOrder;
       }
       try {
         const list = JSON.parse(localStorage.getItem('spystore_orders') || '[]');
-        list.unshift(order);
+        list.unshift(enrichedOrder);
         localStorage.setItem('spystore_orders', JSON.stringify(list.slice(0, 25)));
       } catch {}
+      return enrichedOrder;
     }
 
     window._currentAccountOrders = [];
@@ -4592,12 +4292,14 @@
       const custEmail = o.customerEmail || user?.email || '-';
       const custPhone = o.customerPhone || user?.phone || '-';
 
+      const invNo = o.invoiceNo || refCode;
       container.innerHTML = `
         <div class="order-item" style="border-color:var(--accent-cyan); padding:13px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-weight:800; font-size:0.86rem; color:var(--text-primary);">🧾 Purchase Details</span>
+            <span style="font-weight:800; font-size:0.86rem; color:var(--text-primary);">🧾 Purchase &amp; Invoice Details</span>
             <button type="button" onclick="renderOrderHistory()" style="background:var(--bg-card); border:1px solid var(--border-color); color:var(--accent-cyan); padding:4px 9px; border-radius:8px; font-size:0.7rem; font-weight:700; cursor:pointer;">← Back to List</button>
           </div>
+          <p style="margin-bottom:4px;"><strong>Invoice No:</strong> <span style="color:var(--accent-cyan); font-weight:800;">${invNo}</span></p>
           <p style="margin-bottom:4px;"><strong>Product:</strong> ${o.app || '-'}</p>
           <p style="margin-bottom:4px;"><strong>Duration:</strong> ${o.months || 1} Month(s)</p>
           <p style="margin-bottom:4px;"><strong>Total Amount:</strong> <span style="color:var(--accent-gold); font-weight:800;">RM${o.total || '0.00'}</span></p>
@@ -4606,12 +4308,170 @@
           <p style="margin-bottom:4px;"><strong>Reference:</strong> ${refCode}</p>
           <p style="margin-bottom:4px;"><strong>Account Email:</strong> ${custEmail}</p>
           <p style="margin-bottom:4px;"><strong>Customer Name:</strong> ${custName}</p>
-          <p style="margin-bottom:0;"><strong>WhatsApp:</strong> ${custPhone || '-'}</p>
+          <p style="margin-bottom:10px;"><strong>WhatsApp:</strong> ${custPhone || '-'}</p>
+          <button type="button" onclick="downloadInvoiceByIndex(${idx})" style="width:100%; background:rgba(250,204,21,0.16); border:1px solid var(--accent-gold); color:var(--accent-gold); padding:9px 12px; border-radius:10px; font-size:0.78rem; font-weight:800; cursor:pointer;">📄 Download Invoice (${invNo})</button>
         </div>
       `;
     }
 
-    function renderOrderHistory() {
+        function buildInvoiceHtmlDocument(txn) {
+      const invNo = txn.invoiceNo || txn.ref || generateInvoiceNumber();
+      const amountNum = parseFloat(txn.total);
+      const amountStr = !isNaN(amountNum) ? `RM${amountNum.toFixed(2)}` : (txn.total || 'RM0.00');
+      const monthsNum = Number(txn.months || 1);
+      const user = getCurrentUser();
+      const custName = txn.customerName || user?.name || 'Customer';
+      const custPhone = txn.customerPhone || user?.phone || '-';
+      const custEmail = txn.customerEmail || user?.email || '-';
+      const custDevice = txn.customerDevice && txn.customerDevice !== '-' ? txn.customerDevice : '';
+      const payMethod = txn.paymentMethod || 'FPX';
+      const statusLabel = txn.status || 'PAID / CONFIRMED';
+      const dateStr = txn.date || new Date().toLocaleDateString('en-MY');
+
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Invoice ${invNo} — SPYSTORE BY SAMS</title>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background:#f8fafc; color:#0f172a; margin:0; padding:28px; }
+    .inv-box { max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:28px; box-shadow:0 12px 28px rgba(15,23,42,0.06); }
+    .inv-head { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #0f172a; padding-bottom:16px; margin-bottom:20px; }
+    .brand { font-size:20px; font-weight:800; letter-spacing:0.03em; }
+    .brand span { color:#ca8a04; }
+    .inv-meta { text-align:right; font-size:13px; color:#475569; }
+    .inv-meta strong { color:#0f172a; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; font-size:13px; }
+    .card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; }
+    .card h4 { margin:0 0 6px 0; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; }
+    table { width:100%; border-collapse:collapse; margin-bottom:18px; font-size:13px; }
+    th, td { padding:10px 12px; border-bottom:1px solid #e2e8f0; text-align:left; }
+    th { background:#f1f5f9; font-weight:700; }
+    .total-row td { font-weight:800; font-size:15px; border-top:2px solid #0f172a; border-bottom:none; }
+    .foot { font-size:12px; color:#64748b; border-top:1px dashed #cbd5e1; padding-top:14px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+    @media print { body { background:#fff; padding:0; } .inv-box { box-shadow:none; border:none; } }
+  </style>
+</head>
+<body>
+  <div class="inv-box">
+    <div class="inv-head">
+      <div>
+        <div class="brand">SPYSTORE <span>BY SAMS</span></div>
+        <div style="font-size:12px; color:#475569; margin-top:2px;">Official Digital Subscription Receipt &amp; Invoice</div>
+      </div>
+      <div class="inv-meta">
+        <div><strong>Invoice No:</strong> ${invNo}</div>
+        <div><strong>Date:</strong> ${dateStr}</div>
+        <div><strong>Status:</strong> ${statusLabel}</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>Billed To (Customer)</h4>
+        <div><strong>${custName}</strong></div>
+        <div>WhatsApp: ${custPhone}</div>
+        <div>Email: ${custEmail}</div>
+        ${custDevice ? `<div>Device: ${custDevice}</div>` : ''}
+      </div>
+      <div class="card">
+        <h4>Payment &amp; Store Info</h4>
+        <div>Store: <strong>SPYSTORE BY SAMS</strong></div>
+        <div>Method: ${payMethod}</div>
+        <div>Support WA: +60189066291</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Item / Subscription</th>
+          <th>Duration</th>
+          <th style="text-align:right;">Total Paid</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>${txn.app || 'Subscription'}</strong></td>
+          <td>${monthsNum} Month(s)</td>
+          <td style="text-align:right;">${amountStr}</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="2">Total Amount</td>
+          <td style="text-align:right; color:#b45309;">${amountStr}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="foot">
+      <span>Thank you for purchasing from SPYSTORE BY SAMS.</span>
+      <span>100% Warranty throughout active subscription period.</span>
+    </div>
+  </div>
+</body>
+</html>`;
+    }
+
+    function downloadInvoiceObject(txn) {
+      if (!txn) return;
+      const invNo = txn.invoiceNo || txn.ref || generateInvoiceNumber();
+      const htmlDoc = buildInvoiceHtmlDocument(txn);
+      try {
+        const blob = new Blob([htmlDoc], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${invNo}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast(currentLang === 'en' ? `Invoice ${invNo} downloaded!` : `Invois ${invNo} berjaya dimuat turun!`);
+      } catch (e) {
+        showToast('Failed to download invoice.');
+      }
+    }
+
+    function downloadInvoiceByIndex(idx) {
+      const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
+      if (list[idx]) downloadInvoiceObject(list[idx]);
+    }
+
+    function downloadGlobalTxnInvoice(tIdx) {
+      const list = getAllTransactionsDB();
+      if (list[tIdx]) downloadInvoiceObject(list[tIdx]);
+    }
+
+    function downloadLatestInvoice() {
+      if (window._latestReceiptInvoice) {
+        downloadInvoiceObject(window._latestReceiptInvoice);
+        return;
+      }
+      try {
+        const pending = JSON.parse(localStorage.getItem('spystore_pending_order') || 'null');
+        if (pending && pending.appName) {
+          downloadInvoiceObject({
+            invoiceNo: pending.invoiceNo || generateInvoiceNumber(),
+            app: pending.appName,
+            months: pending.months || 1,
+            total: pending.totalAmount || '0.00',
+            date: new Date().toLocaleDateString('en-MY'),
+            customerName: pending.customerName || '-',
+            customerPhone: pending.customerPhone || '-',
+            customerEmail: pending.customerEmail || '-',
+            customerDevice: pending.customerDevice || '-',
+            paymentMethod: 'FPX',
+            status: 'PAID'
+          });
+          return;
+        }
+      } catch (e) {}
+      const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
+      if (list[0]) downloadInvoiceObject(list[0]);
+      else showToast('No invoice available yet.');
+    }
+
+        function renderOrderHistory() {
       const container = document.getElementById('orderHistoryList');
       const user = getCurrentUser();
       let list = [];
@@ -4636,9 +4496,12 @@
             <span>${o.app} (${o.months} Mo)</span>
             <span style="color:var(--accent-gold);">RM${o.total}</span>
           </div>
-          <div style="display:flex; justify-content:space-between; color:var(--text-muted); font-size:0.72rem; margin-top:2px;">
-            <span>Date: ${o.date}</span>
-            <span style="color:var(--accent-cyan); font-weight:700;">Tap for details ›</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; color:var(--text-muted); font-size:0.72rem; margin-top:4px; gap:6px; flex-wrap:wrap;">
+            <span>${o.invoiceNo ? `${o.invoiceNo} • ` : ''}${o.date}</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" onclick="event.stopPropagation(); downloadInvoiceByIndex(${idx});" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">📄 Invois</button>
+              <span style="color:var(--accent-cyan); font-weight:700;">Details ›</span>
+            </div>
           </div>
         </div>
       `).join('');
@@ -4683,6 +4546,21 @@
           'Mohon admin semak & proses pengaktifan akaun saya. Terima kasih!'
         ].join('\n');
 
+        const confirmedTxn = recordGlobalTransaction({
+          invoiceNo: pending.invoiceNo || generateInvoiceNumber(),
+          ref,
+          app: appName,
+          months,
+          total: totalPaid,
+          date: new Date().toLocaleDateString('en-MY'),
+          customerName: custName,
+          customerPhone: custPhone,
+          customerEmail: pending.customerEmail || getCurrentUser()?.email || '-',
+          customerDevice: custDevice,
+          paymentMethod: 'FPX',
+          status: 'PAID'
+        });
+        window._latestReceiptInvoice = confirmedTxn;
         lastReceiptPlainText = waText;
         document.getElementById('receiptWaLink').href = `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waText)}`;
 
@@ -4706,27 +4584,20 @@
                 customerDevice: custDevice
               })
             });
-            setTimeout(syncGoogleSheetStock, 1500);
+            setTimeout(syncWebsiteCatalog, 1500);
           } catch (e) {}
         }
       }
     })();
 
+    ensureOwnerAccountSeeded();
     applyLanguage();
     updateAuthUI();
+    refreshDrawerRoleTools();
     renderProducts();
-    syncGoogleSheetStock();
+    syncWebsiteCatalog();
     loadTrendingHero();
-    setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        syncGoogleSheetStock();
-      }
-    }, 30000);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        syncGoogleSheetStock();
-      }
-    });
+
   </script>
 </body>
 </html>
