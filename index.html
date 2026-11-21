@@ -2509,6 +2509,7 @@
     </div>
   </div>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
 
     function dismissSplash() {
@@ -3911,7 +3912,52 @@
         renderOrderHistory();
       } else {
         document.getElementById('authModalTitle').textContent = 'SPYSTORE Account';
-        document.getElementById('authFormsView').style.display = 'block';
+        const formsView = document.getElementById('authFormsView');
+        if (!document.getElementById('loginForm')) {
+          formsView.innerHTML = `
+            <div class="auth-tabs">
+              <button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">Login</button>
+              <button class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Register</button>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+              <div class="form-group">
+                <label>Email or WhatsApp Number *</label>
+                <input type="text" class="form-control" id="loginIdentifier" placeholder="e.g. user@email.com or 0123456789" required />
+              </div>
+              <div class="form-group">
+                <label>Password *</label>
+                <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required />
+              </div>
+              <button type="submit" class="primary-submit">Sign In to Account</button>
+              <button type="button" onclick="handleGoogleSignIn('login')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <span style="font-weight:900; color:#4285F4;">G</span> Continue with Google
+              </button>
+            </form>
+            <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
+              <div class="form-group">
+                <label>Full Name *</label>
+                <input type="text" class="form-control" id="regName" placeholder="e.g. Ahmad Hussam" required />
+              </div>
+              <div class="form-group">
+                <label>Email Address *</label>
+                <input type="email" class="form-control" id="regEmail" placeholder="e.g. ahmad@gmail.com" required />
+              </div>
+              <div class="form-group">
+                <label>WhatsApp Number *</label>
+                <input type="tel" class="form-control" id="regPhone" placeholder="e.g. 0123456789" required />
+              </div>
+              <div class="form-group">
+                <label>Create Password *</label>
+                <input type="password" class="form-control" id="regPassword" placeholder="Minimum 6 characters" minlength="6" required />
+              </div>
+              <button type="submit" class="primary-submit">Create Account</button>
+              <button type="button" onclick="handleGoogleSignIn('register')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <span style="font-weight:900; color:#4285F4;">G</span> Sign up with Google
+              </button>
+            </form>
+          `;
+        }
+        formsView.style.display = 'block';
         document.getElementById('loggedInView').style.display = 'none';
         switchAuthTab('login');
       }
@@ -3971,25 +4017,145 @@
       showToast(`Logged in as ${found.name}`);
     }
 
-    function handleGoogleSignIn(mode = 'login') {
-      const existing = getCurrentUser();
-      const googleUser = existing && existing.provider === 'google'
-        ? existing
-        : {
-            name: 'Google Account User',
-            email: 'google.user@gmail.com',
-            phone: '',
-            provider: 'google'
-          };
+    let _pendingGoogleAuthMode = 'login';
+
+    function decodeJwtPayload(token) {
+      try {
+        const parts = String(token || '').split('.');
+        if (parts.length !== 3) return null;
+        const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+        const jsonStr = atob(padded);
+        return JSON.parse(jsonStr);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function getGoogleClientId() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const fromUrl = (params.get('google_client_id') || '').trim();
+        if (fromUrl) {
+          localStorage.setItem('spystore_google_client_id', fromUrl);
+          return fromUrl;
+        }
+      } catch (e) {}
+      if (window.GOOGLE_CLIENT_ID) return String(window.GOOGLE_CLIENT_ID).trim();
+      return String(localStorage.getItem('spystore_google_client_id') || '').trim();
+    }
+
+    function completeGoogleLoginWithProfile(name, email, phone = '') {
+      const cleanEmail = String(email || '').trim().toLowerCase();
+      if (!cleanEmail || !cleanEmail.includes('@')) {
+        showToast(currentLang === 'en' ? 'Enter a valid Google Gmail address.' : 'Masukkan alamat e-mel Google yang sah.');
+        return;
+      }
+      const derivedName = String(name || '').trim() || cleanEmail.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
       const users = getUsersDB();
-      if (!users.some(u => u.email === googleUser.email)) {
+      const existingUser = users.find(u => u.email === cleanEmail);
+      const googleUser = {
+        name: existingUser?.name || derivedName,
+        email: cleanEmail,
+        phone: phone || existingUser?.phone || '',
+        provider: 'google'
+      };
+      if (!existingUser) {
         users.push(googleUser);
+        saveUsersDB(users);
+      } else {
+        Object.assign(existingUser, googleUser);
         saveUsersDB(users);
       }
       localStorage.setItem('spystore_current_user', JSON.stringify(googleUser));
       updateAuthUI();
       closeAuthModal();
-      showToast(mode === 'register' ? 'Google account linked to SPYSTORE!' : 'Signed in with Google!');
+      showToast(_pendingGoogleAuthMode === 'register'
+        ? `Google registered: ${googleUser.email}`
+        : `Signed in as ${googleUser.email}`);
+    }
+
+    function handleGoogleCredentialResponse(response) {
+      if (!response || !response.credential) return;
+      const payload = decodeJwtPayload(response.credential);
+      if (payload && payload.email) {
+        completeGoogleLoginWithProfile(payload.name || payload.given_name || '', payload.email);
+      } else {
+        showToast('Google sign-in token invalid.');
+      }
+    }
+
+    function selectSavedGoogleAccount(email, name) {
+      completeGoogleLoginWithProfile(name, email);
+    }
+
+    function submitCustomGoogleEmail(e) {
+      e.preventDefault();
+      const inp = document.getElementById('googleCustomEmailInput');
+      if (!inp) return;
+      completeGoogleLoginWithProfile('', inp.value.trim());
+    }
+
+    function openGoogleAccountChooser() {
+      const formsView = document.getElementById('authFormsView');
+      const titleEl = document.getElementById('authModalTitle');
+      if (!formsView) return;
+
+      if (titleEl) {
+        titleEl.textContent = currentLang === 'en' ? 'Choose a Google Account' : 'Pilih Akaun Google';
+      }
+
+      const savedUsers = getUsersDB().filter(u => u && u.email);
+      const savedButtons = savedUsers.length
+        ? savedUsers.map(u => {
+            const initial = (u.name || u.email || 'G').charAt(0).toUpperCase();
+            return `
+              <button type="button" onclick="selectSavedGoogleAccount('${u.email.replace(/'/g, "\'")}', '${(u.name || '').replace(/'/g, "\'")}')" style="width:100%; display:flex; align-items:center; gap:10px; text-align:left; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; cursor:pointer; color:var(--text-primary);">
+                <span style="width:32px; height:32px; border-radius:50%; background:var(--accent-blue); color:#ffffff; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:0.84rem; flex-shrink:0;">${initial}</span>
+                <span style="flex:1; min-width:0;">
+                  <span style="display:block; font-weight:700; font-size:0.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${u.name || u.email.split('@')[0]}</span>
+                  <span style="display:block; font-size:0.72rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${u.email}</span>
+                </span>
+              </button>
+            `;
+          }).join('')
+        : '';
+
+      formsView.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+          ${savedButtons}
+        </div>
+        <form onsubmit="submitCustomGoogleEmail(event)" style="border-top:1px solid var(--border-color); padding-top:12px;">
+          <div class="form-group">
+            <label>${currentLang === 'en' ? 'Or enter another Google Gmail address *' : 'Atau masukkan alamat Gmail Google lain *'}</label>
+            <input type="email" class="form-control" id="googleCustomEmailInput" placeholder="e.g. ahmad@gmail.com" required />
+          </div>
+          <button type="submit" class="primary-submit">${currentLang === 'en' ? 'Continue with this Gmail' : 'Teruskan dengan Gmail ini'}</button>
+          <button type="button" onclick="openAuthModal()" style="width:100%; margin-top:8px; background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); padding:9px; border-radius:10px; font-weight:700; font-size:0.78rem; cursor:pointer;">${currentLang === 'en' ? '← Back to Login / Register' : '← Kembali ke Log Masuk / Daftar'}</button>
+        </form>
+      `;
+    }
+
+    function handleGoogleSignIn(mode = 'login') {
+      _pendingGoogleAuthMode = mode;
+      const clientId = getGoogleClientId();
+
+      if (clientId && window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: handleGoogleCredentialResponse
+          });
+          window.google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              openGoogleAccountChooser();
+            }
+          });
+          return;
+        } catch (err) {}
+      }
+
+      openGoogleAccountChooser();
     }
 
     function handleLogout() {
