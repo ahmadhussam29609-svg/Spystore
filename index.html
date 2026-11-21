@@ -2134,203 +2134,6 @@
     </div>
   </div>
   <!-- Side Drawer Navigation -->
-    function refreshDrawerRoleTools() {
-      const role = getUserRole();
-      const sec = document.getElementById('drawerOwnerAdminSection');
-      const verifyBtn = document.getElementById('drawerVerifyToolBtn');
-      if (!sec) return;
-      const isStaff = role === 'owner' || role === 'admin';
-      sec.style.display = isStaff ? 'block' : 'none';
-      if (verifyBtn) {
-        verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
-      }
-    }
-
-    function openOwnerAdminManagerModal(tab = 'catalog') {
-      const role = getUserRole();
-      if (role !== 'owner' && role !== 'admin') {
-        showToast(currentLang === 'en' ? 'Owner or Admin login required.' : 'Perlu log masuk Owner atau Admin.');
-        openAuthModal();
-        return;
-      }
-      if (tab === 'verify' && role !== 'owner') {
-        showToast(currentLang === 'en' ? 'Only Owner can verify roles.' : 'Hanya Owner boleh mengesahkan peranan.');
-        return;
-      }
-
-      const modal = document.getElementById('ownerAdminToolsModal');
-      const catView = document.getElementById('drawerCatalogToolView');
-      const verView = document.getElementById('drawerVerifyRoleToolView');
-      const titleEl = document.getElementById('ownerAdminToolsTitle');
-      if (!modal || !catView || !verView) return;
-
-      const showVerify = tab === 'verify' && role === 'owner';
-      catView.style.display = showVerify ? 'none' : 'block';
-      verView.style.display = showVerify ? 'block' : 'none';
-      if (titleEl) {
-        titleEl.textContent = showVerify ? 'OWNER ROLE VERIFICATION' : 'OWNER / ADMIN CATALOG MANAGER';
-      }
-
-      if (!showVerify) {
-        const sel = document.getElementById('drawerMgrTargetSelect');
-        const opts = getManagerTargetOptions();
-        if (sel) {
-          sel.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
-        }
-        syncDrawerMgrFromSelect();
-      } else {
-        refreshVerifyRoleListUI();
-      }
-
-      modal.classList.add('open');
-    }
-
-    function closeOwnerAdminToolsModal() {
-      const modal = document.getElementById('ownerAdminToolsModal');
-      if (modal) modal.classList.remove('open');
-    }
-
-    function syncDrawerMgrFromSelect() {
-      const sel = document.getElementById('drawerMgrTargetSelect');
-      if (!sel) return;
-      const opts = getManagerTargetOptions();
-      const found = opts.find(o => o.value === sel.value) || opts[0];
-      if (!found) return;
-      const t = found.target;
-      document.getElementById('drawerMgrStockInput').value = Number(t.stock ?? 0);
-      document.getElementById('drawerMgrPrice1MoInput').value = Number(t.price ?? 0);
-      document.getElementById('drawerMgrPrice2MoInput').value =
-        typeof t.price2Mo === 'number' && !isNaN(t.price2Mo) && t.price2Mo > 0 ? Number(t.price2Mo) : '';
-      document.getElementById('drawerMgrStatus1MoSelect').value = getStatusValueFromObj(t, 1);
-      document.getElementById('drawerMgrStatus2MoSelect').value = getStatusValueFromObj(t, 2);
-    }
-
-    function saveDrawerCatalogChanges() {
-      const role = getUserRole();
-      if (role !== 'owner' && role !== 'admin') {
-        showToast('Only Owner or Admin can edit catalog.');
-        return;
-      }
-      const sel = document.getElementById('drawerMgrTargetSelect');
-      const opts = getManagerTargetOptions();
-      const found = opts.find(o => o.value === sel?.value);
-      if (!found) return;
-
-      const t = found.target;
-      const stockVal = Math.max(0, parseInt(document.getElementById('drawerMgrStockInput')?.value || '0', 10) || 0);
-      const p1Val = parseFloat(document.getElementById('drawerMgrPrice1MoInput')?.value || '0');
-      const p2Raw = String(document.getElementById('drawerMgrPrice2MoInput')?.value || '').trim();
-      const p2Val = p2Raw ? parseFloat(p2Raw) : NaN;
-      const st1 = document.getElementById('drawerMgrStatus1MoSelect')?.value || 'active';
-      const st2 = document.getElementById('drawerMgrStatus2MoSelect')?.value || 'active';
-
-      if (!isNaN(p1Val) && p1Val > 0) t.price = p1Val;
-      if (!isNaN(p2Val) && p2Val > 0) {
-        t.price2Mo = p2Val;
-      } else {
-        delete t.price2Mo;
-      }
-      t.stock = stockVal;
-      applyStatusValueToObj(t, 1, st1);
-      applyStatusValueToObj(t, 2, st2);
-
-      if (found.parent && found.parent.mode === 'dual') {
-        recomputeDualProductStock(found.parent);
-      }
-
-      saveCatalogState();
-      syncWebsiteCatalog();
-      refreshRolePanelUI();
-      closeOwnerAdminToolsModal();
-      showToast(`Updated ${found.label} (Stok, Harga & Status)!`);
-    }
-
-    function onVerifyUserSelectChange() {
-      const sel = document.getElementById('verifyUserSelect');
-      const inp = document.getElementById('verifyEmailOrUsernameInput');
-      if (sel && inp && sel.value) {
-        inp.value = sel.value;
-      }
-    }
-
-    function refreshVerifyRoleListUI() {
-      ensureOwnerAccountSeeded();
-      const users = getUsersDB().filter(u => !isDesignatedOwner(u));
-      const sel = document.getElementById('verifyUserSelect');
-      const listBox = document.getElementById('verifiedAdminsListBox');
-
-      if (sel) {
-        sel.innerHTML = `<option value="">-- Choose user --</option>` + users.map(u => {
-          const r = String(u.role || 'customer').toUpperCase();
-          return `<option value="${u.email}">${u.username || u.email} (${u.email}) • [${r}]</option>`;
-        }).join('');
-      }
-
-      if (listBox) {
-        const admins = users.filter(u => String(u.role || '').toLowerCase() === 'admin');
-        listBox.innerHTML = `
-          <div style="font-weight:800; color:var(--accent-cyan); margin-bottom:4px;">Active Admins (${admins.length})</div>
-          ${admins.length ? admins.map(a => `<div>• <strong>${a.username || a.email}</strong> (${a.email})</div>`).join('') : '<div>No verified admins yet.</div>'}
-        `;
-      }
-    }
-
-    function setTargetUserRole(targetRole) {
-      if (getUserRole() !== 'owner') {
-        showToast('Only Owner can verify or change user roles.');
-        return;
-      }
-      const rawQuery = String(document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
-      const cleanUname = normalizeUsername(rawQuery);
-      if (!rawQuery) {
-        showToast('Enter or select an email or username.');
-        return;
-      }
-
-      ensureOwnerAccountSeeded();
-      const users = getUsersDB();
-      const idx = users.findIndex(u => {
-        const em = String(u.email || '').trim().toLowerCase();
-        const un = normalizeUsername(u.username || '');
-        return em === rawQuery || (cleanUname && un === cleanUname);
-      });
-
-      if (idx === -1) {
-        showToast('User account not found. Ask the user to sign up first.');
-        return;
-      }
-      if (isDesignatedOwner(users[idx])) {
-        showToast('Owner account role cannot be changed.');
-        return;
-      }
-
-      users[idx].role = targetRole;
-      saveUsersDB(users);
-
-      const cur = getCurrentUser();
-      if (cur && String(cur.email || '').trim().toLowerCase() === String(users[idx].email).trim().toLowerCase()) {
-        localStorage.setItem('spystore_current_user', JSON.stringify({ ...cur, role: targetRole }));
-      }
-
-      refreshVerifyRoleListUI();
-      refreshDrawerRoleTools();
-      showToast(`${users[idx].username || users[idx].email} role set to ${targetRole.toUpperCase()}!`);
-    }
-
-    function verifyUserToAdminRole() {
-      setTargetUserRole('admin');
-    }
-
-    function demoteAdminToCustomerRole() {
-      setTargetUserRole('customer');
-    }
-
-    function openDrawer() {
-      refreshDrawerRoleTools();
-      document.getElementById('drawerBackdrop').classList.add('open');
-      document.getElementById('sideDrawer').classList.add('open');
-    }
-
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
   <aside class="side-drawer" id="sideDrawer" style="padding:18px 15px; overflow-y:auto;">
     <div>
@@ -2372,7 +2175,6 @@
     </div>
 
     <div style="font-size:0.7rem; color:var(--text-muted); text-align:center; padding-top:12px; border-top:1px solid var(--border-color); margin-top:14px;">
-      SPYSTORE BY SAMS • Official Storefront
     </div>
   </aside>
 
@@ -2525,7 +2327,6 @@
           <input type="email" class="form-control" id="custEmail" placeholder="e.g. name@gmail.com" />
         </div>
         <div id="noExtraInfoNote" style="display:none; font-size:0.74rem; color:var(--text-secondary); padding-top:2px;" data-i18n="noExtraInfoNote">
-          No extra account details required for this plan.
         </div>
       </div>
 
@@ -2658,7 +2459,6 @@
 
         <form id="forgotPasswordForm" style="display:none;" onsubmit="handleForgotPasswordSubmit(event)">
           <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:10px;">
-            Enter your registered <strong>Email Address</strong> and <strong>Username</strong> to set a new password.
           </div>
           <div class="form-group">
             <label>Registered Email Address *</label>
@@ -2785,7 +2585,6 @@
 
       <div id="drawerCatalogToolView">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
-          Kemaskini <strong>Stok</strong>, <strong>Harga (1 Bln &amp; 2 Bln)</strong>, dan <strong>Status (1 Bln &amp; 2 Bln)</strong> terus pada laman web.
         </div>
         <div class="form-group" style="margin-bottom:8px;">
           <label>Select Product / Plan *</label>
@@ -4598,7 +4397,209 @@
     syncWebsiteCatalog();
     loadTrendingHero();
 
-  </script>
+  
+    function refreshDrawerRoleTools() {
+      const role = getUserRole();
+      const sec = document.getElementById('drawerOwnerAdminSection');
+      const verifyBtn = document.getElementById('drawerVerifyToolBtn');
+      if (!sec) return;
+      const isStaff = role === 'owner' || role === 'admin';
+      sec.style.display = isStaff ? 'block' : 'none';
+      if (verifyBtn) {
+        verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
+      }
+    }
+
+    function openOwnerAdminManagerModal(tab = 'catalog') {
+      const role = getUserRole();
+      if (role !== 'owner' && role !== 'admin') {
+        showToast(currentLang === 'en' ? 'Owner or Admin login required.' : 'Perlu log masuk Owner atau Admin.');
+        openAuthModal();
+        return;
+      }
+      if (tab === 'verify' && role !== 'owner') {
+        showToast(currentLang === 'en' ? 'Only Owner can verify roles.' : 'Hanya Owner boleh mengesahkan peranan.');
+        return;
+      }
+
+      const modal = document.getElementById('ownerAdminToolsModal');
+      const catView = document.getElementById('drawerCatalogToolView');
+      const verView = document.getElementById('drawerVerifyRoleToolView');
+      const titleEl = document.getElementById('ownerAdminToolsTitle');
+      if (!modal || !catView || !verView) return;
+
+      const showVerify = tab === 'verify' && role === 'owner';
+      catView.style.display = showVerify ? 'none' : 'block';
+      verView.style.display = showVerify ? 'block' : 'none';
+      if (titleEl) {
+        titleEl.textContent = showVerify ? 'OWNER ROLE VERIFICATION' : 'OWNER / ADMIN CATALOG MANAGER';
+      }
+
+      if (!showVerify) {
+        const sel = document.getElementById('drawerMgrTargetSelect');
+        const opts = getManagerTargetOptions();
+        if (sel) {
+          sel.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+        }
+        syncDrawerMgrFromSelect();
+      } else {
+        refreshVerifyRoleListUI();
+      }
+
+      modal.classList.add('open');
+    }
+
+    function closeOwnerAdminToolsModal() {
+      const modal = document.getElementById('ownerAdminToolsModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function syncDrawerMgrFromSelect() {
+      const sel = document.getElementById('drawerMgrTargetSelect');
+      if (!sel) return;
+      const opts = getManagerTargetOptions();
+      const found = opts.find(o => o.value === sel.value) || opts[0];
+      if (!found) return;
+      const t = found.target;
+      document.getElementById('drawerMgrStockInput').value = Number(t.stock ?? 0);
+      document.getElementById('drawerMgrPrice1MoInput').value = Number(t.price ?? 0);
+      document.getElementById('drawerMgrPrice2MoInput').value =
+        typeof t.price2Mo === 'number' && !isNaN(t.price2Mo) && t.price2Mo > 0 ? Number(t.price2Mo) : '';
+      document.getElementById('drawerMgrStatus1MoSelect').value = getStatusValueFromObj(t, 1);
+      document.getElementById('drawerMgrStatus2MoSelect').value = getStatusValueFromObj(t, 2);
+    }
+
+    function saveDrawerCatalogChanges() {
+      const role = getUserRole();
+      if (role !== 'owner' && role !== 'admin') {
+        showToast('Only Owner or Admin can edit catalog.');
+        return;
+      }
+      const sel = document.getElementById('drawerMgrTargetSelect');
+      const opts = getManagerTargetOptions();
+      const found = opts.find(o => o.value === sel?.value);
+      if (!found) return;
+
+      const t = found.target;
+      const stockVal = Math.max(0, parseInt(document.getElementById('drawerMgrStockInput')?.value || '0', 10) || 0);
+      const p1Val = parseFloat(document.getElementById('drawerMgrPrice1MoInput')?.value || '0');
+      const p2Raw = String(document.getElementById('drawerMgrPrice2MoInput')?.value || '').trim();
+      const p2Val = p2Raw ? parseFloat(p2Raw) : NaN;
+      const st1 = document.getElementById('drawerMgrStatus1MoSelect')?.value || 'active';
+      const st2 = document.getElementById('drawerMgrStatus2MoSelect')?.value || 'active';
+
+      if (!isNaN(p1Val) && p1Val > 0) t.price = p1Val;
+      if (!isNaN(p2Val) && p2Val > 0) {
+        t.price2Mo = p2Val;
+      } else {
+        delete t.price2Mo;
+      }
+      t.stock = stockVal;
+      applyStatusValueToObj(t, 1, st1);
+      applyStatusValueToObj(t, 2, st2);
+
+      if (found.parent && found.parent.mode === 'dual') {
+        recomputeDualProductStock(found.parent);
+      }
+
+      saveCatalogState();
+      syncWebsiteCatalog();
+      refreshRolePanelUI();
+      closeOwnerAdminToolsModal();
+      showToast(`Updated ${found.label} (Stok, Harga & Status)!`);
+    }
+
+    function onVerifyUserSelectChange() {
+      const sel = document.getElementById('verifyUserSelect');
+      const inp = document.getElementById('verifyEmailOrUsernameInput');
+      if (sel && inp && sel.value) {
+        inp.value = sel.value;
+      }
+    }
+
+    function refreshVerifyRoleListUI() {
+      ensureOwnerAccountSeeded();
+      const users = getUsersDB().filter(u => !isDesignatedOwner(u));
+      const sel = document.getElementById('verifyUserSelect');
+      const listBox = document.getElementById('verifiedAdminsListBox');
+
+      if (sel) {
+        sel.innerHTML = `<option value="">-- Choose user --</option>` + users.map(u => {
+          const r = String(u.role || 'customer').toUpperCase();
+          return `<option value="${u.email}">${u.username || u.email} (${u.email}) • [${r}]</option>`;
+        }).join('');
+      }
+
+      if (listBox) {
+        const admins = users.filter(u => String(u.role || '').toLowerCase() === 'admin');
+        listBox.innerHTML = `
+          <div style="font-weight:800; color:var(--accent-cyan); margin-bottom:4px;">Active Admins (${admins.length})</div>
+          ${admins.length ? admins.map(a => `<div>• <strong>${a.username || a.email}</strong> (${a.email})</div>`).join('') : '<div>No verified admins yet.</div>'}
+        `;
+      }
+    }
+
+    function setTargetUserRole(targetRole) {
+      if (getUserRole() !== 'owner') {
+        showToast('Only Owner can verify or change user roles.');
+        return;
+      }
+      const rawQuery = String(document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
+      const cleanUname = normalizeUsername(rawQuery);
+      if (!rawQuery) {
+        showToast('Enter or select an email or username.');
+        return;
+      }
+
+      ensureOwnerAccountSeeded();
+      const users = getUsersDB();
+      const idx = users.findIndex(u => {
+        const em = String(u.email || '').trim().toLowerCase();
+        const un = normalizeUsername(u.username || '');
+        return em === rawQuery || (cleanUname && un === cleanUname);
+      });
+
+      if (idx === -1) {
+        showToast('User account not found. Ask the user to sign up first.');
+        return;
+      }
+      if (isDesignatedOwner(users[idx])) {
+        showToast('Owner account role cannot be changed.');
+        return;
+      }
+
+      users[idx].role = targetRole;
+      saveUsersDB(users);
+
+      const cur = getCurrentUser();
+      if (cur && String(cur.email || '').trim().toLowerCase() === String(users[idx].email).trim().toLowerCase()) {
+        localStorage.setItem('spystore_current_user', JSON.stringify({ ...cur, role: targetRole }));
+      }
+
+      refreshVerifyRoleListUI();
+      refreshDrawerRoleTools();
+      showToast(`${users[idx].username || users[idx].email} role set to ${targetRole.toUpperCase()}!`);
+    }
+
+    function verifyUserToAdminRole() {
+      setTargetUserRole('admin');
+    }
+
+    function demoteAdminToCustomerRole() {
+      setTargetUserRole('customer');
+    }
+
+    function openDrawer() {
+      refreshDrawerRoleTools();
+      document.getElementById('drawerBackdrop').classList.add('open');
+      document.getElementById('sideDrawer').classList.add('open');
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawerBackdrop').classList.remove('open');
+      document.getElementById('sideDrawer').classList.remove('open');
+    }
+</script>
 </body>
 </html>
 
