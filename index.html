@@ -4253,7 +4253,7 @@
   function getAvailabilityLabel(item) {
     const titleLower = String(item.title || '').toLowerCase();
     const yearNum = parseInt(String(item.year || ''), 10);
-    const isFutureRelease = Boolean(item.isUnreleased) || (!isNaN(yearNum) && yearNum > 2026) || titleLower.includes('movie 3') || titleLower.includes('gur'latan');
+    const isFutureRelease = Boolean(item.isUnreleased) || (!isNaN(yearNum) && yearNum > 2026) || titleLower.includes('movie 3') || titleLower.includes("gur'latan");
     if (isFutureRelease) {
       return currentLang === 'my' ? 'Belum Release' : 'Not Yet Released';
     }
