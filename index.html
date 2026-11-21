@@ -2985,7 +2985,7 @@
         data = buildFallbackTrendingData();
       }
       try {
-        const items = data.items || [];
+        const items = (data.items || []).slice(0, 20);
         window._lastShowSearchItems = items;
         trendingByApp = data.byApp || {};
         if (data.categories) {
@@ -3057,10 +3057,15 @@
 
 
 
-    let _inlineSearchShowAll = false;
+    let _inlineSearchVisibleCount = 3;
 
-    function toggleInlineSearchShowAll() {
-      _inlineSearchShowAll = !_inlineSearchShowAll;
+    function revealMoreInlineSearchResults() {
+      const total = Array.isArray(window._lastShowSearchItems) ? window._lastShowSearchItems.length : 0;
+      if (_inlineSearchVisibleCount >= total) {
+        _inlineSearchVisibleCount = 3;
+      } else {
+        _inlineSearchVisibleCount = Math.min(total, _inlineSearchVisibleCount + 10);
+      }
       renderInlineSearchResultsBox();
     }
 
@@ -3069,7 +3074,7 @@
       const box = document.getElementById('inlineShowResultsBox');
       if (!inp || !box) return;
       const q = inp.value.trim();
-      const items = Array.isArray(window._lastShowSearchItems) ? window._lastShowSearchItems : [];
+      const items = Array.isArray(window._lastShowSearchItems) ? window._lastShowSearchItems.slice(0, 20) : [];
 
       if (!items.length) {
         box.innerHTML = `
@@ -3082,9 +3087,9 @@
         return;
       }
 
-      const initialLimit = 3;
-      const visibleItems = _inlineSearchShowAll ? items : items.slice(0, initialLimit);
-      const hasMore = items.length > initialLimit;
+      const limit = Math.min(items.length, Math.max(3, _inlineSearchVisibleCount));
+      const visibleItems = items.slice(0, limit);
+      const remaining = items.length - visibleItems.length;
 
       const rowsHtml = visibleItems.map(it => {
         const apps = Array.isArray(it.availableApps) ? it.availableApps : [];
@@ -3104,20 +3109,24 @@
         `;
       }).join('');
 
-      const showMoreBtnHtml = hasMore
-        ? `<button type="button" onclick="toggleInlineSearchShowAll()" style="width:100%; margin-top:4px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); color:var(--accent-cyan); padding:8px 12px; border-radius:10px; font-size:0.74rem; font-weight:800; cursor:pointer;">${
-            _inlineSearchShowAll
-              ? (currentLang === 'en' ? 'Show Less ▲' : 'Tutup Sebahagian ▲')
-              : (currentLang === 'en' ? `Show More (${items.length - initialLimit} more) ▼` : `Show More (${items.length - initialLimit} lagi) ▼`)
-          }</button>`
-        : '';
+      let stepBtnHtml = '';
+      if (items.length > 3) {
+        const nextBatch = Math.min(10, remaining);
+        stepBtnHtml = remaining > 0
+          ? `<button type="button" onclick="revealMoreInlineSearchResults()" style="width:100%; margin-top:4px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); color:var(--accent-cyan); padding:8px 12px; border-radius:10px; font-size:0.74rem; font-weight:800; cursor:pointer;">${
+              currentLang === 'en' ? `Show More (+${nextBatch} of ${remaining} left) ▼` : `Show More (+${nextBatch} daripada ${remaining} lagi) ▼`
+            }</button>`
+          : `<button type="button" onclick="revealMoreInlineSearchResults()" style="width:100%; margin-top:4px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); color:var(--accent-cyan); padding:8px 12px; border-radius:10px; font-size:0.74rem; font-weight:800; cursor:pointer;">${
+              currentLang === 'en' ? 'Show Less ▲' : 'Tutup Sebahagian ▲'
+            }</button>`;
+      }
 
       box.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Verified MY Catalog:' : 'Katalog MY Disahkan:'} "${q}"</span>
+          <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'en' ? 'Verified MY Catalog:' : 'Katalog MY Disahkan:'} "${q}" (${items.length})</span>
           <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer;">✕</button>
         </div>
-        <div style="display:flex; flex-direction:column; gap:8px;">${rowsHtml}${showMoreBtnHtml}</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">${rowsHtml}${stepBtnHtml}</div>
       `;
     }
 
@@ -3131,7 +3140,7 @@
         return;
       }
 
-      _inlineSearchShowAll = false;
+      _inlineSearchVisibleCount = 3;
       triggerTopLoader(650);
       box.style.display = 'block';
       animateElementEnter(box, 'view-animate-in');
@@ -3225,19 +3234,11 @@
 
 
     function renderVerifiedAppChipHtml(ap, includePrice = false) {
-      const prod = products.find(p => p.id === ap.id) || {};
-      const logo = prod.logo || `${ap.id}.png`;
-      const badge = prod.badge || (ap.shortLabel || ap.id).slice(0, 2).toUpperCase();
-      const bg = prod.bg || '#111827';
-      const color = prod.color || '#facc15';
       const priceText = includePrice && ap.price ? ` • RM${ap.price}` : '';
       return `
-        <button type="button" onclick="event.stopPropagation(); openCheckout('${ap.id}');" style="display:inline-flex; align-items:center; gap:6px; background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:5px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; line-height:1;">
-          <span style="width:18px; height:18px; border-radius:5px; background:${bg}; color:${color}; display:inline-flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; font-size:0.62rem; font-weight:800;">
-            <img src="${logo}" alt="${ap.shortLabel}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-            <span style="display:none;">${badge}</span>
-          </span>
-          <span>${ap.shortLabel}${priceText} ✓&gt;</span>
+        <button type="button" onclick="event.stopPropagation(); openCheckout('${ap.id}');" style="display:inline-flex; align-items:center; gap:5px; background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:5px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; line-height:1.15;">
+          <span>${ap.shortLabel}${priceText}</span>
+          <span style="display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:999px; background:var(--accent-gold); color:#09090b; font-size:0.64rem; font-weight:900;">✓</span>
         </button>
       `;
     }
