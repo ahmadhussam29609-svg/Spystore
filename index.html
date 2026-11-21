@@ -3836,7 +3836,8 @@
     const tagEl = document.getElementById('drawerCurrentRoleTag');
     const custBtn = document.getElementById('drawerCustomersToolBtn');
     const verifyBtn = document.getElementById('drawerVerifyToolBtn');
-    if (sec) sec.style.display = 'block';
+    const isStaff = role === 'owner' || role === 'admin';
+    if (sec) sec.style.display = isStaff ? 'block' : 'none';
     if (tagEl) tagEl.textContent = role.toUpperCase();
     if (custBtn) custBtn.style.display = role === 'owner' ? 'flex' : 'none';
     if (verifyBtn) verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
@@ -4251,20 +4252,7 @@
   }
 
   function getAvailabilityLabel(item) {
-    const titleLower = String(item.title || '').toLowerCase();
-    const yearNum = parseInt(String(item.year || ''), 10);
-    const isFutureRelease = Boolean(item.isUnreleased) || (!isNaN(yearNum) && yearNum > 2026) || titleLower.includes('movie 3') || titleLower.includes("gur'latan");
-    if (isFutureRelease) {
-      return currentLang === 'my' ? 'Belum Release' : 'Not Yet Released';
-    }
-    const plats = getItemPlatforms(item);
-    if (plats.length > 0) {
-      return plats.map(p => p.label).join(', ');
-    }
-    if (item.availabilityNote) {
-      return item.availabilityNote;
-    }
-    return currentLang === 'my' ? 'Tiada di Platform / Belum Release' : 'Not on Platform / Unreleased';
+    return classifyTitleStatus(item).detailText;
   }
 
   function renderSmallPlatformChip(plat) {
@@ -4302,26 +4290,26 @@
     if (!modal || !body) return;
     if (tagEl) tagEl.textContent = 'SHOW SPECIFICATION';
 
+    const statusObj = classifyTitleStatus(item);
     const plats = getItemPlatforms(item);
-    const availText = getAvailabilityLabel(item);
-    const hasPlatform = plats.length > 0 && !String(availText).toLowerCase().includes('belum release') && !String(availText).toLowerCase().includes('not yet released');
-    const primaryPlat = hasPlatform ? plats[0] : null;
+    const isAvailable = statusObj.kind === 'available' && plats.length > 0;
+    const primaryPlat = isAvailable ? plats[0] : null;
     const prod = primaryPlat ? (products.find(p => p.id === primaryPlat.id) || products[0]) : null;
-    const platNamesStr = hasPlatform ? plats.map(x => x.label).join(', ') : availText;
+    const platNamesStr = isAvailable ? plats.map(x => x.label).join(', ') : statusObj.badgeText;
     const mediaTypeStr = item.mediaType || 'MOVIE';
     const yearStr = (item.year && item.year !== '-') ? item.year : (item.releaseDate ? String(item.releaseDate).slice(0, 4) : '-');
     const ratingVal = item.rating && item.rating !== 'N/A' ? `★ ${item.rating} / 10` : '★ N/A';
     const synopsisText = item.overview && item.overview.trim()
       ? item.overview.trim()
-      : `${item.title} (${yearStr}) — ${availText}.`;
+      : `${item.title} (${yearStr}) — ${statusObj.detailText}.`;
 
-    const platformBoxContent = hasPlatform
+    const platformBoxContent = isAvailable
       ? `<div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:2px;">${plats.map(pl => renderPlatformLogoOnly(pl)).join('')}</div>`
-      : `<div class="spec-val" style="color:var(--accent-gold); font-size:0.78rem;">${availText}</div>`;
+      : `<div class="spec-val" style="color:var(--accent-gold); font-size:0.78rem;">${statusObj.badgeText}</div>`;
 
     const actionBtnHtml = prod
       ? `<button type="button" class="primary-submit" style="width:100%; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${prod.id}');">Order ${platNamesStr} →</button>`
-      : `<div style="width:100%; text-align:center; padding:10px 12px; border-radius:10px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent-gold); font-size:0.78rem; font-weight:700;">${availText}</div>`;
+      : `<div style="width:100%; text-align:center; padding:10px 12px; border-radius:10px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent-gold); font-size:0.78rem; font-weight:700;">${statusObj.badgeText}</div>`;
 
     body.innerHTML = `
       <div class="spec-hero">
@@ -4447,25 +4435,55 @@
     return String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
-  function isNonExistentOrJunkTitle(item) {
+  function classifyTitleStatus(item) {
     const t = String(item?.title || '').trim().toLowerCase();
-    if (!t) return true;
-    const blockedPhrases = [
-      'elemental heroes',
-      'sinopsis ',
-      'synopsis ',
-      'ghost of gur',
-      'movie 3'
-    ];
-    return blockedPhrases.some(bp => t.includes(bp));
+    const yearNum = parseInt(String(item?.year || ''), 10);
+    const plats = getItemPlatforms(item);
+
+    const isNonExistent =
+      t.includes('elemental heroes') ||
+      t.includes('sinopsis ') ||
+      t.includes('synopsis ');
+
+    const isUnreleased =
+      Boolean(item?.isUnreleased) ||
+      (!isNaN(yearNum) && yearNum > 2026) ||
+      t.includes('movie 3') ||
+      t.includes("gur'latan");
+
+    if (isNonExistent) {
+      return {
+        kind: 'non_existent',
+        badgeText: currentLang === 'my' ? 'Tidak Wujud' : 'Non-Existent',
+        detailText: currentLang === 'my' ? 'Tajuk tidak wujud' : 'Title does not exist'
+      };
+    }
+
+    if (isUnreleased) {
+      return {
+        kind: 'unreleased',
+        badgeText: currentLang === 'my' ? 'Belum Release' : 'Not Yet Released',
+        detailText: currentLang === 'my' ? 'Belum release di platform' : 'Not yet released on platform'
+      };
+    }
+
+    if (plats.length > 0) {
+      return {
+        kind: 'available',
+        badgeText: null,
+        detailText: plats.map(p => p.label).join(', ')
+      };
+    }
+
+    return {
+      kind: 'not_on_platform',
+      badgeText: currentLang === 'my' ? 'Tiada di Platform' : 'Not on Platform',
+      detailText: currentLang === 'my' ? 'Tiada di platform' : 'Not on platform'
+    };
   }
 
   function canonicalTitleKey(item) {
-    const raw = String(item?.title || '')
-      .toLowerCase()
-      .replace(/^sinopsis\s+/i, '')
-      .replace(/^synopsis\s+/i, '')
-      .replace(/[^a-z0-9]/g, '');
+    const raw = String(item?.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const mType = String(item?.mediaType || 'SHOW').toUpperCase();
     return `${raw}|${mType}`;
   }
@@ -4477,6 +4495,7 @@
       { title: 'BoBoiBoy: The Movie', year: '2016', mediaType: 'MOVIE', rating: '6.8', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy and his friends travel to save Ochobot from an ancient power seeker.' },
       { title: 'BoBoiBoy Galaxy', year: '2016', mediaType: 'SERIES', rating: '7.9', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy embarks on interstellar missions across the galaxy to collect Power Spheras.' },
       { title: 'BoBoiBoy Movie 2', year: '2019', mediaType: 'MOVIE', rating: '7.4', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Retak’ka returns to reclaim elemental powers from BoBoiBoy.' },
+      { title: "BoBoiBoy Movie 3: Ghost of Gur'latan", year: '2027', mediaType: 'MOVIE', rating: 'N/A', isUnreleased: true, platforms: [], overview: 'Not yet released on platform.' },
       { title: 'The Hobbit: The Desolation of Smaug', year: '2013', mediaType: 'MOVIE', rating: '7.8', platformId: 'netflix', platformLabel: 'Netflix / Prime Video', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'primevideo', label: 'Prime Video' }], overview: 'Bilbo Baggins and the dwarves continue their quest toward Erebor and encounter the dragon Smaug.' },
       { title: 'X-Men: Days of Future Past', year: '2014', mediaType: 'MOVIE', rating: '7.5', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The X-Men send Wolverine to the past to change history and prevent doom for humans and mutants.' },
       { title: 'X-Men ’97', year: '2024', mediaType: 'SERIES', rating: '8.7', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A band of mutants use their uncanny gifts to protect a world that hates and fears them.' }
@@ -4487,7 +4506,7 @@
     });
     const seen = new Set();
     return [...extraShows, ...trendingShows].filter(item => {
-      if (isNonExistentOrJunkTitle(item)) return false;
+      if (classifyTitleStatus(item).kind === 'non_existent') return false;
       const key = canonicalTitleKey(item);
       if (seen.has(key)) return false;
       seen.add(key);
@@ -4518,7 +4537,7 @@
       if (!apiItems.length) return localMatches;
 
       const mappedApi = apiItems
-        .filter(it => !isNonExistentOrJunkTitle(it))
+        .filter(it => classifyTitleStatus(it).kind !== 'non_existent')
         .map(it => {
           const apps = Array.isArray(it.availableApps) && it.availableApps.length ? it.availableApps : [];
           const plats = apps.map(a => ({ id: a.id, label: a.shortLabel || a.label || a.id }));
@@ -4554,12 +4573,14 @@
         seen.add(k);
         const matchedApi = apiByKey.get(k);
         if (matchedApi) {
+          const matchedPlats = getItemPlatforms(matchedApi);
           merged.push({
             ...loc,
             poster: matchedApi.poster || loc.poster || '',
             overview: matchedApi.overview || loc.overview || '',
             rating: (matchedApi.rating && matchedApi.rating !== 'N/A') ? matchedApi.rating : (loc.rating || 'N/A'),
-            year: (matchedApi.year && matchedApi.year !== '-') ? matchedApi.year : (loc.year || '')
+            year: (matchedApi.year && matchedApi.year !== '-') ? matchedApi.year : (loc.year || ''),
+            platforms: matchedPlats.length ? matchedPlats : getItemPlatforms(loc)
           });
         } else {
           merged.push(loc);
@@ -4612,7 +4633,7 @@
         const globalIdx = matches.indexOf(m);
         const plats = getItemPlatforms(m);
         const availText = getAvailabilityLabel(m);
-        const hasPlats = plats.length > 0 && !String(availText).toLowerCase().includes('belum release') && !String(availText).toLowerCase().includes('not yet released');
+        const stObj = classifyTitleStatus(m); const hasPlats = stObj.kind === 'available' && plats.length > 0;
         const yearStr = (m.year && m.year !== '-') ? ` (${m.year})` : '';
         const posterEl = m.poster
           ? `<img src="${m.poster}" alt="${m.title}" referrerpolicy="no-referrer" style="width:46px; height:68px; object-fit:cover; border-radius:8px; flex-shrink:0; border:1px solid var(--border-color);" onerror="this.style.display='none';" />`
@@ -4623,7 +4644,7 @@
               const pObj = products.find(x => x.id === pl.id) || products[0];
               return `<button type="button" onclick="event.stopPropagation(); openCheckout('${pObj.id}')" style="background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">${pl.label} ✓</button>`;
             }).join('')
-          : `<span style="background:rgba(148,163,184,0.12); border:1px solid var(--border-color); color:var(--text-secondary); padding:3px 10px; border-radius:999px; font-size:0.68rem; font-weight:700;">${availText}</span>`;
+          : `<span style="background:rgba(250,204,21,0.1); border:1px solid rgba(250,204,21,0.35); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.68rem; font-weight:700;">${stObj.badgeText}</span>`;
 
         return `
           <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; margin-bottom:8px; display:flex; gap:11px; align-items:center; cursor:pointer;" onclick="openSearchedShowDetail(${globalIdx})">
@@ -4695,7 +4716,7 @@
     box.innerHTML = matches.length ? matches.map((m, idx) => {
       const plats = getItemPlatforms(m);
       const availText = getAvailabilityLabel(m);
-      const hasPlats = plats.length > 0 && !String(availText).toLowerCase().includes('belum release') && !String(availText).toLowerCase().includes('not yet released');
+      const stObj = classifyTitleStatus(m); const hasPlats = stObj.kind === 'available' && plats.length > 0;
       const yearStr = (m.year && m.year !== '-') ? ` (${m.year})` : '';
       return `
         <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; display:flex; gap:11px; align-items:center; cursor:pointer;" onclick="openSearchedShowDetail(${idx})">
@@ -4709,7 +4730,7 @@
                     const pObj = products.find(x => x.id === pl.id) || products[0];
                     return `<button type="button" onclick="event.stopPropagation(); closeShowSearchModal(); openCheckout('${pObj.id}')" style="background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer;">${pl.label} ✓</button>`;
                   }).join('')
-                : `<span style="background:rgba(148,163,184,0.12); border:1px solid var(--border-color); color:var(--text-secondary); padding:3px 10px; border-radius:999px; font-size:0.68rem; font-weight:700;">${availText}</span>`}
+                : `<span style="background:rgba(250,204,21,0.1); border:1px solid rgba(250,204,21,0.35); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.68rem; font-weight:700;">${stObj.badgeText}</span>`}
             </div>
           </div>
         </div>
