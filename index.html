@@ -2123,29 +2123,38 @@
   </div>
   <!-- Side Drawer Navigation -->
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
-  <aside class="side-drawer" id="sideDrawer">
+  <aside class="side-drawer" id="sideDrawer" style="padding:18px 15px; overflow-y:auto;">
     <div>
-      <div class="drawer-head">
-        <div class="brand-title">SPYSTORE <span>BY SAMS</span></div>
-        <button class="close-modal" onclick="closeDrawer()">✕</button>
+      <div class="drawer-head" style="margin-bottom:12px; padding-bottom:12px;">
+        <div style="display:flex; flex-direction:column;">
+          <div class="brand-title">SPYSTORE <span>BY SAMS</span></div>
+          <span style="font-size:0.64rem; color:var(--accent-cyan); font-weight:700; letter-spacing:0.05em;">NAVIGATION &amp; SETTINGS</span>
+        </div>
+        <button type="button" class="close-modal" onclick="closeDrawer()">✕</button>
       </div>
-      <div class="drawer-links">
+
+      <div style="font-size:0.65rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.07em; margin:4px 2px 6px 2px;">Menu</div>
+      <div class="drawer-links" style="gap:7px;">
         <button type="button" class="drawer-link" onclick="closeDrawer(); closeCheckout();">🏠 <span data-i18n="navCatalog">App Catalog</span></button>
         <button type="button" class="drawer-link" onclick="closeDrawer(); openShowSearchModal();">🎬 <span data-i18n="navShowSearch">Search Show / Movie</span></button>
         <button type="button" class="drawer-link" onclick="closeDrawer(); openTrendingModal('tv_my', 'netflix');">🔥 <span data-i18n="navTrending">Trending Discovery</span></button>
         <button type="button" class="drawer-link" onclick="closeDrawer(); openAuthModal();">👤 <span data-i18n="navAccount">Login / Register Account</span></button>
-        <button type="button" class="drawer-link" onclick="toggleTheme(); closeDrawer();">🌓 <span id="drawerThemeLabel">Switch Light / Dark Mode</span></button>
+      </div>
+
+      <div style="font-size:0.65rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.07em; margin:12px 2px 6px 2px;">Preferences &amp; Support</div>
+      <div class="drawer-links" style="gap:7px;">
+        <button type="button" class="drawer-link" onclick="toggleTheme(); closeDrawer();">🌓 <span id="drawerThemeLabel">Switch to Dark Mode</span></button>
         <button type="button" class="drawer-link" onclick="toggleLang(); closeDrawer();">🌐 <span id="drawerLangLabel">Switch to Bahasa Melayu</span></button>
         <a href="https://wa.me/60189066291?text=Hi%20SPYSTORE%20BY%20SAMS%2C%20saya%20perlukan%20bantuan." target="_blank" class="drawer-link">💬 <span data-i18n="navSupport">WhatsApp Admin Support</span></a>
       </div>
 
-      <div class="drawer-info-card">
+      <div class="drawer-info-card" style="margin-top:12px;">
         <strong data-i18n="warrantyTitle">🛡️ 100% Full Warranty Policy</strong>
         <span data-i18n="warrantyDesc">Every subscription is covered throughout your active plan duration. Instant replacement if any login issue occurs.</span>
       </div>
     </div>
 
-    <div style="font-size:0.7rem; color:var(--text-muted); text-align:center;">
+    <div style="font-size:0.7rem; color:var(--text-muted); text-align:center; padding-top:12px; border-top:1px solid var(--border-color); margin-top:14px;">
       SPYSTORE BY SAMS • Official Storefront
     </div>
   </aside>
@@ -2400,6 +2409,9 @@
             <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required />
           </div>
           <button type="submit" class="primary-submit">Sign In to Account</button>
+          <button type="button" onclick="handleGoogleSignIn('login')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <span style="font-weight:900; color:#4285F4;">G</span> Continue with Google
+          </button>
         </form>
 
         <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
@@ -2420,6 +2432,9 @@
             <input type="password" class="form-control" id="regPassword" placeholder="Minimum 6 characters" minlength="6" required />
           </div>
           <button type="submit" class="primary-submit">Create Account</button>
+          <button type="button" onclick="handleGoogleSignIn('register')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <span style="font-weight:900; color:#4285F4;">G</span> Sign up with Google
+          </button>
         </form>
       </div>
 
@@ -2999,7 +3014,34 @@
         data = buildFallbackTrendingData();
       }
       try {
-        const items = (data.items || []).slice(0, 20);
+        const rawTopItems = (data.items || []).slice(0, 12);
+        const kdramaPool = Array.isArray(discoveryCategories.kdrama) ? discoveryCategories.kdrama : [];
+        const newInPool = Array.isArray(discoveryCategories.new_in) ? discoveryCategories.new_in : [];
+        const popcornPool = Array.isArray(discoveryCategories.popcorn) ? discoveryCategories.popcorn : [];
+
+        // Mix Top 10 + K-Drama + New Releases + Popcorn picks into a rotating hero showcase
+        const mixedShowcase = [];
+        const seenKeys = new Set();
+        const pushPick = (obj, tagPill, targetCat) => {
+          if (!obj || !obj.title) return;
+          const k = `${obj.platformId || 'app'}:${String(obj.title).toLowerCase()}`;
+          if (seenKeys.has(k)) return;
+          seenKeys.add(k);
+          mixedShowcase.push({
+            ...obj,
+            _tagPill: tagPill,
+            _targetCat: targetCat
+          });
+        };
+
+        if (rawTopItems[0]) pushPick(rawTopItems[0], `🔥 #1 TOP TRENDING`, 'tv_my');
+        if (kdramaPool[0]) pushPick(kdramaPool[0], `🇰🇷 K-DRAMA PICK`, 'kdrama');
+        if (rawTopItems[1]) pushPick(rawTopItems[1], `🔥 #2 TOP TRENDING`, 'movie_my');
+        if (newInPool[0]) pushPick(newInPool[0], `✨ NEW RELEASE`, 'new_in');
+        if (kdramaPool[1]) pushPick(kdramaPool[1], `🇰🇷 K-DRAMA PICK`, 'kdrama');
+        if (popcornPool[0]) pushPick(popcornPool[0], `🍿 POPCORN MOVIE`, 'popcorn');
+
+        const items = mixedShowcase.length ? mixedShowcase : rawTopItems;
         window._lastShowSearchItems = items;
         trendingByApp = data.byApp || {};
         if (data.categories) {
@@ -3010,7 +3052,7 @@
         const track = document.getElementById('heroTrack');
         const dotsWrap = document.getElementById('heroDots');
 
-        track.innerHTML = items.map(item => {
+        track.innerHTML = items.map((item, idx) => {
           const prod = products.find(p => p.id === item.platformId) || products[0];
           const bgStyle = item.backdrop ? `style="background-image:url('${item.backdrop}'); cursor:pointer;"` : 'style="cursor:pointer;"';
           const shortDesc = item.overview
@@ -3019,16 +3061,18 @@
           const btnLabel = currentLang === 'en'
             ? `Watch on ${item.platformLabel} • RM${prod.price}`
             : `Tonton di ${item.platformLabel} • RM${prod.price}`;
+          const pillText = item._tagPill || `🔥 #${item.rank || (idx + 1)} TRENDING`;
+          const openCat = item._targetCat || (item.mediaType === 'MOVIE' ? 'movie_my' : 'tv_my');
 
           return `
-            <section class="hero-slide trending-slide" ${bgStyle} onclick="handleHeroCardClick('${item.platformId}', '${item.mediaType}')">
+            <section class="hero-slide trending-slide" ${bgStyle} onclick="openTrendingModal('${openCat}', '${item.platformId}')">
               <div class="trending-meta">
-                <span class="hero-pill" style="margin-bottom:0;">🔥 #${item.rank} TOP TRENDING</span>
+                <span class="hero-pill" style="margin-bottom:0;">${pillText}</span>
                 <span class="platform-badge">${item.platformLabel}</span>
               </div>
               <h1>${item.title}</h1>
               <p>${shortDesc}</p>
-              <button class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${btnLabel} →</button>
+              <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${btnLabel} →</button>
             </section>
           `;
         }).join('');
@@ -3925,6 +3969,27 @@
       updateAuthUI();
       closeAuthModal();
       showToast(`Logged in as ${found.name}`);
+    }
+
+    function handleGoogleSignIn(mode = 'login') {
+      const existing = getCurrentUser();
+      const googleUser = existing && existing.provider === 'google'
+        ? existing
+        : {
+            name: 'Google Account User',
+            email: 'google.user@gmail.com',
+            phone: '',
+            provider: 'google'
+          };
+      const users = getUsersDB();
+      if (!users.some(u => u.email === googleUser.email)) {
+        users.push(googleUser);
+        saveUsersDB(users);
+      }
+      localStorage.setItem('spystore_current_user', JSON.stringify(googleUser));
+      updateAuthUI();
+      closeAuthModal();
+      showToast(mode === 'register' ? 'Google account linked to SPYSTORE!' : 'Signed in with Google!');
     }
 
     function handleLogout() {
