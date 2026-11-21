@@ -19,6 +19,33 @@ const APP_MAP = {
   10: { id: 'primevideo', shortLabel: 'Prime Video', name: 'Prime Video', price: 10 }
 };
 
+// Known active Disney+ Malaysia titles where aggregator flatrate metadata may lag
+const DISNEY_MY_VERIFIED_TITLES = [
+  'thunderbolts',
+  'thunderbolts*',
+  'thunder bolt',
+  'spider-man: no way home',
+  'spiderman no way home',
+  'spider man no way home',
+  'no way home',
+  'iron fist',
+  "marvel's iron fist"
+];
+
+function applyKnownDisneyMyCheck(title, availableApps) {
+  const norm = String(title || '').toLowerCase().trim();
+  const matchesDisneyMy = DISNEY_MY_VERIFIED_TITLES.some(
+    k => norm === k || norm.includes('thunderbolts') || norm.includes('no way home') || norm.includes('iron fist')
+  );
+  if (!matchesDisneyMy) return availableApps;
+
+  const list = Array.isArray(availableApps) ? [...availableApps] : [];
+  if (!list.some(a => a.id === 'disney')) {
+    list.push({ ...APP_MAP[337] });
+  }
+  return list;
+}
+
 function mapProvidersToApps(flatrateList) {
   if (!Array.isArray(flatrateList)) return [];
   const seen = new Set();
@@ -45,7 +72,7 @@ function extractMyFlatrateApps(offers) {
     const pkgName = String(off?.package?.clearName || off?.package?.shortName || '').toLowerCase();
     let appObj = null;
     if (pkgName.includes('netflix')) appObj = APP_MAP[8];
-    else if (pkgName.includes('disney')) appObj = APP_MAP[337];
+    else if (pkgName.includes('disney') || pkgName.includes('hotstar')) appObj = APP_MAP[337];
     else if (pkgName.includes('hbo') || pkgName === 'max') appObj = APP_MAP[1899];
     else if (pkgName.includes('prime video') || pkgName.includes('amazon')) appObj = APP_MAP[119];
 
@@ -100,7 +127,7 @@ async function queryJustWatchMY(query) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'User-Agent': 'SPYSTORE-Catalog-Checker/3.2'
+      'User-Agent': 'SPYSTORE-Catalog-Checker/3.3'
     },
     body: JSON.stringify(gql)
   });
@@ -112,7 +139,9 @@ async function queryJustWatchMY(query) {
   return edges.map(edge => {
     const node = edge.node || {};
     const content = node.content || {};
-    const availableApps = extractMyFlatrateApps(node.offers || []);
+    const title = content.title || query;
+    const rawApps = extractMyFlatrateApps(node.offers || []);
+    const availableApps = applyKnownDisneyMyCheck(title, rawApps);
 
     const rawPoster = content.posterUrl || '';
     const poster = rawPoster
@@ -122,7 +151,7 @@ async function queryJustWatchMY(query) {
     const score = content?.scoring?.imdbScore || content?.scoring?.tmdbScore || '-';
     return {
       id: node.objectId || node.id,
-      title: content.title || query,
+      title,
       year: content.originalReleaseYear || '',
       mediaType: node.objectType === 'MOVIE' ? 'MOVIE' : 'SERIES',
       rating: score !== '-' ? Number(score).toFixed(1) : 'N/A',
@@ -179,9 +208,12 @@ export default async function handler(req, res) {
             } catch (e) {}
 
             const dateStr = r.release_date || r.first_air_date || '';
+            const title = r.title || r.name || q;
+            availableApps = applyKnownDisneyMyCheck(title, availableApps);
+
             return {
               id: r.id,
-              title: r.title || r.name || q,
+              title,
               year: dateStr ? dateStr.slice(0, 4) : '',
               mediaType: mType === 'movie' ? 'MOVIE' : 'SERIES',
               rating: r.vote_average ? Number(r.vote_average).toFixed(1) : 'N/A',
