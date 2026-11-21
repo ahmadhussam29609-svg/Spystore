@@ -918,7 +918,7 @@
           <div class="pay-card active" data-pay="billplz_online_banking">
             <div>
               <div class="pay-title">Online Banking (FPX) — Billplz</div>
-              <div class="pay-sub">Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank &amp; bank Malaysia melalui bil Billplz.</div>
+              <div class="pay-sub">Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank &amp; semua bank Malaysia melalui bil Billplz.</div>
             </div>
             <span class="tag-active">Aktif</span>
           </div>
@@ -926,23 +926,31 @@
           <div class="pay-card" data-pay="billplz_online_banking_biz">
             <div>
               <div class="pay-title">Online Banking (Business) — Billplz</div>
-              <div class="pay-sub">Pembayaran perbankan korporat/perniagaan melalui bil Billplz.</div>
+              <div class="pay-sub">Pembayaran perbankan perniagaan / korporat melalui bil Billplz.</div>
             </div>
             <span class="tag-active">Aktif</span>
           </div>
 
-          <div class="pay-card" data-pay="billplz_qr">
+          <div class="pay-card" data-pay="billplz_duitnow_qr">
             <div>
-              <div class="pay-title">DuitNow QR / QR Payments — Billplz</div>
-              <div class="pay-sub">Permohonan pengaktifan QR Payments telah dihantar ke Billplz; boleh terus menjana bil Billplz.</div>
+              <div class="pay-title">DuitNow QR — Billplz</div>
+              <div class="pay-sub">Bayar melalui Billplz DuitNow QR &amp; saluran bayaran dalam talian (pengaktifan dimohon ke Billplz).</div>
+            </div>
+            <span class="tag-pending">Dimohon</span>
+          </div>
+
+          <div class="pay-card" data-pay="billplz_qr_payments">
+            <div>
+              <div class="pay-title">QR Payments — Billplz</div>
+              <div class="pay-sub">Saluran QR Payments pada akaun Billplz (pengaktifan dimohon ke Billplz).</div>
             </div>
             <span class="tag-pending">Dimohon</span>
           </div>
 
           <div class="pay-card" data-pay="billplz_wallet">
             <div>
-              <div class="pay-title">Wallet (Touch 'n Go eWallet / GrabPay) — Billplz</div>
-              <div class="pay-sub">Saluran dompet digital Billplz (pengaktifan dimohon ke Billplz) atau sahkan pantas via WhatsApp.</div>
+              <div class="pay-title">Wallet (Touch &apos;n Go eWallet / GrabPay) — Billplz</div>
+              <div class="pay-sub">Saluran Wallet melalui Billplz (pengaktifan dimohon ke Billplz).</div>
             </div>
             <span class="tag-pending">Dimohon</span>
           </div>
@@ -950,7 +958,7 @@
           <div class="pay-card" data-pay="billplz_card">
             <div>
               <div class="pay-title">Card (Visa / Mastercard) — Billplz</div>
-              <div class="pay-sub">Pembayaran kad kredit/debit melalui Billplz (pengaktifan dimohon ke Billplz).</div>
+              <div class="pay-sub">Pembayaran kad kredit &amp; debit Visa / Mastercard melalui Billplz (pengaktifan dimohon ke Billplz).</div>
             </div>
             <span class="tag-pending">Dimohon</span>
           </div>
@@ -958,15 +966,15 @@
           <div class="pay-card" data-pay="billplz_bnpl">
             <div>
               <div class="pay-title">BNPL (Buy Now Pay Later) — Billplz</div>
-              <div class="pay-sub">Pembayaran ansuran/tangguh melalui saluran BNPL Billplz (pengaktifan dimohon ke Billplz).</div>
+              <div class="pay-sub">Pembayaran BNPL melalui Billplz (pengaktifan dimohon ke Billplz).</div>
             </div>
             <span class="tag-pending">Dimohon</span>
           </div>
 
           <div class="pay-card" data-pay="whatsapp_ewallet">
             <div>
-              <div class="pay-title">eWallet (Touch 'n Go / GrabPay / Boost / ShopeePay) via WhatsApp</div>
-              <div class="pay-sub">Hantar butiran tempahan terus ke WhatsApp admin untuk semakan &amp; pengesahan bayaran eWallet.</div>
+              <div class="pay-title">eWallet (Touch &apos;n Go / GrabPay / Boost / ShopeePay) via WhatsApp</div>
+              <div class="pay-sub">Bayar melalui Touch &apos;n Go eWallet, GrabPay, Boost atau ShopeePay &amp; sahkan terus melalui WhatsApp.</div>
             </div>
             <span class="tag-wa">WhatsApp</span>
           </div>
@@ -1116,14 +1124,15 @@
           }
         ];
 
-        var PAYMENT_NOTES = {
+                var PAYMENT_NOTES = {
           billplz_online_banking: '<strong>Online Banking (FPX) — Aktif:</strong> Anda akan dibawa ke bil Billplz untuk melengkapkan bayaran perbankan dalam talian.',
           billplz_online_banking_biz: '<strong>Online Banking (Business) — Aktif:</strong> Anda akan dibawa ke bil Billplz untuk bayaran melalui akaun perbankan perniagaan.',
-          billplz_qr: '<strong>DuitNow QR / QR Payments — Dimohon:</strong> Pengaktifan QR Payments telah dipohon kepada Billplz. Tekan <strong>Pay Now →</strong> untuk menjana bil Billplz atau gunakan pilihan lain buat sementara waktu.',
-          billplz_wallet: '<strong>Wallet (Touch 'n Go / GrabPay) — Dimohon:</strong> Pengaktifan Wallet telah dipohon kepada Billplz. Anda boleh menjana bil Billplz atau pilih <strong>eWallet via WhatsApp</strong>.',
+          billplz_duitnow_qr: '<strong>DuitNow QR — Dimohon:</strong> Pengaktifan DuitNow QR / QR Payments telah dipohon kepada Billplz. Tekan <strong>Pay Now →</strong> untuk menjana bil Billplz atau gunakan saluran aktif/WhatsApp.',
+          billplz_qr_payments: '<strong>QR Payments — Dimohon:</strong> Permohonan pengaktifan QR Payments telah dihantar ke Billplz. Tekan <strong>Pay Now →</strong> untuk menjana bil Billplz.',
+          billplz_wallet: '<strong>Wallet (Touch \x27n Go / GrabPay) — Dimohon:</strong> Pengaktifan Wallet telah dipohon kepada Billplz. Anda boleh menjana bil Billplz atau pilih <strong>eWallet via WhatsApp</strong>.',
           billplz_card: '<strong>Card (Visa / Mastercard) — Dimohon:</strong> Pengaktifan Card telah dipohon kepada Billplz. Tekan <strong>Pay Now →</strong> untuk menjana bil Billplz.',
           billplz_bnpl: '<strong>BNPL — Dimohon:</strong> Pengaktifan BNPL telah dipohon kepada Billplz. Tekan <strong>Pay Now →</strong> untuk menjana bil Billplz.',
-          whatsapp_ewallet: '<strong>eWallet via WhatsApp:</strong> Butiran tempahan akan dihantar terus ke WhatsApp admin untuk pengesahan pembayaran eWallet.'
+          whatsapp_ewallet: '<strong>eWallet via WhatsApp:</strong> Butiran tempahan Touch \x27n Go / GrabPay / Boost / ShopeePay akan dihantar terus ke WhatsApp admin untuk pengesahan.'
         };
 
         var currentFilter = 'all';
