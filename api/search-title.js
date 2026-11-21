@@ -139,8 +139,7 @@ function mapProviderIdsToApps(providerIds = []) {
 }
 
 async function searchViaTmdb(q, region) {
-  const apiKey = process.env.TMDB_API_KEY;
-  if (!apiKey) return null;
+  const apiKey = process.env.TMDB_API_KEY || '4d8856163cb184c1dc7eda6063f78d1a';
 
   const searchUrl = `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(apiKey)}&query=${encodeURIComponent(q)}&language=en-US&page=1`;
   const r = await fetch(searchUrl);
