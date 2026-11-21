@@ -4011,7 +4011,9 @@
     document.getElementById('ownerAdminToolsModal')?.classList.remove('open');
   }
 
-  // Fresh Trending Discovery & Show/Movie Search Implementation
+  // Live Trending Discovery (/api/trending + Fallback) & Live Show/Movie Search (/api/search-title + Fallback)
+  let _trendingFetchedFromApi = false;
+
   function buildFallbackTrendingData() {
     const rawByApp = {
       netflix: [
@@ -4082,6 +4084,8 @@
         all: list,
         movies: movies.length ? movies : list,
         series: series.length ? series : list,
+        newMovies: newReleases.filter(i => i.mediaType === 'MOVIE'),
+        newSeries: newReleases.filter(i => i.mediaType === 'SERIES'),
         newReleases: newReleases.length ? newReleases : list.slice(0, 4),
         popcorn: (movies.length ? movies : list).slice().sort((a, b) => Number(b.rating) - Number(a.rating)),
         kdrama: kdramaList.length ? kdramaList : list.slice(0, 4),
@@ -4116,14 +4120,33 @@
 
   function getAppItems(appId, catKey) {
     ensureTrendingStoreReady();
-    const appObj = trendingByApp[appId] || trendingByApp.netflix || {};
-    if (catKey === 'movie_my') return appObj.movies || appObj.all || [];
-    if (catKey === 'tv_my') return appObj.series || appObj.all || [];
-    if (catKey === 'new_in') return appObj.newReleases || appObj.all || [];
-    if (catKey === 'popcorn') return appObj.popcorn || appObj.movies || appObj.all || [];
-    if (catKey === 'kdrama') return appObj.kdrama || appObj.all || [];
-    if (catKey === 'rewatched') return appObj.rewatched || appObj.series || appObj.all || [];
-    return appObj.onlyOn || appObj.all || [];
+    const fb = buildFallbackTrendingData();
+    const appObj = trendingByApp[appId] || fb.byApp[appId] || {};
+    const fbApp = fb.byApp[appId] || {};
+    let list = [];
+    if (catKey === 'movie_my') {
+      list = appObj.movies || [];
+    } else if (catKey === 'tv_my') {
+      list = appObj.series || [];
+    } else if (catKey === 'new_in') {
+      list = [...(appObj.newMovies || []), ...(appObj.newSeries || [])];
+      if (!list.length) list = appObj.newReleases || [];
+    } else if (catKey === 'popcorn') {
+      const src = appObj.movies || appObj.popcorn || [];
+      list = src.slice().sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+    } else if (catKey === 'kdrama') {
+      list = appObj.kdrama || [];
+    } else if (catKey === 'rewatched') {
+      const src = appObj.series || appObj.rewatched || [];
+      list = src.slice().sort((a, b) => ((b.popularity || 10) * Number(b.rating || 7)) - ((a.popularity || 10) * Number(a.rating || 7)));
+    } else {
+      list = [...(appObj.movies || []).slice(0, 5), ...(appObj.series || []).slice(0, 5)];
+      if (!list.length) list = appObj.onlyOn || appObj.all || [];
+    }
+    if (!list || !list.length) {
+      list = fbApp.all || fb.items || [];
+    }
+    return list.slice(0, 10);
   }
 
   function openTrendingModal(defaultCat = 'tv_my', appFilter = 'netflix') {
@@ -4135,6 +4158,9 @@
     triggerTopLoader(400);
     modal.style.display = 'flex';
     renderTrendingModal();
+    if (!_trendingFetchedFromApi) {
+      loadTrendingHero();
+    }
   }
 
   function closeTrendingModal() {
@@ -4187,22 +4213,26 @@
       body.innerHTML = `<div style="text-align:center; padding:22px; color:var(--text-muted); font-size:0.8rem;">No titles available for this selection right now.</div>`;
       return;
     }
-    body.innerHTML = list.map((item, idx) => `
-      <div class="discovery-row-card" style="display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
-        <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${idx + 1}</div>
-        ${renderPosterOrFallback(item)}
-        <div style="flex:1; min-width:0;">
-          <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap;">
-            <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel}</span>
-            <span style="font-size:0.64rem; color:var(--accent-cyan); font-weight:700;">${item.mediaType}</span>
-            <span style="font-size:0.68rem; color:var(--accent-gold); font-weight:700;">★ ${item.rating}</span>
+    body.innerHTML = list.map((item, idx) => {
+      const prod = products.find(p => p.id === item.platformId) || products[0];
+      const priceVal = prod ? Number(prod.price) : Number(item.price || 10);
+      return `
+        <div class="discovery-row-card" style="display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
+          <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${idx + 1}</div>
+          ${renderPosterOrFallback(item)}
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap;">
+              <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel || prod.name}</span>
+              <span style="font-size:0.64rem; color:var(--accent-cyan); font-weight:700;">${item.mediaType || 'SHOW'}</span>
+              <span style="font-size:0.68rem; color:var(--accent-gold); font-weight:700;">★ ${item.rating || 'N/A'}</span>
+            </div>
+            <div style="font-weight:700; font-size:0.9rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
+            <div style="font-size:0.73rem; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px;">${item.overview || ''}</div>
+            <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId || prod.id}');">Order ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} ✓</button>
           </div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
-          <div style="font-size:0.73rem; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px;">${item.overview || ''}</div>
-          <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId}');">Order ${item.platformLabel} • RM${Number(item.price).toFixed(2)} ✓</button>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   function openShowDetailModal(item) {
@@ -4214,11 +4244,11 @@
     const priceVal = prod ? Number(prod.price) : Number(item.price || 10);
     body.innerHTML = `
       <div class="spec-hero">
-        ${item.poster ? `<img src="${item.poster}" alt="${item.title}" class="spec-poster" onerror="this.style.display='none';" />` : ''}
+        ${item.poster ? `<img src="${item.poster}" alt="${item.title}" class="spec-poster" referrerpolicy="no-referrer" onerror="this.style.display='none';" />` : ''}
         <div style="flex:1; min-width:0;">
-          <div class="spec-title">${item.title}</div>
+          <div class="spec-title">${item.title} ${item.year && item.year !== '-' ? `<small style="color:var(--text-muted);font-weight:600;">(${item.year})</small>` : ''}</div>
           <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700; margin-bottom:6px;">${item.platformLabel || prod.name} • ${item.mediaType || 'SHOW'} • ★ ${item.rating || 'N/A'}</div>
-          <div style="font-size:0.8rem; color:var(--text-secondary);">${item.overview || ''}</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary);">${item.overview || 'No synopsis available.'}</div>
         </div>
       </div>
       <div class="spec-actions">
@@ -4234,32 +4264,59 @@
     if (list && list[idx]) openShowDetailModal(list[idx]);
   }
 
-  function loadTrendingHero() {
-    const fb = buildFallbackTrendingData();
-    trendingByApp = fb.byApp;
-    discoveryCategories = fb.categories;
-    const items = fb.items.slice(0, 6);
+  function renderHeroSlidesFromItems(items) {
     const track = document.getElementById('heroTrack');
     const dotsWrap = document.getElementById('heroDots');
-    if (!track || !dotsWrap || !items.length) return;
+    if (!track || !dotsWrap || !items || !items.length) return;
     track.innerHTML = items.map((item, idx) => {
       const prod = products.find(p => p.id === item.platformId) || products[0];
-      const bgStyle = item.backdrop ? `style="background-image:url('${item.backdrop}'); cursor:pointer;"` : `style="background:linear-gradient(135deg,#0b132b 0%,#172554 58%,#09152b 100%); cursor:pointer;"`;
+      const priceVal = prod ? Number(prod.price) : Number(item.price || 10);
+      const bgImg = item.backdrop || item.poster || '';
+      const bgStyle = bgImg
+        ? `style="background-image:url('${bgImg}'); cursor:pointer;"`
+        : `style="background:linear-gradient(135deg,#0b132b 0%,#172554 58%,#09152b 100%); cursor:pointer;"`;
       return `
         <section class="hero-slide trending-slide" ${bgStyle} onclick="openTrendingModal('tv_my', '${item.platformId}')">
           <div class="trending-meta">
             <span class="hero-pill">🔥 #${idx + 1} TRENDING</span>
-            <span class="platform-badge">${item.platformLabel}</span>
+            <span class="platform-badge">${item.platformLabel || prod.name}</span>
           </div>
           <h1>${item.title}</h1>
           <p>${item.overview || ''}</p>
-          <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${item.platformLabel} • RM${Number(item.price).toFixed(2)} →</button>
+          <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} →</button>
         </section>
       `;
     }).join('');
     totalSlides = items.length;
     currentSlide = 0;
     dotsWrap.innerHTML = items.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i + 1}"></button>`).join('');
+  }
+
+  async function loadTrendingHero() {
+    const fb = buildFallbackTrendingData();
+    trendingByApp = fb.byApp;
+    discoveryCategories = fb.categories;
+    renderHeroSlidesFromItems(fb.items.slice(0, 6));
+
+    try {
+      const res = await fetch('/api/trending');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data && data.byApp && Object.keys(data.byApp).length) {
+        trendingByApp = data.byApp;
+        _trendingFetchedFromApi = true;
+      }
+      if (data && data.categories) {
+        discoveryCategories = data.categories;
+      }
+      if (data && Array.isArray(data.items) && data.items.length) {
+        renderHeroSlidesFromItems(data.items.slice(0, 6));
+      }
+      const modal = document.getElementById('trendingModal');
+      if (modal && modal.style.display === 'flex') {
+        renderTrendingModal();
+      }
+    } catch (e) {}
   }
 
   function goToSlide(index) {
@@ -4280,9 +4337,16 @@
     }
   }
 
+  function normalizeSearchText(str) {
+    return String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
   function collectAllShowCatalog() {
     ensureTrendingStoreReady();
     const extraShows = [
+      { title: 'X-Men: Days of Future Past', year: '2014', mediaType: 'MOVIE', rating: '7.5', platformId: 'disney', platformLabel: 'Disney+', overview: 'The X-Men send Wolverine to the past to change history and prevent doom for humans and mutants.' },
+      { title: 'X-Men ’97', year: '2024', mediaType: 'SERIES', rating: '8.7', platformId: 'disney', platformLabel: 'Disney+', overview: 'A band of mutants use their uncanny gifts to protect a world that hates and fears them.' },
+      { title: 'Deadpool & Wolverine', year: '2024', mediaType: 'MOVIE', rating: '7.7', platformId: 'disney', platformLabel: 'Disney+', overview: 'Deadpool teams up with a reluctant Wolverine to save his universe.' },
       { title: 'Ultraman Trigger', year: '2021', mediaType: 'SERIES', rating: '7.6', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Kengo Manaka bonds with Ultraman Trigger to defend Earth.' },
       { title: 'Ultraman Blazar', year: '2023', mediaType: 'SERIES', rating: '8.1', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Captain Gento Hiruma transforms into Ultraman Blazar.' },
       { title: 'Ultraman Z', year: '2020', mediaType: 'SERIES', rating: '8.4', platformId: 'netflix', platformLabel: 'Netflix', overview: 'Haruki Natsuki teams up with Ultraman Z.' },
@@ -4295,25 +4359,68 @@
       { title: 'John Wick: Chapter 4', year: '2023', mediaType: 'MOVIE', rating: '7.8', platformId: 'primevideo', platformLabel: 'Prime Video', overview: 'John Wick faces the High Table.' }
     ];
     const trendingShows = [];
-    Object.values(trendingByApp || {}).forEach(appObj => (appObj.all || []).forEach(it => trendingShows.push(it)));
+    Object.values(trendingByApp || {}).forEach(appObj => {
+      [...(appObj.all || []), ...(appObj.movies || []), ...(appObj.series || [])].forEach(it => trendingShows.push(it));
+    });
     const seen = new Set();
     return [...trendingShows, ...extraShows].filter(item => {
-      const key = `${String(item.title || '').toLowerCase()}|${String(item.platformId || '')}`;
+      const key = `${normalizeSearchText(item.title)}|${String(item.platformId || '')}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
   }
 
-  function findMatchingShows(query) {
+  function findMatchingShowsLocal(query) {
     const ql = String(query || '').trim().toLowerCase();
+    const qNorm = normalizeSearchText(ql);
     if (!ql) return [];
     return collectAllShowCatalog().filter(item =>
       String(item.title || '').toLowerCase().includes(ql) ||
+      (qNorm && normalizeSearchText(item.title || '').includes(qNorm)) ||
       String(item.platformLabel || '').toLowerCase().includes(ql) ||
       String(item.mediaType || '').toLowerCase().includes(ql) ||
       String(item.overview || '').toLowerCase().includes(ql)
     );
+  }
+
+  async function queryShowsLiveAndLocal(query) {
+    const localMatches = findMatchingShowsLocal(query);
+    try {
+      const res = await fetch(`/api/search-title?q=${encodeURIComponent(query)}&region=MY`);
+      if (!res.ok) return localMatches;
+      const data = await res.json();
+      const apiItems = Array.isArray(data.items) ? data.items : [];
+      if (!apiItems.length) return localMatches;
+
+      const mappedApi = apiItems.map(it => {
+        const apps = Array.isArray(it.availableApps) && it.availableApps.length ? it.availableApps : [];
+        const primaryApp = apps[0] || { id: 'netflix', shortLabel: 'Netflix', price: 18 };
+        const allAppNames = apps.length ? apps.map(a => a.shortLabel).join(' / ') : 'Netflix / Disney+';
+        return {
+          id: it.id,
+          title: it.title,
+          year: it.year || '',
+          mediaType: it.mediaType || 'SHOW',
+          rating: it.rating || 'N/A',
+          overview: it.overview || '',
+          poster: it.poster || '',
+          platformId: primaryApp.id,
+          platformLabel: allAppNames,
+          price: primaryApp.price
+        };
+      });
+
+      const seen = new Set();
+      return [...mappedApi, ...localMatches].filter(item => {
+        const k = `${normalizeSearchText(item.title)}|${item.mediaType}`;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+    } catch (e) {
+      return localMatches;
+    }
   }
 
   window._lastSearchedShows = [];
@@ -4323,15 +4430,19 @@
     if (list[idx]) openShowDetailModal(list[idx]);
   }
 
-  function searchShowFromMainBox() {
+  async function searchShowFromMainBox() {
     const inp = document.getElementById('searchInput');
     const box = document.getElementById('inlineShowResultsBox');
     if (!inp || !box) return;
     const q = inp.value.trim();
     if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
-    const matches = findMatchingShows(q);
-    window._lastSearchedShows = matches;
+
     box.style.display = 'block';
+    box.innerHTML = `<div style="font-size:0.76rem; color:var(--accent-cyan); font-weight:700;">🔍 Searching "${q}" across Netflix, Disney+, HBO Max &amp; Prime Video...</div>`;
+
+    const matches = await queryShowsLiveAndLocal(q);
+    window._lastSearchedShows = matches;
+
     box.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <span style="font-size:0.74rem; font-weight:800; color:var(--accent-gold);">🎬 Show / Movie Search: "${q}" (${matches.length})</span>
@@ -4343,7 +4454,7 @@
         return `
           <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="openSearchedShowDetail(${idx})">
             <div style="min-width:0;">
-              <div style="font-weight:700; font-size:0.82rem; color:var(--text-primary);">${m.title} ${m.year ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}</div>
+              <div style="font-weight:700; font-size:0.82rem; color:var(--text-primary);">${m.title} ${m.year && m.year !== '-' ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}</div>
               <div style="font-size:0.68rem; color:var(--accent-cyan);">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • ${m.platformLabel || prod.name}</div>
             </div>
             <button type="button" onclick="event.stopPropagation(); openCheckout('${prod.id}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:4px 9px; border-radius:999px; font-size:0.68rem; font-weight:800; cursor:pointer; white-space:nowrap;">RM${priceVal.toFixed(2)} ✓</button>
@@ -4358,31 +4469,42 @@
     if (m) m.classList.add('open');
     setTimeout(() => {
       const i = document.getElementById('showSearchInput');
-      if (i) { i.focus(); if (i.value.trim()) runShowSearch(); }
+      if (i) {
+        const mainQ = (document.getElementById('searchInput')?.value || '').trim();
+        if (!i.value.trim() && mainQ) i.value = mainQ;
+        i.focus();
+        if (i.value.trim()) runShowSearch();
+      }
     }, 80);
   }
 
   function closeShowSearchModal() { document.getElementById('showSearchModal')?.classList.remove('open'); }
   function closeShowDetailModal() { document.getElementById('showDetailModal')?.classList.remove('open'); }
 
-  function runShowSearch() {
+  async function runShowSearch() {
     const inp = document.getElementById('showSearchInput');
     const box = document.getElementById('showSearchResults');
     if (!inp || !box) return;
     const q = inp.value.trim();
     if (!q) { box.innerHTML = `<div style="font-size:0.76rem; color:var(--text-muted);">Type a movie or show title to check availability.</div>`; return; }
-    const matches = findMatchingShows(q);
+
+    box.innerHTML = `<div style="font-size:0.78rem; color:var(--accent-cyan); font-weight:700;">🔍 Searching "${q}"...</div>`;
+    const matches = await queryShowsLiveAndLocal(q);
     window._lastSearchedShows = matches;
+
     box.innerHTML = matches.length ? matches.map((m, idx) => {
       const prod = products.find(p => p.id === m.platformId) || products[0];
       const priceVal = prod ? Number(prod.price) : Number(m.price || 10);
       return `
         <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer;" onclick="openSearchedShowDetail(${idx})">
-          <div style="min-width:0;">
-            <div style="font-weight:700; font-size:0.84rem; color:var(--text-primary);">${m.title} ${m.year ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}</div>
-            <div style="font-size:0.7rem; color:var(--accent-cyan); margin-top:2px;">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • Available on <strong>${m.platformLabel || prod.name}</strong></div>
+          <div style="display:flex; gap:10px; align-items:center; min-width:0; flex:1;">
+            ${m.poster ? `<img src="${m.poster}" alt="${m.title}" referrerpolicy="no-referrer" style="width:42px; height:62px; object-fit:cover; border-radius:8px; flex-shrink:0;" onerror="this.style.display='none';" />` : ''}
+            <div style="min-width:0;">
+              <div style="font-weight:700; font-size:0.84rem; color:var(--text-primary);">${m.title} ${m.year && m.year !== '-' ? `<small style="color:var(--text-muted);">(${m.year})</small>` : ''}</div>
+              <div style="font-size:0.7rem; color:var(--accent-cyan); margin-top:2px;">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • Available on <strong>${m.platformLabel || prod.name}</strong></div>
+            </div>
           </div>
-          <button type="button" onclick="event.stopPropagation(); closeShowSearchModal(); openCheckout('${prod.id}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:5px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; white-space:nowrap;">Order • RM${priceVal.toFixed(2)}</button>
+          <button type="button" onclick="event.stopPropagation(); closeShowSearchModal(); openCheckout('${prod.id}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:5px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; white-space:nowrap; flex-shrink:0;">Order • RM${priceVal.toFixed(2)}</button>
         </div>
       `;
     }).join('') : `<div style="font-size:0.78rem; color:var(--text-muted);">No matching movie or show found for "${q}".</div>`;
