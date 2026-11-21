@@ -2395,64 +2395,52 @@
     </svg>
   </a>
 
-  <!-- Login / Register Modal -->
+  <!-- Sign Up / Account Modal (GameJus-inspired) -->
   <div class="modal-backdrop" id="authModal">
     <div class="modal-card">
       <div class="modal-top">
-        <h3 id="authModalTitle">SPYSTORE Account</h3>
-        <button class="close-modal" onclick="closeAuthModal()">✕</button>
+        <h3 id="authModalTitle">SPYSTORE SIGN UP</h3>
+        <button type="button" class="close-modal" onclick="closeAuthModal()">✕</button>
       </div>
 
-      <div id="authFormsView">
-        <div class="auth-tabs">
-          <button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">Login</button>
-          <button class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Register</button>
+      <div id="authFormsView" class="auth-form-anim">
+        <button type="button" onclick="handleGoogleSignIn('signup')" style="width:100%; background:#ffffff; color:#0f172a; border:1.5px solid var(--border-strong); padding:12px 14px; border-radius:12px; font-weight:800; font-size:0.86rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
+          <span id="gSignupSvgSlot"></span>
+          <span>Continue with Google</span>
+        </button>
+
+        <div style="display:flex; align-items:center; gap:10px; margin:14px 0; color:var(--text-muted); font-size:0.72rem; font-weight:800; letter-spacing:0.06em;">
+          <span style="flex:1; height:1px; background:var(--border-color);"></span>
+          <span>OR</span>
+          <span style="flex:1; height:1px; background:var(--border-color);"></span>
         </div>
 
-        <form id="loginForm" onsubmit="handleLogin(event)">
+        <form id="simpleSignupForm" onsubmit="handleSignupSubmit(event)">
           <div class="form-group">
-            <label>Email or WhatsApp Number *</label>
-            <input type="text" class="form-control" id="loginIdentifier" placeholder="e.g. user@email.com or 0123456789" required />
+            <label>Username / Email Address *</label>
+            <div style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;">
+              <input type="text" class="form-control" id="signupUserOrEmail" placeholder="e.g. ahmad or ahmad@gmail.com" required />
+              <span style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:10px 11px; border-radius:10px; font-size:0.78rem; font-weight:700; white-space:nowrap;">@ email.com</span>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Password *</label>
-            <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required />
-          </div>
-          <button type="submit" class="primary-submit">Sign In to Account</button>
-          <button type="button" onclick="handleGoogleSignIn('login')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-            <span id="gLoginSvgSlot"></span> Continue with Google
-          </button>
+          <button type="submit" class="primary-submit">CONTINUE SIGN UP →</button>
         </form>
 
-        <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
-          <div class="form-group">
-            <label>Full Name *</label>
-            <input type="text" class="form-control" id="regName" placeholder="e.g. Ahmad Hussam" required />
-          </div>
-          <div class="form-group">
-            <label>Email Address *</label>
-            <input type="email" class="form-control" id="regEmail" placeholder="e.g. ahmad@gmail.com" required />
-          </div>
-          <div class="form-group">
-            <label>WhatsApp Number *</label>
-            <input type="tel" class="form-control" id="regPhone" placeholder="e.g. 0123456789" required />
-          </div>
-          <div class="form-group">
-            <label>Create Password *</label>
-            <input type="password" class="form-control" id="regPassword" placeholder="Minimum 6 characters" minlength="6" required />
-          </div>
-          <button type="submit" class="primary-submit">Create Account</button>
-          <button type="button" onclick="handleGoogleSignIn('register')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-            <span id="gRegSvgSlot"></span> Sign up with Google
-          </button>
-        </form>
+        <div class="warranty-rules-box" style="margin-top:14px;">
+          <strong>Easy Steps to Join SPYSTORE</strong>
+          <ol class="warranty-rules-list">
+            <li>Sign in with Google or enter your email/username to create your account.</li>
+            <li>Your account profile and transaction history stay saved automatically.</li>
+            <li>Enjoy instant digital subscription ordering with full warranty.</li>
+          </ol>
+        </div>
       </div>
 
       <div id="loggedInView" style="display:none;">
         <div class="profile-box" id="profileDetailsBox"></div>
-        <h4 style="font-size:0.85rem; margin-bottom:8px;">Recent Order History</h4>
+        <h4 style="font-size:0.85rem; margin-bottom:8px;">Transaction History</h4>
         <div id="orderHistoryList"></div>
-        <button class="logout-btn" onclick="handleLogout()">Log Out</button>
+        <button type="button" class="logout-btn" onclick="handleLogout()">Log Out</button>
       </div>
     </div>
   </div>
@@ -2734,12 +2722,27 @@
       document.getElementById('searchInput').placeholder = currentLang === 'en'
         ? 'Search Netflix, Disney+, Spotify, Canva...'
         : 'Cari Netflix, Disney+, Spotify, Canva...';
+      if (typeof refreshCheckoutLoginReminder === 'function') {
+        refreshCheckoutLoginReminder();
+      }
     }
 
     function toggleLang() {
       currentLang = currentLang === 'en' ? 'my' : 'en';
       localStorage.setItem('spystore_lang', currentLang);
       triggerTopLoader(700);
+
+    (function sanitizeDemoGoogleAccount() {
+      try {
+        const users = getUsersDB();
+        localStorage.setItem('spystore_users_db', JSON.stringify(users));
+        const cur = JSON.parse(localStorage.getItem('spystore_current_user') || 'null');
+        if (cur && String(cur.email || '').toLowerCase() === 'google.user@gmail.com') {
+          localStorage.removeItem('spystore_current_user');
+        }
+      } catch (e) {}
+    })();
+
     applyLanguage();
       renderProducts();
     }
@@ -3907,16 +3910,20 @@
     }
 
     function getUsersDB() {
-      try { return JSON.parse(localStorage.getItem('spystore_users_db') || '[]'); } catch { return []; }
+      try {
+        const raw = JSON.parse(localStorage.getItem('spystore_users_db') || '[]');
+        return Array.isArray(raw)
+          ? raw.filter(u => u && u.email && String(u.email).toLowerCase() !== 'google.user@gmail.com')
+          : [];
+      } catch { return []; }
     }
     function saveUsersDB(users) { localStorage.setItem('spystore_users_db', JSON.stringify(users)); }
     function getCurrentUser() {
       try { return JSON.parse(localStorage.getItem('spystore_current_user') || 'null'); } catch { return null; }
     }
 
-
     function hydrateGoogleButtonLogos() {
-      document.querySelectorAll('#gLoginSvgSlot, #gRegSvgSlot').forEach(el => {
+      document.querySelectorAll('#gSignupSvgSlot').forEach(el => {
         if (!el.innerHTML.trim() && typeof googleLogoSvg === 'function') {
           el.innerHTML = googleLogoSvg(18);
         }
@@ -3933,16 +3940,16 @@
       const bEl = document.getElementById('checkoutReminderBtn');
       if (tEl) {
         tEl.textContent = currentLang === 'en'
-          ? '⚠️ Login Before Payment So Your Data & History Are Saved'
-          : '⚠️ Login Dahulu Sebelum Bayar Supaya Data & Rekod Tak Hilang';
+          ? '⚠️ Sign Up / Login Before Payment So Your Data & History Are Saved'
+          : '⚠️ Sign Up / Login Dahulu Sebelum Bayar Supaya Data & Rekod Tak Hilang';
       }
       if (dEl) {
         dEl.textContent = currentLang === 'en'
-          ? 'Please sign in first so your profile details and order/transaction history stay saved to your account.'
-          : 'Sila log masuk dahulu supaya data profil serta sejarah transaksi/tempahan kekal tersimpan dalam akaun anda.';
+          ? 'Please sign in first so your profile details and transaction history stay saved to your account.'
+          : 'Sila log masuk / daftar dahulu supaya maklumat profil serta sejarah transaksi kekal tersimpan dalam akaun anda.';
       }
       if (bEl) {
-        bEl.textContent = currentLang === 'en' ? 'Login Now →' : 'Login Sekarang →';
+        bEl.textContent = currentLang === 'en' ? 'Sign Up / Login →' : 'Sign Up / Login →';
       }
     }
 
@@ -3950,14 +3957,49 @@
       const user = getCurrentUser();
       const navBtn = document.getElementById('authNavBtn');
       if (user) {
-        const firstName = user.name.split(' ')[0];
+        const firstName = (user.name || user.email || 'Account').split(' ')[0];
         navBtn.textContent = `👤 ${firstName}`;
         navBtn.classList.add('auth-active');
       } else {
-        navBtn.textContent = 'Login';
+        navBtn.textContent = 'Sign Up';
         navBtn.classList.remove('auth-active');
       }
       refreshCheckoutLoginReminder();
+    }
+
+    function renderAuthSignupCardHtml() {
+      return `
+        <button type="button" onclick="handleGoogleSignIn('signup')" style="width:100%; background:#ffffff; color:#0f172a; border:1.5px solid var(--border-strong); padding:12px 14px; border-radius:12px; font-weight:800; font-size:0.86rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
+          <span id="gSignupSvgSlot"></span>
+          <span>Continue with Google</span>
+        </button>
+
+        <div style="display:flex; align-items:center; gap:10px; margin:14px 0; color:var(--text-muted); font-size:0.72rem; font-weight:800; letter-spacing:0.06em;">
+          <span style="flex:1; height:1px; background:var(--border-color);"></span>
+          <span>OR</span>
+          <span style="flex:1; height:1px; background:var(--border-color);"></span>
+        </div>
+
+        <form id="simpleSignupForm" onsubmit="handleSignupSubmit(event)">
+          <div class="form-group">
+            <label>Username / Email Address *</label>
+            <div style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;">
+              <input type="text" class="form-control" id="signupUserOrEmail" placeholder="e.g. ahmad or ahmad@gmail.com" required />
+              <span style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:10px 11px; border-radius:10px; font-size:0.78rem; font-weight:700; white-space:nowrap;">@ email.com</span>
+            </div>
+          </div>
+          <button type="submit" class="primary-submit">CONTINUE SIGN UP →</button>
+        </form>
+
+        <div class="warranty-rules-box" style="margin-top:14px;">
+          <strong>Easy Steps to Join SPYSTORE</strong>
+          <ol class="warranty-rules-list">
+            <li>Sign in with Google or enter your email/username to create your account.</li>
+            <li>Your account profile and transaction history stay saved automatically.</li>
+            <li>Enjoy instant digital subscription ordering with full warranty.</li>
+          </ol>
+        </div>
+      `;
     }
 
     function openAuthModal() {
@@ -3966,125 +4008,62 @@
       modal.classList.add('open');
 
       if (user) {
-        document.getElementById('authModalTitle').textContent = 'My Account';
+        document.getElementById('authModalTitle').textContent = 'SPYSTORE PROFILE';
         document.getElementById('authFormsView').style.display = 'none';
         document.getElementById('loggedInView').style.display = 'block';
         document.getElementById('profileDetailsBox').innerHTML = `
-          <p><strong>Name:</strong> ${user.name}</p>
+          <p><strong>Username:</strong> ${user.username || (user.email ? user.email.split('@')[0] : user.name)}</p>
+          <p><strong>Full Name:</strong> ${user.name}</p>
           <p><strong>Email:</strong> ${user.email}</p>
-          <p style="margin-bottom:0;"><strong>WhatsApp:</strong> ${user.phone}</p>
+          <p><strong>Country:</strong> Malaysia</p>
+          <p style="margin-bottom:0;"><strong>WhatsApp:</strong> ${user.phone || '-'}</p>
         `;
         renderOrderHistory();
       } else {
-        document.getElementById('authModalTitle').textContent = 'SPYSTORE Account';
+        document.getElementById('authModalTitle').textContent = 'SPYSTORE SIGN UP';
         const formsView = document.getElementById('authFormsView');
-        if (!document.getElementById('loginForm')) {
-          formsView.innerHTML = `
-            <div class="auth-tabs">
-              <button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">Login</button>
-              <button class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Register</button>
-            </div>
-            <form id="loginForm" onsubmit="handleLogin(event)">
-              <div class="form-group">
-                <label>Email or WhatsApp Number *</label>
-                <input type="text" class="form-control" id="loginIdentifier" placeholder="e.g. user@email.com or 0123456789" required />
-              </div>
-              <div class="form-group">
-                <label>Password *</label>
-                <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required />
-              </div>
-              <button type="submit" class="primary-submit">Sign In to Account</button>
-              <button type="button" onclick="handleGoogleSignIn('login')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-                <span id="gLoginSvgSlot"></span> Continue with Google
-              </button>
-            </form>
-            <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
-              <div class="form-group">
-                <label>Full Name *</label>
-                <input type="text" class="form-control" id="regName" placeholder="e.g. Ahmad Hussam" required />
-              </div>
-              <div class="form-group">
-                <label>Email Address *</label>
-                <input type="email" class="form-control" id="regEmail" placeholder="e.g. ahmad@gmail.com" required />
-              </div>
-              <div class="form-group">
-                <label>WhatsApp Number *</label>
-                <input type="tel" class="form-control" id="regPhone" placeholder="e.g. 0123456789" required />
-              </div>
-              <div class="form-group">
-                <label>Create Password *</label>
-                <input type="password" class="form-control" id="regPassword" placeholder="Minimum 6 characters" minlength="6" required />
-              </div>
-              <button type="submit" class="primary-submit">Create Account</button>
-              <button type="button" onclick="handleGoogleSignIn('register')" style="width:100%; margin-top:8px; background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-strong); padding:11px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-                <span id="gRegSvgSlot"></span> Sign up with Google
-              </button>
-            </form>
-          `;
-        }
+        formsView.innerHTML = renderAuthSignupCardHtml();
         formsView.style.display = 'block';
         document.getElementById('loggedInView').style.display = 'none';
-        switchAuthTab('login');
+        hydrateGoogleButtonLogos();
       }
     }
 
     function closeAuthModal() { document.getElementById('authModal').classList.remove('open'); }
 
-    function switchAuthTab(tab) {
-      const isLogin = tab === 'login';
-      document.getElementById('tabLoginBtn').classList.toggle('active', isLogin);
-      document.getElementById('tabRegisterBtn').classList.toggle('active', !isLogin);
-      const lf = document.getElementById('loginForm');
-      const rf = document.getElementById('registerForm');
-      lf.style.display = isLogin ? 'block' : 'none';
-      rf.style.display = isLogin ? 'none' : 'block';
-      animateElementEnter(isLogin ? lf : rf, 'auth-form-anim');
-    }
-
-    function handleRegister(e) {
+    function handleSignupSubmit(e) {
       e.preventDefault();
-      const name = document.getElementById('regName').value.trim();
-      const email = document.getElementById('regEmail').value.trim().toLowerCase();
-      const phone = document.getElementById('regPhone').value.trim();
-      const password = document.getElementById('regPassword').value;
+      const rawInput = String(document.getElementById('signupUserOrEmail')?.value || '').trim().toLowerCase();
+      if (!rawInput) return;
+
+      const email = rawInput.includes('@') ? rawInput : `${rawInput.replace(/[^a-z0-9._-]/g, '')}@gmail.com`;
+      const username = email.split('@')[0];
+      const name = username.replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
       const users = getUsersDB();
-      if (users.some(u => u.email === email || u.phone === phone)) {
-        showToast('Email or WhatsApp number already registered! Please Login.');
-        switchAuthTab('login');
-        return;
+      const existing = users.find(u => u.email === email);
+      const account = {
+        username,
+        name: existing?.name || name,
+        email,
+        phone: existing?.phone || '',
+        provider: existing?.provider || 'signup'
+      };
+      if (!existing) {
+        users.push(account);
+        saveUsersDB(users);
+      } else {
+        Object.assign(existing, account);
+        saveUsersDB(users);
       }
-
-      const newUser = { name, email, phone, password };
-      users.push(newUser);
-      saveUsersDB(users);
-      localStorage.setItem('spystore_current_user', JSON.stringify(newUser));
-      updateAuthUI();
-    hydrateGoogleButtonLogos();
-      closeAuthModal();
-      showToast(`Welcome to SPYSTORE BY SAMS, ${name}!`);
-    }
-
-    function handleLogin(e) {
-      e.preventDefault();
-      const identifier = document.getElementById('loginIdentifier').value.trim().toLowerCase();
-      const password = document.getElementById('loginPassword').value;
-
-      const users = getUsersDB();
-      const found = users.find(u => (u.email === identifier || u.phone === identifier) && u.password === password);
-      if (!found) {
-        showToast('Invalid email/WhatsApp or password.');
-        return;
-      }
-
-      localStorage.setItem('spystore_current_user', JSON.stringify(found));
+      localStorage.setItem('spystore_current_user', JSON.stringify(account));
       syncCurrentUserSavedData();
       updateAuthUI();
       closeAuthModal();
-      showToast(`Logged in as ${found.name}`);
+      showToast(`Signed up as ${account.email}`);
     }
 
-    let _pendingGoogleAuthMode = 'login';
+    let _pendingGoogleAuthMode = 'signup';
 
     function decodeJwtPayload(token) {
       try {
@@ -4118,10 +4097,12 @@
         showToast(currentLang === 'en' ? 'Enter a valid Google Gmail address.' : 'Masukkan alamat e-mel Google yang sah.');
         return;
       }
-      const derivedName = String(name || '').trim() || cleanEmail.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const username = cleanEmail.split('@')[0];
+      const derivedName = String(name || '').trim() || username.replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
       const users = getUsersDB();
       const existingUser = users.find(u => u.email === cleanEmail);
       const googleUser = {
+        username,
         name: existingUser?.name || derivedName,
         email: cleanEmail,
         phone: phone || existingUser?.phone || '',
@@ -4138,9 +4119,7 @@
       syncCurrentUserSavedData();
       updateAuthUI();
       closeAuthModal();
-      showToast(_pendingGoogleAuthMode === 'register'
-        ? `Google registered: ${googleUser.email}`
-        : `Signed in as ${googleUser.email}`);
+      showToast(`Signed in with Google: ${googleUser.email}`);
     }
 
     function handleGoogleCredentialResponse(response) {
@@ -4199,12 +4178,12 @@
             <input type="email" class="form-control" id="googleCustomEmailInput" placeholder="e.g. ahmad@gmail.com" required />
           </div>
           <button type="submit" class="primary-submit">${currentLang === 'en' ? 'Continue with this Gmail' : 'Teruskan dengan Gmail ini'}</button>
-          <button type="button" onclick="openAuthModal()" style="width:100%; margin-top:8px; background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); padding:9px; border-radius:10px; font-weight:700; font-size:0.78rem; cursor:pointer;">${currentLang === 'en' ? '← Back to Login / Register' : '← Kembali ke Log Masuk / Daftar'}</button>
+          <button type="button" onclick="openAuthModal()" style="width:100%; margin-top:8px; background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); padding:9px; border-radius:10px; font-weight:700; font-size:0.78rem; cursor:pointer;">${currentLang === 'en' ? '← Back to Sign Up' : '← Kembali ke Sign Up'}</button>
         </form>
       `;
     }
 
-    function handleGoogleSignIn(mode = 'login') {
+    function handleGoogleSignIn(mode = 'signup') {
       _pendingGoogleAuthMode = mode;
       const clientId = getGoogleClientId();
 
@@ -4233,7 +4212,6 @@
       showToast('Logged out successfully.');
     }
 
-
     function getUserDataKey(email) {
       return `spystore_user_data_${String(email || 'guest').trim().toLowerCase()}`;
     }
@@ -4254,10 +4232,11 @@
       try { current = JSON.parse(localStorage.getItem(key) || '{"orders":[],"profile":{}}'); } catch (e) {}
 
       current.profile = {
+        username: user.username || (user.email ? user.email.split('@')[0] : ''),
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
-        provider: user.provider || 'local',
+        provider: user.provider || 'signup',
         updatedAt: new Date().toISOString()
       };
 
