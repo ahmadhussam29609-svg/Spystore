@@ -8,8 +8,8 @@
     :root {
       --bg: #070b14;
       --bg-soft: #0d1424;
-      --card: rgba(16, 24, 42, 0.88);
-      --card-hover: rgba(23, 35, 61, 0.96);
+      --card: rgba(16, 24, 42, 0.9);
+      --card-hover: rgba(24, 36, 63, 0.98);
       --text: #f3f6fc;
       --muted: #9aa7bf;
       --accent: #facc15;
@@ -23,7 +23,7 @@
     body.light-mode {
       --bg: #f4f7fb;
       --bg-soft: #e9eff8;
-      --card: rgba(255, 255, 255, 0.92);
+      --card: rgba(255, 255, 255, 0.94);
       --card-hover: rgba(255, 255, 255, 1);
       --text: #0f172a;
       --muted: #475569;
@@ -59,13 +59,13 @@
 
     @keyframes floatSlow {
       0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-6px); }
+      50% { transform: translateY(-5px); }
     }
 
     @keyframes fadeSlideUp {
       from {
         opacity: 0;
-        transform: translateY(14px);
+        transform: translateY(10px);
       }
       to {
         opacity: 1;
@@ -73,27 +73,21 @@
       }
     }
 
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.25); }
-      50% { box-shadow: 0 0 22px 4px rgba(250, 204, 21, 0.18); }
-    }
-
     .anim-up {
-      animation: fadeSlideUp 0.45s ease both;
+      animation: fadeSlideUp 0.4s ease both;
     }
 
-    /* Header */
     header {
       position: sticky;
       top: 0;
       z-index: 40;
       backdrop-filter: blur(14px);
-      background: rgba(7, 11, 20, 0.82);
+      background: rgba(7, 11, 20, 0.85);
       border-bottom: 1px solid var(--border);
     }
 
     body.light-mode header {
-      background: rgba(244, 247, 251, 0.85);
+      background: rgba(244, 247, 251, 0.88);
     }
 
     .nav-wrap {
@@ -156,7 +150,7 @@
       font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -166,6 +160,10 @@
     .btn:hover {
       background: var(--card-hover);
       transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
     }
 
     .btn-primary {
@@ -179,16 +177,14 @@
       filter: brightness(1.04);
     }
 
-    /* Container */
     .container {
       max-width: 1120px;
       margin: 0 auto;
-      padding: 20px 16px 72px;
+      padding: 20px 16px 84px;
     }
 
-    /* Hero & Search */
     .hero {
-      background: linear-gradient(135deg, rgba(16, 24, 42, 0.92), rgba(15, 23, 42, 0.75));
+      background: linear-gradient(135deg, rgba(16, 24, 42, 0.92), rgba(15, 23, 42, 0.78));
       border: 1px solid var(--border);
       border-radius: 20px;
       padding: 24px 20px;
@@ -197,7 +193,7 @@
     }
 
     body.light-mode .hero {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(233, 239, 248, 0.9));
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(233, 239, 248, 0.92));
     }
 
     .hero-top {
@@ -251,6 +247,7 @@
       color: var(--text);
       font-size: 0.92rem;
       outline: none;
+      transition: border-color 0.16s ease;
     }
 
     .search-input:focus {
@@ -268,7 +265,7 @@
 
     .show-results.active {
       display: block;
-      animation: fadeSlideUp 0.25s ease;
+      animation: fadeSlideUp 0.22s ease;
     }
 
     .show-item {
@@ -284,7 +281,6 @@
       gap: 10px;
     }
 
-    /* Section Headers & Filters */
     .section-head {
       display: flex;
       flex-wrap: wrap;
@@ -315,7 +311,7 @@
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.16s ease;
     }
 
     .chip.active, .chip:hover {
@@ -324,7 +320,6 @@
       border-color: transparent;
     }
 
-    /* Catalog Grid */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -338,22 +333,27 @@
       border-radius: 16px;
       padding: 16px;
       cursor: pointer;
-      transition: all 0.22s ease;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       gap: 12px;
+      user-select: none;
     }
 
     .app-card:hover {
       background: var(--card-hover);
-      transform: translateY(-3px);
+      transform: translateY(-2px);
       border-color: rgba(250, 204, 21, 0.45);
+    }
+
+    .app-card:active {
+      transform: scale(0.99);
     }
 
     .app-card.selected {
       border-color: var(--accent);
-      animation: pulseGlow 2.4s infinite;
+      box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.35), var(--shadow);
     }
 
     .app-top {
@@ -371,6 +371,11 @@
       background: rgba(148, 163, 184, 0.12);
       display: grid;
       place-items: center;
+      transition: transform 0.2s ease;
+    }
+
+    .app-card:hover .app-icon {
+      transform: scale(1.06);
     }
 
     .badge {
@@ -405,7 +410,6 @@
       align-items: center;
     }
 
-    /* Checkout Panel */
     .checkout-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -455,14 +459,14 @@
       border-radius: 12px;
       padding: 12px;
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.16s ease;
       text-align: left;
       color: var(--text);
     }
 
     .plan-option.active {
       border-color: var(--accent);
-      background: rgba(250, 204, 21, 0.1);
+      background: rgba(250, 204, 21, 0.12);
     }
 
     .plan-price {
@@ -512,7 +516,7 @@
       border-radius: 14px;
       padding: 14px;
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.16s ease;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -521,7 +525,7 @@
 
     .pay-card.active {
       border-color: var(--accent);
-      background: rgba(250, 204, 21, 0.09);
+      background: rgba(250, 204, 21, 0.1);
     }
 
     .pay-title {
@@ -716,7 +720,6 @@
 
       <div id="orderReceipt" class="receipt-box"></div>
 
-      <!-- Step 1: Plan Selection -->
       <div class="step-box">
         <div class="step-label">
           <span class="step-num">1</span>
@@ -726,7 +729,6 @@
         <div class="plan-grid" id="durationGrid"></div>
       </div>
 
-      <!-- Step 2: Customer Details -->
       <div class="step-box">
         <div class="step-label">
           <span class="step-num">2</span>
@@ -757,7 +759,6 @@
         </div>
       </div>
 
-      <!-- Step 3: Updated Payment Method -->
       <div class="step-box">
         <div class="step-label">
           <span class="step-num">3</span>
@@ -933,7 +934,7 @@
     ];
 
     let currentFilter = 'all';
-    let selectedApp = APPS[1]; // Default Disney+ Premium
+    let selectedApp = APPS[1];
     let selectedSubPlan = null;
     let selectedDuration = selectedApp.durations[0];
     let selectedPayment = 'billplz_fpx';
@@ -964,7 +965,7 @@
       catalogGrid.innerHTML = filtered.map(app => {
         const isSel = selectedApp && selectedApp.id === app.id;
         return `
-          <div class="app-card ${isSel ? 'selected' : ''}" onclick="selectApp('${app.id}')">
+          <div class="app-card ${isSel ? 'selected' : ''}" data-app-id="${app.id}">
             <div>
               <div class="app-top">
                 <div class="app-icon">${app.icon}</div>
@@ -982,7 +983,7 @@
       }).join('');
     }
 
-    function selectApp(appId) {
+    function selectApp(appId, shouldScroll = true) {
       const found = APPS.find(a => a.id === appId);
       if (!found) return;
       selectedApp = found;
@@ -996,7 +997,9 @@
       renderCatalog();
       renderCheckoutPlans();
       updateTotal();
-      document.getElementById('checkout-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (shouldScroll) {
+        document.getElementById('checkout-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     function selectSubPlan(subId) {
@@ -1029,7 +1032,7 @@
               <button
                 type="button"
                 class="plan-option ${selectedSubPlan && selectedSubPlan.id === sp.id ? 'active' : ''}"
-                onclick="selectSubPlan('${sp.id}')"
+                data-sub-id="${sp.id}"
               >
                 <div style="font-weight:800;">${sp.label}</div>
               </button>
@@ -1047,7 +1050,7 @@
           <button
             type="button"
             class="plan-option ${isAct ? 'active' : ''}"
-            onclick="selectDuration(${idx})"
+            data-dur-idx="${idx}"
           >
             <div style="font-weight:700;">${d.label}</div>
             <div class="plan-price">RM${Number(d.price).toFixed(2)}</div>
@@ -1060,6 +1063,35 @@
       const price = selectedDuration ? Number(selectedDuration.price) : 0;
       totalPayableEl.textContent = `RM${price.toFixed(2)}`;
     }
+
+    // Event delegation for catalog cards
+    catalogGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.app-card');
+      if (!card) return;
+      const appId = card.getAttribute('data-app-id');
+      if (appId) selectApp(appId, true);
+    });
+
+    // Event delegation for sub-plans
+    subPlanContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-sub-id]');
+      if (!btn) return;
+      selectSubPlan(btn.getAttribute('data-sub-id'));
+    });
+
+    // Event delegation for duration plans
+    durationGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-dur-idx]');
+      if (!btn) return;
+      selectDuration(Number(btn.getAttribute('data-dur-idx')));
+    });
+
+    // Event delegation for show search item buttons
+    document.getElementById('showSearchResults').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-pick-app]');
+      if (!btn) return;
+      selectApp(btn.getAttribute('data-pick-app'), true);
+    });
 
     document.querySelectorAll('#paymentMethodList .pay-card').forEach(card => {
       card.addEventListener('click', () => {
@@ -1122,7 +1154,15 @@
         const data = await res.json();
         const results = Array.isArray(data.results) ? data.results : [];
         if (results.length === 0) {
-          box.innerHTML = `<div style="font-size:0.85rem; color:var(--muted);">Tiada padanan cerita dijumpai untuk "<strong>${query}</strong>". Anda masih boleh memilih aplikasi penstriman di bawah.</div>`;
+          box.innerHTML = `
+            <div style="font-size:0.85rem; color:var(--muted);">
+              Tiada padanan cerita dijumpai untuk "<strong>${query}</strong>". Anda boleh pilih aplikasi di bawah:
+              <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary" data-pick-app="netflix">Netflix UHD →</button>
+                <button type="button" class="btn" data-pick-app="disney">Disney+ Premium →</button>
+              </div>
+            </div>
+          `;
           return;
         }
         box.innerHTML = `
@@ -1133,7 +1173,7 @@
                 <div style="font-weight:800;">${item.title || query}</div>
                 <div style="font-size:0.78rem; color:var(--muted);">Platform: ${(item.platforms || ['Netflix', 'Disney+']).join(', ')}</div>
               </div>
-              <button type="button" class="btn btn-primary" onclick="selectApp('netflix')">Pilih App →</button>
+              <button type="button" class="btn btn-primary" data-pick-app="netflix">Pilih App →</button>
             </div>
           `).join('')}
         `;
@@ -1215,7 +1255,6 @@
       }
     });
 
-    // Check Billplz redirect params
     (function checkRedirectReceipt() {
       const params = new URLSearchParams(window.location.search);
       const paid = params.get('billplz[paid]') || params.get('paid');
@@ -1230,7 +1269,6 @@
       }
     })();
 
-    // Theme toggle
     document.getElementById('themeBtn').addEventListener('click', () => {
       document.body.classList.toggle('light-mode');
       document.getElementById('themeBtn').textContent = document.body.classList.contains('light-mode') ? '🌙' : '☀️';
