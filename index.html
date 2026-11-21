@@ -2619,7 +2619,7 @@
       { id: 'youtube', logo: 'youtube.png', name: 'YouTube Premium', mode: 'invite', category: 'Streaming', price: 5, stock: 0, badge: 'YT', bg: '#271313', color: '#f87171' },
       { id: 'spotify', logo: 'spotify.png', name: 'Spotify Premium', mode: 'invite', category: 'Music', price: 13, stock: 0, badge: 'SP', bg: '#0d2618', color: '#22c55e' },
       { id: 'canva', logo: 'canva.png', name: 'Canva Pro', mode: 'invite', category: 'Creative', price: 5, stock: 0, badge: 'C', bg: '#0e2933', color: '#22d3ee' },
-      { id: 'capcut', logo: 'capcut.png', name: 'CapCut Pro', mode: 'dual', subPlans: [{ key: 'share', label: 'Share', price: 10 }, { key: 'private', label: 'Private', price: 15 }], category: 'Creative', price: 10, stock: 0, badge: 'CC', bg: '#18181b', color: '#facc15' }
+      { id: 'capcut', logo: 'capcut.png', name: 'CapCut Pro', mode: 'dual', subPlans: [{ key: 'share', label: 'Share', price: 10, stock: 0 }, { key: 'private', label: 'Private', price: 15, stock: 0 }], category: 'Creative', price: 10, stock: 0, badge: 'CC', bg: '#18181b', color: '#facc15' }
     ];
 
     let selectedCategory = 'All';
@@ -3554,11 +3554,122 @@
       setTimeout(() => box.classList.remove('show'), 3200);
     }
 
+    function parseLocalizedNumber(raw) {
+      if (typeof raw === 'number') return raw;
+      const cleaned = String(raw ?? '')
+        .replace(/[^0-9,.-]/g, '')
+        .trim();
+      if (!cleaned) return NaN;
+      if (cleaned.includes(',') && cleaned.includes('.')) {
+        return parseFloat(cleaned.replace(/,/g, ''));
+      }
+      if (cleaned.includes(',')) {
+        return parseFloat(cleaned.replace(',', '.'));
+      }
+      return parseFloat(cleaned);
+    }
+
+    function parseDurationStatus(statusRaw, fallbackIsComingSoon = false, fallbackIsOff = false) {
+      const st = String(statusRaw || '').trim().toLowerCase().replace(/\s+/g, '_');
+      if (!st) {
+        return {
+          comingSoon: Boolean(fallbackIsComingSoon),
+          disabledOut: Boolean(fallbackIsOff)
+        };
+      }
+      if (['coming_soon', 'comingsoon', 'comming_soon', 'commingsoon', 'soon', 'akan_datang'].includes(st)) {
+        return { comingSoon: true, disabledOut: false };
+      }
+      if (['off', 'disabled', 'hidden', 'tutup', 'out', 'out_of_stock', 'outofstock', 'habis'].includes(st)) {
+        return { comingSoon: false, disabledOut: true };
+      }
+      if (['active', 'aktif', 'on', 'available', 'in_stock', 'instock', 'buka', 'ready'].includes(st)) {
+        return { comingSoon: false, disabledOut: false };
+      }
+      return { comingSoon: Boolean(fallbackIsComingSoon), disabledOut: Boolean(fallbackIsOff) };
+    }
+
+    function applyDurationStatusToTarget(target, status1MoRaw, rowStock, status2MoRaw = '') {
+      const s1 = parseDurationStatus(status1MoRaw, false, false);
+      const hasExplicit2Mo = String(status2MoRaw || '').trim() !== '';
+      const s2 = hasExplicit2Mo
+        ? parseDurationStatus(status2MoRaw, false, false)
+        : parseDurationStatus(status1MoRaw, false, false);
+
+      target.comingSoon1Mo = s1.comingSoon;
+      target.disabled1Mo = s1.disabledOut;
+      target.comingSoon2Mo = s2.comingSoon;
+      target.disabled2Mo = s2.disabledOut;
+      target.comingSoon = Boolean(s1.comingSoon && s2.comingSoon);
+
+      if (!isNaN(rowStock) && rowStock >= 0) {
+        target.stock = rowStock;
+      } else if (s1.disabledOut && s2.disabledOut) {
+        target.stock = 0;
+      }
+    }
+
+    function applySheetStatusToProduct(p, status1MoRaw, rowStock, status2MoRaw = '') {
+      applyDurationStatusToTarget(p, status1MoRaw, rowStock, status2MoRaw);
+    }
+
+    function applySheetRowToProducts(rowNameRaw, rowPriceRaw, rowStockRaw, row2MoPriceRaw, rowStatus1MoRaw, rowStatus2MoRaw) {
+      const rowName = String(rowNameRaw || '').trim().toLowerCase();
+      if (!rowName) return;
+
+      const rowPrice = parseLocalizedNumber(rowPriceRaw);
+      const rowStock = parseInt(parseLocalizedNumber(rowStockRaw), 10);
+      const row2MoPrice = parseLocalizedNumber(row2MoPriceRaw);
+
+      products.forEach(p => {
+        const isCapcutSub = p.id === 'capcut' && (
+          rowName.includes('share') || rowName.includes('private') || rowName.includes('capcut')
+        );
+        const matchesMain = rowName === p.id || rowName === p.name.toLowerCase() || p.name.toLowerCase().includes(rowName) || rowName.includes(p.id);
+
+        if (p.mode === 'dual' && Array.isArray(p.subPlans) && isCapcutSub) {
+          const spShare = p.subPlans.find(x => x.key === 'share');
+          const spPrivate = p.subPlans.find(x => x.key === 'private');
+
+          if (rowName.includes('share') && spShare) {
+            if (!isNaN(rowPrice) && rowPrice > 0) spShare.price = rowPrice;
+            if (!isNaN(row2MoPrice) && row2MoPrice > 0) spShare.price2Mo = row2MoPrice;
+            applyDurationStatusToTarget(spShare, rowStatus1MoRaw, rowStock, rowStatus2MoRaw);
+          } else if (rowName.includes('private') && spPrivate) {
+            if (!isNaN(rowPrice) && rowPrice > 0) spPrivate.price = rowPrice;
+            if (!isNaN(row2MoPrice) && row2MoPrice > 0) spPrivate.price2Mo = row2MoPrice;
+            applyDurationStatusToTarget(spPrivate, rowStatus1MoRaw, rowStock, rowStatus2MoRaw);
+          } else if (matchesMain) {
+            if (!isNaN(rowPrice) && rowPrice > 0) p.price = rowPrice;
+            if (!isNaN(row2MoPrice) && row2MoPrice > 0) p.price2Mo = row2MoPrice;
+            applyDurationStatusToTarget(p, rowStatus1MoRaw, rowStock, rowStatus2MoRaw);
+          }
+
+          if (spShare && spPrivate) {
+            const s1 = Number(spShare.stock || 0);
+            const s2 = Number(spPrivate.stock || 0);
+            if (!isNaN(s1) || !isNaN(s2)) {
+              p.stock = (spShare.disabled1Mo && spShare.disabled2Mo ? 0 : s1) + (spPrivate.disabled1Mo && spPrivate.disabled2Mo ? 0 : s2);
+            }
+            p.comingSoon = Boolean(spShare.comingSoon && spPrivate.comingSoon);
+            p.price = Math.min(spShare.price || 10, spPrivate.price || 15);
+          }
+          return;
+        }
+
+        if (matchesMain) {
+          if (!isNaN(rowPrice) && rowPrice > 0) p.price = rowPrice;
+          if (!isNaN(row2MoPrice) && row2MoPrice > 0) p.price2Mo = row2MoPrice;
+          applySheetStatusToProduct(p, rowStatus1MoRaw, rowStock, rowStatus2MoRaw);
+        }
+      });
+    }
+
     async function syncGoogleSheetStock() {
       const statusEl = document.getElementById('liveStockStatus');
       try {
-        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
-        const res = await fetch(url);
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&_t=${Date.now()}`;
+        const res = await fetch(url, { cache: 'no-store' });
         const text = await res.text();
         const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
         const data = JSON.parse(jsonStr);
@@ -3566,24 +3677,79 @@
 
         rows.forEach(r => {
           const cells = r.c || [];
-          const rowName = String(cells[0]?.v || '').toLowerCase();
-          const rowPrice = parseFloat(cells[1]?.v);
-          const rowStock = parseInt(cells[2]?.v, 10);
-
-          products.forEach(p => {
-            if (rowName && (rowName.includes(p.id) || p.name.toLowerCase().includes(rowName))) {
-              if (!isNaN(rowPrice) && rowPrice > 0 && p.mode !== 'dual') p.price = rowPrice;
-              if (!isNaN(rowStock) && rowStock >= 0) p.stock = rowStock;
-            }
-          });
+          applySheetRowToProducts(
+            cells[0]?.v,
+            cells[2]?.v,
+            cells[1]?.v,
+            cells[3]?.v,
+            cells[4]?.v,
+            cells[5]?.v
+          );
         });
 
-        statusEl.textContent = 'Live Stock ✓';
+        if (statusEl) statusEl.textContent = 'Live Stock ✓';
         renderProducts();
+        if (currentProduct) {
+          const unit = getActiveUnitPrice();
+          const twoMoVal = getActiveTwoMonthPrice(unit);
+          document.getElementById('plan1Price').textContent = `RM${unit.toFixed(2)}`;
+          document.getElementById('plan2Price').textContent = `RM${twoMoVal.toFixed(2)}`;
+          refreshDurationButtonsState();
+          renderSelectedAppHeader();
+          renderSubPlanSelector();
+          updatePayTotalDisplay();
+        }
       } catch (e) {
-        statusEl.textContent = 'Live Stock ✓';
+        if (statusEl) statusEl.textContent = 'Live Stock ✓';
         renderProducts();
       }
+    }
+
+    function getActivePlanTarget() {
+      if (!currentProduct) return null;
+      if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        return currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
+      }
+      return currentProduct;
+    }
+
+    function refreshDurationButtonsState() {
+      const b1 = document.getElementById('plan1Btn');
+      const b2 = document.getElementById('plan2Btn');
+      const target = getActivePlanTarget();
+      if (!b1 || !b2 || !target) return;
+
+      const cs1 = Boolean(target.comingSoon1Mo);
+      const off1 = Boolean(target.disabled1Mo);
+      const cs2 = Boolean(target.comingSoon2Mo);
+      const off2 = Boolean(target.disabled2Mo);
+
+      b1.style.opacity = (cs1 || off1) ? '0.48' : '1';
+      b1.style.cursor = (cs1 || off1) ? 'not-allowed' : 'pointer';
+      b1.setAttribute('title', cs1 ? '1 Month — Coming Soon' : (off1 ? '1 Month — Unavailable' : ''));
+
+      b2.style.opacity = (cs2 || off2) ? '0.48' : '1';
+      b2.style.cursor = (cs2 || off2) ? 'not-allowed' : 'pointer';
+      b2.setAttribute('title', cs2 ? '2 Months — Coming Soon' : (off2 ? '2 Months — Unavailable' : ''));
+
+      if (selectedMonths === 1 && (cs1 || off1) && !(cs2 || off2)) {
+        selectMonths(2);
+      } else if (selectedMonths === 2 && (cs2 || off2) && !(cs1 || off1)) {
+        selectMonths(1);
+      }
+    }
+
+    function getActiveTwoMonthPrice(unitPrice) {
+      if (currentProduct && currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        const found = currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
+        if (found && typeof found.price2Mo === 'number' && !isNaN(found.price2Mo) && found.price2Mo > 0) {
+          return found.price2Mo;
+        }
+      }
+      if (currentProduct && typeof currentProduct.price2Mo === 'number' && !isNaN(currentProduct.price2Mo) && currentProduct.price2Mo > 0) {
+        return currentProduct.price2Mo;
+      }
+      return unitPrice * 2;
     }
 
     function setCategory(cat, btn) {
@@ -3614,15 +3780,21 @@
       });
 
       grid.innerHTML = filtered.map((p, idx) => {
-        const inStock = p.stock > 0;
-        const stockLabel = inStock
-          ? (currentLang === 'en' ? `In Stock • ${p.stock}` : `Stok Ada • ${p.stock}`)
-          : (currentLang === 'en' ? 'Out of Stock' : 'Stok Habis');
-        const moLabel = currentLang === 'en' ? '/ mo' : '/ bln';
+        const isComingSoon = Boolean(p.comingSoon);
+        const inStock = !isComingSoon && p.stock > 0;
+        const stockLabel = isComingSoon
+          ? 'Coming Soon'
+          : (inStock
+            ? (currentLang === 'en' ? `In Stock • ${p.stock}` : `Stok Ada • ${p.stock}`)
+            : (currentLang === 'en' ? 'Out of Stock' : 'Stok Habis'));
+        const pillClass = isComingSoon ? 'mode-invite' : (inStock ? 'stock-in' : 'stock-out');
+        const onClickAction = isComingSoon
+          ? `showToast('${p.name} — Coming Soon')`
+          : (inStock ? `openCheckout('${p.id}')` : `showToast('${p.name} out of stock')`);
 
         return `
-          <div class="product-card card-stagger-in ${inStock ? '' : 'out-of-stock'}" style="animation-delay:${Math.min(idx * 40, 280)}ms;" onclick="${inStock ? `openCheckout('${p.id}')` : `showToast('${p.name} out of stock')`}">
-            <span class="stock-pill ${inStock ? 'stock-in' : 'stock-out'}">${stockLabel}</span>
+          <div class="product-card card-stagger-in ${inStock ? '' : 'out-of-stock'}" style="animation-delay:${Math.min(idx * 40, 280)}ms;" onclick="${onClickAction}">
+            <span class="stock-pill ${pillClass}">${stockLabel}</span>
             ${renderAppIconHtml(p)}
             <div class="app-name">${p.name}</div>
             <span class="mode-badge ${p.mode === 'invite' ? 'mode-invite' : 'mode-private'}">${p.mode === 'dual' ? 'Share • Private' : (p.mode === 'invite' ? 'Via Invite' : 'Private')}</span>
@@ -3639,6 +3811,13 @@
 
       selectedMonths = 1;
       selectedSubPlan = 'share';
+      if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        const spShare = currentProduct.subPlans.find(x => x.key === 'share');
+        const spPrivate = currentProduct.subPlans.find(x => x.key === 'private');
+        if (spShare && spPrivate && isSubPlanUnavailable(spShare) && !isSubPlanUnavailable(spPrivate)) {
+          selectedSubPlan = 'private';
+        }
+      }
       selectedPaymentMethod = 'fpx';
       selectPaymentMethod('fpx');
       triggerTopLoader(500);
@@ -3669,8 +3848,9 @@
       }
 
       const initUnit = getActiveUnitPrice();
+      const initTwoMo = getActiveTwoMonthPrice(initUnit);
       document.getElementById('plan1Price').textContent = `RM${initUnit.toFixed(2)}`;
-      document.getElementById('plan2Price').textContent = `RM${(initUnit * 2).toFixed(2)}`;
+      document.getElementById('plan2Price').textContent = `RM${initTwoMo.toFixed(2)}`;
       selectMonths(1);
       const coEl = document.getElementById('checkoutView');
       if (coEl) coEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -3714,7 +3894,7 @@
               <span style="font-size:1.05rem; font-weight:700;">${currentProduct.name}</span>
               <span class="mode-badge ${badgeClass}" style="margin-bottom:0;">${modeText}</span>
             </div>
-            <div style="font-size:0.76rem; color:var(--accent-cyan);">${dict.rule1} • Stock: ${currentProduct.stock}</div>
+            <div style="font-size:0.76rem; color:var(--accent-cyan);">${dict.rule1} • Stock: ${(getActivePlanTarget()?.stock ?? currentProduct.stock)}</div>
           </div>
         </div>
         <div class="warranty-rules-box">
@@ -3728,6 +3908,14 @@
       `;
     }
 
+    function isSubPlanUnavailable(sp) {
+      if (!sp) return false;
+      const bothDisabled = Boolean(sp.disabled1Mo && sp.disabled2Mo);
+      const bothComingSoon = Boolean(sp.comingSoon1Mo && sp.comingSoon2Mo);
+      const zeroStock = typeof sp.stock === 'number' && sp.stock <= 0 && !sp.comingSoon1Mo && !sp.comingSoon2Mo;
+      return bothDisabled || bothComingSoon || zeroStock;
+    }
+
     function renderSubPlanSelector() {
       const wrap = document.getElementById('subPlanSelectorWrap');
       const grid = document.getElementById('subPlanGrid');
@@ -3735,12 +3923,17 @@
       if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
         wrap.style.display = 'block';
         const moTag = currentLang === 'en' ? '/ mo' : '/ bln';
-        grid.innerHTML = currentProduct.subPlans.map(sp => `
-          <div class="plan-option ${selectedSubPlan === sp.key ? 'selected' : ''}" onclick="selectSubPlan('${sp.key}')">
-            <div class="plan-mo">${sp.label}</div>
-            <div class="plan-amt">RM${sp.price.toFixed(2)} <small style="font-size:0.68rem; font-weight:500; color:var(--text-secondary);">${moTag}</small></div>
-          </div>
-        `).join('');
+        grid.innerHTML = currentProduct.subPlans.map(sp => {
+          const isCS = Boolean(sp.comingSoon1Mo && sp.comingSoon2Mo);
+          const isOff = Boolean(sp.disabled1Mo && sp.disabled2Mo) || (typeof sp.stock === 'number' && sp.stock <= 0 && !isCS);
+          const statusSub = isCS ? ' • Coming Soon' : (isOff ? ' • Habis' : (typeof sp.stock === 'number' ? ` • Stok ${sp.stock}` : ''));
+          return `
+            <div class="plan-option ${selectedSubPlan === sp.key ? 'selected' : ''}" style="${(isCS || isOff) ? 'opacity:0.48; cursor:not-allowed;' : ''}" onclick="selectSubPlan('${sp.key}')">
+              <div class="plan-mo">${sp.label}${statusSub}</div>
+              <div class="plan-amt">RM${sp.price.toFixed(2)} <small style="font-size:0.68rem; font-weight:500; color:var(--text-secondary);">${moTag}</small></div>
+            </div>
+          `;
+        }).join('');
       } else {
         wrap.style.display = 'none';
         grid.innerHTML = '';
@@ -3748,10 +3941,25 @@
     }
 
     function selectSubPlan(subKey) {
+      if (currentProduct && currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
+        const sp = currentProduct.subPlans.find(x => x.key === subKey);
+        if (sp) {
+          if (sp.comingSoon1Mo && sp.comingSoon2Mo) {
+            showToast(`${sp.label} — Coming Soon`);
+            return;
+          }
+          if ((sp.disabled1Mo && sp.disabled2Mo) || (typeof sp.stock === 'number' && sp.stock <= 0)) {
+            showToast(currentLang === 'en' ? `${sp.label} plan is out of stock.` : `Pelan ${sp.label} kehabisan stok.`);
+            return;
+          }
+        }
+      }
       selectedSubPlan = subKey;
       const unit = getActiveUnitPrice();
+      const twoMo = getActiveTwoMonthPrice(unit);
       document.getElementById('plan1Price').textContent = `RM${unit.toFixed(2)}`;
-      document.getElementById('plan2Price').textContent = `RM${(unit * 2).toFixed(2)}`;
+      document.getElementById('plan2Price').textContent = `RM${twoMo.toFixed(2)}`;
+      refreshDurationButtonsState();
       renderSelectedAppHeader();
       renderSubPlanSelector();
       updatePayTotalDisplay();
@@ -3788,6 +3996,25 @@
     }
 
     function selectMonths(mo) {
+      const target = getActivePlanTarget();
+      if (target) {
+        if (mo === 1 && target.comingSoon1Mo) {
+          showToast(currentLang === 'en' ? '1 Month plan is Coming Soon.' : 'Pelan 1 Bulan adalah Coming Soon.');
+          return;
+        }
+        if (mo === 1 && target.disabled1Mo) {
+          showToast(currentLang === 'en' ? '1 Month plan is currently unavailable.' : 'Pelan 1 Bulan tidak tersedia buat masa ini.');
+          return;
+        }
+        if (mo === 2 && target.comingSoon2Mo) {
+          showToast(currentLang === 'en' ? '2 Months plan is Coming Soon.' : 'Pelan 2 Bulan adalah Coming Soon.');
+          return;
+        }
+        if (mo === 2 && target.disabled2Mo) {
+          showToast(currentLang === 'en' ? '2 Months plan is currently unavailable.' : 'Pelan 2 Bulan tidak tersedia buat masa ini.');
+          return;
+        }
+      }
       selectedMonths = mo;
       document.getElementById('plan1Btn').classList.toggle('selected', mo === 1);
       document.getElementById('plan2Btn').classList.toggle('selected', mo === 2);
@@ -4490,7 +4717,17 @@
     updateAuthUI();
     renderProducts();
     syncGoogleSheetStock();
-        loadTrendingHero();
+    loadTrendingHero();
+    setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        syncGoogleSheetStock();
+      }
+    }, 30000);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        syncGoogleSheetStock();
+      }
+    });
   </script>
 </body>
 </html>
