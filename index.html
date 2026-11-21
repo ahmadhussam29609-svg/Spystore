@@ -4442,7 +4442,20 @@
         document.getElementById('receiptTitle').textContent = `✅ Payment Confirmed • ${ref}`;
         document.getElementById('receiptDesc').textContent = `${appName} (${months} Month) — Admin has been notified. Tap below to receive your account on WhatsApp.`;
 
-        const waText = `*RESIT TEMPAHAN — SPYSTORE BY SAMS*\n━━━━━━━━━━━━━━━━━━━━\n• *No. Rujukan:* ${ref}\n• *Status:* BERJAYA (FPX) ✅\n• *Produk:* ${appName} (${months} Bulan)\n• *Jumlah Bayaran:* RM${totalPaid}\n• *Nama:* ${custName}\n• *No. WhatsApp:* ${custPhone}\n• *Peranti:* ${custDevice}\n━━━━━━━━━━━━━━━━━━━━\nMohon admin proses & hantar akaun saya. Terima kasih!`;
+        const cleanTotal = (totalPaid && totalPaid !== '-' && !isNaN(parseFloat(totalPaid))) ? `RM${parseFloat(totalPaid).toFixed(2)}` : '-';
+        const waText = [
+          '✨ *RESIT TEMPAHAN — SPYSTORE BY SAMS* ✨',
+          '━━━━━━━━━━━━━━━━━━━━━━',
+          `🧾 *No. Rujukan:* \`${ref}\``,
+          '✅ *Status:* Pembayaran Berjaya (FPX)',
+          `📱 *Produk:* ${appName} (${months} Bulan)`,
+          `💰 *Jumlah Bayaran:* ${cleanTotal}`,
+          `👤 *Nama:* ${custName}`,
+          `📲 *WhatsApp:* ${custPhone}`,
+          ...(custDevice && custDevice !== '-' ? [`💻 *Peranti:* ${custDevice}`] : []),
+          '━━━━━━━━━━━━━━━━━━━━━━',
+          'Mohon admin semak & proses pengaktifan akaun saya. Terima kasih!'
+        ].join('\n');
 
         lastReceiptPlainText = waText;
         document.getElementById('receiptWaLink').href = `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waText)}`;
