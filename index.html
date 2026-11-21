@@ -2153,11 +2153,16 @@
         <button type="button" class="drawer-link" onclick="closeDrawer(); openAuthModal();">👤 <span data-i18n="navAccount">Login / Register Account</span></button>
       </div>
 
-      <div id="drawerOwnerAdminSection" style="display:none; margin-top:12px;">
-        <div style="font-size:0.65rem; font-weight:800; color:var(--accent-gold); text-transform:uppercase; letter-spacing:0.07em; margin:0 2px 6px 2px;">Owner / Admin Tools</div>
-        <div class="drawer-links" style="gap:7px;">
-          <button type="button" id="drawerMgrToolBtn" class="drawer-link" onclick="closeDrawer(); openOwnerAdminManagerModal('catalog');">🛠️ <span>Owner / Admin: Stok, Harga &amp; Status</span></button>
-          <button type="button" id="drawerVerifyToolBtn" class="drawer-link" style="display:none;" onclick="closeDrawer(); openOwnerAdminManagerModal('verify');">👑 <span>Owner: Verify Role (Customer → Admin)</span></button>
+      <div id="drawerOwnerAdminSection" style="display:none; margin-top:12px; background:rgba(250,204,21,0.05); border:1px solid rgba(250,204,21,0.22); border-radius:14px; padding:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:7px;">
+          <span style="font-size:0.65rem; font-weight:800; color:var(--accent-gold); text-transform:uppercase; letter-spacing:0.07em;">Owner / Admin</span>
+          <span id="drawerCurrentRoleTag" style="font-size:0.62rem; font-weight:800; padding:2px 7px; border-radius:999px; background:rgba(56,189,248,0.14); color:var(--accent-cyan);">STAFF</span>
+        </div>
+        <div class="drawer-links" style="gap:6px;">
+          <button type="button" id="drawerRoleAccessBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('access');">🔑 <span>Role &amp; Staff Access</span></button>
+          <button type="button" id="drawerMgrToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('catalog');">🛠️ <span>Website Catalog Manager</span></button>
+          <button type="button" id="drawerTxnsToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('transactions');">🧾 <span>All Transactions</span></button>
+          <button type="button" id="drawerVerifyToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('verify');">👥 <span>Registered Customers &amp; Role</span></button>
         </div>
       </div>
 
@@ -2497,61 +2502,6 @@
           </div>
           <button type="submit" class="primary-submit" style="margin-top:0;">Save Profile Changes</button>
         </form>
-        <div id="staffRoleAccessBox" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:12px; margin-bottom:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
-            <span style="font-size:0.78rem; font-weight:800; color:var(--accent-gold);">🔑 Role &amp; Staff Access</span>
-            <span id="currentRoleBadge" style="font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:999px; background:rgba(56,189,248,0.14); color:var(--accent-cyan);">CUSTOMER</span>
-          </div>
-          <div id="roleUnlockControls" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
-            <input type="password" class="form-control" id="staffPasscodeInput" placeholder="Staff / Owner passcode (e.g. ADMIN2026 / OWNER2026)" style="flex:1; min-width:160px; padding:8px 10px; font-size:0.78rem;" />
-            <button type="button" onclick="unlockStaffRole()" style="background:var(--accent-blue); color:#fff; border:none; padding:8px 12px; border-radius:9px; font-size:0.74rem; font-weight:800; cursor:pointer;">Activate Role</button>
-          </div>
-          <div id="ownerPartnerSummaryBox" style="display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.76rem; color:var(--text-secondary);"></div>
-        </div>
-
-        <div id="websiteCatalogManagerPanel" style="display:none; background:var(--bg-input); border:1.5px solid var(--accent-gold); border-radius:14px; padding:12px; margin-bottom:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
-            <span style="font-size:0.84rem; font-weight:800; color:var(--accent-gold);">🛠️ Website Catalog Manager (Stok, Harga &amp; Status)</span>
-          </div>
-          <div class="form-group" style="margin-bottom:8px;">
-            <label>Select Product / Plan *</label>
-            <select class="form-control" id="mgrTargetSelect" onchange="loadTargetIntoManagerForm()"></select>
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Stock (Stok)</label>
-              <input type="number" min="0" class="form-control" id="mgrStockInput" />
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>1-Month Price (RM)</label>
-              <input type="number" step="0.5" min="0" class="form-control" id="mgrPrice1MoInput" />
-            </div>
-          </div>
-          <div class="form-group" style="margin-bottom:8px;">
-            <label>2-Month Price (RM) — optional (blank = 1-Mo × 2)</label>
-            <input type="number" step="0.5" min="0" class="form-control" id="mgrPrice2MoInput" placeholder="e.g. 32" />
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label>1-Month Status</label>
-              <select class="form-control" id="mgrStatus1MoSelect">
-                <option value="active">In Stock / Active</option>
-                <option value="coming_soon">Coming Soon</option>
-                <option value="off">Out of Stock / Off</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>2-Month Status</label>
-              <select class="form-control" id="mgrStatus2MoSelect">
-                <option value="active">In Stock / Active</option>
-                <option value="coming_soon">Coming Soon</option>
-                <option value="off">Out of Stock / Off</option>
-              </select>
-            </div>
-          </div>
-          <button type="button" class="primary-submit" style="margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveCatalogManagerChanges()">Save Website Changes ✓</button>
-        </div>
-
         <h4 style="font-size:0.85rem; margin-bottom:8px;">Transaction History</h4>
         <div id="orderHistoryList"></div>
         <button type="button" class="logout-btn" onclick="handleLogout()">Log Out</button>
@@ -2575,16 +2525,36 @@
   </div>
 
   <!-- Toast -->
-    <!-- Owner / Admin Tools Modal (Catalog & Role Verification) -->
+    <!-- Owner / Admin Tools Modal (All Owner/Admin Features Only in 3-Line Drawer) -->
   <div class="modal-backdrop" id="ownerAdminToolsModal" onclick="if(event.target===this) closeOwnerAdminToolsModal()">
-    <div class="modal-card" style="max-width:460px;">
+    <div class="modal-card" style="max-width:470px;">
       <div class="modal-top">
-        <h3 id="ownerAdminToolsTitle">OWNER / ADMIN TOOLS</h3>
+        <h3 id="ownerAdminToolsTitle">OWNER / ADMIN</h3>
         <button type="button" class="close-modal" onclick="closeOwnerAdminToolsModal()">✕</button>
       </div>
 
-      <div id="drawerCatalogToolView">
+      <!-- 1. Role & Staff Access -->
+      <div id="drawerRoleAccessView" style="display:none;">
+        <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:12px; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong style="font-size:0.84rem; color:var(--accent-gold);">🔑 Role &amp; Staff Access</strong>
+            <span id="modalRoleBadge" style="font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:999px; background:rgba(56,189,248,0.14); color:var(--accent-cyan);">CUSTOMER</span>
+          </div>
+          <p style="font-size:0.74rem; color:var(--text-secondary); margin-bottom:8px;">
+            Owner account: <strong>ahmadhussam29609@gmail.com</strong> (<code>ahmadhussam29609</code>). Enter passcode to activate Owner or Admin role.
+          </p>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <input type="password" class="form-control" id="drawerStaffPasscodeInput" placeholder="Passcode (ADMIN2026 / OWNER2026)" style="flex:1; min-width:160px;" />
+            <button type="button" onclick="unlockStaffRoleFromDrawer()" style="background:var(--accent-blue); color:#fff; border:none; padding:9px 13px; border-radius:10px; font-size:0.76rem; font-weight:800; cursor:pointer;">Activate</button>
+          </div>
+        </div>
+        <div id="drawerOwnerSummaryCard" style="display:none; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:11px; font-size:0.75rem; color:var(--text-secondary);"></div>
+      </div>
+
+      <!-- 2. Website Catalog Manager (Stok, Harga & Status) -->
+      <div id="drawerCatalogToolView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
+          Kemaskini <strong>Stok</strong>, <strong>Harga (1 Bln &amp; 2 Bln)</strong>, dan <strong>Status (1 Bln &amp; 2 Bln)</strong> terus pada laman web.
         </div>
         <div class="form-group" style="margin-bottom:8px;">
           <label>Select Product / Plan *</label>
@@ -2625,9 +2595,18 @@
         <button type="button" class="primary-submit" style="margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveDrawerCatalogChanges()">Save Stock, Price &amp; Status ✓</button>
       </div>
 
+      <!-- 3. All Transactions (Owner / Admin) -->
+      <div id="drawerTransactionsToolView" style="display:none;">
+        <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">
+          Senarai semua transaksi yang disusun kemas beserta nombor invois.
+        </div>
+        <div id="drawerAllTransactionsBody" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+
+      <!-- 4. Registered Customers & Role Verification (Owner Only) -->
       <div id="drawerVerifyRoleToolView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
-          <strong>Owner Role Verification:</strong> Tukar akaun pelanggan biasa (<code>customer</code>) kepada peranan <strong>Admin</strong> (<code>admin</code>).
+          <strong>Registered Customers &amp; Role Verification:</strong> Lihat pelanggan berdaftar dan sahkan peranan <strong>Customer → Admin</strong>.
         </div>
         <div class="form-group" style="margin-bottom:8px;">
           <label>Select Registered Account</label>
@@ -2637,11 +2616,12 @@
           <label>Or Enter Email / Username *</label>
           <input type="text" class="form-control" id="verifyEmailOrUsernameInput" placeholder="e.g. user@gmail.com or username" />
         </div>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
           <button type="button" class="primary-submit" style="margin-top:0; flex:1;" onclick="verifyUserToAdminRole()">Verify as Admin ✓</button>
           <button type="button" style="background:rgba(239,68,68,0.14); color:#f87171; border:1px solid rgba(239,68,68,0.35); padding:10px 12px; border-radius:12px; font-size:0.78rem; font-weight:700; cursor:pointer;" onclick="demoteAdminToCustomerRole()">Set Customer</button>
         </div>
-        <div id="verifiedAdminsListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.76rem; color:var(--text-secondary);"></div>
+        <div id="registeredCustomersListBox" style="margin-bottom:10px; padding-top:8px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
+        <div id="verifiedAdminsListBox" style="padding-top:8px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
       </div>
     </div>
   </div>
@@ -2952,8 +2932,236 @@
       }
     }
 
-    function loadTrendingHero() {}
-    function openTrendingModal() { showToast('Trending Discovery'); }
+    let trendingByApp = {};
+    let discoveryCategories = {
+      tv_my: [],
+      movie_my: [],
+      new_in: [],
+      popcorn: [],
+      kdrama: [],
+      rewatched: [],
+      only_on: []
+    };
+    let activeDiscoveryCat = 'tv_my';
+    let activeAppSubFilter = 'netflix';
+    let totalSlides = 2;
+
+    const CATEGORY_TITLES = {
+      tv_my: 'Top 10 Tv Show in Malaysia Today',
+      movie_my: 'Top 10 Movie in Malaysia Today',
+      new_in: 'New Releases',
+      popcorn: 'Perfect Popcorn Movie',
+      kdrama: 'Kdrama',
+      rewatched: 'Most Rewatched Show',
+      only_on: 'Only On Platform'
+    };
+
+    function buildFallbackTrendingData() {
+      const fb = {
+        netflix: [
+          { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', overview: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games.", backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
+          { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', overview: 'Wednesday Addams investigates a murder spree while making new friends at Nevermore.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
+          { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', overview: 'A small town uncovers a mystery involving secret experiments and supernatural forces.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' }
+        ],
+        disney: [
+          { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', overview: 'After the devastating events of Avengers: Infinity War, the universe is in ruins.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg' },
+          { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', overview: 'A lone gunfighter makes his way through the outer reaches of the galaxy.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
+          { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', overview: "Riley's mind headquarters makes room for new Emotions.", backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' }
+        ],
+        hbomax: [
+          { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', overview: 'The Targaryen civil war about 200 years before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
+          { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', overview: 'Paul Atreides unites with Chani and the Fremen on a path of revenge.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' }
+        ],
+        primevideo: [
+          { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', overview: 'A group of vigilantes set out to take down corrupt superheroes.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg' },
+          { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', overview: 'Jack Reacher investigates a conspiracy in a small town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' }
+        ]
+      };
+      const mapApp = (key, label, price) => (fb[key] || []).map((x, idx) => ({
+        rank: idx + 1,
+        id: x.id,
+        title: x.title,
+        mediaType: x.mediaType,
+        platformId: key,
+        platformLabel: label,
+        price,
+        rating: x.rating,
+        popularity: 100 - idx * 10,
+        overview: x.overview,
+        backdrop: x.backdrop || '',
+        poster: x.poster || ''
+      }));
+      const nList = mapApp('netflix', 'Netflix', 18);
+      const dList = mapApp('disney', 'Disney+', 16);
+      const hList = mapApp('hbomax', 'HBO Max', 16);
+      const pList = mapApp('primevideo', 'Prime Video', 10);
+      const allFb = [nList[0], nList[1], dList[0], dList[1], hList[0], pList[0], dList[2], hList[1]];
+      return {
+        byApp: {
+          netflix: { movies: nList.filter(i => i.mediaType === 'MOVIE'), series: nList.filter(i => i.mediaType === 'SERIES'), newMovies: [nList[1]], newSeries: [nList[0]], kdrama: [nList[0], nList[1]], price: 18, label: 'Netflix' },
+          disney: { movies: dList.filter(i => i.mediaType === 'MOVIE'), series: dList.filter(i => i.mediaType === 'SERIES'), newMovies: [dList[2]], newSeries: [dList[1]], kdrama: [dList[1]], price: 16, label: 'Disney+' },
+          hbomax: { movies: hList.filter(i => i.mediaType === 'MOVIE'), series: hList.filter(i => i.mediaType === 'SERIES'), newMovies: [hList[1]], newSeries: [hList[0]], kdrama: [hList[0]], price: 16, label: 'HBO Max' },
+          primevideo: { movies: pList.filter(i => i.mediaType === 'MOVIE'), series: pList.filter(i => i.mediaType === 'SERIES'), newMovies: [], newSeries: [pList[0], pList[1]], kdrama: [pList[1]], price: 10, label: 'Prime Video' }
+        },
+        categories: {
+          tv_my: [nList[0], dList[1], hList[0], pList[0]],
+          movie_my: [dList[0], hList[1], dList[2]],
+          new_in: [nList[1], dList[2], hList[1], pList[1]],
+          popcorn: [dList[0], hList[1], dList[2]],
+          kdrama: [nList[0], nList[1], dList[1]],
+          rewatched: [hList[0], nList[2], dList[1], pList[0]],
+          only_on: [nList[0], dList[0], hList[0], pList[0]]
+        },
+        items: allFb.map((it, idx) => ({ ...it, rank: idx + 1 }))
+      };
+    }
+
+    function getAppItems(appId, catKey) {
+      const appObj = trendingByApp[appId] || {};
+      if (catKey === 'movie_my') return appObj.movies || [];
+      if (catKey === 'tv_my') return appObj.series || [];
+      if (catKey === 'new_in') return [...(appObj.newMovies || []), ...(appObj.newSeries || [])].slice(0, 10);
+      if (catKey === 'popcorn') return (appObj.movies || []).slice().sort((a, b) => Number(b.rating) - Number(a.rating)).slice(0, 10);
+      if (catKey === 'kdrama') return (appObj.kdrama || []).slice(0, 10);
+      if (catKey === 'rewatched') return (appObj.series || []).slice().sort((a, b) => (b.popularity * Number(b.rating)) - (a.popularity * Number(a.rating))).slice(0, 10);
+      return [...(appObj.movies || []).slice(0, 5), ...(appObj.series || []).slice(0, 5)];
+    }
+
+    function openTrendingModal(defaultCat = 'tv_my', appFilter = 'netflix') {
+      const modal = document.getElementById('trendingModal');
+      if (!modal) return;
+      if (!Object.keys(trendingByApp).length) {
+        const fb = buildFallbackTrendingData();
+        trendingByApp = fb.byApp;
+        discoveryCategories = fb.categories;
+      }
+      activeDiscoveryCat = CATEGORY_TITLES[defaultCat] ? defaultCat : 'tv_my';
+      activeAppSubFilter = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(appFilter) ? appFilter : 'netflix';
+      triggerTopLoader(420);
+      modal.style.display = 'flex';
+      renderTrendingModal();
+    }
+
+    function closeTrendingModal() {
+      const modal = document.getElementById('trendingModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function switchDiscoveryCategory(catKey) {
+      activeDiscoveryCat = catKey;
+      renderTrendingModal();
+    }
+
+    function switchAppSubFilter(appKey) {
+      activeAppSubFilter = appKey;
+      renderTrendingModal();
+    }
+
+    function renderTrendingModal() {
+      const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
+      const baseTitle = CATEGORY_TITLES[activeDiscoveryCat] || 'Streaming Picks';
+      const titleEl = document.getElementById('trendingModalTitle');
+      if (titleEl) titleEl.textContent = `${appLabels[activeAppSubFilter] || 'Netflix'} • ${baseTitle}`;
+
+      ['netflix', 'disney', 'hbomax', 'primevideo'].forEach(appId => {
+        const sBtn = document.getElementById(`appSub_${appId}`);
+        if (!sBtn) return;
+        const active = activeAppSubFilter === appId;
+        sBtn.style.background = active ? 'var(--accent-blue)' : 'var(--bg-card)';
+        sBtn.style.color = active ? '#ffffff' : 'var(--text-secondary)';
+        sBtn.style.border = active ? 'none' : '1px solid var(--border-color)';
+      });
+
+      Object.keys(CATEGORY_TITLES).forEach(key => {
+        const btn = document.getElementById(`catTab_${key}`);
+        if (!btn) return;
+        const isActive = key === activeDiscoveryCat;
+        btn.style.background = isActive ? 'var(--accent-gold)' : 'var(--bg-card)';
+        btn.style.color = isActive ? '#09090b' : 'var(--text-secondary)';
+        btn.style.border = isActive ? 'none' : '1px solid var(--border-color)';
+      });
+
+      const body = document.getElementById('trendingModalBody');
+      if (!body) return;
+      const list = getAppItems(activeAppSubFilter, activeDiscoveryCat);
+      if (!list || !list.length) {
+        body.innerHTML = `<div style="text-align:center; padding:22px; color:var(--text-muted); font-size:0.8rem;">No titles available for this selection right now.</div>`;
+        return;
+      }
+
+      body.innerHTML = list.map((item, idx) => `
+        <div class="discovery-row-card" style="display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
+          <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${idx + 1}</div>
+          ${item.poster ? `<img src="${item.poster}" referrerpolicy="no-referrer" style="width:62px; height:92px; object-fit:cover; border-radius:10px; flex-shrink:0;" onerror="this.outerHTML='<div style=\'width:62px;height:92px;border-radius:10px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;\'>🎬</div>';" />` : `<div style="width:62px;height:92px;border-radius:10px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;">🎬</div>`}
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;">
+              <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel}</span>
+              <span style="font-size:0.68rem; color:var(--accent-gold); font-weight:700;">★ ${item.rating}</span>
+            </div>
+            <div style="font-weight:700; font-size:0.9rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
+            <div style="font-size:0.73rem; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px;">${item.overview || ''}</div>
+            <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId}');">Order ${item.platformLabel} • RM${item.price} ✓</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openShowDetailModal(item) {
+      if (!item) return;
+      const modal = document.getElementById('showDetailModal');
+      const body = document.getElementById('showDetailBody');
+      if (!modal || !body) return;
+      const prod = products.find(p => p.id === item.platformId) || products[0];
+      body.innerHTML = `
+        <div class="spec-hero">
+          ${item.poster ? `<img src="${item.poster}" alt="${item.title}" class="spec-poster" />` : ''}
+          <div style="flex:1; min-width:0;">
+            <div class="spec-title">${item.title}</div>
+            <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700; margin-bottom:6px;">${item.mediaType || 'SHOW'} • ★ ${item.rating || 'N/A'}</div>
+            <div style="font-size:0.8rem; color:var(--text-secondary);">${item.overview || ''}</div>
+          </div>
+        </div>
+        <div class="spec-actions">
+          <button type="button" class="primary-submit" style="width:auto; flex:1; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${prod.id}');">Order ${item.platformLabel || prod.name} • RM${prod.price} →</button>
+          <button type="button" class="back-btn" style="margin-bottom:0;" onclick="closeShowDetailModal()">Close</button>
+        </div>
+      `;
+      modal.classList.add('open');
+    }
+
+    function openShowDetailByIndex(appKey, catKey, idx) {
+      const list = getAppItems(appKey, catKey);
+      if (list && list[idx]) openShowDetailModal(list[idx]);
+    }
+
+    function loadTrendingHero() {
+      const fb = buildFallbackTrendingData();
+      trendingByApp = fb.byApp;
+      discoveryCategories = fb.categories;
+      const items = fb.items.slice(0, 6);
+      const track = document.getElementById('heroTrack');
+      const dotsWrap = document.getElementById('heroDots');
+      if (!track || !dotsWrap || !items.length) return;
+      track.innerHTML = items.map((item, idx) => {
+        const prod = products.find(p => p.id === item.platformId) || products[0];
+        const bgStyle = item.backdrop ? `style="background-image:url('${item.backdrop}'); cursor:pointer;"` : 'style="cursor:pointer;"';
+        return `
+          <section class="hero-slide trending-slide" ${bgStyle} onclick="openTrendingModal('tv_my', '${item.platformId}')">
+            <div class="trending-meta">
+              <span class="hero-pill">🔥 #${idx + 1} TRENDING</span>
+              <span class="platform-badge">${item.platformLabel}</span>
+            </div>
+            <h1>${item.title}</h1>
+            <p>${item.overview || ''}</p>
+            <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${item.platformLabel} • RM${prod.price} →</button>
+          </section>
+        `;
+      }).join('');
+      totalSlides = items.length;
+      currentSlide = 0;
+      dotsWrap.innerHTML = items.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i + 1}"></button>`).join('');
+    }
+        function openTrendingModal() { showToast('Trending Discovery'); }
     function closeTrendingModal() { const m = document.getElementById('trendingModal'); if (m) m.style.display = 'none'; }
     function openShowSearchModal() {
       const m = document.getElementById('showSearchModal');
@@ -3949,84 +4157,7 @@
       showToast(`Role activated: ${nextRole.toUpperCase()}`);
     }
 
-    function refreshRolePanelUI() {
-      const user = getCurrentUser();
-      const role = getUserRole(user);
-      const badge = document.getElementById('currentRoleBadge');
-      const mgrPanel = document.getElementById('websiteCatalogManagerPanel');
-      const ownerBox = document.getElementById('ownerPartnerSummaryBox');
-      if (badge) badge.textContent = role.toUpperCase();
-
-      const isStaff = role === 'owner' || role === 'admin';
-      if (mgrPanel) {
-        mgrPanel.style.display = isStaff ? 'block' : 'none';
-        if (isStaff) {
-          const sel = document.getElementById('mgrTargetSelect');
-          const opts = getManagerTargetOptions();
-          const prev = sel?.value;
-          if (sel) {
-            sel.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
-            if (prev && opts.some(o => o.value === prev)) sel.value = prev;
-          }
-          loadTargetIntoManagerForm();
-        }
-      }
-
-      if (ownerBox) {
-        if (role === 'owner' || role === 'admin') {
-          ownerBox.style.display = 'block';
-          const allTxns = getAllTransactionsDB();
-          const totalStock = products.reduce((acc, p) => acc + Number(p.stock || 0), 0);
-          const totalSales = allTxns.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
-
-          const registeredCustomers = getUsersDB().filter(u => !isDesignatedOwner(u));
-          const customersHtml = role === 'owner' ? `
-            <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color);">
-              <div style="font-weight:800; color:var(--accent-gold); margin-bottom:5px;">👥 Registered Customers (${registeredCustomers.length})</div>
-              ${registeredCustomers.length ? registeredCustomers.map(c => `
-                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:7px 9px; margin-bottom:5px;">
-                  <div style="font-weight:700; color:var(--text-primary);">${c.name || c.username || c.email} <span style="color:var(--accent-cyan); font-size:0.68rem;">(@${c.username || '-'})</span></div>
-                  <div style="font-size:0.69rem; color:var(--text-muted);">${c.email || '-'} • WA: ${c.phone || '-'} • [${String(c.role || 'customer').toUpperCase()}]</div>
-                </div>
-              `).join('') : '<div style="font-size:0.72rem; color:var(--text-muted);">No registered customers yet.</div>'}
-            </div>
-          ` : '';
-
-          const txnsHtml = `
-            <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color);">
-              <div style="font-weight:800; color:var(--accent-cyan); margin-bottom:5px;">🧾 All Transactions (${allTxns.length})</div>
-              ${allTxns.length ? allTxns.slice(0, 20).map((t, tIdx) => `
-                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px 9px; margin-bottom:6px;">
-                  <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--text-primary);">
-                    <span>${t.app} (${t.months} Bln)</span>
-                    <span style="color:var(--accent-gold);">RM${t.total}</span>
-                  </div>
-                  <div style="font-size:0.69rem; color:var(--text-secondary); margin-top:2px;">
-                    ${t.invoiceNo || t.ref || '-'} • ${t.customerName || '-'} (${t.customerPhone || '-'}) • ${t.date || '-'}
-                  </div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                    <span style="font-size:0.66rem; font-weight:700; color:var(--accent-cyan);">${t.status || 'PAID'} • ${t.paymentMethod || 'FPX'}</span>
-                    <button type="button" onclick="downloadGlobalTxnInvoice(${tIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:2px 8px; border-radius:6px; font-size:0.66rem; font-weight:800; cursor:pointer;">📄 Invois</button>
-                  </div>
-                </div>
-              `).join('') : '<div style="font-size:0.72rem; color:var(--text-muted);">No transactions recorded yet.</div>'}
-            </div>
-          `;
-
-          ownerBox.innerHTML = `
-            <div style="font-weight:800; color:var(--accent-cyan); margin-bottom:4px;">${role === 'owner' ? '👑 Owner Panel (SPYSTORE BY SAMS)' : '🛡️ Admin Panel (SPYSTORE BY SAMS)'}</div>
-            <div>• Total Active Stock: <strong>${totalStock}</strong> slots across ${products.length} apps</div>
-            <div>• All Transactions Sum: <strong>RM${totalSales.toFixed(2)}</strong> (${allTxns.length} txns)</div>
-            ${role === 'owner' ? '<div>• Partner Split: <strong>Owner &amp; Adik</strong> profit-sharing active</div>' : ''}
-            ${customersHtml}
-            ${txnsHtml}
-          `;
-        } else {
-          ownerBox.style.display = 'none';
-          ownerBox.innerHTML = '';
-        }
-      }
-    }
+    function refreshRolePanelUI() { refreshDrawerRoleTools(); }
 
     function openAuthModal() {
       const modal = document.getElementById('authModal');
@@ -4686,47 +4817,128 @@
       const role = getUserRole();
       const sec = document.getElementById('drawerOwnerAdminSection');
       const verifyBtn = document.getElementById('drawerVerifyToolBtn');
+      const tagEl = document.getElementById('drawerCurrentRoleTag');
       if (!sec) return;
-      const isStaff = role === 'owner' || role === 'admin';
-      sec.style.display = isStaff ? 'block' : 'none';
+      // Always display the OWNER / ADMIN block neatly in the 3-line drawer so Role & Staff Access can be activated or used directly
+      sec.style.display = 'block';
+      if (tagEl) tagEl.textContent = role.toUpperCase();
       if (verifyBtn) {
         verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
       }
     }
 
-    function openOwnerAdminManagerModal(tab = 'catalog') {
-      const role = getUserRole();
-      if (role !== 'owner' && role !== 'admin') {
-        showToast(currentLang === 'en' ? 'Owner or Admin login required.' : 'Perlu log masuk Owner atau Admin.');
-        openAuthModal();
+    function unlockStaffRoleFromDrawer() {
+      const code = String(document.getElementById('drawerStaffPasscodeInput')?.value || '').trim();
+      const keys = getDefaultStaffKeys();
+      let nextRole = null;
+      if (code && code === keys.owner) nextRole = 'owner';
+      else if (code && code === keys.admin) nextRole = 'admin';
+      if (!nextRole) {
+        showToast('Invalid passcode. Try ADMIN2026 or OWNER2026.');
         return;
       }
-      if (tab === 'verify' && role !== 'owner') {
-        showToast(currentLang === 'en' ? 'Only Owner can verify roles.' : 'Hanya Owner boleh mengesahkan peranan.');
+      const cur = getCurrentUser() || { name: 'Staff', email: '', username: '' };
+      const updated = { ...cur, role: nextRole };
+      localStorage.setItem('spystore_current_user', JSON.stringify(updated));
+      if (cur.email) {
+        const users = getUsersDB();
+        const idx = users.findIndex(u => String(u.email).toLowerCase() === String(cur.email).toLowerCase());
+        if (idx !== -1) {
+          users[idx] = { ...users[idx], role: nextRole };
+          saveUsersDB(users);
+        }
+      }
+      document.getElementById('drawerStaffPasscodeInput').value = '';
+      updateAuthUI();
+      refreshDrawerRoleTools();
+      openOwnerAdminManagerModal('access');
+      showToast(`Activated ${nextRole.toUpperCase()} role!`);
+    }
+
+    function renderDrawerTransactionsList() {
+      const box = document.getElementById('drawerAllTransactionsBody');
+      if (!box) return;
+      const allTxns = getAllTransactionsDB();
+      if (!allTxns.length) {
+        box.innerHTML = `<div style="font-size:0.76rem; color:var(--text-muted); padding:10px; background:var(--bg-input); border-radius:10px;">No transactions recorded yet.</div>`;
         return;
+      }
+      box.innerHTML = allTxns.slice(0, 30).map((t, tIdx) => `
+        <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:9px 11px;">
+          <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.82rem;">
+            <span>${t.app} (${t.months} Bln)</span>
+            <span style="color:var(--accent-gold);">RM${t.total}</span>
+          </div>
+          <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:2px;">
+            ${t.invoiceNo || t.ref || '-'} • ${t.customerName || '-'} (${t.customerPhone || '-'}) • ${t.date || '-'}
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+            <span style="font-size:0.66rem; font-weight:700; color:var(--accent-cyan);">${t.status || 'PAID'} • ${t.paymentMethod || 'FPX'}</span>
+            <button type="button" onclick="downloadGlobalTxnInvoice(${tIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">📄 Invois</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openOwnerAdminManagerModal(tab = 'catalog') {
+      const role = getUserRole();
+      const isStaff = role === 'owner' || role === 'admin';
+      if (tab !== 'access' && !isStaff) {
+        showToast(currentLang === 'en' ? 'Activate Owner or Admin role first.' : 'Aktifkan peranan Owner atau Admin dahulu.');
+        tab = 'access';
+      }
+      if (tab === 'verify' && role !== 'owner') {
+        showToast(currentLang === 'en' ? 'Owner role required.' : 'Perlu peranan Owner.');
+        tab = 'access';
       }
 
       const modal = document.getElementById('ownerAdminToolsModal');
+      const accView = document.getElementById('drawerRoleAccessView');
       const catView = document.getElementById('drawerCatalogToolView');
+      const txnView = document.getElementById('drawerTransactionsToolView');
       const verView = document.getElementById('drawerVerifyRoleToolView');
       const titleEl = document.getElementById('ownerAdminToolsTitle');
-      if (!modal || !catView || !verView) return;
+      const badgeEl = document.getElementById('modalRoleBadge');
+      if (!modal || !accView || !catView || !txnView || !verView) return;
 
-      const showVerify = tab === 'verify' && role === 'owner';
-      catView.style.display = showVerify ? 'none' : 'block';
-      verView.style.display = showVerify ? 'block' : 'none';
-      if (titleEl) {
-        titleEl.textContent = showVerify ? 'OWNER ROLE VERIFICATION' : 'OWNER / ADMIN CATALOG MANAGER';
-      }
+      accView.style.display = tab === 'access' ? 'block' : 'none';
+      catView.style.display = tab === 'catalog' ? 'block' : 'none';
+      txnView.style.display = tab === 'transactions' ? 'block' : 'none';
+      verView.style.display = tab === 'verify' ? 'block' : 'none';
+      if (badgeEl) badgeEl.textContent = role.toUpperCase();
 
-      if (!showVerify) {
+      if (tab === 'access') {
+        if (titleEl) titleEl.textContent = 'ROLE & STAFF ACCESS';
+        const sumCard = document.getElementById('drawerOwnerSummaryCard');
+        if (sumCard) {
+          if (role === 'owner') {
+            const totalStock = products.reduce((acc, p) => acc + Number(p.stock || 0), 0);
+            const allTxns = getAllTransactionsDB();
+            const totalSales = allTxns.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
+            sumCard.style.display = 'block';
+            sumCard.innerHTML = `
+              <div style="font-weight:800; color:var(--accent-cyan); margin-bottom:4px;">👑 Owner Overview</div>
+              <div>• Total Active Stock: <strong>${totalStock}</strong></div>
+              <div>• Total Transactions: <strong>RM${totalSales.toFixed(2)}</strong> (${allTxns.length})</div>
+              <div>• Partner Split: <strong>Owner &amp; Adik</strong></div>
+            `;
+          } else {
+            sumCard.style.display = 'none';
+          }
+        }
+      } else if (tab === 'catalog') {
+        if (titleEl) titleEl.textContent = 'WEBSITE CATALOG MANAGER';
         const sel = document.getElementById('drawerMgrTargetSelect');
         const opts = getManagerTargetOptions();
         if (sel) {
           sel.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
         }
         syncDrawerMgrFromSelect();
-      } else {
+      } else if (tab === 'transactions') {
+        if (titleEl) titleEl.textContent = 'ALL TRANSACTIONS';
+        renderDrawerTransactionsList();
+      } else if (tab === 'verify') {
+        if (titleEl) titleEl.textContent = 'REGISTERED CUSTOMERS & ROLE';
         refreshVerifyRoleListUI();
       }
 
@@ -4814,6 +5026,13 @@
         }).join('');
       }
 
+      const custBox = document.getElementById('registeredCustomersListBox');
+      if (custBox) {
+        custBox.innerHTML = `
+          <div style="font-weight:800; color:var(--accent-gold); margin-bottom:4px;">Registered Customers (${users.length})</div>
+          ${users.length ? users.map(u => `<div>• <strong>${u.name || u.username || u.email}</strong> (@${u.username || '-'}) • ${u.email} • [${String(u.role || 'customer').toUpperCase()}]</div>`).join('') : '<div>No registered customers yet.</div>'}
+        `;
+      }
       if (listBox) {
         const admins = users.filter(u => String(u.role || '').toLowerCase() === 'admin');
         listBox.innerHTML = `
