@@ -2130,10 +2130,13 @@
         <button class="close-modal" onclick="closeDrawer()">✕</button>
       </div>
       <div class="drawer-links">
-        <button class="drawer-link" onclick="closeDrawer(); closeCheckout();"> <span data-i18n="navCatalog">App Catalog</span></button>
-        <button class="drawer-link" onclick="closeDrawer(); openAuthModal();"> <span data-i18n="navAccount">Login / Register Account</span></button>
-        <button class="drawer-link" onclick="toggleLang(); closeDrawer();"> <span id="drawerLangLabel">Switch to Bahasa Melayu</span></button>
-        <a href="https://wa.me/60189066291?text=Hi%20SPYSTORE%20BY%20SAMS%2C%20saya%20perlukan%20bantuan." target="_blank" class="drawer-link"> <span data-i18n="navSupport">WhatsApp Admin Support</span></a>
+        <button type="button" class="drawer-link" onclick="closeDrawer(); closeCheckout();">🏠 <span data-i18n="navCatalog">App Catalog</span></button>
+        <button type="button" class="drawer-link" onclick="closeDrawer(); openShowSearchModal();">🎬 <span data-i18n="navShowSearch">Search Show / Movie</span></button>
+        <button type="button" class="drawer-link" onclick="closeDrawer(); openTrendingModal('tv_my', 'netflix');">🔥 <span data-i18n="navTrending">Trending Discovery</span></button>
+        <button type="button" class="drawer-link" onclick="closeDrawer(); openAuthModal();">👤 <span data-i18n="navAccount">Login / Register Account</span></button>
+        <button type="button" class="drawer-link" onclick="toggleTheme(); closeDrawer();">🌓 <span id="drawerThemeLabel">Switch Light / Dark Mode</span></button>
+        <button type="button" class="drawer-link" onclick="toggleLang(); closeDrawer();">🌐 <span id="drawerLangLabel">Switch to Bahasa Melayu</span></button>
+        <a href="https://wa.me/60189066291?text=Hi%20SPYSTORE%20BY%20SAMS%2C%20saya%20perlukan%20bantuan." target="_blank" class="drawer-link">💬 <span data-i18n="navSupport">WhatsApp Admin Support</span></a>
       </div>
 
       <div class="drawer-info-card">
@@ -2447,36 +2450,36 @@
   <!-- Toast -->
   <div class="toast" id="toastBox"></div>
       <!-- Trending Top 10 Modal -->
-  <div id="trendingModal" onclick="if(event.target===this) closeTrendingModal()" style="display:none; position:fixed; inset:0; background:#07090e; z-index:9999; align-items:stretch; justify-content:stretch; padding:0;">
-    <div class="discovery-modal-box" style="background:#0c1018; color:#f8fafc; width:100%; height:100vh; max-width:100vw; max-height:100vh; border-radius:0; display:flex; flex-direction:column; overflow:hidden;">
-      <div style="padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; background:#111724;">
+  <div id="trendingModal" onclick="if(event.target===this) closeTrendingModal()" style="display:none; position:fixed; inset:0; background:rgba(2, 6, 23, 0.72); backdrop-filter:blur(6px); z-index:9999; align-items:stretch; justify-content:stretch; padding:0;">
+    <div class="discovery-modal-box" style="background:var(--bg-primary); color:var(--text-primary); width:100%; height:100vh; max-width:100vw; max-height:100vh; border-radius:0; display:flex; flex-direction:column; overflow:hidden;">
+      <div style="padding:14px 16px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
         <div style="min-width:0; padding-right:10px;">
-          <div style="font-size:0.66rem; color:#facc15; font-weight:800; letter-spacing:0.08em;">STREAMING DISCOVERY</div>
-          <h3 id="trendingModalTitle" style="margin:2px 0 0 0; font-size:1.05rem; color:#ffffff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Netflix • Top 10 Tv Show in Malaysia Today</h3>
+          <div style="font-size:0.66rem; color:var(--accent-gold); font-weight:800; letter-spacing:0.08em;">STREAMING DISCOVERY</div>
+          <h3 id="trendingModalTitle" style="margin:2px 0 0 0; font-size:1.05rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Netflix • Top 10 Tv Show in Malaysia Today</h3>
         </div>
-        <button onclick="closeTrendingModal()" style="background:rgba(255,255,255,0.14); border:none; color:#ffffff; width:36px; height:36px; border-radius:50%; font-size:1rem; cursor:pointer; flex-shrink:0;">✕</button>
+        <button type="button" onclick="closeTrendingModal()" class="close-modal" style="width:36px; height:36px; font-size:1rem; flex-shrink:0;">✕</button>
       </div>
 
       <!-- Baris 1: 4 Tab Platform Berasingan -->
-      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; padding:10px 16px 6px 16px; background:#0c1018;">
-        <button id="appSub_netflix" onclick="switchAppSubFilter('netflix')" style="padding:9px 6px; border-radius:10px; border:none; background:#2563eb; color:#ffffff; font-weight:800; font-size:0.78rem; cursor:pointer;">Netflix</button>
-        <button id="appSub_disney" onclick="switchAppSubFilter('disney')" style="padding:9px 6px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.78rem; cursor:pointer;">Disney+</button>
-        <button id="appSub_hbomax" onclick="switchAppSubFilter('hbomax')" style="padding:9px 6px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.78rem; cursor:pointer;">HBO Max</button>
-        <button id="appSub_primevideo" onclick="switchAppSubFilter('primevideo')" style="padding:9px 6px; border-radius:10px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.78rem; cursor:pointer;">Prime Video</button>
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; padding:10px 16px 6px 16px; background:var(--bg-primary);">
+        <button type="button" id="appSub_netflix" onclick="switchAppSubFilter('netflix')" style="padding:9px 6px; border-radius:10px; border:none; background:var(--accent-blue); color:#ffffff; font-weight:800; font-size:0.78rem; cursor:pointer;">Netflix</button>
+        <button type="button" id="appSub_disney" onclick="switchAppSubFilter('disney')" style="padding:9px 6px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); font-weight:700; font-size:0.78rem; cursor:pointer;">Disney+</button>
+        <button type="button" id="appSub_hbomax" onclick="switchAppSubFilter('hbomax')" style="padding:9px 6px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); font-weight:700; font-size:0.78rem; cursor:pointer;">HBO Max</button>
+        <button type="button" id="appSub_primevideo" onclick="switchAppSubFilter('primevideo')" style="padding:9px 6px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); font-weight:700; font-size:0.78rem; cursor:pointer;">Prime Video</button>
       </div>
 
       <!-- Baris 2: 7 Kategori Pilihan -->
-      <div id="categoryScrollRow" style="display:flex; gap:7px; padding:6px 16px 12px 16px; overflow-x:auto; scrollbar-width:none; background:#0c1018; border-bottom:1px solid rgba(255,255,255,0.08);">
-        <button id="catTab_tv_my" onclick="switchDiscoveryCategory('tv_my')" style="padding:7px 13px; border-radius:999px; border:none; background:#facc15; color:#09090b; font-weight:800; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Top 10 Tv Show in Malaysia Today</button>
-        <button id="catTab_movie_my" onclick="switchDiscoveryCategory('movie_my')" style="padding:7px 13px; border-radius:999px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Top 10 Movie in Malaysia Today</button>
-        <button id="catTab_new_in" onclick="switchDiscoveryCategory('new_in')" style="padding:7px 13px; border-radius:999px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">New Releases</button>
-        <button id="catTab_popcorn" onclick="switchDiscoveryCategory('popcorn')" style="padding:7px 13px; border-radius:999px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Perfect Popcorn Movie</button>
-        <button id="catTab_kdrama" onclick="switchDiscoveryCategory('kdrama')" style="padding:7px 13px; border-radius:999px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Kdrama</button>
-        <button id="catTab_rewatched" onclick="switchDiscoveryCategory('rewatched')" style="padding:7px 13px; border-radius:999px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Most Rewatched Show</button>
-        <button id="catTab_only_on" onclick="switchDiscoveryCategory('only_on')" style="padding:7px 13px; border-radius:999px; border:1px solid rgba(255,255,255,0.14); background:#161d2c; color:#cbd5e1; font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Only On Platform</button>
+      <div id="categoryScrollRow" style="display:flex; gap:7px; padding:6px 16px 12px 16px; overflow-x:auto; scrollbar-width:none; background:var(--bg-primary); border-bottom:1px solid var(--border-color);">
+        <button type="button" id="catTab_tv_my" onclick="switchDiscoveryCategory('tv_my')" style="padding:7px 13px; border-radius:999px; border:none; background:var(--accent-gold); color:#09090b; font-weight:800; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Top 10 Tv Show in Malaysia Today</button>
+        <button type="button" id="catTab_movie_my" onclick="switchDiscoveryCategory('movie_my')" style="padding:7px 13px; border-radius:999px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Top 10 Movie in Malaysia Today</button>
+        <button type="button" id="catTab_new_in" onclick="switchDiscoveryCategory('new_in')" style="padding:7px 13px; border-radius:999px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">New Releases</button>
+        <button type="button" id="catTab_popcorn" onclick="switchDiscoveryCategory('popcorn')" style="padding:7px 13px; border-radius:999px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Perfect Popcorn Movie</button>
+        <button type="button" id="catTab_kdrama" onclick="switchDiscoveryCategory('kdrama')" style="padding:7px 13px; border-radius:999px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Kdrama</button>
+        <button type="button" id="catTab_rewatched" onclick="switchDiscoveryCategory('rewatched')" style="padding:7px 13px; border-radius:999px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Most Rewatched Show</button>
+        <button type="button" id="catTab_only_on" onclick="switchDiscoveryCategory('only_on')" style="padding:7px 13px; border-radius:999px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); font-weight:700; font-size:0.74rem; cursor:pointer; white-space:nowrap; flex-shrink:0;">Only On Platform</button>
       </div>
 
-      <div id="trendingModalBody" style="padding:14px 16px 28px 16px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:11px; background:#0c1018;"></div>
+      <div id="trendingModalBody" style="padding:14px 16px 28px 16px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:11px; background:var(--bg-primary);"></div>
     </div>
   </div>
 
@@ -2561,6 +2564,8 @@
       en: {
         brandSub: 'Digital Subscription Hub',
         navCatalog: 'App Catalog',
+        navShowSearch: 'Search Show / Movie',
+        navTrending: 'Trending Discovery',
         navAccount: 'Login / Register Account',
         navSupport: 'WhatsApp Admin Support',
         warrantyTitle: '🛡️ 100% Full Warranty Policy',
@@ -2621,6 +2626,8 @@
       my: {
         brandSub: 'Hab Langganan Digital',
         navCatalog: 'Katalog Aplikasi',
+        navShowSearch: 'Cari Cerita / Movie',
+        navTrending: 'Senarai Trending',
         navAccount: 'Log Masuk / Daftar Akaun',
         navSupport: 'Sokongan Admin WhatsApp',
         warrantyTitle: '🛡️ Polisi Waranti Penuh 100%',
@@ -2688,6 +2695,13 @@
       });
       document.getElementById('langToggleBtn').textContent = currentLang.toUpperCase();
       document.getElementById('drawerLangLabel').textContent = currentLang === 'en' ? 'Tukar ke Bahasa Melayu' : 'Switch to English';
+      const dTheme = document.getElementById('drawerThemeLabel');
+      if (dTheme) {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        dTheme.textContent = currentLang === 'en'
+          ? (isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode')
+          : (isDark ? 'Tukar ke Mod Siang' : 'Tukar ke Mod Gelap');
+      }
       document.getElementById('searchInput').placeholder = currentLang === 'en'
         ? 'Search Netflix, Disney+, Spotify, Canva...'
         : 'Cari Netflix, Disney+, Spotify, Canva...';
@@ -2864,18 +2878,18 @@
         const sBtn = document.getElementById(`appSub_${appId}`);
         if (!sBtn) return;
         const active = activeAppSubFilter === appId;
-        sBtn.style.background = active ? '#2563eb' : '#161d2c';
-        sBtn.style.color = active ? '#ffffff' : '#cbd5e1';
-        sBtn.style.border = active ? 'none' : '1px solid rgba(255,255,255,0.14)';
+        sBtn.style.background = active ? 'var(--accent-blue)' : 'var(--bg-card)';
+        sBtn.style.color = active ? '#ffffff' : 'var(--text-secondary)';
+        sBtn.style.border = active ? 'none' : '1px solid var(--border-color)';
       });
 
       Object.keys(CATEGORY_TITLES).forEach(key => {
         const btn = document.getElementById(`catTab_${key}`);
         if (!btn) return;
         const isActive = key === activeDiscoveryCat;
-        btn.style.background = isActive ? '#facc15' : '#161d2c';
-        btn.style.color = isActive ? '#09090b' : '#cbd5e1';
-        btn.style.border = isActive ? 'none' : '1px solid rgba(255,255,255,0.14)';
+        btn.style.background = isActive ? 'var(--accent-gold)' : 'var(--bg-card)';
+        btn.style.color = isActive ? '#09090b' : 'var(--text-secondary)';
+        btn.style.border = isActive ? 'none' : '1px solid var(--border-color)';
       });
 
       const body = document.getElementById('trendingModalBody');
@@ -2884,25 +2898,25 @@
       const list = appSpecificList.length ? appSpecificList : catList;
 
       if (!list || !list.length) {
-        body.innerHTML = `<div style="text-align:center; padding:22px; color:#94a3b8; font-size:0.8rem;">Tiada senarai untuk pilihan ini buat masa ini.</div>`;
+        body.innerHTML = `<div style="text-align:center; padding:22px; color:var(--text-muted); font-size:0.8rem;">${currentLang === 'en' ? 'No titles available for this selection right now.' : 'Tiada senarai untuk pilihan ini buat masa ini.'}</div>`;
         return;
       }
 
       body.innerHTML = list.map((item, idx) => {
         const displayRank = idx + 1;
         return `
-          <div class="discovery-row-card" style="animation-delay:${Math.min(idx * 35, 320)}ms; display:flex; gap:12px; align-items:center; background:#141b29; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
-            <div style="font-weight:800; font-size:0.9rem; color:#facc15; min-width:26px; text-align:center;">#${displayRank}</div>
-            ${item.poster ? `<img src="${item.poster}" style="width:64px; height:94px; object-fit:cover; border-radius:10px; flex-shrink:0; box-shadow:0 6px 16px rgba(0,0,0,0.45);" />` : ''}
+          <div class="discovery-row-card" style="animation-delay:${Math.min(idx * 35, 320)}ms; display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
+            <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${displayRank}</div>
+            ${item.poster ? `<img src="${item.poster}" referrerpolicy="no-referrer" style="width:64px; height:94px; object-fit:cover; border-radius:10px; flex-shrink:0; box-shadow:0 6px 16px rgba(0,0,0,0.35);" onerror="this.outerHTML='<div style=\'width:64px;height:94px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;\'>🎬</div>';" />` : `<div style="width:64px;height:94px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🎬</div>`}
             <div style="flex:1; min-width:0;">
               <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap;">
                 <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel}</span>
-                <span style="font-size:0.68rem; color:#facc15; font-weight:700;">★ ${item.rating}</span>
-                <span style="font-size:0.64rem; color:#94a3b8;">${item.mediaType}</span>
+                <span style="font-size:0.68rem; color:var(--accent-gold); font-weight:700;">★ ${item.rating}</span>
+                <span style="font-size:0.64rem; color:var(--text-muted);">${item.mediaType}</span>
               </div>
-              <div style="font-weight:700; font-size:0.9rem; color:#ffffff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
-              <div style="font-size:0.74rem; line-height:1.38; color:#94a3b8; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:3px;">${item.overview || 'Popular streaming title.'}</div>
-              <button type="button" class="discovery-quick-order" onclick="closeTrendingModal(); openCheckout('${item.platformId}');">Order ${item.platformLabel} • RM${item.price} →</button>
+              <div style="font-weight:700; font-size:0.9rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
+              <div style="font-size:0.74rem; line-height:1.38; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:3px;">${item.overview || 'Popular streaming title.'}</div>
+              <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId}');">${currentLang === 'en' ? `Order ${item.platformLabel} • RM${item.price} ✓` : `Tempah ${item.platformLabel} • RM${item.price} ✓`}</button>
             </div>
           </div>
         `;
@@ -3511,7 +3525,9 @@
       document.getElementById('plan1Price').textContent = `RM${initUnit.toFixed(2)}`;
       document.getElementById('plan2Price').textContent = `RM${(initUnit * 2).toFixed(2)}`;
       selectMonths(1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const coEl = document.getElementById('checkoutView');
+      if (coEl) coEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
 
