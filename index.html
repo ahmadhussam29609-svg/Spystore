@@ -2435,6 +2435,10 @@
 
         <form id="simpleSignupForm" onsubmit="handleSignupSubmit(event)">
           <div class="form-group">
+            <label>Username * (Unique per account)</label>
+            <input type="text" class="form-control" id="signupUsernameInput" placeholder="e.g. ahmad_hussam" required />
+          </div>
+          <div class="form-group">
             <label>Email Address *</label>
             <input type="email" class="form-control" id="signupEmailInput" placeholder="e.g. ahmad@gmail.com" required />
           </div>
@@ -2451,14 +2455,37 @@
 
         <form id="simpleLoginForm" style="display:none;" onsubmit="handleAccountLoginSubmit(event)">
           <div class="form-group">
-            <label>Email Address *</label>
-            <input type="email" class="form-control" id="loginEmailInput" placeholder="e.g. ahmad@gmail.com" required />
+            <label>Email or Username *</label>
+            <input type="text" class="form-control" id="loginEmailInput" placeholder="e.g. ahmad@gmail.com or ahmad_hussam" required />
           </div>
           <div class="form-group">
             <label>Password *</label>
             <input type="password" class="form-control" id="loginPasswordInput" placeholder="Enter your password" required />
           </div>
+          <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+            <button type="button" onclick="openForgotPasswordView()" style="background:none; border:none; color:var(--accent-cyan); font-size:0.76rem; font-weight:700; cursor:pointer; text-decoration:underline;">Forgot Password?</button>
+          </div>
           <button type="submit" class="primary-submit">LOGIN TO ACCOUNT →</button>
+        </form>
+
+        <form id="forgotPasswordForm" style="display:none;" onsubmit="handleForgotPasswordSubmit(event)">
+          <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:10px;">
+            Enter your registered <strong>Email Address</strong> and <strong>Username</strong> to set a new password.
+          </div>
+          <div class="form-group">
+            <label>Registered Email Address *</label>
+            <input type="email" class="form-control" id="forgotEmailInput" placeholder="e.g. ahmad@gmail.com" required />
+          </div>
+          <div class="form-group">
+            <label>Registered Username *</label>
+            <input type="text" class="form-control" id="forgotUsernameInput" placeholder="e.g. ahmad_hussam" required />
+          </div>
+          <div class="form-group">
+            <label>New Password *</label>
+            <input type="password" class="form-control" id="forgotNewPasswordInput" placeholder="Minimum 6 characters" minlength="6" required />
+          </div>
+          <button type="submit" class="primary-submit">RESET PASSWORD →</button>
+          <button type="button" onclick="switchAuthMode('login')" style="width:100%; margin-top:8px; background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); padding:9px; border-radius:10px; font-weight:700; font-size:0.78rem; cursor:pointer;">← Back to Login</button>
         </form>
       </div>
 
@@ -3076,12 +3103,27 @@
         data = buildFallbackTrendingData();
       }
       try {
-        const rawTopItems = (data.items || []).slice(0, 12);
-        const kdramaPool = Array.isArray(discoveryCategories.kdrama) ? discoveryCategories.kdrama : [];
-        const newInPool = Array.isArray(discoveryCategories.new_in) ? discoveryCategories.new_in : [];
-        const popcornPool = Array.isArray(discoveryCategories.popcorn) ? discoveryCategories.popcorn : [];
+        const fallbackSet = buildFallbackTrendingData();
+        trendingByApp = (data.byApp && Object.keys(data.byApp).length) ? data.byApp : fallbackSet.byApp;
+        discoveryCategories = {
+          ...fallbackSet.categories,
+          ...(data.categories || {})
+        };
 
-        // Mix Top 10 + K-Drama + New Releases + Popcorn picks into a rotating hero showcase
+        const rawTopItems = (Array.isArray(data.items) && data.items.length >= 4)
+          ? data.items.slice(0, 12)
+          : fallbackSet.items;
+
+        const kdramaPool = (Array.isArray(discoveryCategories.kdrama) && discoveryCategories.kdrama.length)
+          ? discoveryCategories.kdrama
+          : fallbackSet.categories.kdrama;
+        const newInPool = (Array.isArray(discoveryCategories.new_in) && discoveryCategories.new_in.length)
+          ? discoveryCategories.new_in
+          : fallbackSet.categories.new_in;
+        const popcornPool = (Array.isArray(discoveryCategories.popcorn) && discoveryCategories.popcorn.length)
+          ? discoveryCategories.popcorn
+          : fallbackSet.categories.popcorn;
+
         const mixedShowcase = [];
         const seenKeys = new Set();
         const pushPick = (obj, tagPill, targetCat) => {
@@ -3096,19 +3138,23 @@
           });
         };
 
-        if (rawTopItems[0]) pushPick(rawTopItems[0], `🔥 #1 TOP TRENDING`, 'tv_my');
-        if (kdramaPool[0]) pushPick(kdramaPool[0], `🇰🇷 K-DRAMA PICK`, 'kdrama');
-        if (rawTopItems[1]) pushPick(rawTopItems[1], `🔥 #2 TOP TRENDING`, 'movie_my');
-        if (newInPool[0]) pushPick(newInPool[0], `✨ NEW RELEASE`, 'new_in');
-        if (kdramaPool[1]) pushPick(kdramaPool[1], `🇰🇷 K-DRAMA PICK`, 'kdrama');
-        if (popcornPool[0]) pushPick(popcornPool[0], `🍿 POPCORN MOVIE`, 'popcorn');
+        if (rawTopItems[0]) pushPick(rawTopItems[0], '🔥 #1 TOP TRENDING', 'tv_my');
+        if (kdramaPool[0]) pushPick(kdramaPool[0], '🇰🇷 K-DRAMA PICK', 'kdrama');
+        if (rawTopItems[1]) pushPick(rawTopItems[1], '🔥 #2 TOP TRENDING', 'movie_my');
+        if (newInPool[0]) pushPick(newInPool[0], '✨ NEW RELEASE', 'new_in');
+        if (kdramaPool[1]) pushPick(kdramaPool[1], '🇰🇷 K-DRAMA PICK', 'kdrama');
+        if (popcornPool[0]) pushPick(popcornPool[0], '🍿 POPCORN MOVIE', 'popcorn');
+        if (rawTopItems[2]) pushPick(rawTopItems[2], '🔥 #3 TOP TRENDING', 'tv_my');
+        if (newInPool[1]) pushPick(newInPool[1], '✨ NEW RELEASE', 'new_in');
 
-        const items = mixedShowcase.length ? mixedShowcase : rawTopItems;
-        window._lastShowSearchItems = items;
-        trendingByApp = data.byApp || {};
-        if (data.categories) {
-          discoveryCategories = { ...discoveryCategories, ...data.categories };
+        // Guarantee at least 8 slides using fallback items if API returned fewer
+        for (const fbIt of fallbackSet.items) {
+          if (mixedShowcase.length >= 8) break;
+          pushPick(fbIt, `🔥 #${mixedShowcase.length + 1} TRENDING`, 'tv_my');
         }
+
+        const items = mixedShowcase.slice(0, 8);
+        window._lastShowSearchItems = items;
         if (!items.length) return;
 
         const track = document.getElementById('heroTrack');
@@ -4012,16 +4058,71 @@
       refreshCheckoutLoginReminder();
     }
 
+    function normalizeUsername(u) {
+      return String(u || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+    }
+
     function switchAuthMode(mode = 'signup') {
       const isSignup = mode === 'signup';
+      const isForgot = mode === 'forgot';
       const sBtn = document.getElementById('authModeSignupBtn');
       const lBtn = document.getElementById('authModeLoginBtn');
       const sForm = document.getElementById('simpleSignupForm');
       const lForm = document.getElementById('simpleLoginForm');
+      const fForm = document.getElementById('forgotPasswordForm');
       if (sBtn) sBtn.classList.toggle('active', isSignup);
-      if (lBtn) lBtn.classList.toggle('active', !isSignup);
+      if (lBtn) lBtn.classList.toggle('active', !isSignup && !isForgot);
       if (sForm) sForm.style.display = isSignup ? 'block' : 'none';
-      if (lForm) lForm.style.display = isSignup ? 'none' : 'block';
+      if (lForm) lForm.style.display = (!isSignup && !isForgot) ? 'block' : 'none';
+      if (fForm) fForm.style.display = isForgot ? 'block' : 'none';
+    }
+
+    function openForgotPasswordView() {
+      switchAuthMode('forgot');
+      const cur = getCurrentUser();
+      const fEmail = document.getElementById('forgotEmailInput');
+      const fUser = document.getElementById('forgotUsernameInput');
+      if (fEmail && cur?.email && !fEmail.value) fEmail.value = cur.email;
+      if (fUser && cur?.username && !fUser.value) fUser.value = cur.username;
+    }
+
+    function handleForgotPasswordSubmit(e) {
+      e.preventDefault();
+      const email = String(document.getElementById('forgotEmailInput')?.value || '').trim().toLowerCase();
+      const uname = normalizeUsername(document.getElementById('forgotUsernameInput')?.value || '');
+      const newPass = String(document.getElementById('forgotNewPasswordInput')?.value || '');
+
+      if (!email || !uname || newPass.length < 6) {
+        showToast('Fill email, username & new password (min 6 chars).');
+        return;
+      }
+
+      const users = getUsersDB();
+      const idx = users.findIndex(u =>
+        String(u.email || '').trim().toLowerCase() === email &&
+        normalizeUsername(u.username || (u.email || '').split('@')[0]) === uname
+      );
+
+      if (idx === -1) {
+        showToast('Account not found! Check your email and username.');
+        return;
+      }
+
+      users[idx].password = newPass;
+      saveUsersDB(users);
+
+      const cur = getCurrentUser();
+      if (cur && String(cur.email || '').trim().toLowerCase() === email) {
+        localStorage.setItem('spystore_current_user', JSON.stringify({ ...cur, password: newPass }));
+      }
+
+      if (document.getElementById('forgotNewPasswordInput')) {
+        document.getElementById('forgotNewPasswordInput').value = '';
+      }
+      switchAuthMode('login');
+      const lEmail = document.getElementById('loginEmailInput');
+      if (lEmail) lEmail.value = email;
+      showToast('Password updated! Please log in with your new password.');
     }
 
     function renderProfileCardHtml(user) {
@@ -4053,9 +4154,23 @@
       if (!user || !user.email) return;
 
       const newName = String(document.getElementById('editFullNameInput')?.value || '').trim();
-      const newUsername = String(document.getElementById('editUsernameInput')?.value || '').trim();
+      const rawUsername = String(document.getElementById('editUsernameInput')?.value || '').trim();
+      const newUsername = normalizeUsername(rawUsername);
       const newPhone = String(document.getElementById('editPhoneInput')?.value || '').trim();
-      if (!newName || !newUsername) return;
+      if (!newName || !newUsername) {
+        showToast('Enter a valid username.');
+        return;
+      }
+
+      const users = getUsersDB();
+      const takenByOther = users.some(u =>
+        String(u.email || '').trim().toLowerCase() !== String(user.email).trim().toLowerCase() &&
+        normalizeUsername(u.username || (u.email || '').split('@')[0]) === newUsername
+      );
+      if (takenByOther) {
+        showToast('Username already used by another account! Please choose another.');
+        return;
+      }
 
       const updated = {
         ...user,
@@ -4064,7 +4179,6 @@
         phone: newPhone
       };
 
-      const users = getUsersDB();
       const idx = users.findIndex(u => u.email === user.email);
       if (idx !== -1) {
         users[idx] = { ...users[idx], ...updated };
@@ -4114,16 +4228,27 @@
 
     function handleSignupSubmit(e) {
       e.preventDefault();
+      const rawUsername = String(document.getElementById('signupUsernameInput')?.value || '').trim();
+      const username = normalizeUsername(rawUsername);
       const email = String(document.getElementById('signupEmailInput')?.value || '').trim().toLowerCase();
       const fullName = String(document.getElementById('signupFullNameInput')?.value || '').trim();
       const password = String(document.getElementById('signupPasswordInput')?.value || '');
-      if (!email || !fullName || password.length < 6) {
-        showToast('Fill email, full name & password (min 6 chars).');
+
+      if (!username || !email || !fullName || password.length < 6) {
+        showToast('Fill username, email, full name & password (min 6 chars).');
         return;
       }
 
-      const username = email.split('@')[0];
       const users = getUsersDB();
+      const usernameTaken = users.some(u =>
+        normalizeUsername(u.username || (u.email || '').split('@')[0]) === username &&
+        String(u.email || '').trim().toLowerCase() !== email
+      );
+      if (usernameTaken) {
+        showToast('Username already registered by another account! Please change username.');
+        return;
+      }
+
       const existing = users.find(u => u.email === email);
       const account = {
         username,
@@ -4144,19 +4269,25 @@
       syncCurrentUserSavedData();
       updateAuthUI();
       closeAuthModal();
-      showToast(`Account created: ${account.email}`);
+      showToast(`Account created: @${account.username}`);
     }
 
     function handleAccountLoginSubmit(e) {
       e.preventDefault();
-      const email = String(document.getElementById('loginEmailInput')?.value || '').trim().toLowerCase();
+      const identifier = String(document.getElementById('loginEmailInput')?.value || '').trim().toLowerCase();
+      const cleanUname = normalizeUsername(identifier);
       const password = String(document.getElementById('loginPasswordInput')?.value || '');
-      if (!email || !password) return;
+      if (!identifier || !password) return;
 
       const users = getUsersDB();
-      const found = users.find(u => u.email === email && u.password === password);
+      const found = users.find(u => {
+        const uEmail = String(u.email || '').trim().toLowerCase();
+        const uName = normalizeUsername(u.username || (u.email || '').split('@')[0]);
+        return (uEmail === identifier || (cleanUname && uName === cleanUname)) && u.password === password;
+      });
+
       if (!found) {
-        showToast('Invalid email or password.');
+        showToast('Invalid email/username or password.');
         return;
       }
 
@@ -4334,6 +4465,41 @@
       } catch {}
     }
 
+    window._currentAccountOrders = [];
+
+    function openTransactionDetail(idx) {
+      const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
+      const o = list[idx];
+      if (!o) return;
+      const user = getCurrentUser();
+      const container = document.getElementById('orderHistoryList');
+      if (!container) return;
+
+      const refCode = o.ref || o.refno || `SPY-${String(idx + 1).padStart(3, '0')}`;
+      const payMethod = o.paymentMethod ? String(o.paymentMethod).toUpperCase() : 'FPX / ONLINE';
+      const custName = o.customerName || user?.name || '-';
+      const custEmail = o.customerEmail || user?.email || '-';
+      const custPhone = o.customerPhone || user?.phone || '-';
+
+      container.innerHTML = `
+        <div class="order-item" style="border-color:var(--accent-cyan); padding:13px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-weight:800; font-size:0.86rem; color:var(--text-primary);">🧾 Purchase Details</span>
+            <button type="button" onclick="renderOrderHistory()" style="background:var(--bg-card); border:1px solid var(--border-color); color:var(--accent-cyan); padding:4px 9px; border-radius:8px; font-size:0.7rem; font-weight:700; cursor:pointer;">← Back to List</button>
+          </div>
+          <p style="margin-bottom:4px;"><strong>Product:</strong> ${o.app || '-'}</p>
+          <p style="margin-bottom:4px;"><strong>Duration:</strong> ${o.months || 1} Month(s)</p>
+          <p style="margin-bottom:4px;"><strong>Total Amount:</strong> <span style="color:var(--accent-gold); font-weight:800;">RM${o.total || '0.00'}</span></p>
+          <p style="margin-bottom:4px;"><strong>Date:</strong> ${o.date || '-'}</p>
+          <p style="margin-bottom:4px;"><strong>Payment Method:</strong> ${payMethod}</p>
+          <p style="margin-bottom:4px;"><strong>Reference:</strong> ${refCode}</p>
+          <p style="margin-bottom:4px;"><strong>Account Email:</strong> ${custEmail}</p>
+          <p style="margin-bottom:4px;"><strong>Customer Name:</strong> ${custName}</p>
+          <p style="margin-bottom:0;"><strong>WhatsApp:</strong> ${custPhone || '-'}</p>
+        </div>
+      `;
+    }
+
     function renderOrderHistory() {
       const container = document.getElementById('orderHistoryList');
       const user = getCurrentUser();
@@ -4346,20 +4512,22 @@
         try { list = JSON.parse(localStorage.getItem('spystore_orders') || '[]'); } catch {}
       }
 
+      window._currentAccountOrders = list;
+
       if (!list.length) {
         container.innerHTML = `<p style="font-size:0.78rem; color:var(--text-muted);">No transaction history saved for this account yet.</p>`;
         return;
       }
 
-      container.innerHTML = list.map(o => `
-        <div class="order-item">
+      container.innerHTML = list.map((o, idx) => `
+        <div class="order-item" style="cursor:pointer;" onclick="openTransactionDetail(${idx})">
           <div style="display:flex; justify-content:space-between; font-weight:700;">
             <span>${o.app} (${o.months} Mo)</span>
             <span style="color:var(--accent-gold);">RM${o.total}</span>
           </div>
           <div style="display:flex; justify-content:space-between; color:var(--text-muted); font-size:0.72rem; margin-top:2px;">
             <span>Date: ${o.date}</span>
-            <span style="color:#4ade80;">Saved ✓</span>
+            <span style="color:var(--accent-cyan); font-weight:700;">Tap for details ›</span>
           </div>
         </div>
       `).join('');
