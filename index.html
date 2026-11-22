@@ -2603,7 +2603,10 @@
           <label>Email or Username *</label>
           <input type="text" class="form-control" id="verifyEmailOrUsernameInput" placeholder="e.g. user@gmail.com or username" />
         </div>
-        <button type="button" class="primary-submit" style="margin-top:0; width:100%;" onclick="verifyUserToAdminRole()">Verify as Admin ✓</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="primary-submit" style="flex:1; margin-top:0;" onclick="verifyUserToAdminRole()">Verify as Admin ✓</button>
+          <button type="button" onclick="unverifyUserFromAdminRole()" style="background:rgba(239, 68, 68, 0.14); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:11px 14px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer;">Unverify Admin</button>
+        </div>
         <div id="verifiedAdminsListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
       </div>
 
@@ -4072,14 +4075,92 @@
   }
 
   function refreshVerifyRoleListUI() {
-  
-  let _allowLeavePage = false;
+    ensureOwnerAccountSeeded();
+    const users = getUsersDB().filter(u => !isDesignatedOwner(u));
+    const vList = getVerifiedAdminsList();
+    const custBox = document.getElementById('registeredCustomersListBox');
+    const listBox = document.getElementById('verifiedAdminsListBox');
+    if (custBox) {
+      custBox.innerHTML = `<div style="font-weight:800; color:var(--accent-gold); margin-bottom:4px;">Registered Customers (${users.length})</div>` +
+        (users.length ? users.map(u => {
+          const effRole = getUserRole(u);
+          return `<div>• <strong>${u.name || u.username || u.email}</strong> (@${u.username || '-'}) • ${u.email} • [${String(effRole).toUpperCase()}]</div>`;
+        }).join('') : '<div>No registered customers yet.</div>');
+    }
+    if (listBox) {
+      const admins = users.filter(u => {
+        const em = String(u.email || '').trim().toLowerCase();
+        const un = normalizeUsername(u.username || '');
+        return String(u.role || '').toLowerCase() === 'admin' || (em && vList.includes(em)) || (un && vList.includes(un));
+      });
+      listBox.innerHTML = `<div style="font-weight:800; color:var(--accent-cyan); margin-bottom:6px;">Active Admins (${admins.length})</div>` +
+        (admins.length ? admins.map(a => {
+          const targetId = a.email || a.username || '';
+          const escapedId = String(targetId).replace(/'/g, "\\'");
+          return `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:5px; padding:5px 8px; border-radius:8px; background:var(--bg-input);">
+            <span style="min-width:0; overflow:hidden; text-overflow:ellipsis;">• <strong>${a.username || a.email}</strong> (${a.email})</span>
+            <button type="button" onclick="unverifyUserFromAdminRole('${escapedId}')" style="background:rgba(239, 68, 68, 0.16); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:3px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer; flex-shrink:0;">Unverify</button>
+          </div>`;
+        }).join('') : '<div>No verified admins yet.</div>');
+    }
+  }
 
-  function cancelLeaveWebsite() {
-    document.getElementById('leaveConfirmModal')?.classList.remove('open');
+  function unverifyUserFromAdminRole(explicitTarget = '') {
+    if (getUserRole() !== 'owner') { showToast('Only Owner can unverify admins.'); return; }
+    const rawQ = String(explicitTarget || document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
+    const cleanU = normalizeUsername(rawQ);
+    if (!rawQ) { showToast('Enter an email or username to unverify.'); return; }
+    ensureOwnerAccountSeeded();
+    const users = getUsersDB();
+    const idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === rawQ || (cleanU && normalizeUsername(u.username || '') === cleanU));
+    if (idx !== -1 && isDesignatedOwner(users[idx])) { showToast('Owner role cannot be changed.'); return; }
+
+    let removedLabel = rawQ;
+    if (idx !== -1) {
+      users[idx].role = 'customer';
+      removedLabel = users[idx].username || users[idx].email;
+      saveUsersDB(users);
+    }
+
+    const filteredAdmins = getVerifiedAdminsList().filter(item => {
+      const it = String(item || '').trim().toLowerCase();
+      if (it === rawQ || (cleanU && it === cleanU)) return false;
+      if (idx !== -1) {
+        const uEm = String(users[idx].email || '').trim().toLowerCase();
+        const uUn = normalizeUsername(users[idx].username || '');
+        if ((uEm && it === uEm) || (uUn && it === uUn)) return false;
+      }
+      return true;
+    });
+    saveVerifiedAdminsList(filteredAdmins);
+
     try {
-      history.pushState({ spystoreGuard: true }, '', window.location.href);
-    } catch (e)   function verifyUserToAdminRole() {
+      const seen = JSON.parse(localStorage.getItem(ADMIN_NOTIF_SEEN_KEY) || '{}');
+      delete seen[rawQ];
+      if (idx !== -1 && users[idx].email) delete seen[String(users[idx].email).trim().toLowerCase()];
+      if (idx !== -1 && users[idx].username) delete seen[normalizeUsername(users[idx].username)];
+      localStorage.setItem(ADMIN_NOTIF_SEEN_KEY, JSON.stringify(seen));
+    } catch (e) {}
+
+    const activeU = getCurrentUser();
+    if (activeU && !isDesignatedOwner(activeU) && (
+      String(activeU.email || '').trim().toLowerCase() === rawQ ||
+      (cleanU && normalizeUsername(activeU.username || '') === cleanU) ||
+      (idx !== -1 && String(activeU.email || '').trim().toLowerCase() === String(users[idx].email || '').trim().toLowerCase())
+    )) {
+      const downgraded = { ...activeU, role: 'customer' };
+      localStorage.setItem('spystore_current_user', JSON.stringify(downgraded));
+    }
+
+    if (!explicitTarget && document.getElementById('verifyEmailOrUsernameInput')) {
+      document.getElementById('verifyEmailOrUsernameInput').value = '';
+    }
+    refreshVerifyRoleListUI();
+    refreshDrawerRoleTools();
+    showToast(`🚫 ${removedLabel} telah di-unverify daripada ADMIN (kembali ke Customer).`);
+  }
+
+  function verifyUserToAdminRole() {
     if (getUserRole() !== 'owner') { showToast('Only Owner can verify admins.'); return; }
     const rawQ = String(document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
     const cleanU = normalizeUsername(rawQ);
