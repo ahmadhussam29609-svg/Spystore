@@ -2597,7 +2597,7 @@
       <!-- Add Admin Role Only (Owner Only — Type Email / Username Directly) -->
       <div id="drawerVerifyRoleToolView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
-          <span id="lblVerifyHint">Type a user's <strong>username</strong> or <strong>email</strong> to assign or unverify <strong>Admin</strong>.</span>
+          <span id="lblVerifyHint">Type a user\'s <strong>username</strong> or <strong>email</strong> to assign or unverify <strong>Admin</strong>.</span>
         </div>
         <div class="form-group" style="margin-bottom:10px;">
           <label id="lblVerifyField">Email or Username *</label>
@@ -3070,7 +3070,7 @@
 
     setHtml('lblVerifyHint', isMy
       ? 'Taip <strong>username</strong> atau <strong>email</strong> pengguna untuk dijadikan atau dibatalkan <strong>Admin</strong>.'
-      : 'Type a user's <strong>username</strong> or <strong>email</strong> to assign or unverify <strong>Admin</strong>.');
+      : 'Type a user\'s <strong>username</strong> or <strong>email</strong> to assign or unverify <strong>Admin</strong>.');
     setTxt('lblVerifyField', isMy ? 'E-mel atau Username *' : 'Email or Username *');
     setTxt('lblVerifyBtn', isMy ? 'Sahkan Sebagai Admin ✓' : 'Verify as Admin ✓');
     setTxt('lblUnverifyBtn', isMy ? 'Batal Admin' : 'Unverify Admin');
@@ -4119,7 +4119,24 @@
   }
 
   function refreshVerifyRoleListUI() {
-    ensureOwnerAccountSeeded();
+  
+  (function ensureSplashNeverStuck() {
+    const hideNow = () => {
+      const sp = document.getElementById('splashIntro');
+      if (sp) {
+        sp.classList.add('hide');
+        sp.style.display = 'none';
+      }
+    };
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(hideNow, 650);
+    } else {
+      window.addEventListener('DOMContentLoaded', () => setTimeout(hideNow, 650));
+    }
+    setTimeout(hideNow, 1100);
+  })();
+
+  ensureOwnerAccountSeeded();
     const users = getUsersDB().filter(u => !isDesignatedOwner(u));
     const vList = getVerifiedAdminsList();
     const custBox = document.getElementById('registeredCustomersListBox');
@@ -4154,7 +4171,24 @@
     const rawQ = String(explicitTarget || document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
     const cleanU = normalizeUsername(rawQ);
     if (!rawQ) { showToast('Enter an email or username to unverify.'); return; }
-    ensureOwnerAccountSeeded();
+  
+  (function ensureSplashNeverStuck() {
+    const hideNow = () => {
+      const sp = document.getElementById('splashIntro');
+      if (sp) {
+        sp.classList.add('hide');
+        sp.style.display = 'none';
+      }
+    };
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(hideNow, 650);
+    } else {
+      window.addEventListener('DOMContentLoaded', () => setTimeout(hideNow, 650));
+    }
+    setTimeout(hideNow, 1100);
+  })();
+
+  ensureOwnerAccountSeeded();
     const users = getUsersDB();
     const idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === rawQ || (cleanU && normalizeUsername(u.username || '') === cleanU));
     if (idx !== -1 && isDesignatedOwner(users[idx])) { showToast('Owner role cannot be changed.'); return; }
@@ -4209,7 +4243,24 @@
     const rawQ = String(document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
     const cleanU = normalizeUsername(rawQ);
     if (!rawQ) { showToast('Enter an email or username.'); return; }
-    ensureOwnerAccountSeeded();
+  
+  (function ensureSplashNeverStuck() {
+    const hideNow = () => {
+      const sp = document.getElementById('splashIntro');
+      if (sp) {
+        sp.classList.add('hide');
+        sp.style.display = 'none';
+      }
+    };
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(hideNow, 650);
+    } else {
+      window.addEventListener('DOMContentLoaded', () => setTimeout(hideNow, 650));
+    }
+    setTimeout(hideNow, 1100);
+  })();
+
+  ensureOwnerAccountSeeded();
     const users = getUsersDB();
     let idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === rawQ || (cleanU && normalizeUsername(u.username || '') === cleanU));
     if (idx === -1 && rawQ.includes('@')) {
@@ -4289,6 +4340,23 @@ ernameInput')?.value || '').trim().toLowerCase();
       e.preventDefault();
       e.returnValue = '';
     });
+  })();
+
+
+  (function ensureSplashNeverStuck() {
+    const hideNow = () => {
+      const sp = document.getElementById('splashIntro');
+      if (sp) {
+        sp.classList.add('hide');
+        sp.style.display = 'none';
+      }
+    };
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(hideNow, 650);
+    } else {
+      window.addEventListener('DOMContentLoaded', () => setTimeout(hideNow, 650));
+    }
+    setTimeout(hideNow, 1100);
   })();
 
   ensureOwnerAccountSeeded();
@@ -5251,6 +5319,23 @@ ernameInput')?.value || '').trim().toLowerCase();
       e.preventDefault();
       e.returnValue = '';
     });
+  })();
+
+
+  (function ensureSplashNeverStuck() {
+    const hideNow = () => {
+      const sp = document.getElementById('splashIntro');
+      if (sp) {
+        sp.classList.add('hide');
+        sp.style.display = 'none';
+      }
+    };
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(hideNow, 650);
+    } else {
+      window.addEventListener('DOMContentLoaded', () => setTimeout(hideNow, 650));
+    }
+    setTimeout(hideNow, 1100);
   })();
 
   ensureOwnerAccountSeeded();
