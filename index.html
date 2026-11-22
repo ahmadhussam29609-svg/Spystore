@@ -2621,7 +2621,7 @@
           <textarea rows="6" class="form-control" id="ownerTgTemplateInput" style="resize:vertical; font-size:0.78rem; line-height:1.45;"></textarea>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button type="button" class="primary-submit" style="flex:1; margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerMsgTemplates()">Save WA &amp; Telegram Text ✓</button>
+          <button type="button" class="primary-submit" style="flex:1; margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerMsgTemplates()">Save</button>
           <button type="button" onclick="resetOwnerMsgTemplatesToDefault()" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:11px 12px; border-radius:12px; font-size:0.76rem; font-weight:700; cursor:pointer;">Reset Default</button>
         </div>
       </div>
@@ -2659,6 +2659,44 @@
       </div>
 
       <div id="trendingModalBody" style="padding:14px 16px 28px 16px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:11px; background:var(--bg-primary);"></div>
+    </div>
+  </div>
+
+  <!-- Confirm Leave Website Modal -->
+  <div class="modal-backdrop" id="leaveConfirmModal" onclick="if(event.target===this) cancelLeaveWebsite()">
+    <div class="modal-card" style="max-width:380px; text-align:center;">
+      <div class="modal-top" style="margin-bottom:8px;">
+        <h3 style="font-size:1.05rem;">Confirm to Leave Website</h3>
+        <button type="button" class="close-modal" onclick="cancelLeaveWebsite()">✕</button>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:16px;">
+        Adakah anda pasti mahu keluar atau meninggalkan laman web <strong>SPYSTORE BY SAMS</strong>?
+      </p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button type="button" onclick="cancelLeaveWebsite()" style="flex:1; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-primary); padding:11px 14px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer;">Stay (Kekal)</button>
+        <button type="button" onclick="confirmLeaveWebsite()" style="flex:1; background:linear-gradient(135deg, #dc2626, #b91c1c); border:none; color:#ffffff; padding:11px 14px; border-radius:12px; font-weight:800; font-size:0.84rem; cursor:pointer;">Leave (Keluar)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Before Pay Pop-up Modal -->
+  <div class="modal-backdrop" id="loginBeforePayModal" onclick="if(event.target===this) closeLoginBeforePayModal()">
+    <div class="modal-card" style="max-width:410px;">
+      <div class="modal-top" style="margin-bottom:10px;">
+        <h3 style="font-size:1.05rem; color:var(--accent-gold);">⚠️ Sila Login Terlebih Dahulu</h3>
+        <button type="button" class="close-modal" onclick="closeLoginBeforePayModal()">✕</button>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-primary); font-weight:600; margin-bottom:8px;">
+        Anda belum log masuk ke akaun SPYSTORE anda sebelum membuat pembayaran.
+      </p>
+      <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:11px 12px; font-size:0.77rem; color:var(--text-secondary); margin-bottom:14px;">
+        <strong style="color:var(--accent-cyan); display:block; margin-bottom:4px;">Kenapa login penting sebelum bayar?</strong>
+        <span>Sejarah transaksi, nombor invois, dan maklumat langganan anda akan disimpan dengan teratur dan selamat dalam akaun anda supaya tidak mudah hilang jika bertukar peranti atau membersihkan data pelayar.</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button type="button" class="primary-submit" style="margin-top:0;" onclick="closeLoginBeforePayModal(); openAuthModal();">Login / Daftar Akaun Sekarang →</button>
+        <button type="button" onclick="proceedPaymentAfterPrompt()" style="width:100%; background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); padding:10px 12px; border-radius:11px; font-size:0.78rem; font-weight:700; cursor:pointer;">Teruskan Bayar Tanpa Login</button>
+      </div>
     </div>
   </div>
 
@@ -3446,8 +3484,25 @@
     return enriched;
   }
 
+  let _bypassLoginPromptOnce = false;
+
+  function closeLoginBeforePayModal() {
+    document.getElementById('loginBeforePayModal')?.classList.remove('open');
+  }
+
+  function proceedPaymentAfterPrompt() {
+    closeLoginBeforePayModal();
+    _bypassLoginPromptOnce = true;
+    processPayment();
+  }
+
   async function processPayment() {
     if (!currentProduct) return;
+    if (!getCurrentUser() && !_bypassLoginPromptOnce) {
+      document.getElementById('loginBeforePayModal')?.classList.add('open');
+      return;
+    }
+    _bypassLoginPromptOnce = false;
     const customerName = document.getElementById('custName').value.trim();
     const customerPhone = document.getElementById('custPhone').value.trim();
     const needsDevice = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(currentProduct.id);
@@ -3964,7 +4019,43 @@
   }
 
   function refreshVerifyRoleListUI() {
-    ensureOwnerAccountSeeded();
+  
+  let _allowLeavePage = false;
+
+  function cancelLeaveWebsite() {
+    document.getElementById('leaveConfirmModal')?.classList.remove('open');
+    try {
+      history.pushState({ spystoreGuard: true }, '', window.location.href);
+    } catch (e) {}
+  }
+
+  function confirmLeaveWebsite() {
+    _allowLeavePage = true;
+    document.getElementById('leaveConfirmModal')?.classList.remove('open');
+    window.history.go(-2);
+  }
+
+  (function initLeaveWebsiteGuard() {
+    try {
+      history.pushState({ spystoreGuard: true }, '', window.location.href);
+    } catch (e) {}
+
+    window.addEventListener('popstate', function () {
+      if (_allowLeavePage) return;
+      try {
+        history.pushState({ spystoreGuard: true }, '', window.location.href);
+      } catch (e) {}
+      document.getElementById('leaveConfirmModal')?.classList.add('open');
+    });
+
+    window.addEventListener('beforeunload', function (e) {
+      if (_allowLeavePage) return;
+      e.preventDefault();
+      e.returnValue = '';
+    });
+  })();
+
+  ensureOwnerAccountSeeded();
     const users = getUsersDB().filter(u => !isDesignatedOwner(u));
     const custBox = document.getElementById('registeredCustomersListBox');
     const listBox = document.getElementById('verifiedAdminsListBox');
@@ -3984,7 +4075,43 @@
     const rawQ = String(document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
     const cleanU = normalizeUsername(rawQ);
     if (!rawQ) { showToast('Enter an email or username.'); return; }
-    ensureOwnerAccountSeeded();
+  
+  let _allowLeavePage = false;
+
+  function cancelLeaveWebsite() {
+    document.getElementById('leaveConfirmModal')?.classList.remove('open');
+    try {
+      history.pushState({ spystoreGuard: true }, '', window.location.href);
+    } catch (e) {}
+  }
+
+  function confirmLeaveWebsite() {
+    _allowLeavePage = true;
+    document.getElementById('leaveConfirmModal')?.classList.remove('open');
+    window.history.go(-2);
+  }
+
+  (function initLeaveWebsiteGuard() {
+    try {
+      history.pushState({ spystoreGuard: true }, '', window.location.href);
+    } catch (e) {}
+
+    window.addEventListener('popstate', function () {
+      if (_allowLeavePage) return;
+      try {
+        history.pushState({ spystoreGuard: true }, '', window.location.href);
+      } catch (e) {}
+      document.getElementById('leaveConfirmModal')?.classList.add('open');
+    });
+
+    window.addEventListener('beforeunload', function (e) {
+      if (_allowLeavePage) return;
+      e.preventDefault();
+      e.returnValue = '';
+    });
+  })();
+
+  ensureOwnerAccountSeeded();
     const users = getUsersDB();
     const idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === rawQ || (cleanU && normalizeUsername(u.username || '') === cleanU));
     if (idx === -1) { showToast('User account not found.'); return; }
@@ -4908,6 +5035,42 @@
       lastReceiptPlainText = waText;
       document.getElementById('receiptWaLink').href = `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waText)}`;
     }
+  })();
+
+
+  let _allowLeavePage = false;
+
+  function cancelLeaveWebsite() {
+    document.getElementById('leaveConfirmModal')?.classList.remove('open');
+    try {
+      history.pushState({ spystoreGuard: true }, '', window.location.href);
+    } catch (e) {}
+  }
+
+  function confirmLeaveWebsite() {
+    _allowLeavePage = true;
+    document.getElementById('leaveConfirmModal')?.classList.remove('open');
+    window.history.go(-2);
+  }
+
+  (function initLeaveWebsiteGuard() {
+    try {
+      history.pushState({ spystoreGuard: true }, '', window.location.href);
+    } catch (e) {}
+
+    window.addEventListener('popstate', function () {
+      if (_allowLeavePage) return;
+      try {
+        history.pushState({ spystoreGuard: true }, '', window.location.href);
+      } catch (e) {}
+      document.getElementById('leaveConfirmModal')?.classList.add('open');
+    });
+
+    window.addEventListener('beforeunload', function (e) {
+      if (_allowLeavePage) return;
+      e.preventDefault();
+      e.returnValue = '';
+    });
   })();
 
   ensureOwnerAccountSeeded();
