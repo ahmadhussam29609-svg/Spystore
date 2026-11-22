@@ -1590,9 +1590,7 @@
       transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.45s ease;
     }
 
-    [data-theme="light"] @keyframes splashAutoHide { 0%, 82% { opacity: 1; visibility: visible; } 100% { opacity: 0; visibility: hidden; pointer-events: none; } }
-    .splash-intro {
-      animation: splashAutoHide 1.8s ease forwards;
+    [data-theme="light"] .splash-intro {
       background: radial-gradient(circle at 50% 42%, #eff6ff 0%, #f8fafc 75%);
     }
 
@@ -2454,7 +2452,7 @@
 
         <form id="simpleLoginForm" style="display:none;" onsubmit="handleAccountLoginSubmit(event)">
           <div class="form-group">
-            <label id="lblVerifyField">Email or Username *</label>
+            <label>Email or Username *</label>
             <input type="text" class="form-control" id="loginEmailInput" placeholder="e.g. ahmad@gmail.com or ahmad_hussam" required />
           </div>
           <div class="form-group">
@@ -3814,6 +3812,450 @@
     if (document.getElementById('simpleSignupForm')) document.getElementById('simpleSignupForm').style.display = isSignup ? 'block' : 'none';
     if (document.getElementById('simpleLoginForm')) document.getElementById('simpleLoginForm').style.display = (!isSignup && !isForgot) ? 'block' : 'none';
     if (document.getElementById('forgotPasswordForm')) document.getElementById('forgotPasswordForm').style.display = isForgot ? 'block' : 'none';
+  }
+
+  function openForgotPasswordView() { switchAuthMode('forgot'); }
+
+  function handleForgotPasswordSubmit(e) {
+    e.preventDefault();
+    const email = String(document.getElementById('forgotEmailInput')?.value || '').trim().toLowerCase();
+    const uname = normalizeUsername(document.getElementById('forgotUsernameInput')?.value || '');
+    const newPass = String(document.getElementById('forgotNewPasswordInput')?.value || '');
+    const users = getUsersDB();
+    const idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === email && normalizeUsername(u.username || (u.email || '').split('@')[0]) === uname);
+    if (idx === -1) { showToast('Account not found!'); return; }
+    users[idx].password = newPass;
+    saveUsersDB(users);
+    switchAuthMode('login');
+    showToast('Password updated! Please log in.');
+  }
+
+  function renderProfileCardHtml(user) {
+    return `
+      <p><strong>Username:</strong> ${user.username || (user.email ? user.email.split('@')[0] : user.name)}</p>
+      <p><strong>Full Name:</strong> ${user.name}</p>
+      <p><strong>Email:</strong> ${user.email}</p>
+      <p><strong>Country:</strong> Malaysia</p>
+      <p style="margin-bottom:0;"><strong>WhatsApp:</strong> ${user.phone || '-'}</p>
+    `;
+  }
+
+  function toggleProfileEditMode() {
+    const user = getCurrentUser();
+    const form = document.getElementById('editProfileForm');
+    if (!user || !form) return;
+    const opening = form.style.display === 'none';
+    form.style.display = opening ? 'block' : 'none';
+    if (opening) {
+      document.getElementById('editFullNameInput').value = user.name || '';
+      document.getElementById('editUsernameInput').value = user.username || (user.email ? user.email.split('@')[0] : '');
+      document.getElementById('editPhoneInput').value = user.phone || '';
+    }
+  }
+
+  function saveProfileEdits(e) {
+    e.preventDefault();
+    const user = getCurrentUser();
+    if (!user || !user.email) return;
+    const newName = String(document.getElementById('editFullNameInput')?.value || '').trim();
+    const newUsername = normalizeUsername(document.getElementById('editUsernameInput')?.value || '');
+    const newPhone = String(document.getElementById('editPhoneInput')?.value || '').trim();
+    if (!newName || !newUsername) { showToast('Enter valid name and username.'); return; }
+    const users = getUsersDB();
+    const taken = users.some(u => String(u.email || '').trim().toLowerCase() !== String(user.email).trim().toLowerCase() && normalizeUsername(u.username || '') === newUsername);
+    if (taken) { showToast('Username already taken.'); return; }
+    const updated = { ...user, name: newName, username: newUsername, phone: newPhone };
+    const idx = users.findIndex(u => u.email === user.email);
+    if (idx !== -1) users[idx] = { ...users[idx], ...updated };
+    else users.push(updated);
+    saveUsersDB(users);
+    localStorage.setItem('spystore_current_user', JSON.stringify(updated));
+    syncCurrentUserSavedData();
+    updateAuthUI();
+    document.getElementById('profileDetailsBox').innerHTML = renderProfileCardHtml(updated);
+    document.getElementById('editProfileForm').style.display = 'none';
+    showToast('Profile details updated!');
+  }
+
+  function openAuthModal() {
+    const modal = document.getElementById('authModal');
+    const user = getCurrentUser();
+    modal.classList.add('open');
+    if (user) {
+      document.getElementById('authModalTitle').textContent = 'SPYSTORE PROFILE';
+      document.getElementById('authFormsView').style.display = 'none';
+      document.getElementById('loggedInView').style.display = 'block';
+      if (document.getElementById('editProfileForm')) document.getElementById('editProfileForm').style.display = 'none';
+      document.getElementById('profileDetailsBox').innerHTML = renderProfileCardHtml(user);
+      renderOrderHistory();
+    } else {
+      document.getElementById('authModalTitle').textContent = 'SPYSTORE ACCOUNT';
+      document.getElementById('authFormsView').style.display = 'block';
+      document.getElementById('loggedInView').style.display = 'none';
+      switchAuthMode('signup');
+      setTimeout(() => {
+        if (initAndRenderGoogleButton()) {
+          const fb = document.getElementById('customGoogleFallbackBtn');
+          if (fb) fb.style.display = 'none';
+        }
+      }, 80);
+    }
+  }
+
+  function closeAuthModal() { document.getElementById('authModal').classList.remove('open'); }
+
+  function handleSignupSubmit(e) {
+    e.preventDefault();
+    const username = normalizeUsername(document.getElementById('signupUsernameInput')?.value || '');
+    const email = String(document.getElementById('signupEmailInput')?.value || '').trim().toLowerCase();
+    const fullName = String(document.getElementById('signupFullNameInput')?.value || '').trim();
+    const password = String(document.getElementById('signupPasswordInput')?.value || '');
+    if (!username || !email || !fullName || password.length < 6) { showToast('Please complete all fields.'); return; }
+    const users = getUsersDB();
+    const taken = users.some(u => normalizeUsername(u.username || '') === username && String(u.email || '').trim().toLowerCase() !== email);
+    if (taken) { showToast('Username already used.'); return; }
+    const existing = users.find(u => u.email === email);
+    const account = { username, name: fullName, email, password, phone: existing?.phone || '', provider: 'email' };
+    if (existing) Object.assign(existing, account);
+    else users.push(account);
+    saveUsersDB(users);
+    localStorage.setItem('spystore_current_user', JSON.stringify(account));
+    syncCurrentUserSavedData();
+    updateAuthUI();
+    refreshDrawerRoleTools();
+    checkAndNotifyAdminRoleGranted();
+    closeAuthModal();
+    showToast(`Account created: @${account.username}`);
+  }
+
+  function handleAccountLoginSubmit(e) {
+    e.preventDefault();
+    const idf = String(document.getElementById('loginEmailInput')?.value || '').trim().toLowerCase();
+    const cleanUname = normalizeUsername(idf);
+    const pass = String(document.getElementById('loginPasswordInput')?.value || '');
+    const users = getUsersDB();
+    const found = users.find(u => (String(u.email || '').trim().toLowerCase() === idf || (cleanUname && normalizeUsername(u.username || '') === cleanUname)) && u.password === pass);
+    if (!found) { showToast('Invalid login details.'); return; }
+    localStorage.setItem('spystore_current_user', JSON.stringify(found));
+    syncCurrentUserSavedData();
+    updateAuthUI();
+    refreshDrawerRoleTools();
+    checkAndNotifyAdminRoleGranted();
+    closeAuthModal();
+    showToast(`Logged in as ${found.email}`);
+  }
+
+  function decodeJwtPayload(token) {
+    try {
+      const p = String(token || '').split('.');
+      if (p.length !== 3) return null;
+      const b64 = p[1].replace(/-/g, '+').replace(/_/g, '/').padEnd(p[1].length + ((4 - (p[1].length % 4)) % 4), '=');
+      return JSON.parse(atob(b64));
+    } catch (e) { return null; }
+  }
+
+  function completeGoogleLoginWithProfile(name, email, phone = '') {
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) return;
+    const username = cleanEmail.split('@')[0];
+    const derivedName = String(name || '').trim() || username.replace(/[._-]+/g, ' ').replace(/ \w/g, c => c.toUpperCase());
+    const users = getUsersDB();
+    const existing = users.find(u => u.email === cleanEmail);
+    const gUser = { username, name: existing?.name || derivedName, email: cleanEmail, phone: phone || existing?.phone || '', provider: 'google' };
+    if (existing) Object.assign(existing, gUser);
+    else users.push(gUser);
+    saveUsersDB(users);
+    localStorage.setItem('spystore_current_user', JSON.stringify(gUser));
+    syncCurrentUserSavedData();
+    updateAuthUI();
+    refreshDrawerRoleTools();
+    checkAndNotifyAdminRoleGranted();
+    closeAuthModal();
+    showToast(`Signed in with Google: ${gUser.email}`);
+  }
+
+  function handleGoogleCredentialResponse(resp) {
+    if (!resp || !resp.credential) return;
+    const payload = decodeJwtPayload(resp.credential);
+    if (payload && payload.email) completeGoogleLoginWithProfile(payload.name || payload.given_name || '', payload.email);
+  }
+
+  function initAndRenderGoogleButton() {
+    const clientId = String(window.GOOGLE_CLIENT_ID || '').trim();
+    const host = document.getElementById('officialGoogleBtnContainer');
+    if (!clientId || !window.google?.accounts?.id) return false;
+    try {
+      window.google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredentialResponse, auto_select: false });
+      if (host) {
+        host.innerHTML = '';
+        window.google.accounts.id.renderButton(host, { type: 'standard', theme: 'outline', size: 'large', text: 'continue_with', shape: 'pill', width: 300 });
+      }
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function handleGoogleSignIn() {
+    if (initAndRenderGoogleButton()) {
+      try { window.google.accounts.id.prompt(); return; } catch (e) {}
+    }
+    showToast('Loading Google Sign-In... please try again.');
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('spystore_current_user');
+    updateAuthUI();
+    refreshDrawerRoleTools();
+    closeAuthModal();
+    showToast('Logged out.');
+  }
+
+  // Drawer & Owner/Admin Tools
+  function refreshDrawerRoleTools() {
+    const role = getUserRole();
+    const sec = document.getElementById('drawerOwnerAdminSection');
+    const tagEl = document.getElementById('drawerCurrentRoleTag');
+    const custBtn = document.getElementById('drawerCustomersToolBtn');
+    const verifyBtn = document.getElementById('drawerVerifyToolBtn');
+    const msgTplBtn = document.getElementById('drawerMsgTemplatesToolBtn');
+    const isStaff = role === 'owner' || role === 'admin';
+    if (sec) sec.style.display = isStaff ? 'block' : 'none';
+    if (tagEl) tagEl.textContent = role.toUpperCase();
+    if (custBtn) custBtn.style.display = role === 'owner' ? 'flex' : 'none';
+    if (verifyBtn) verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
+    if (msgTplBtn) msgTplBtn.style.display = role === 'owner' ? 'flex' : 'none';
+  }
+
+  function openDrawer() {
+    refreshDrawerRoleTools();
+    document.getElementById('drawerBackdrop').classList.add('open');
+    document.getElementById('sideDrawer').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawerBackdrop').classList.remove('open');
+    document.getElementById('sideDrawer').classList.remove('open');
+  }
+
+  function getManagerTargetOptions() {
+    const opts = [];
+    products.forEach(p => {
+      if (p.mode === 'dual' && Array.isArray(p.subPlans)) {
+        p.subPlans.forEach(sp => opts.push({ value: `${p.id}:${sp.key}`, label: `${p.name} (${sp.label})`, target: sp, parent: p }));
+      } else {
+        opts.push({ value: p.id, label: p.name, target: p, parent: p });
+      }
+    });
+    return opts;
+  }
+
+  function getStatusValueFromObj(obj, mo) {
+    if (!obj) return 'active';
+    if (mo === 1) return obj.comingSoon1Mo ? 'coming_soon' : (obj.disabled1Mo ? 'off' : 'active');
+    return obj.comingSoon2Mo ? 'coming_soon' : (obj.disabled2Mo ? 'off' : 'active');
+  }
+
+  function applyStatusValueToObj(obj, mo, val) {
+    if (mo === 1) { obj.comingSoon1Mo = val === 'coming_soon'; obj.disabled1Mo = val === 'off'; }
+    else { obj.comingSoon2Mo = val === 'coming_soon'; obj.disabled2Mo = val === 'off'; }
+    obj.comingSoon = Boolean(obj.comingSoon1Mo && obj.comingSoon2Mo);
+  }
+
+  function syncDrawerMgrFromSelect() {
+    const sel = document.getElementById('drawerMgrTargetSelect');
+    const opts = getManagerTargetOptions();
+    const found = opts.find(o => o.value === sel?.value) || opts[0];
+    if (!found) return;
+    const t = found.target;
+    document.getElementById('drawerMgrStockInput').value = Number(t.stock ?? 0);
+    document.getElementById('drawerMgrPrice1MoInput').value = Number(t.price ?? 0);
+    document.getElementById('drawerMgrPrice2MoInput').value = typeof t.price2Mo === 'number' && !isNaN(t.price2Mo) && t.price2Mo > 0 ? Number(t.price2Mo) : '';
+    document.getElementById('drawerMgrStatus1MoSelect').value = getStatusValueFromObj(t, 1);
+    document.getElementById('drawerMgrStatus2MoSelect').value = getStatusValueFromObj(t, 2);
+  }
+
+  function saveDrawerCatalogChanges() {
+    const role = getUserRole();
+    if (role !== 'owner' && role !== 'admin') { showToast('Owner or Admin access required.'); return; }
+    const sel = document.getElementById('drawerMgrTargetSelect');
+    const opts = getManagerTargetOptions();
+    const found = opts.find(o => o.value === sel?.value);
+    if (!found) return;
+    const t = found.target;
+    const stockVal = Math.max(0, parseInt(document.getElementById('drawerMgrStockInput')?.value || '0', 10) || 0);
+    const p1Val = parseFloat(document.getElementById('drawerMgrPrice1MoInput')?.value || '0');
+    const p2Raw = String(document.getElementById('drawerMgrPrice2MoInput')?.value || '').trim();
+    const p2Val = p2Raw ? parseFloat(p2Raw) : NaN;
+    const st1 = document.getElementById('drawerMgrStatus1MoSelect')?.value || 'active';
+    const st2 = document.getElementById('drawerMgrStatus2MoSelect')?.value || 'active';
+    if (!isNaN(p1Val) && p1Val > 0) t.price = p1Val;
+    if (!isNaN(p2Val) && p2Val > 0) t.price2Mo = p2Val;
+    else delete t.price2Mo;
+    t.stock = stockVal;
+    applyStatusValueToObj(t, 1, st1);
+    applyStatusValueToObj(t, 2, st2);
+    if (found.parent && found.parent.mode === 'dual') recomputeDualProductStock(found.parent);
+    saveCatalogState();
+    syncWebsiteCatalog();
+    closeOwnerAdminToolsModal();
+    showToast(`Updated ${found.label}!`);
+  }
+
+  function renderDrawerTransactionsList() {
+    const box = document.getElementById('drawerAllTransactionsBody');
+    if (!box) return;
+    const allTxns = getAllTransactionsDB();
+    if (!allTxns.length) {
+      box.innerHTML = `<div style="font-size:0.76rem; color:var(--text-muted); padding:10px; background:var(--bg-input); border-radius:10px;">No transactions recorded yet.</div>`;
+      return;
+    }
+    box.innerHTML = allTxns.slice(0, 30).map((t, tIdx) => `
+      <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:9px 11px;">
+        <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.82rem;">
+          <span>${t.app} (${t.months} Bln)</span>
+          <span style="color:var(--accent-gold);">RM${t.total}</span>
+        </div>
+        <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:2px;">${t.invoiceNo || t.ref || '-'} • ${t.customerName || '-'} (${t.customerPhone || '-'}) • ${t.date || '-'}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+          <span style="font-size:0.66rem; font-weight:700; color:var(--accent-cyan);">${t.status || 'PAID'} • ${t.paymentMethod || 'FPX'}</span>
+          <button type="button" onclick="downloadGlobalTxnInvoice(${tIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">📄 Invois</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function refreshVerifyRoleListUI() {
+    ensureOwnerAccountSeeded();
+    const users = getUsersDB().filter(u => !isDesignatedOwner(u));
+    const vList = getVerifiedAdminsList();
+    const custBox = document.getElementById('registeredCustomersListBox');
+    const listBox = document.getElementById('verifiedAdminsListBox');
+    const isMy = currentLang === 'my';
+    if (custBox) {
+      custBox.innerHTML = `<div style="font-weight:800; color:var(--accent-gold); margin-bottom:4px;">${isMy ? 'Pelanggan Berdaftar' : 'Registered Customers'} (${users.length})</div>` +
+        (users.length ? users.map(u => {
+          const effRole = getUserRole(u);
+          return `<div>• <strong>${u.name || u.username || u.email}</strong> (@${u.username || '-'}) • ${u.email} • [${String(effRole).toUpperCase()}]</div>`;
+        }).join('') : `<div>${isMy ? 'Belum ada pelanggan berdaftar.' : 'No registered customers yet.'}</div>`);
+    }
+    if (listBox) {
+      const admins = users.filter(u => {
+        const em = String(u.email || '').trim().toLowerCase();
+        const un = normalizeUsername(u.username || '');
+        return String(u.role || '').toLowerCase() === 'admin' || (em && vList.includes(em)) || (un && vList.includes(un));
+      });
+      listBox.innerHTML = `<div style="font-weight:800; color:var(--accent-cyan); margin-bottom:6px;">${isMy ? 'Admin Aktif' : 'Active Admins'} (${admins.length})</div>` +
+        (admins.length ? admins.map(a => {
+          const targetId = a.email || a.username || '';
+          const escapedId = String(targetId).replace(/'/g, "\\'");
+          return `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:5px; padding:5px 8px; border-radius:8px; background:var(--bg-input);">
+            <span style="min-width:0; overflow:hidden; text-overflow:ellipsis;">• <strong>${a.username || a.email}</strong> (${a.email})</span>
+            <button type="button" onclick="unverifyUserFromAdminRole('${escapedId}')" style="background:rgba(239, 68, 68, 0.16); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:3px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer; flex-shrink:0;">${isMy ? 'Batal' : 'Unverify'}</button>
+          </div>`;
+        }).join('') : `<div>${isMy ? 'Belum ada admin disahkan.' : 'No verified admins yet.'}</div>`);
+    }
+  }
+
+  function unverifyUserFromAdminRole(explicitTarget = '') {
+    if (getUserRole() !== 'owner') { showToast(currentLang === 'my' ? 'Hanya Owner boleh membatalkan admin.' : 'Only Owner can unverify admins.'); return; }
+    const rawQ = String(explicitTarget || document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
+    const cleanU = normalizeUsername(rawQ);
+    if (!rawQ) { showToast(currentLang === 'my' ? 'Masukkan e-mel atau username untuk dibatalkan.' : 'Enter an email or username to unverify.'); return; }
+    ensureOwnerAccountSeeded();
+    const users = getUsersDB();
+    const idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === rawQ || (cleanU && normalizeUsername(u.username || '') === cleanU));
+    if (idx !== -1 && isDesignatedOwner(users[idx])) { showToast(currentLang === 'my' ? 'Peranan Owner tidak boleh diubah.' : 'Owner role cannot be changed.'); return; }
+
+    let removedLabel = rawQ;
+    if (idx !== -1) {
+      users[idx].role = 'customer';
+      removedLabel = users[idx].username || users[idx].email;
+      saveUsersDB(users);
+    }
+
+    const filteredAdmins = getVerifiedAdminsList().filter(item => {
+      const it = String(item || '').trim().toLowerCase();
+      if (it === rawQ || (cleanU && it === cleanU)) return false;
+      if (idx !== -1) {
+        const uEm = String(users[idx].email || '').trim().toLowerCase();
+        const uUn = normalizeUsername(users[idx].username || '');
+        if ((uEm && it === uEm) || (uUn && it === uUn)) return false;
+      }
+      return true;
+    });
+    saveVerifiedAdminsList(filteredAdmins);
+
+    try {
+      const seen = JSON.parse(localStorage.getItem(ADMIN_NOTIF_SEEN_KEY) || '{}');
+      delete seen[rawQ];
+      if (idx !== -1 && users[idx].email) delete seen[String(users[idx].email).trim().toLowerCase()];
+      if (idx !== -1 && users[idx].username) delete seen[normalizeUsername(users[idx].username)];
+      localStorage.setItem(ADMIN_NOTIF_SEEN_KEY, JSON.stringify(seen));
+    } catch (e) {}
+
+    const activeU = getCurrentUser();
+    if (activeU && !isDesignatedOwner(activeU) && (
+      String(activeU.email || '').trim().toLowerCase() === rawQ ||
+      (cleanU && normalizeUsername(activeU.username || '') === cleanU) ||
+      (idx !== -1 && String(activeU.email || '').trim().toLowerCase() === String(users[idx].email || '').trim().toLowerCase())
+    )) {
+      const downgraded = { ...activeU, role: 'customer' };
+      localStorage.setItem('spystore_current_user', JSON.stringify(downgraded));
+    }
+
+    if (!explicitTarget && document.getElementById('verifyEmailOrUsernameInput')) {
+      document.getElementById('verifyEmailOrUsernameInput').value = '';
+    }
+    refreshVerifyRoleListUI();
+    refreshDrawerRoleTools();
+    showToast(currentLang === 'my' ? `🚫 ${removedLabel} telah di-unverify daripada ADMIN (kembali ke Customer).` : `🚫 ${removedLabel} has been unverified from ADMIN (reverted to Customer).`);
+  }
+
+  function verifyUserToAdminRole() {
+    if (getUserRole() !== 'owner') { showToast(currentLang === 'my' ? 'Hanya Owner boleh mengesahkan admin.' : 'Only Owner can verify admins.'); return; }
+    const rawQ = String(document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
+    const cleanU = normalizeUsername(rawQ);
+    if (!rawQ) { showToast(currentLang === 'my' ? 'Masukkan e-mel atau username.' : 'Enter an email or username.'); return; }
+    ensureOwnerAccountSeeded();
+    const users = getUsersDB();
+    let idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === rawQ || (cleanU && normalizeUsername(u.username || '') === cleanU));
+    if (idx === -1 && rawQ.includes('@')) {
+      const derivedUn = normalizeUsername(rawQ.split('@')[0]);
+      const derivedName = rawQ.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      users.push({
+        username: derivedUn,
+        name: derivedName,
+        email: rawQ,
+        phone: '',
+        provider: 'admin-assigned',
+        role: 'admin'
+      });
+      idx = users.length - 1;
+    } else if (idx === -1) {
+      showToast(currentLang === 'my' ? 'Akaun pengguna tidak ditemui.' : 'User account not found.');
+      return;
+    }
+    if (isDesignatedOwner(users[idx])) { showToast(currentLang === 'my' ? 'Peranan Owner tidak boleh diubah.' : 'Owner role cannot be changed.'); return; }
+    users[idx].role = 'admin';
+    saveUsersDB(users);
+
+    const vList = getVerifiedAdminsList();
+    if (users[idx].email) vList.push(String(users[idx].email).trim().toLowerCase());
+    if (users[idx].username) vList.push(normalizeUsername(users[idx].username));
+    saveVerifiedAdminsList(vList);
+
+    const activeU = getCurrentUser();
+    if (activeU && (
+      String(activeU.email || '').trim().toLowerCase() === String(users[idx].email || '').trim().toLowerCase() ||
+      normalizeUsername(activeU.username || '') === normalizeUsername(users[idx].username || '')
+    )) {
+      const updatedActive = { ...activeU, role: 'admin' };
+      localStorage.setItem('spystore_current_user', JSON.stringify(updatedActive));
+    }
+
+    if (document.getElementById('verifyEmailOrUsernameInput')) document.getElementById('verifyEmailOrUsernameInput').value = '';
+    refreshVerifyRoleListUI();
+    refreshDrawerRoleTools();
+    showToast(currentLang === 'my' ? `✅ ${users[idx].username || users[idx].email} telah disahkan sebagai ADMIN!` : `✅ ${users[idx].username || users[idx].email} has been verified as ADMIN!`);
   }
 
   const WA_TEMPLATE_STORAGE_KEY = 'spystore_wa_support_template_v1';
