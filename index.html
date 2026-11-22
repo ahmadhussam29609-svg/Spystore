@@ -2159,11 +2159,11 @@
           <span id="drawerCurrentRoleTag" style="font-size:0.62rem; font-weight:800; padding:2px 7px; border-radius:999px; background:rgba(56,189,248,0.14); color:var(--accent-cyan);">STAFF</span>
         </div>
         <div class="drawer-links" style="gap:6px;">
-          <button type="button" id="drawerMgrToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('catalog');">🛠️ <span id="lblDrawerCatalogMgr">Website Catalog Manager</span></button>
-          <button type="button" id="drawerTxnsToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('transactions');">🧾 <span id="lblDrawerAllTxns">All Transactions</span></button>
-          <button type="button" id="drawerCustomersToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('customers');">👥 <span id="lblDrawerCustomers">Registered Customers</span></button>
-          <button type="button" id="drawerVerifyToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('verify');">👑 <span id="lblDrawerAddAdmin">Add Admin Role</span></button>
-          <button type="button" id="drawerMsgTemplatesToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('msg_templates');">✉️ <span id="lblDrawerMsgTemplates">Messaging Templates</span></button>
+          <button type="button" id="drawerMgrToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('catalog');">🛠️ <span>Website Catalog Manager</span></button>
+          <button type="button" id="drawerTxnsToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('transactions');">🧾 <span>All Transactions</span></button>
+          <button type="button" id="drawerCustomersToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('customers');">👥 <span>Registered Customers</span></button>
+          <button type="button" id="drawerVerifyToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('verify');">👑 <span>Add Admin Role</span></button>
+          <button type="button" id="drawerMsgTemplatesToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('msg_templates');">✉️ <span>Messaging Templates</span></button>
         </div>
       </div>
 
@@ -2450,7 +2450,7 @@
 
         <form id="simpleLoginForm" style="display:none;" onsubmit="handleAccountLoginSubmit(event)">
           <div class="form-group">
-            <label id="lblVerifyField">Email or Username *</label>
+            <label>Email or Username *</label>
             <input type="text" class="form-control" id="loginEmailInput" placeholder="e.g. ahmad@gmail.com or ahmad_hussam" required />
           </div>
           <div class="form-group">
@@ -2597,35 +2597,32 @@
       <!-- Add Admin Role Only (Owner Only — Type Email / Username Directly) -->
       <div id="drawerVerifyRoleToolView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
-          <span id="lblVerifyHint">Type a user's <strong>username</strong> or <strong>email</strong> to assign or unverify <strong>Admin</strong>.</span>
+          Taip <strong>username</strong> atau <strong>email</strong> pengguna untuk dijadikan <strong>Admin</strong>.
         </div>
         <div class="form-group" style="margin-bottom:10px;">
-          <label id="lblVerifyField">Email or Username *</label>
+          <label>Email or Username *</label>
           <input type="text" class="form-control" id="verifyEmailOrUsernameInput" placeholder="e.g. user@gmail.com or username" />
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button type="button" class="primary-submit" style="flex:1; margin-top:0;" onclick="verifyUserToAdminRole()"><span id="lblVerifyBtn">Verify as Admin ✓</span></button>
-          <button type="button" onclick="unverifyUserFromAdminRole()" style="background:rgba(239, 68, 68, 0.14); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:11px 14px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer;"><span id="lblUnverifyBtn">Unverify Admin</span></button>
-        </div>
+        <button type="button" class="primary-submit" style="margin-top:0; width:100%;" onclick="verifyUserToAdminRole()">Verify as Admin ✓</button>
         <div id="verifiedAdminsListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
       </div>
 
       <!-- Edit WhatsApp & Telegram Text Templates (Owner Only) -->
       <div id="drawerMsgTemplatesToolView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
-          <span id="lblMsgTplHint">Edit automatic message templates for <strong>WhatsApp</strong> and <strong>Telegram</strong>. Variables: <code>{ref}</code>, <code>{app}</code>, <code>{months}</code>, <code>{total}</code>, <code>{name}</code>, <code>{phone}</code>, <code>{device}</code>.</span>
+          Edit teks mesej automatik untuk <strong>WhatsApp</strong> dan <strong>Telegram</strong>. Pemboleh ubah: <code>{ref}</code>, <code>{app}</code>, <code>{months}</code>, <code>{total}</code>, <code>{name}</code>, <code>{phone}</code>, <code>{device}</code>.
         </div>
         <div class="form-group" style="margin-bottom:10px;">
-          <label id="lblWaTplLabel">WhatsApp Message Template *</label>
+          <label>WhatsApp Message Template *</label>
           <textarea rows="6" class="form-control" id="ownerWaTemplateInput" style="resize:vertical; font-size:0.78rem; line-height:1.45;"></textarea>
         </div>
         <div class="form-group" style="margin-bottom:10px;">
-          <label id="lblTgTplLabel">Telegram Message Template *</label>
+          <label>Telegram Message Template *</label>
           <textarea rows="6" class="form-control" id="ownerTgTemplateInput" style="resize:vertical; font-size:0.78rem; line-height:1.45;"></textarea>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button type="button" class="primary-submit" style="flex:1; margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerMsgTemplates()"><span id="lblSaveTplBtn">Save</span></button>
-          <button type="button" onclick="resetOwnerMsgTemplatesToDefault()" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:11px 12px; border-radius:12px; font-size:0.76rem; font-weight:700; cursor:pointer;"><span id="lblResetTplBtn">Reset Default</span></button>
+          <button type="button" class="primary-submit" style="flex:1; margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerMsgTemplates()">Save</button>
+          <button type="button" onclick="resetOwnerMsgTemplatesToDefault()" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:11px 12px; border-radius:12px; font-size:0.76rem; font-weight:700; cursor:pointer;">Reset Default</button>
         </div>
       </div>
     </div>
@@ -2669,15 +2666,15 @@
   <div class="modal-backdrop" id="leaveConfirmModal" onclick="if(event.target===this) cancelLeaveWebsite()">
     <div class="modal-card" style="max-width:380px; text-align:center;">
       <div class="modal-top" style="margin-bottom:8px;">
-        <h3 id="leaveModalTitle" style="font-size:1.05rem;">Confirm to Leave Website</h3>
+        <h3 style="font-size:1.05rem;">Confirm to Leave Website</h3>
         <button type="button" class="close-modal" onclick="cancelLeaveWebsite()">✕</button>
       </div>
-      <p id="leaveModalDesc" style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:16px;">
-        Are you sure you want to leave <strong>SPYSTORE BY SAMS</strong>?
+      <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:16px;">
+        Adakah anda pasti mahu keluar atau meninggalkan laman web <strong>SPYSTORE BY SAMS</strong>?
       </p>
       <div style="display:flex; gap:10px; justify-content:center;">
-        <button type="button" id="leaveStayBtn" onclick="cancelLeaveWebsite()" style="flex:1; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-primary); padding:11px 14px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer;">Stay</button>
-        <button type="button" id="leaveConfirmBtn" onclick="confirmLeaveWebsite()" style="flex:1; background:linear-gradient(135deg, #dc2626, #b91c1c); border:none; color:#ffffff; padding:11px 14px; border-radius:12px; font-weight:800; font-size:0.84rem; cursor:pointer;">Leave</button>
+        <button type="button" onclick="cancelLeaveWebsite()" style="flex:1; background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-primary); padding:11px 14px; border-radius:12px; font-weight:700; font-size:0.84rem; cursor:pointer;">Stay (Kekal)</button>
+        <button type="button" onclick="confirmLeaveWebsite()" style="flex:1; background:linear-gradient(135deg, #dc2626, #b91c1c); border:none; color:#ffffff; padding:11px 14px; border-radius:12px; font-weight:800; font-size:0.84rem; cursor:pointer;">Leave (Keluar)</button>
       </div>
     </div>
   </div>
@@ -2686,19 +2683,19 @@
   <div class="modal-backdrop" id="loginBeforePayModal" onclick="if(event.target===this) closeLoginBeforePayModal()">
     <div class="modal-card" style="max-width:410px;">
       <div class="modal-top" style="margin-bottom:10px;">
-        <h3 id="loginPayModalTitle" style="font-size:1.05rem; color:var(--accent-gold);">⚠️ Please Login First</h3>
+        <h3 style="font-size:1.05rem; color:var(--accent-gold);">⚠️ Sila Login Terlebih Dahulu</h3>
         <button type="button" class="close-modal" onclick="closeLoginBeforePayModal()">✕</button>
       </div>
-      <p id="loginPayModalDesc" style="font-size:0.82rem; color:var(--text-primary); font-weight:600; margin-bottom:8px;">
-        You are not logged in to your SPYSTORE account before making a payment.
+      <p style="font-size:0.82rem; color:var(--text-primary); font-weight:600; margin-bottom:8px;">
+        Anda belum log masuk ke akaun SPYSTORE anda sebelum membuat pembayaran.
       </p>
       <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:11px 12px; font-size:0.77rem; color:var(--text-secondary); margin-bottom:14px;">
-        <strong id="loginPayReasonTitle" style="color:var(--accent-cyan); display:block; margin-bottom:4px;">Why is logging in important before paying?</strong>
-        <span id="loginPayReasonText">Your transaction history, invoice numbers, and subscription records are saved securely in your account so they are not easily lost when switching devices or clearing browser data.</span>
+        <strong style="color:var(--accent-cyan); display:block; margin-bottom:4px;">Kenapa login penting sebelum bayar?</strong>
+        <span>Sejarah transaksi, nombor invois, dan maklumat langganan anda akan disimpan dengan teratur dan selamat dalam akaun anda supaya tidak mudah hilang jika bertukar peranti atau membersihkan data pelayar.</span>
       </div>
       <div style="display:flex; flex-direction:column; gap:8px;">
-        <button type="button" id="loginPayNowActionBtn" class="primary-submit" style="margin-top:0;" onclick="closeLoginBeforePayModal(); openAuthModal();">Login / Sign Up Now →</button>
-        <button type="button" id="loginPayContinueGuestBtn" onclick="proceedPaymentAfterPrompt()" style="width:100%; background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); padding:10px 12px; border-radius:11px; font-size:0.78rem; font-weight:700; cursor:pointer;">Continue Payment Without Login</button>
+        <button type="button" class="primary-submit" style="margin-top:0;" onclick="closeLoginBeforePayModal(); openAuthModal();">Login / Daftar Akaun Sekarang →</button>
+        <button type="button" onclick="proceedPaymentAfterPrompt()" style="width:100%; background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); padding:10px 12px; border-radius:11px; font-size:0.78rem; font-weight:700; cursor:pointer;">Teruskan Bayar Tanpa Login</button>
       </div>
     </div>
   </div>
@@ -3018,7 +3015,7 @@
       if (!seen[keyId]) {
         seen[keyId] = true;
         try { localStorage.setItem(ADMIN_NOTIF_SEEN_KEY, JSON.stringify(seen)); } catch (e) {}
-        showToast(currentLang === 'my' ? '🎉 Notifikasi: Akaun anda telah disahkan sebagai ADMIN! Alat Admin sudah dibuka di menu ☰.' : '🎉 Notification: Your account has been verified as ADMIN! Admin tools are now available in the ☰ menu.');
+        showToast('🎉 Notifikasi: Akaun anda telah disahkan sebagai ADMIN! Alat Admin sudah dibuka di menu ☰.');
       }
     }
   }
@@ -3040,50 +3037,6 @@
     }
     const searchInp = document.getElementById('searchInput');
     if (searchInp) searchInp.placeholder = currentLang === 'en' ? 'Search app or show (e.g. Doraemon)...' : 'Cari app atau cerita (cth. Doraemon)...';
-    const isMy = currentLang === 'my';
-    const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-    const setHtml = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
-
-    setTxt('lblDrawerCatalogMgr', isMy ? 'Pengurus Katalog Laman Web' : 'Website Catalog Manager');
-    setTxt('lblDrawerAllTxns', isMy ? 'Semua Transaksi' : 'All Transactions');
-    setTxt('lblDrawerCustomers', isMy ? 'Pelanggan Berdaftar' : 'Registered Customers');
-    setTxt('lblDrawerAddAdmin', isMy ? 'Tambah Peranan Admin' : 'Add Admin Role');
-    setTxt('lblDrawerMsgTemplates', isMy ? 'Templat Mesej' : 'Messaging Templates');
-
-    setTxt('leaveModalTitle', isMy ? 'Sahkan Keluar Dari Laman Web' : 'Confirm to Leave Website');
-    setHtml('leaveModalDesc', isMy
-      ? 'Adakah anda pasti mahu keluar atau meninggalkan laman web <strong>SPYSTORE BY SAMS</strong>?'
-      : 'Are you sure you want to leave <strong>SPYSTORE BY SAMS</strong>?');
-    setTxt('leaveStayBtn', isMy ? 'Kekal' : 'Stay');
-    setTxt('leaveConfirmBtn', isMy ? 'Keluar' : 'Leave');
-
-    setTxt('loginPayModalTitle', isMy ? '⚠️ Sila Login Terlebih Dahulu' : '⚠️ Please Login First');
-    setTxt('loginPayModalDesc', isMy
-      ? 'Anda belum log masuk ke akaun SPYSTORE anda sebelum membuat pembayaran.'
-      : 'You are not logged in to your SPYSTORE account before making a payment.');
-    setTxt('loginPayReasonTitle', isMy ? 'Kenapa login penting sebelum bayar?' : 'Why is logging in important before paying?');
-    setTxt('loginPayReasonText', isMy
-      ? 'Sejarah transaksi, nombor invois, dan maklumat langganan anda akan disimpan dengan teratur dan selamat dalam akaun anda supaya tidak mudah hilang jika bertukar peranti atau membersihkan data pelayar.'
-      : 'Your transaction history, invoice numbers, and subscription records are saved securely in your account so they are not easily lost when switching devices or clearing browser data.');
-    setTxt('loginPayNowActionBtn', isMy ? 'Login / Daftar Akaun Sekarang →' : 'Login / Sign Up Now →');
-    setTxt('loginPayContinueGuestBtn', isMy ? 'Teruskan Bayar Tanpa Login' : 'Continue Payment Without Login');
-
-    setHtml('lblVerifyHint', isMy
-      ? 'Taip <strong>username</strong> atau <strong>email</strong> pengguna untuk dijadikan atau dibatalkan <strong>Admin</strong>.'
-      : 'Type a user's <strong>username</strong> or <strong>email</strong> to assign or unverify <strong>Admin</strong>.');
-    setTxt('lblVerifyField', isMy ? 'E-mel atau Username *' : 'Email or Username *');
-    setTxt('lblVerifyBtn', isMy ? 'Sahkan Sebagai Admin ✓' : 'Verify as Admin ✓');
-    setTxt('lblUnverifyBtn', isMy ? 'Batal Admin' : 'Unverify Admin');
-
-    setHtml('lblMsgTplHint', isMy
-      ? 'Edit teks mesej automatik untuk <strong>WhatsApp</strong> dan <strong>Telegram</strong>. Pemboleh ubah: <code>{ref}</code>, <code>{app}</code>, <code>{months}</code>, <code>{total}</code>, <code>{name}</code>, <code>{phone}</code>, <code>{device}</code>.'
-      : 'Edit automatic message templates for <strong>WhatsApp</strong> and <strong>Telegram</strong>. Variables: <code>{ref}</code>, <code>{app}</code>, <code>{months}</code>, <code>{total}</code>, <code>{name}</code>, <code>{phone}</code>, <code>{device}</code>.');
-    setTxt('lblWaTplLabel', isMy ? 'Templat Mesej WhatsApp *' : 'WhatsApp Message Template *');
-    setTxt('lblTgTplLabel', isMy ? 'Templat Mesej Telegram *' : 'Telegram Message Template *');
-    setTxt('lblSaveTplBtn', isMy ? 'Simpan' : 'Save');
-    setTxt('lblResetTplBtn', isMy ? 'Tetapan Asal' : 'Reset Default');
-
-    refreshVerifyRoleListUI();
     updateAuthUI();
     refreshCheckoutLoginReminder();
   }
@@ -4119,92 +4072,14 @@
   }
 
   function refreshVerifyRoleListUI() {
-    ensureOwnerAccountSeeded();
-    const users = getUsersDB().filter(u => !isDesignatedOwner(u));
-    const vList = getVerifiedAdminsList();
-    const custBox = document.getElementById('registeredCustomersListBox');
-    const listBox = document.getElementById('verifiedAdminsListBox');
-    if (custBox) {
-      custBox.innerHTML = `<div style="font-weight:800; color:var(--accent-gold); margin-bottom:4px;">Registered Customers (${users.length})</div>` +
-        (users.length ? users.map(u => {
-          const effRole = getUserRole(u);
-          return `<div>• <strong>${u.name || u.username || u.email}</strong> (@${u.username || '-'}) • ${u.email} • [${String(effRole).toUpperCase()}]</div>`;
-        }).join('') : '<div>No registered customers yet.</div>');
-    }
-    if (listBox) {
-      const admins = users.filter(u => {
-        const em = String(u.email || '').trim().toLowerCase();
-        const un = normalizeUsername(u.username || '');
-        return String(u.role || '').toLowerCase() === 'admin' || (em && vList.includes(em)) || (un && vList.includes(un));
-      });
-      listBox.innerHTML = `<div style="font-weight:800; color:var(--accent-cyan); margin-bottom:6px;">Active Admins (${admins.length})</div>` +
-        (admins.length ? admins.map(a => {
-          const targetId = a.email || a.username || '';
-          const escapedId = String(targetId).replace(/'/g, "\\'");
-          return `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:5px; padding:5px 8px; border-radius:8px; background:var(--bg-input);">
-            <span style="min-width:0; overflow:hidden; text-overflow:ellipsis;">• <strong>${a.username || a.email}</strong> (${a.email})</span>
-            <button type="button" onclick="unverifyUserFromAdminRole('${escapedId}')" style="background:rgba(239, 68, 68, 0.16); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:3px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer; flex-shrink:0;">Unverify</button>
-          </div>`;
-        }).join('') : '<div>No verified admins yet.</div>');
-    }
-  }
+  
+  let _allowLeavePage = false;
 
-  function unverifyUserFromAdminRole(explicitTarget = '') {
-    if (getUserRole() !== 'owner') { showToast('Only Owner can unverify admins.'); return; }
-    const rawQ = String(explicitTarget || document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
-    const cleanU = normalizeUsername(rawQ);
-    if (!rawQ) { showToast('Enter an email or username to unverify.'); return; }
-    ensureOwnerAccountSeeded();
-    const users = getUsersDB();
-    const idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === rawQ || (cleanU && normalizeUsername(u.username || '') === cleanU));
-    if (idx !== -1 && isDesignatedOwner(users[idx])) { showToast('Owner role cannot be changed.'); return; }
-
-    let removedLabel = rawQ;
-    if (idx !== -1) {
-      users[idx].role = 'customer';
-      removedLabel = users[idx].username || users[idx].email;
-      saveUsersDB(users);
-    }
-
-    const filteredAdmins = getVerifiedAdminsList().filter(item => {
-      const it = String(item || '').trim().toLowerCase();
-      if (it === rawQ || (cleanU && it === cleanU)) return false;
-      if (idx !== -1) {
-        const uEm = String(users[idx].email || '').trim().toLowerCase();
-        const uUn = normalizeUsername(users[idx].username || '');
-        if ((uEm && it === uEm) || (uUn && it === uUn)) return false;
-      }
-      return true;
-    });
-    saveVerifiedAdminsList(filteredAdmins);
-
+  function cancelLeaveWebsite() {
+    document.getElementById('leaveConfirmModal')?.classList.remove('open');
     try {
-      const seen = JSON.parse(localStorage.getItem(ADMIN_NOTIF_SEEN_KEY) || '{}');
-      delete seen[rawQ];
-      if (idx !== -1 && users[idx].email) delete seen[String(users[idx].email).trim().toLowerCase()];
-      if (idx !== -1 && users[idx].username) delete seen[normalizeUsername(users[idx].username)];
-      localStorage.setItem(ADMIN_NOTIF_SEEN_KEY, JSON.stringify(seen));
-    } catch (e) {}
-
-    const activeU = getCurrentUser();
-    if (activeU && !isDesignatedOwner(activeU) && (
-      String(activeU.email || '').trim().toLowerCase() === rawQ ||
-      (cleanU && normalizeUsername(activeU.username || '') === cleanU) ||
-      (idx !== -1 && String(activeU.email || '').trim().toLowerCase() === String(users[idx].email || '').trim().toLowerCase())
-    )) {
-      const downgraded = { ...activeU, role: 'customer' };
-      localStorage.setItem('spystore_current_user', JSON.stringify(downgraded));
-    }
-
-    if (!explicitTarget && document.getElementById('verifyEmailOrUsernameInput')) {
-      document.getElementById('verifyEmailOrUsernameInput').value = '';
-    }
-    refreshVerifyRoleListUI();
-    refreshDrawerRoleTools();
-    showToast(currentLang === 'my' ? `🚫 ${removedLabel} telah di-unverify daripada ADMIN (kembali ke Customer).` : `🚫 ${removedLabel} has been unverified from ADMIN (reverted to Customer).`);
-  }
-
-  function verifyUserToAdminRole() {
+      history.pushState({ spystoreGuard: true }, '', window.location.href);
+    } catch (e)   function verifyUserToAdminRole() {
     if (getUserRole() !== 'owner') { showToast('Only Owner can verify admins.'); return; }
     const rawQ = String(document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
     const cleanU = normalizeUsername(rawQ);
@@ -4249,7 +4124,7 @@
     if (document.getElementById('verifyEmailOrUsernameInput')) document.getElementById('verifyEmailOrUsernameInput').value = '';
     refreshVerifyRoleListUI();
     refreshDrawerRoleTools();
-    showToast(currentLang === 'my' ? `✅ ${users[idx].username || users[idx].email} telah disahkan sebagai ADMIN!` : `✅ ${users[idx].username || users[idx].email} has been verified as ADMIN!`);
+    showToast(`✅ ${users[idx].username || users[idx].email} telah disahkan sebagai ADMIN!`);
   }
 
 ernameInput')?.value || '').trim().toLowerCase();
