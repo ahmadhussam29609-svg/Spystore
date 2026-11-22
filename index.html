@@ -2163,7 +2163,7 @@
           <button type="button" id="drawerTxnsToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('transactions');">🧾 <span>All Transactions</span></button>
           <button type="button" id="drawerCustomersToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('customers');">👥 <span>Registered Customers</span></button>
           <button type="button" id="drawerVerifyToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('verify');">👑 <span>Add Admin Role</span></button>
-          <button type="button" id="drawerMsgTemplatesToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('msg_templates');">📝 <span>Edit WA &amp; Telegram Text</span></button>
+          <button type="button" id="drawerMsgTemplatesToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('msg_templates');">✉️ <span>Messaging Templates</span></button>
         </div>
       </div>
 
@@ -3996,33 +3996,11 @@
     showToast(`${users[idx].username || users[idx].email} verified as ADMIN!`);
   }
 
-  const WA_TEMPLATE_STORAGE_KEY = 'spystore_wa_template_v1';
-  const TG_TEMPLATE_STORAGE_KEY = 'spystore_tg_template_v1';
+  const WA_TEMPLATE_STORAGE_KEY = 'spystore_wa_support_template_v1';
+  const TG_TEMPLATE_STORAGE_KEY = 'spystore_tg_support_template_v1';
 
-  const DEFAULT_WA_TEMPLATE = [
-    '✨ *RESIT TEMPAHAN — SPYSTORE BY SAMS* ✨',
-    '━━━━━━━━━━━━━━━━━━━━━━',
-    '🧾 *No. Rujukan:* `{ref}`',
-    '✅ *Status:* Pembayaran Berjaya (FPX)',
-    '📱 *Produk:* {app} ({months} Bulan)',
-    '💰 *Jumlah Bayaran:* {total}',
-    '👤 *Nama:* {name}',
-    '📲 *WhatsApp:* {phone}',
-    '💻 *Peranti:* {device}',
-    '━━━━━━━━━━━━━━━━━━━━━━',
-    'Mohon admin semak & proses pengaktifan akaun saya. Terima kasih!'
-  ].join('\n');
-
-  const DEFAULT_TG_TEMPLATE = [
-    '✨ RESIT TEMPAHAN — SPYSTORE BY SAMS ✨',
-    'No. Rujukan: {ref}',
-    'Produk: {app} ({months} Bulan)',
-    'Jumlah Bayaran: {total}',
-    'Nama: {name}',
-    'WhatsApp: {phone}',
-    'Peranti: {device}',
-    'Mohon admin semak & aktifkan akaun.'
-  ].join('\n');
+  const DEFAULT_WA_TEMPLATE = 'Hi SPYSTORE BY SAMS, saya nak tanya / perlukan bantuan tentang langganan.';
+  const DEFAULT_TG_TEMPLATE = 'Hi SPYSTORE BY SAMS, saya nak tanya / perlukan bantuan tentang langganan di Telegram.';
 
   function getWaTemplate() {
     return localStorage.getItem(WA_TEMPLATE_STORAGE_KEY) || DEFAULT_WA_TEMPLATE;
@@ -4030,6 +4008,16 @@
 
   function getTgTemplate() {
     return localStorage.getItem(TG_TEMPLATE_STORAGE_KEY) || DEFAULT_TG_TEMPLATE;
+  }
+
+  function applySupportLinksFromTemplates() {
+    const waMsg = getWaTemplate().trim() || DEFAULT_WA_TEMPLATE;
+    const encodedWa = encodeURIComponent(waMsg);
+    const waHref = `https://wa.me/${ADMIN_WA}?text=${encodedWa}`;
+    const floatBtn = document.querySelector('.wa-float');
+    if (floatBtn) floatBtn.href = waHref;
+    const drawerSupportLink = document.querySelector('#sideDrawer a[href*="wa.me"]');
+    if (drawerSupportLink) drawerSupportLink.href = waHref;
   }
 
   function formatOrderMessageTemplate(tpl, vars = {}) {
@@ -4051,8 +4039,9 @@
     if (!waVal || !tgVal) { showToast('Please fill in both WhatsApp and Telegram text.'); return; }
     localStorage.setItem(WA_TEMPLATE_STORAGE_KEY, waVal);
     localStorage.setItem(TG_TEMPLATE_STORAGE_KEY, tgVal);
+    applySupportLinksFromTemplates();
     closeOwnerAdminToolsModal();
-    showToast('WhatsApp & Telegram text templates saved!');
+    showToast('Messaging templates saved!');
   }
 
   function resetOwnerMsgTemplatesToDefault() {
@@ -4061,7 +4050,8 @@
     localStorage.removeItem(TG_TEMPLATE_STORAGE_KEY);
     if (document.getElementById('ownerWaTemplateInput')) document.getElementById('ownerWaTemplateInput').value = DEFAULT_WA_TEMPLATE;
     if (document.getElementById('ownerTgTemplateInput')) document.getElementById('ownerTgTemplateInput').value = DEFAULT_TG_TEMPLATE;
-    showToast('Reset to default WA & Telegram text.');
+    applySupportLinksFromTemplates();
+    showToast('Reset to default messaging templates.');
   }
 
   function openOwnerAdminManagerModal(tab = 'catalog') {
@@ -4097,7 +4087,7 @@
       if (titleEl) titleEl.textContent = 'ADD ADMIN ROLE';
       refreshVerifyRoleListUI();
     } else if (tab === 'msg_templates') {
-      if (titleEl) titleEl.textContent = 'EDIT WA & TELEGRAM TEXT';
+      if (titleEl) titleEl.textContent = 'MESSAGING TEMPLATES';
       const waInp = document.getElementById('ownerWaTemplateInput');
       const tgInp = document.getElementById('ownerTgTemplateInput');
       if (waInp) waInp.value = getWaTemplate();
@@ -4889,6 +4879,7 @@
   })();
 
   ensureOwnerAccountSeeded();
+  applySupportLinksFromTemplates();
   applyLanguage();
   updateAuthUI();
   refreshDrawerRoleTools();
