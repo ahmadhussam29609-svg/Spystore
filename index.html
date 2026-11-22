@@ -2705,6 +2705,22 @@
     </div>
   </div>
 
+  <!-- Admin Role Granted Pop-up Modal -->
+  <div class="modal-backdrop" id="adminGrantedPopupModal" onclick="if(event.target===this) closeAdminGrantedPopup()">
+    <div class="modal-card" style="max-width:390px; text-align:center;">
+      <div class="modal-top" style="margin-bottom:8px;">
+        <h3 id="adminGrantedTitle" style="font-size:1.05rem; color:var(--accent-gold);">🎉 Tahniah! Anda Kini ADMIN</h3>
+        <button type="button" class="close-modal" onclick="closeAdminGrantedPopup()">✕</button>
+      </div>
+      <p id="adminGrantedDesc" style="font-size:0.83rem; color:var(--text-primary); margin-bottom:14px;">
+        Akaun anda telah disahkan sebagai <strong>ADMIN</strong> oleh Owner. Alat pengurusan <strong>Website Catalog Manager</strong> dan <strong>All Transactions</strong> kini tersedia dalam menu <strong>☰</strong>.
+      </p>
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="primary-submit" style="flex:1; margin-top:0;" onclick="closeAdminGrantedPopup(); openDrawer();" id="adminGrantedOpenMenuBtn">Buka Menu Admin (☰) →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Show Detail Specification Modal -->
   <div class="show-detail-backdrop" id="showDetailModal" onclick="if(event.target===this) closeShowDetailModal()">
     <div class="show-detail-card" id="showDetailCard">
@@ -3010,6 +3026,96 @@
     return ['owner', 'admin', 'customer'].includes(r) ? r : 'customer';
   }
 
+  function closeAdminGrantedPopup() {
+    document.getElementById('adminGrantedPopupModal')?.classList.remove('open');
+  }
+
+  function showAdminGrantedPopup() {
+    const isMy = currentLang === 'my';
+    const tEl = document.getElementById('adminGrantedTitle');
+    const dEl = document.getElementById('adminGrantedDesc');
+    const bEl = document.getElementById('adminGrantedOpenMenuBtn');
+    if (tEl) tEl.textContent = isMy ? '🎉 Tahniah! Anda Kini ADMIN' : '🎉 Congratulations! You Are Now ADMIN';
+    if (dEl) dEl.innerHTML = isMy
+      ? 'Akaun anda telah disahkan sebagai <strong>ADMIN</strong> oleh Owner. Alat pengurusan <strong>Website Catalog Manager</strong> dan <strong>All Transactions</strong> kini tersedia dalam menu <strong>☰</strong>.'
+      : 'Your account has been verified as <strong>ADMIN</strong> by the Owner. <strong>Website Catalog Manager</strong> and <strong>All Transactions</strong> are now unlocked in the <strong>☰</strong> menu.';
+    if (bEl) bEl.textContent = isMy ? 'Buka Menu Admin (☰) →' : 'Open Admin Menu (☰) →';
+    document.getElementById('adminGrantedPopupModal')?.classList.add('open');
+  }
+
+  async function pushSharedStoreToServer() {
+    try {
+      const catalogData = JSON.parse(localStorage.getItem(CATALOG_STORAGE_KEY) || 'null');
+      await fetch('/api/store-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          verifiedAdmins: getVerifiedAdminsList(),
+          catalog: catalogData,
+          templates: {
+            wa: getWaTemplate(),
+            tg: getTgTemplate()
+          }
+        })
+      });
+    } catch (e) {}
+  }
+
+  async function pullSharedStoreFromServer() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenAdmin = String(urlParams.get('admin_verify') || '').trim().toLowerCase();
+      if (tokenAdmin) {
+        const curList = getVerifiedAdminsList();
+        curList.push(tokenAdmin);
+        if (tokenAdmin.includes('@')) curList.push(normalizeUsername(tokenAdmin.split('@')[0]));
+        saveVerifiedAdminsList(curList);
+        try {
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({ spystoreGuard: true }, '', cleanUrl);
+        } catch (e) {}
+      }
+
+      const res = await fetch('/api/store-sync', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data && Array.isArray(data.verifiedAdmins)) {
+        const localOnly = tokenAdmin ? [tokenAdmin] : [];
+        const mergedAdmins = Array.from(new Set([
+          ...data.verifiedAdmins.map(x => String(x || '').trim().toLowerCase()),
+          ...localOnly
+        ])).filter(Boolean);
+        saveVerifiedAdminsList(mergedAdmins);
+
+        const users = getUsersDB();
+        let changed = false;
+        users.forEach(u => {
+          if (isDesignatedOwner(u)) return;
+          const em = String(u.email || '').trim().toLowerCase();
+          const un = normalizeUsername(u.username || '');
+          const shouldBeAdmin = (em && mergedAdmins.includes(em)) || (un && mergedAdmins.includes(un));
+          if (shouldBeAdmin && u.role !== 'admin') { u.role = 'admin'; changed = true; }
+          if (!shouldBeAdmin && u.role === 'admin') { u.role = 'customer'; changed = true; }
+        });
+        if (changed) saveUsersDB(users);
+      }
+
+      if (data && Array.isArray(data.catalog) && data.catalog.length) {
+        localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(data.catalog));
+        syncWebsiteCatalog();
+      }
+
+      if (data && data.templates) {
+        if (data.templates.wa) localStorage.setItem(WA_TEMPLATE_STORAGE_KEY, data.templates.wa);
+        if (data.templates.tg) localStorage.setItem(TG_TEMPLATE_STORAGE_KEY, data.templates.tg);
+        applySupportLinksFromTemplates();
+      }
+
+      refreshDrawerRoleTools();
+      checkAndNotifyAdminRoleGranted();
+    } catch (e) {}
+  }
+
   function checkAndNotifyAdminRoleGranted() {
     const u = getCurrentUser();
     if (!u || isDesignatedOwner(u)) return;
@@ -3020,7 +3126,7 @@
       if (!seen[keyId]) {
         seen[keyId] = true;
         try { localStorage.setItem(ADMIN_NOTIF_SEEN_KEY, JSON.stringify(seen)); } catch (e) {}
-        showToast(currentLang === 'my' ? '🎉 Notifikasi: Akaun anda telah disahkan sebagai ADMIN! Alat Admin sudah dibuka di menu ☰.' : '🎉 Notification: Your account has been verified as ADMIN! Admin tools are now available in the ☰ menu.');
+        showAdminGrantedPopup();
       }
     }
   }
@@ -4027,6 +4133,7 @@
 
   function openDrawer() {
     refreshDrawerRoleTools();
+    pullSharedStoreFromServer();
     document.getElementById('drawerBackdrop').classList.add('open');
     document.getElementById('sideDrawer').classList.add('open');
   }
@@ -4096,6 +4203,7 @@
     if (found.parent && found.parent.mode === 'dual') recomputeDualProductStock(found.parent);
     saveCatalogState();
     syncWebsiteCatalog();
+    pushSharedStoreToServer();
     closeOwnerAdminToolsModal();
     showToast(`Updated ${found.label}!`);
   }
@@ -4147,9 +4255,14 @@
         (admins.length ? admins.map(a => {
           const targetId = a.email || a.username || '';
           const escapedId = String(targetId).replace(/'/g, "\\'");
-          return `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:5px; padding:5px 8px; border-radius:8px; background:var(--bg-input);">
+          const inviteLink = `${window.location.origin}/?admin_verify=${encodeURIComponent(targetId)}`;
+          const escapedLink = inviteLink.replace(/'/g, "\\'");
+          return `<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:5px; padding:5px 8px; border-radius:8px; background:var(--bg-input);">
             <span style="min-width:0; overflow:hidden; text-overflow:ellipsis;">• <strong>${a.username || a.email}</strong> (${a.email})</span>
-            <button type="button" onclick="unverifyUserFromAdminRole('${escapedId}')" style="background:rgba(239, 68, 68, 0.16); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:3px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer; flex-shrink:0;">${isMy ? 'Batal' : 'Unverify'}</button>
+            <div style="display:flex; gap:5px; flex-shrink:0;">
+              <button type="button" onclick="navigator.clipboard?.writeText('${escapedLink}'); showToast(currentLang==='my'?'Pautan pengaktifan Admin disalin!':'Admin activation link copied!');" style="background:rgba(56, 189, 248, 0.16); border:1px solid rgba(56, 189, 248, 0.45); color:var(--accent-cyan); padding:3px 7px; border-radius:7px; font-size:0.66rem; font-weight:800; cursor:pointer;">${isMy ? 'Salin Link' : 'Copy Link'}</button>
+              <button type="button" onclick="unverifyUserFromAdminRole('${escapedId}')" style="background:rgba(239, 68, 68, 0.16); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:3px 7px; border-radius:7px; font-size:0.66rem; font-weight:800; cursor:pointer;">${isMy ? 'Batal' : 'Unverify'}</button>
+            </div>
           </div>`;
         }).join('') : `<div>${isMy ? 'Belum ada admin disahkan.' : 'No verified admins yet.'}</div>`);
     }
@@ -4183,6 +4296,7 @@
       return true;
     });
     saveVerifiedAdminsList(filteredAdmins);
+    pushSharedStoreToServer();
 
     try {
       const seen = JSON.parse(localStorage.getItem(ADMIN_NOTIF_SEEN_KEY) || '{}');
@@ -4242,6 +4356,7 @@
     if (users[idx].email) vList.push(String(users[idx].email).trim().toLowerCase());
     if (users[idx].username) vList.push(normalizeUsername(users[idx].username));
     saveVerifiedAdminsList(vList);
+    pushSharedStoreToServer();
 
     const activeU = getCurrentUser();
     if (activeU && (
@@ -4324,6 +4439,7 @@
     localStorage.setItem(WA_TEMPLATE_STORAGE_KEY, waVal);
     localStorage.setItem(TG_TEMPLATE_STORAGE_KEY, tgVal);
     applySupportLinksFromTemplates();
+    pushSharedStoreToServer();
     closeOwnerAdminToolsModal();
     showToast('Messaging templates saved!');
   }
@@ -5214,6 +5330,7 @@
   updateAuthUI();
   refreshDrawerRoleTools();
   checkAndNotifyAdminRoleGranted();
+  pullSharedStoreFromServer();
   syncWebsiteCatalog();
   loadTrendingHero();
 </script>
