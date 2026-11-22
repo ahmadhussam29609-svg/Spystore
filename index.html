@@ -2163,6 +2163,7 @@
           <button type="button" id="drawerTxnsToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('transactions');">🧾 <span>All Transactions</span></button>
           <button type="button" id="drawerCustomersToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('customers');">👥 <span>Registered Customers</span></button>
           <button type="button" id="drawerVerifyToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('verify');">👑 <span>Add Admin Role</span></button>
+          <button type="button" id="drawerMsgTemplatesToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('msg_templates');">📝 <span>Edit WA &amp; Telegram Text</span></button>
         </div>
       </div>
 
@@ -2604,6 +2605,25 @@
         </div>
         <button type="button" class="primary-submit" style="margin-top:0; width:100%;" onclick="verifyUserToAdminRole()">Verify as Admin ✓</button>
         <div id="verifiedAdminsListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
+      </div>
+
+      <!-- Edit WhatsApp & Telegram Text Templates (Owner Only) -->
+      <div id="drawerMsgTemplatesToolView" style="display:none;">
+        <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
+          Edit teks mesej automatik untuk <strong>WhatsApp</strong> dan <strong>Telegram</strong>. Pemboleh ubah: <code>{ref}</code>, <code>{app}</code>, <code>{months}</code>, <code>{total}</code>, <code>{name}</code>, <code>{phone}</code>, <code>{device}</code>.
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label>WhatsApp Message Template *</label>
+          <textarea rows="6" class="form-control" id="ownerWaTemplateInput" style="resize:vertical; font-size:0.78rem; line-height:1.45;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label>Telegram Message Template *</label>
+          <textarea rows="6" class="form-control" id="ownerTgTemplateInput" style="resize:vertical; font-size:0.78rem; line-height:1.45;"></textarea>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="primary-submit" style="flex:1; margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerMsgTemplates()">Save WA &amp; Telegram Text ✓</button>
+          <button type="button" onclick="resetOwnerMsgTemplatesToDefault()" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:11px 12px; border-radius:12px; font-size:0.76rem; font-weight:700; cursor:pointer;">Reset Default</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3836,11 +3856,13 @@
     const tagEl = document.getElementById('drawerCurrentRoleTag');
     const custBtn = document.getElementById('drawerCustomersToolBtn');
     const verifyBtn = document.getElementById('drawerVerifyToolBtn');
+    const msgTplBtn = document.getElementById('drawerMsgTemplatesToolBtn');
     const isStaff = role === 'owner' || role === 'admin';
     if (sec) sec.style.display = isStaff ? 'block' : 'none';
     if (tagEl) tagEl.textContent = role.toUpperCase();
     if (custBtn) custBtn.style.display = role === 'owner' ? 'flex' : 'none';
     if (verifyBtn) verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
+    if (msgTplBtn) msgTplBtn.style.display = role === 'owner' ? 'flex' : 'none';
   }
 
   function openDrawer() {
@@ -3974,21 +3996,91 @@
     showToast(`${users[idx].username || users[idx].email} verified as ADMIN!`);
   }
 
+  const WA_TEMPLATE_STORAGE_KEY = 'spystore_wa_template_v1';
+  const TG_TEMPLATE_STORAGE_KEY = 'spystore_tg_template_v1';
+
+  const DEFAULT_WA_TEMPLATE = [
+    '✨ *RESIT TEMPAHAN — SPYSTORE BY SAMS* ✨',
+    '━━━━━━━━━━━━━━━━━━━━━━',
+    '🧾 *No. Rujukan:* `{ref}`',
+    '✅ *Status:* Pembayaran Berjaya (FPX)',
+    '📱 *Produk:* {app} ({months} Bulan)',
+    '💰 *Jumlah Bayaran:* {total}',
+    '👤 *Nama:* {name}',
+    '📲 *WhatsApp:* {phone}',
+    '💻 *Peranti:* {device}',
+    '━━━━━━━━━━━━━━━━━━━━━━',
+    'Mohon admin semak & proses pengaktifan akaun saya. Terima kasih!'
+  ].join('\n');
+
+  const DEFAULT_TG_TEMPLATE = [
+    '✨ RESIT TEMPAHAN — SPYSTORE BY SAMS ✨',
+    'No. Rujukan: {ref}',
+    'Produk: {app} ({months} Bulan)',
+    'Jumlah Bayaran: {total}',
+    'Nama: {name}',
+    'WhatsApp: {phone}',
+    'Peranti: {device}',
+    'Mohon admin semak & aktifkan akaun.'
+  ].join('\n');
+
+  function getWaTemplate() {
+    return localStorage.getItem(WA_TEMPLATE_STORAGE_KEY) || DEFAULT_WA_TEMPLATE;
+  }
+
+  function getTgTemplate() {
+    return localStorage.getItem(TG_TEMPLATE_STORAGE_KEY) || DEFAULT_TG_TEMPLATE;
+  }
+
+  function formatOrderMessageTemplate(tpl, vars = {}) {
+    return String(tpl || '')
+      .replace(/\{ref\}/g, vars.ref || '-')
+      .replace(/\{app\}/g, vars.app || '-')
+      .replace(/\{months\}/g, String(vars.months || '1'))
+      .replace(/\{total\}/g, vars.total || '-')
+      .replace(/\{name\}/g, vars.name || '-')
+      .replace(/\{phone\}/g, vars.phone || '-')
+      .replace(/\{device\}/g, vars.device || '-')
+      .replace(/\{email\}/g, vars.email || '-');
+  }
+
+  function saveOwnerMsgTemplates() {
+    if (getUserRole() !== 'owner') { showToast('Only Owner can edit WA & Telegram text.'); return; }
+    const waVal = String(document.getElementById('ownerWaTemplateInput')?.value || '').trim();
+    const tgVal = String(document.getElementById('ownerTgTemplateInput')?.value || '').trim();
+    if (!waVal || !tgVal) { showToast('Please fill in both WhatsApp and Telegram text.'); return; }
+    localStorage.setItem(WA_TEMPLATE_STORAGE_KEY, waVal);
+    localStorage.setItem(TG_TEMPLATE_STORAGE_KEY, tgVal);
+    closeOwnerAdminToolsModal();
+    showToast('WhatsApp & Telegram text templates saved!');
+  }
+
+  function resetOwnerMsgTemplatesToDefault() {
+    if (getUserRole() !== 'owner') { showToast('Only Owner can reset templates.'); return; }
+    localStorage.removeItem(WA_TEMPLATE_STORAGE_KEY);
+    localStorage.removeItem(TG_TEMPLATE_STORAGE_KEY);
+    if (document.getElementById('ownerWaTemplateInput')) document.getElementById('ownerWaTemplateInput').value = DEFAULT_WA_TEMPLATE;
+    if (document.getElementById('ownerTgTemplateInput')) document.getElementById('ownerTgTemplateInput').value = DEFAULT_TG_TEMPLATE;
+    showToast('Reset to default WA & Telegram text.');
+  }
+
   function openOwnerAdminManagerModal(tab = 'catalog') {
     const role = getUserRole();
     if (role !== 'owner' && role !== 'admin') { showToast('Owner or Admin access required.'); return; }
-    if ((tab === 'customers' || tab === 'verify') && role !== 'owner') { showToast('Owner access required.'); return; }
+    if ((tab === 'customers' || tab === 'verify' || tab === 'msg_templates') && role !== 'owner') { showToast('Owner access required.'); return; }
     const modal = document.getElementById('ownerAdminToolsModal');
     const catView = document.getElementById('drawerCatalogToolView');
     const txnView = document.getElementById('drawerTransactionsToolView');
     const custView = document.getElementById('drawerCustomersOnlyView');
     const verView = document.getElementById('drawerVerifyRoleToolView');
+    const msgView = document.getElementById('drawerMsgTemplatesToolView');
     const titleEl = document.getElementById('ownerAdminToolsTitle');
-    if (!modal || !catView || !txnView || !custView || !verView) return;
+    if (!modal || !catView || !txnView || !custView || !verView || !msgView) return;
     catView.style.display = tab === 'catalog' ? 'block' : 'none';
     txnView.style.display = tab === 'transactions' ? 'block' : 'none';
     custView.style.display = tab === 'customers' ? 'block' : 'none';
     verView.style.display = tab === 'verify' ? 'block' : 'none';
+    msgView.style.display = tab === 'msg_templates' ? 'block' : 'none';
     if (tab === 'catalog') {
       if (titleEl) titleEl.textContent = 'WEBSITE CATALOG MANAGER';
       const sel = document.getElementById('drawerMgrTargetSelect');
@@ -4004,6 +4096,12 @@
     } else if (tab === 'verify') {
       if (titleEl) titleEl.textContent = 'ADD ADMIN ROLE';
       refreshVerifyRoleListUI();
+    } else if (tab === 'msg_templates') {
+      if (titleEl) titleEl.textContent = 'EDIT WA & TELEGRAM TEXT';
+      const waInp = document.getElementById('ownerWaTemplateInput');
+      const tgInp = document.getElementById('ownerTgTemplateInput');
+      if (waInp) waInp.value = getWaTemplate();
+      if (tgInp) tgInp.value = getTgTemplate();
     }
     modal.classList.add('open');
   }
@@ -4766,19 +4864,16 @@
       document.getElementById('receiptTitle').textContent = `✅ Payment Confirmed • ${ref}`;
       document.getElementById('receiptDesc').textContent = `${appName} (${months} Month) — Admin has been notified. Tap below to receive your account on WhatsApp.`;
       const cleanTotal = (totalPaid && totalPaid !== '-' && !isNaN(parseFloat(totalPaid))) ? `RM${parseFloat(totalPaid).toFixed(2)}` : '-';
-      const waText = [
-        '✨ *RESIT TEMPAHAN — SPYSTORE BY SAMS* ✨',
-        '━━━━━━━━━━━━━━━━━━━━━━',
-        `🧾 *No. Rujukan:* \`${ref}\``,
-        '✅ *Status:* Pembayaran Berjaya (FPX)',
-        `📱 *Produk:* ${appName} (${months} Bulan)`,
-        `💰 *Jumlah Bayaran:* ${cleanTotal}`,
-        `👤 *Nama:* ${custName}`,
-        `📲 *WhatsApp:* ${custPhone}`,
-        ...(custDevice && custDevice !== '-' ? [`💻 *Peranti:* ${custDevice}`] : []),
-        '━━━━━━━━━━━━━━━━━━━━━━',
-        'Mohon admin semak & proses pengaktifan akaun saya. Terima kasih!'
-      ].join('\n');
+      const waText = formatOrderMessageTemplate(getWaTemplate(), {
+        ref,
+        app: appName,
+        months,
+        total: cleanTotal,
+        name: custName,
+        phone: custPhone,
+        device: custDevice && custDevice !== '-' ? custDevice : '-',
+        email: pending.customerEmail || getCurrentUser()?.email || '-'
+      });
       const confirmedTxn = recordGlobalTransaction({
         invoiceNo: pending.invoiceNo || generateInvoiceNumber(),
         ref, app: appName, months, total: totalPaid,
