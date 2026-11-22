@@ -4000,7 +4000,17 @@
   const TG_TEMPLATE_STORAGE_KEY = 'spystore_tg_support_template_v1';
 
   const DEFAULT_WA_TEMPLATE = 'Hi SPYSTORE BY SAMS, saya nak tanya / perlukan bantuan tentang langganan.';
-  const DEFAULT_TG_TEMPLATE = 'Hi SPYSTORE BY SAMS, saya nak tanya / perlukan bantuan tentang langganan di Telegram.';
+  const DEFAULT_TG_TEMPLATE = [
+    '✨ TEMPAHAN BAHARU — SPYSTORE BY SAMS ✨',
+    '━━━━━━━━━━━━━━━━━━━━━━',
+    '🧾 No. Rujukan: {ref}',
+    '📱 Produk: {app} ({months} Bulan)',
+    '💰 Jumlah: {total}',
+    '👤 Nama: {name}',
+    '📲 WhatsApp: {phone}',
+    '💻 Peranti: {device}',
+    '━━━━━━━━━━━━━━━━━━━━━━'
+  ].join('\n');
 
   function getWaTemplate() {
     return localStorage.getItem(WA_TEMPLATE_STORAGE_KEY) || DEFAULT_WA_TEMPLATE;
@@ -4030,6 +4040,18 @@
       .replace(/\{phone\}/g, vars.phone || '-')
       .replace(/\{device\}/g, vars.device || '-')
       .replace(/\{email\}/g, vars.email || '-');
+  }
+
+  async function sendTelegramBotOrderAlert(vars = {}) {
+    const text = formatOrderMessageTemplate(getTgTemplate(), vars);
+    if (!text) return;
+    try {
+      await fetch('/api/send-telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, order: vars })
+      });
+    } catch (e) {}
   }
 
   function saveOwnerMsgTemplates() {
@@ -4871,6 +4893,16 @@
         customerName: custName, customerPhone: custPhone,
         customerEmail: pending.customerEmail || getCurrentUser()?.email || '-',
         customerDevice: custDevice, paymentMethod: 'FPX', status: 'PAID'
+      });
+      sendTelegramBotOrderAlert({
+        ref,
+        app: appName,
+        months,
+        total: cleanTotal,
+        name: custName,
+        phone: custPhone,
+        device: custDevice && custDevice !== '-' ? custDevice : '-',
+        email: pending.customerEmail || getCurrentUser()?.email || '-'
       });
       window._latestReceiptInvoice = confirmedTxn;
       lastReceiptPlainText = waText;
