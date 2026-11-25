@@ -3890,82 +3890,113 @@
     }
   }
 
+  function formatReceiptDisplayDate(dateInput) {
+    const raw = String(dateInput || '').trim();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    // Match YYYY-MM-DD
+    const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoMatch) {
+      const y = isoMatch[1];
+      const mIdx = Math.max(0, Math.min(11, parseInt(isoMatch[2], 10) - 1));
+      const dNum = parseInt(isoMatch[3], 10);
+      return `${dNum} ${months[mIdx]} ${y}`;
+    }
+    // Match DD/MM/YYYY or D/M/YYYY
+    const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slashMatch) {
+      const dNum = parseInt(slashMatch[1], 10);
+      const mIdx = Math.max(0, Math.min(11, parseInt(slashMatch[2], 10) - 1));
+      const y = slashMatch[3];
+      return `${dNum} ${months[mIdx]} ${y}`;
+    }
+    return raw || new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
   function renderSSResitCanvas(txn) {
     const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
     const amountNum = parseFloat(txn.total);
     const amountStr = !isNaN(amountNum) ? `RM ${amountNum.toFixed(2)}` : `RM ${String(txn.total || '0.00')}`;
     const monthsNum = Number(txn.months || 1);
     const user = getCurrentUser();
-    const custName = txn.customerName || user?.name || 'Customer Name';
-    const custPhone = txn.customerPhone && txn.customerPhone !== '-' ? txn.customerPhone : '';
-    const custEmail = txn.customerEmail && txn.customerEmail !== '-' ? txn.customerEmail : '';
-    const custDevice = txn.customerDevice && txn.customerDevice !== '-' ? txn.customerDevice : '';
+    const custName = txn.customerName && txn.customerName !== '-' ? txn.customerName : (user?.name || 'Customer');
     const payMethod = txn.paymentMethod || 'Online Transfer';
-    const dateStr = txn.date || new Date().toLocaleDateString('en-MY');
-    const prodName = txn.app || 'Digital Subscription';
+    const dateStr = formatReceiptDisplayDate(txn.date);
+    const prodName = txn.app || 'Netflix Premium';
     const planLabel = `${monthsNum} Month${monthsNum > 1 ? 's' : ''}`;
 
     const W = 880;
-    const H = 1120;
+    const H = 960;
     const canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
+    // Clean white receipt card background
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, W, H);
 
+    // Top 3-stop gradient bar matching SSResit
     const grad = ctx.createLinearGradient(0, 0, W, 0);
     grad.addColorStop(0, '#2563eb');
-    grad.addColorStop(0.55, '#4f46e5');
+    grad.addColorStop(0.5, '#4f46e5');
     grad.addColorStop(1, '#f59e0b');
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, 16);
+    ctx.fillRect(0, 0, W, 14);
 
     const padX = 56;
-    let y = 64;
+    let y = 58;
 
+    // Logo box (rounded square)
     ctx.fillStyle = '#0f172a';
     ctx.beginPath();
-    ctx.roundRect(padX, y, 108, 108, 24);
+    ctx.roundRect(padX, y, 112, 112, 28);
     ctx.fill();
 
     ctx.fillStyle = '#fbbf24';
-    ctx.font = '800 40px "Space Grotesk", "Plus Jakarta Sans", sans-serif';
+    ctx.font = '800 38px "Space Grotesk", "Plus Jakarta Sans", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('SS', padX + 54, y + 56);
+    ctx.fillText('SS', padX + 56, y + 58);
 
+    // Company Name & Contact Number
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = '#0f172a';
-    ctx.font = '800 32px "Space Grotesk", "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('SPYSTORE OFFICIAL OUTLET', padX + 132, y + 44);
+    ctx.font = '800 30px "Space Grotesk", "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('SPYSTORE', padX + 136, y + 34);
+    ctx.fillText('OFFICIAL OUTLET', padX + 136, y + 70);
 
     ctx.fillStyle = '#64748b';
-    ctx.font = '600 22px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Contact Number: +60189066291', padX + 132, y + 84);
+    ctx.font = '500 22px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Contact Number:', padX + 136, y + 102);
+    ctx.fillText('60189066291', padX + 136, y + 130);
 
-    ctx.textAlign = 'right';
+    // PAID badge + OFFICIAL RECEIPT on right
+    const badgeW = 104;
+    const badgeH = 42;
+    const badgeX = W - padX - badgeW;
     ctx.fillStyle = '#ecfdf5';
     ctx.strokeStyle = '#a7f3d0';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.roundRect(W - padX - 116, y, 116, 44, 12);
+    ctx.roundRect(badgeX, y, badgeW, badgeH, 10);
     ctx.fill();
     ctx.stroke();
 
     ctx.fillStyle = '#047857';
-    ctx.font = '800 20px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('PAID', W - padX - 58, y + 29);
+    ctx.font = '800 19px "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PAID', badgeX + badgeW / 2, y + 28);
 
+    ctx.textAlign = 'right';
     ctx.fillStyle = '#94a3b8';
     ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
     ctx.fillText('OFFICIAL RECEIPT', W - padX, y + 76);
 
-    y += 142;
+    y += 156;
 
+    // Solid divider line
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -3975,19 +4006,20 @@
 
     y += 42;
 
+    // Row 1: BILLED TO & ORDER ID
     ctx.textAlign = 'left';
     ctx.fillStyle = '#94a3b8';
     ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
     ctx.fillText('BILLED TO', padX, y);
 
     ctx.textAlign = 'right';
-    ctx.fillText('RECEIPT NO', W - padX, y);
+    ctx.fillText('ORDER ID', W - padX, y);
 
-    y += 32;
+    y += 34;
     ctx.textAlign = 'left';
     ctx.fillStyle = '#0f172a';
     ctx.font = '700 26px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(String(custName).slice(0, 28), padX, y);
+    ctx.fillText(String(custName).slice(0, 26), padX, y);
 
     ctx.textAlign = 'right';
     ctx.fillStyle = '#1d4ed8';
@@ -3996,6 +4028,7 @@
 
     y += 46;
 
+    // Row 2: DATE ISSUED & PAYMENT METHOD
     ctx.textAlign = 'left';
     ctx.fillStyle = '#94a3b8';
     ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
@@ -4004,7 +4037,7 @@
     ctx.textAlign = 'right';
     ctx.fillText('PAYMENT METHOD', W - padX, y);
 
-    y += 30;
+    y += 32;
     ctx.textAlign = 'left';
     ctx.fillStyle = '#334155';
     ctx.font = '600 22px "Plus Jakarta Sans", sans-serif';
@@ -4015,6 +4048,7 @@
 
     y += 38;
 
+    // Dashed divider matching SSResit
     ctx.save();
     ctx.setLineDash([8, 8]);
     ctx.strokeStyle = '#cbd5e1';
@@ -4025,8 +4059,9 @@
     ctx.stroke();
     ctx.restore();
 
-    y += 40;
+    y += 42;
 
+    // DESCRIPTION & AMOUNT (MYR)
     ctx.textAlign = 'left';
     ctx.fillStyle = '#94a3b8';
     ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
@@ -4042,8 +4077,9 @@
     ctx.lineTo(W - padX, y);
     ctx.stroke();
 
-    y += 42;
+    y += 44;
 
+    // Item title + right amount
     ctx.textAlign = 'left';
     ctx.fillStyle = '#0f172a';
     ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
@@ -4053,38 +4089,41 @@
     ctx.font = '700 24px "JetBrains Mono", monospace';
     ctx.fillText(amountStr, W - padX, y);
 
-    y += 30;
+    y += 32;
     ctx.textAlign = 'left';
     ctx.fillStyle = '#64748b';
     ctx.font = '500 20px "Plus Jakarta Sans", sans-serif';
     ctx.fillText(`${planLabel} • 1 × ${amountStr}`, padX, y);
 
-    y += 44;
-    ctx.strokeStyle = '#f1f5f9';
-    ctx.beginPath();
-    ctx.moveTo(padX, y);
-    ctx.lineTo(W - padX, y);
-    ctx.stroke();
-
     y += 42;
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#64748b';
-    ctx.font = '600 21px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Subtotal', padX, y);
-
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#334155';
-    ctx.font = '600 21px "JetBrains Mono", monospace';
-    ctx.fillText(amountStr, W - padX, y);
-
-    y += 28;
     ctx.strokeStyle = '#e2e8f0';
     ctx.beginPath();
     ctx.moveTo(padX, y);
     ctx.lineTo(W - padX, y);
     ctx.stroke();
 
-    y += 46;
+    // Subtotal
+    y += 44;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#64748b';
+    ctx.font = '500 22px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Subtotal', padX, y);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#334155';
+    ctx.font = '600 22px "JetBrains Mono", monospace';
+    ctx.fillText(amountStr, W - padX, y);
+
+    y += 30;
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(padX, y);
+    ctx.lineTo(W - padX, y);
+    ctx.stroke();
+
+    // TOTAL PAID
+    y += 52;
     ctx.textAlign = 'left';
     ctx.fillStyle = '#0f172a';
     ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
@@ -4092,70 +4131,50 @@
 
     ctx.textAlign = 'right';
     ctx.fillStyle = '#1d4ed8';
-    ctx.font = '800 32px "JetBrains Mono", monospace';
+    ctx.font = '800 34px "JetBrains Mono", monospace';
     ctx.fillText(amountStr, W - padX, y);
 
-    const extraLines = [];
-    if (custPhone) extraLines.push(`WhatsApp: ${custPhone}`);
-    if (custEmail) extraLines.push(`Email: ${custEmail}`);
-    if (custDevice) extraLines.push(`Device: ${custDevice}`);
-
-    if (extraLines.length) {
-      y += 44;
-      const boxH = 44 + (extraLines.length * 30);
-      ctx.fillStyle = '#f8fafc';
-      ctx.strokeStyle = '#e2e8f0';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(padX, y, W - padX * 2, boxH, 16);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.textAlign = 'left';
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '700 15px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText('ORDER DETAILS', padX + 22, y + 30);
-
-      ctx.fillStyle = '#475569';
-      ctx.font = '500 19px "Plus Jakarta Sans", sans-serif';
-      extraLines.forEach((line, i) => {
-        ctx.fillText(line, padX + 22, y + 60 + (i * 30));
-      });
-      y += boxH;
-    }
-
-    const footY = Math.max(y + 64, H - 72);
+    // Footer
+    y += 96;
     ctx.strokeStyle = '#f1f5f9';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(padX, footY - 28);
-    ctx.lineTo(W - padX, footY - 28);
+    ctx.moveTo(padX, y - 28);
+    ctx.lineTo(W - padX, y - 28);
     ctx.stroke();
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#64748b';
-    ctx.font = '600 20px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Thank you for your purchase!', W / 2, footY + 6);
+    ctx.font = '500 21px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Thank you for your purchase!', W / 2, y + 6);
 
     return canvas;
   }
 
-  function downloadSSResitObject(txn) {
+  async function downloadSSResitObject(txn) {
     if (!txn) return;
     const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
+    showToast(`Fetching SSResit receipt for ${recNo}...`);
 
+    // 1. Ensure order detail is sent to Spystore bridge & SSResit
+    await pushOrderToSSResit(txn, txn.generatedReceiptPng || '');
+
+    // 2. Check if SSResit generated receipt is already on this transaction or in /api/ssresit-sync
     let pngDataUrl = txn.generatedReceiptPng || '';
     if (!pngDataUrl) {
-      const canvas = renderSSResitCanvas(txn);
-      if (canvas && canvas.toDataURL) {
-        try {
-          pngDataUrl = canvas.toDataURL('image/png');
-          attachGeneratedReceiptToTransaction(recNo, pngDataUrl);
-        } catch (e) {}
-      }
+      try {
+        const res = await fetch(`/api/ssresit-sync?ref=${encodeURIComponent(recNo)}`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.order?.generatedReceipt?.pngDataUrl) {
+            pngDataUrl = data.order.generatedReceipt.pngDataUrl;
+            attachGeneratedReceiptToTransaction(recNo, pngDataUrl);
+          }
+        }
+      } catch (e) {}
     }
 
-    pushOrderToSSResit(txn, pngDataUrl);
-
+    // 3. If SSResit generated PNG is received in Spystore, download that exact SSResit receipt
     if (pngDataUrl) {
       const a = document.createElement('a');
       a.href = pngDataUrl;
@@ -4163,11 +4182,14 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showToast(`Receipt ${recNo}.png downloaded!`);
+      showToast(`SSResit receipt ${recNo}.png downloaded!`);
       return;
     }
 
-    showToast(`Receipt ${recNo} synced to SSResit.`);
+    // 4. Send order detail to SSResit (`https://ssresit.vercel.app`) to generate the receipt & sync back
+    const ssresitGenUrl = `${buildSSResitUrl(txn)}&autodownload=1`;
+    window.open(ssresitGenUrl, '_blank', 'noopener');
+    showToast(`Sent ${recNo} to SSResit to generate receipt...`);
   }
 
   function downloadSSResitByIndex(idx) {
@@ -5651,7 +5673,7 @@
         receiptNo: pending.receiptNo || pending.invoiceNo || generateReceiptNumber(),
         ref, app: appName, months, total: totalPaid,
         date: new Date().toLocaleDateString('en-MY'),
-        customerName: custName, customerPhone: custPhone,
+        customerName: custName && custName !== '-' ? custName : (getCurrentUser()?.name || 'Customer'), customerPhone: custPhone,
         customerEmail: pending.customerEmail || getCurrentUser()?.email || '-',
         customerDevice: custDevice, paymentMethod: 'Online Transfer', status: 'PAID'
       });
