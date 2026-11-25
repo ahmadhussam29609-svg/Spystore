@@ -3628,14 +3628,60 @@
     return `${SSRESIT_BASE_URL}/?${params.toString()}`;
   }
 
-  async function pushOrderToSSResit(txn) {
+  function attachGeneratedReceiptToTransaction(recNo, pngDataUrl) {
+    if (!recNo || !pngDataUrl) return;
+    const stamp = new Date().toISOString();
+    try {
+      const allList = getAllTransactionsDB();
+      const updatedAll = allList.map(x => {
+        if ((x.receiptNo || x.invoiceNo || x.ref) === recNo) {
+          return { ...x, receiptReady: true, generatedReceiptPng: pngDataUrl, receiptGeneratedAt: stamp };
+        }
+        return x;
+      });
+      localStorage.setItem(ALL_TXNS_STORAGE_KEY, JSON.stringify(updatedAll));
+    } catch (e) {}
+
+    try {
+      const guestList = JSON.parse(localStorage.getItem('spystore_orders') || '[]');
+      if (Array.isArray(guestList) && guestList.length) {
+        const nextGuest = guestList.map(x => {
+          if ((x.receiptNo || x.invoiceNo || x.ref) === recNo) {
+            return { ...x, receiptReady: true, generatedReceiptPng: pngDataUrl, receiptGeneratedAt: stamp };
+          }
+          return x;
+        });
+        localStorage.setItem('spystore_orders', JSON.stringify(nextGuest));
+      }
+    } catch (e) {}
+
+    const user = getCurrentUser();
+    if (user && user.email) {
+      try {
+        const key = getUserDataKey(user.email);
+        const saved = JSON.parse(localStorage.getItem(key) || '{"orders":[],"profile":{}}');
+        if (Array.isArray(saved.orders)) {
+          saved.orders = saved.orders.map(x => {
+            if ((x.receiptNo || x.invoiceNo || x.ref) === recNo) {
+              return { ...x, receiptReady: true, generatedReceiptPng: pngDataUrl, receiptGeneratedAt: stamp };
+            }
+            return x;
+          });
+          localStorage.setItem(key, JSON.stringify(saved));
+        }
+      } catch (e) {}
+    }
+  }
+
+  async function pushOrderToSSResit(txn, generatedReceiptPng = '') {
     if (!txn) return;
+    const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
     const payload = {
       source: 'spystore.vercel.app',
       company: 'SPYSTORE OFFICIAL OUTLET',
       companyPhone: '60189066291',
-      receiptNo: txn.receiptNo || txn.ref || generateReceiptNumber(),
-      ref: txn.ref || txn.receiptNo || '-',
+      receiptNo: recNo,
+      ref: txn.ref || recNo,
       customerName: txn.customerName || 'Customer',
       customerPhone: txn.customerPhone || '-',
       customerEmail: txn.customerEmail || '-',
@@ -3647,13 +3693,28 @@
       paymentMethod: txn.paymentMethod || 'Online Transfer',
       date: txn.date || new Date().toLocaleDateString('en-MY'),
       status: txn.status || 'PAID',
-      ssresitUrl: buildSSResitUrl(txn)
+      generatedReceipt: generatedReceiptPng ? { receiptNo: recNo, pngDataUrl: generatedReceiptPng, generatedAt: new Date().toISOString() } : null
     };
     try {
       await fetch('/api/ssresit-sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
+      });
+    } catch (e) {}
+  }
+
+  async function syncGeneratedReceiptsFromServer() {
+    try {
+      const res = await fetch('/api/ssresit-sync', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      const remoteOrders = Array.isArray(data?.orders) ? data.orders : [];
+      if (!remoteOrders.length) return;
+      remoteOrders.forEach(ro => {
+        if (ro?.receiptNo && ro?.generatedReceipt?.pngDataUrl) {
+          attachGeneratedReceiptToTransaction(ro.receiptNo, ro.generatedReceipt.pngDataUrl);
+        }
       });
     } catch (e) {}
   }
@@ -3681,7 +3742,9 @@
         customerEmail: txn.customerEmail || '-',
         customerDevice: txn.customerDevice || '-',
         paymentMethod: txn.paymentMethod || 'Online Transfer',
-        status: txn.status || 'CONFIRMED'
+        status: txn.status || 'CONFIRMED',
+        receiptReady: Boolean(txn.receiptReady),
+        generatedReceiptPng: txn.generatedReceiptPng || ''
       };
       const deduped = existing.filter(x => (x.receiptNo || x.invoiceNo) !== receiptNo && !(txn.ref && x.ref === txn.ref && x.app === item.app && x.total === item.total && x.date === item.date));
       deduped.unshift(item);
@@ -3850,11 +3913,9 @@
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    // White receipt card background
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, W, H);
 
-    // Top accent bar (blue -> indigo -> amber)
     const grad = ctx.createLinearGradient(0, 0, W, 0);
     grad.addColorStop(0, '#2563eb');
     grad.addColorStop(0.55, '#4f46e5');
@@ -3865,7 +3926,6 @@
     const padX = 56;
     let y = 64;
 
-    // Company badge box ("SS")
     ctx.fillStyle = '#0f172a';
     ctx.beginPath();
     ctx.roundRect(padX, y, 108, 108, 24);
@@ -3877,7 +3937,6 @@
     ctx.textBaseline = 'middle';
     ctx.fillText('SS', padX + 54, y + 56);
 
-    // Company title & contact
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = '#0f172a';
@@ -3888,7 +3947,6 @@
     ctx.font = '600 22px "Plus Jakarta Sans", sans-serif';
     ctx.fillText('Contact Number: +60189066291', padX + 132, y + 84);
 
-    // PAID pill & OFFICIAL RECEIPT label on right
     ctx.textAlign = 'right';
     ctx.fillStyle = '#ecfdf5';
     ctx.strokeStyle = '#a7f3d0';
@@ -3908,7 +3966,6 @@
 
     y += 142;
 
-    // Divider line
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -3918,7 +3975,6 @@
 
     y += 42;
 
-    // Metadata grid: Billed To & Receipt No
     ctx.textAlign = 'left';
     ctx.fillStyle = '#94a3b8';
     ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
@@ -3940,7 +3996,6 @@
 
     y += 46;
 
-    // Metadata grid: Date Issued & Payment Method
     ctx.textAlign = 'left';
     ctx.fillStyle = '#94a3b8';
     ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
@@ -3960,7 +4015,6 @@
 
     y += 38;
 
-    // Dashed divider
     ctx.save();
     ctx.setLineDash([8, 8]);
     ctx.strokeStyle = '#cbd5e1';
@@ -3973,7 +4027,6 @@
 
     y += 40;
 
-    // Items header
     ctx.textAlign = 'left';
     ctx.fillStyle = '#94a3b8';
     ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
@@ -3991,7 +4044,6 @@
 
     y += 42;
 
-    // Item row
     ctx.textAlign = 'left';
     ctx.fillStyle = '#0f172a';
     ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
@@ -4005,8 +4057,7 @@
     ctx.textAlign = 'left';
     ctx.fillStyle = '#64748b';
     ctx.font = '500 20px "Plus Jakarta Sans", sans-serif';
-    const subMeta = `${planLabel} • 1 × ${amountStr}`;
-    ctx.fillText(subMeta, padX, y);
+    ctx.fillText(`${planLabel} • 1 × ${amountStr}`, padX, y);
 
     y += 44;
     ctx.strokeStyle = '#f1f5f9';
@@ -4015,7 +4066,6 @@
     ctx.lineTo(W - padX, y);
     ctx.stroke();
 
-    // Totals section
     y += 42;
     ctx.textAlign = 'left';
     ctx.fillStyle = '#64748b';
@@ -4045,7 +4095,6 @@
     ctx.font = '800 32px "JetBrains Mono", monospace';
     ctx.fillText(amountStr, W - padX, y);
 
-    // Optional buyer / device details box
     const extraLines = [];
     if (custPhone) extraLines.push(`WhatsApp: ${custPhone}`);
     if (custEmail) extraLines.push(`Email: ${custEmail}`);
@@ -4075,7 +4124,6 @@
       y += boxH;
     }
 
-    // Footer
     const footY = Math.max(y + 64, H - 72);
     ctx.strokeStyle = '#f1f5f9';
     ctx.beginPath();
@@ -4094,21 +4142,29 @@
   function downloadSSResitObject(txn) {
     if (!txn) return;
     const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
-    pushOrderToSSResit(txn);
 
-    const canvas = renderSSResitCanvas(txn);
-    if (canvas && canvas.toDataURL) {
-      try {
-        const dataUrl = canvas.toDataURL('image/png');
-        const a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = `${recNo}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        showToast(`Receipt ${recNo}.png downloaded!`);
-        return;
-      } catch (e) {}
+    let pngDataUrl = txn.generatedReceiptPng || '';
+    if (!pngDataUrl) {
+      const canvas = renderSSResitCanvas(txn);
+      if (canvas && canvas.toDataURL) {
+        try {
+          pngDataUrl = canvas.toDataURL('image/png');
+          attachGeneratedReceiptToTransaction(recNo, pngDataUrl);
+        } catch (e) {}
+      }
+    }
+
+    pushOrderToSSResit(txn, pngDataUrl);
+
+    if (pngDataUrl) {
+      const a = document.createElement('a');
+      a.href = pngDataUrl;
+      a.download = `${recNo}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast(`Receipt ${recNo}.png downloaded!`);
+      return;
     }
 
     showToast(`Receipt ${recNo} synced to SSResit.`);
@@ -5658,6 +5714,7 @@
   refreshDrawerRoleTools();
   checkAndNotifyAdminRoleGranted();
   pullSharedStoreFromServer();
+  syncGeneratedReceiptsFromServer();
   syncWebsiteCatalog();
   loadTrendingHero();
 </script>
