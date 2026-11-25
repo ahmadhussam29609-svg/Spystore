@@ -2216,7 +2216,7 @@
       <h4 id="receiptTitle">Payment Successful!</h4>
       <p id="receiptDesc">Your order has been confirmed. Tap below to send your verified order slip to Admin on WhatsApp.</p>
       <div class="receipt-actions-row">
-        <button type="button" class="copy-order-btn" style="background:rgba(250,204,21,0.16); border-color:var(--accent-gold); color:var(--accent-gold);" id="receiptDownloadInvoiceBtn" onclick="downloadLatestInvoice()">📄 Download Invoice (Invois)</button>
+        <button type="button" class="copy-order-btn" style="background:rgba(250,204,21,0.16); border-color:var(--accent-gold); color:var(--accent-gold);" id="receiptDownloadReceiptBtn" onclick="downloadLatestSSResit()">🧾 Download Receipt (SSResit)</button>
         <button type="button" class="copy-order-btn" onclick="copyReceiptSummary()" data-i18n="copyOrderBtn">Copy Order Summary</button>
         <a href="https://wa.me/60189066291" target="_blank" class="receipt-wa-btn" id="receiptWaLink">
           <span data-i18n="claimWaBtn">Claim Account on WhatsApp →</span>
@@ -2583,7 +2583,7 @@
       <!-- All Transactions (Owner / Admin) -->
       <div id="drawerTransactionsToolView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">
-          Senarai semua transaksi yang disusun kemas beserta nombor invois.
+          Senarai semua transaksi yang disusun kemas & disambungkan ke SSResit (ssresit.vercel.app).
         </div>
         <div id="drawerAllTransactionsBody" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
@@ -2696,7 +2696,7 @@
       </p>
       <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:11px 12px; font-size:0.77rem; color:var(--text-secondary); margin-bottom:14px;">
         <strong id="loginPayReasonTitle" style="color:var(--accent-cyan); display:block; margin-bottom:4px;">Why is logging in important before paying?</strong>
-        <span id="loginPayReasonText">Your transaction history, invoice numbers, and subscription records are saved securely in your account so they are not easily lost when switching devices or clearing browser data.</span>
+        <span id="loginPayReasonText">Your transaction history, official SSResit receipts, and subscription records are saved securely in your account so they are not easily lost when switching devices or clearing browser data.</span>
       </div>
       <div style="display:flex; flex-direction:column; gap:8px;">
         <button type="button" id="loginPayNowActionBtn" class="primary-submit" style="margin-top:0;" onclick="closeLoginBeforePayModal(); openAuthModal();">Login / Sign Up Now →</button>
@@ -3171,8 +3171,8 @@
       : 'You are not logged in to your SPYSTORE account before making a payment.');
     setTxt('loginPayReasonTitle', isMy ? 'Kenapa login penting sebelum bayar?' : 'Why is logging in important before paying?');
     setTxt('loginPayReasonText', isMy
-      ? 'Sejarah transaksi, nombor invois, dan maklumat langganan anda akan disimpan dengan teratur dan selamat dalam akaun anda supaya tidak mudah hilang jika bertukar peranti atau membersihkan data pelayar.'
-      : 'Your transaction history, invoice numbers, and subscription records are saved securely in your account so they are not easily lost when switching devices or clearing browser data.');
+      ? 'Sejarah transaksi, resit rasmi SSResit, dan maklumat langganan anda akan disimpan dengan teratur dan selamat dalam akaun anda supaya tidak mudah hilang jika bertukar peranti atau membersihkan data pelayar.'
+      : 'Your transaction history, official SSResit receipts, and subscription records are saved securely in your account so they are not easily lost when switching devices or clearing browser data.');
     setTxt('loginPayNowActionBtn', isMy ? 'Login / Daftar Akaun Sekarang →' : 'Login / Sign Up Now →');
     setTxt('loginPayContinueGuestBtn', isMy ? 'Teruskan Bayar Tanpa Login' : 'Continue Payment Without Login');
 
@@ -3593,13 +3593,69 @@
     animateElementEnter(catView);
   }
 
-  function generateInvoiceNumber() {
+  const SSRESIT_BASE_URL = 'https://ssresit.vercel.app';
+
+  function generateReceiptNumber() {
     const now = new Date();
     const y = String(now.getFullYear()).slice(-2);
     const m = String(now.getMonth() + 1).padStart(2, '0');
     const d = String(now.getDate()).padStart(2, '0');
     const rand = String(Math.floor(1000 + Math.random() * 9000));
-    return `INV-SPY-${y}${m}${d}-${rand}`;
+    return `RES-SPY-${y}${m}${d}-${rand}`;
+  }
+
+  function buildSSResitUrl(txn) {
+    const recNo = txn.receiptNo || txn.ref || generateReceiptNumber();
+    const amountNum = parseFloat(txn.total);
+    const amountStr = !isNaN(amountNum) ? amountNum.toFixed(2) : String(txn.total || '0.00');
+    const params = new URLSearchParams({
+      source: 'spystore',
+      company: 'SPYSTORE OFFICIAL OUTLET',
+      companyPhone: '60189066291',
+      receiptNo: recNo,
+      ref: txn.ref || recNo,
+      customer: txn.customerName || 'Customer',
+      phone: txn.customerPhone || '-',
+      email: txn.customerEmail || '-',
+      device: txn.customerDevice || '-',
+      product: `${txn.app || 'Subscription'} (${txn.months || 1} Month)`,
+      months: String(txn.months || 1),
+      amount: amountStr,
+      method: txn.paymentMethod || 'Online Transfer',
+      date: txn.date || new Date().toLocaleDateString('en-MY'),
+      status: txn.status || 'PAID'
+    });
+    return `${SSRESIT_BASE_URL}/?${params.toString()}`;
+  }
+
+  async function pushOrderToSSResit(txn) {
+    if (!txn) return;
+    const payload = {
+      source: 'spystore.vercel.app',
+      company: 'SPYSTORE OFFICIAL OUTLET',
+      companyPhone: '60189066291',
+      receiptNo: txn.receiptNo || txn.ref || generateReceiptNumber(),
+      ref: txn.ref || txn.receiptNo || '-',
+      customerName: txn.customerName || 'Customer',
+      customerPhone: txn.customerPhone || '-',
+      customerEmail: txn.customerEmail || '-',
+      customerDevice: txn.customerDevice || '-',
+      product: `${txn.app || 'Subscription'} (${txn.months || 1} Month)`,
+      app: txn.app || 'Subscription',
+      months: Number(txn.months || 1),
+      total: String(txn.total || '0.00').trim(),
+      paymentMethod: txn.paymentMethod || 'Online Transfer',
+      date: txn.date || new Date().toLocaleDateString('en-MY'),
+      status: txn.status || 'PAID',
+      ssresitUrl: buildSSResitUrl(txn)
+    };
+    try {
+      await fetch('/api/ssresit-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {}
   }
 
   function getAllTransactionsDB() {
@@ -3612,10 +3668,10 @@
   function recordGlobalTransaction(txn) {
     try {
       const existing = getAllTransactionsDB();
-      const invoiceNo = txn.invoiceNo || generateInvoiceNumber();
+      const receiptNo = txn.receiptNo || txn.invoiceNo || generateReceiptNumber();
       const item = {
-        invoiceNo,
-        ref: txn.ref || invoiceNo,
+        receiptNo,
+        ref: txn.ref || receiptNo,
         app: txn.app || 'Subscription',
         months: txn.months || 1,
         total: txn.total || '0.00',
@@ -3624,12 +3680,13 @@
         customerPhone: txn.customerPhone || '-',
         customerEmail: txn.customerEmail || '-',
         customerDevice: txn.customerDevice || '-',
-        paymentMethod: txn.paymentMethod || 'FPX',
+        paymentMethod: txn.paymentMethod || 'Online Transfer',
         status: txn.status || 'CONFIRMED'
       };
-      const deduped = existing.filter(x => x.invoiceNo !== invoiceNo && !(txn.ref && x.ref === txn.ref && x.app === item.app && x.total === item.total && x.date === item.date));
+      const deduped = existing.filter(x => (x.receiptNo || x.invoiceNo) !== receiptNo && !(txn.ref && x.ref === txn.ref && x.app === item.app && x.total === item.total && x.date === item.date));
       deduped.unshift(item);
       localStorage.setItem(ALL_TXNS_STORAGE_KEY, JSON.stringify(deduped.slice(0, 100)));
+      pushOrderToSSResit(item);
       return item;
     } catch (e) { return txn; }
   }
@@ -3667,12 +3724,12 @@
     const user = getCurrentUser();
     const enriched = {
       ...order,
-      invoiceNo: order.invoiceNo || generateInvoiceNumber(),
+      receiptNo: order.receiptNo || order.invoiceNo || generateReceiptNumber(),
       customerName: order.customerName || user?.name || '-',
       customerPhone: order.customerPhone || user?.phone || '-',
       customerEmail: order.customerEmail || user?.email || '-',
       customerDevice: order.customerDevice || '-',
-      paymentMethod: order.paymentMethod || 'FPX',
+      paymentMethod: order.paymentMethod || 'Online Transfer',
       status: order.status || 'PAID'
     };
     recordGlobalTransaction(enriched);
@@ -3721,10 +3778,10 @@
     const planAmount = selectedMonths === 2 ? getActiveTwoMonthPrice(getActiveUnitPrice()) : getActiveUnitPrice();
     const feeAmount = 1.00;
     const totalAmount = planAmount + feeAmount;
-    const invoiceNo = generateInvoiceNumber();
+    const receiptNo = generateReceiptNumber();
 
     localStorage.setItem('spystore_pending_order', JSON.stringify({
-      invoiceNo,
+      receiptNo,
       appId: currentProduct.id,
       appName: activeAppName,
       months: selectedMonths,
@@ -3738,7 +3795,7 @@
     }));
 
     saveLocalOrder({
-      invoiceNo,
+      receiptNo,
       app: activeAppName,
       months: selectedMonths,
       total: totalAmount.toFixed(2),
@@ -3747,7 +3804,7 @@
       customerPhone,
       customerEmail,
       customerDevice,
-      paymentMethod: 'FPX',
+      paymentMethod: 'Online Transfer',
       status: 'PENDING FPX'
     });
 
@@ -3770,8 +3827,8 @@
     }
   }
 
-  function buildInvoiceHtmlDocument(txn) {
-    const invNo = txn.invoiceNo || txn.ref || generateInvoiceNumber();
+  function buildSSResitHtmlDocument(txn) {
+    const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
     const amountNum = parseFloat(txn.total);
     const amountStr = !isNaN(amountNum) ? `RM${amountNum.toFixed(2)}` : (txn.total || 'RM0.00');
     const monthsNum = Number(txn.months || 1);
@@ -3780,49 +3837,67 @@
     const custPhone = txn.customerPhone || user?.phone || '-';
     const custEmail = txn.customerEmail || user?.email || '-';
     const custDevice = txn.customerDevice && txn.customerDevice !== '-' ? txn.customerDevice : '';
-    const payMethod = txn.paymentMethod || 'FPX';
-    const statusLabel = txn.status || 'PAID / CONFIRMED';
+    const payMethod = txn.paymentMethod || 'Online Transfer';
+    const statusLabel = txn.status || 'PAID';
     const dateStr = txn.date || new Date().toLocaleDateString('en-MY');
-    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>Invoice ${invNo} — SPYSTORE BY SAMS</title><style>body{font-family:'Plus Jakarta Sans',Arial,sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:28px}.inv-box{max-width:640px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px}.inv-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0f172a;padding-bottom:16px;margin-bottom:20px}.brand{font-size:20px;font-weight:800}.brand span{color:#ca8a04}.inv-meta{text-align:right;font-size:13px;color:#475569}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;font-size:13px}.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px}.card h4{margin:0 0 6px 0;font-size:11px;text-transform:uppercase;color:#64748b}table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:13px}th,td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left}th{background:#f1f5f9}.total-row td{font-weight:800;font-size:15px;border-top:2px solid #0f172a;border-bottom:none}.foot{font-size:12px;color:#64748b;border-top:1px dashed #cbd5e1;padding-top:14px;display:flex;justify-content:space-between}</style></head><body><div class="inv-box"><div class="inv-head"><div><div class="brand">SPYSTORE <span>BY SAMS</span></div><div style="font-size:12px;color:#475569">Official Digital Subscription Receipt &amp; Invoice</div></div><div class="inv-meta"><div><strong>Invoice No:</strong> ${invNo}</div><div><strong>Date:</strong> ${dateStr}</div><div><strong>Status:</strong> ${statusLabel}</div></div></div><div class="grid-2"><div class="card"><h4>Billed To</h4><div><strong>${custName}</strong></div><div>WhatsApp: ${custPhone}</div><div>Email: ${custEmail}</div>${custDevice ? `<div>Device: ${custDevice}</div>` : ''}</div><div class="card"><h4>Store Info</h4><div>Store: <strong>SPYSTORE BY SAMS</strong></div><div>Method: ${payMethod}</div><div>Support WA: +60189066291</div></div></div><table><thead><tr><th>Item</th><th>Duration</th><th style="text-align:right">Total</th></tr></thead><tbody><tr><td><strong>${txn.app || 'Subscription'}</strong></td><td>${monthsNum} Month(s)</td><td style="text-align:right">${amountStr}</td></tr><tr class="total-row"><td colspan="2">Total Amount</td><td style="text-align:right;color:#b45309">${amountStr}</td></tr></tbody></table><div class="foot"><span>Thank you for purchasing from SPYSTORE BY SAMS.</span><span>100% Warranty throughout active subscription.</span></div></div></body></html>`;
+    const ssresitLink = buildSSResitUrl(txn);
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>Official Receipt ${recNo} — SPYSTORE OFFICIAL OUTLET</title><style>body{font-family:'Plus Jakarta Sans',Arial,sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:28px}.rec-box{max-width:600px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px;box-shadow:0 12px 30px rgba(15,23,42,0.06)}.rec-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0f172a;padding-bottom:16px;margin-bottom:20px}.brand{font-size:20px;font-weight:800}.brand span{color:#ca8a04}.rec-meta{text-align:right;font-size:13px;color:#475569}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;font-size:13px}.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px}.card h4{margin:0 0 6px 0;font-size:11px;text-transform:uppercase;color:#64748b}table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:13px}th,td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left}th{background:#f1f5f9}.total-row td{font-weight:800;font-size:15px;border-top:2px solid #0f172a;border-bottom:none}.portal-bar{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#1e3a8a}.portal-btn{background:#2563eb;color:#fff;text-decoration:none;padding:7px 12px;border-radius:8px;font-weight:700}.foot{font-size:12px;color:#64748b;border-top:1px dashed #cbd5e1;padding-top:14px;display:flex;justify-content:space-between}</style></head><body><div class="rec-box"><div class="rec-head"><div><div class="brand">SPYSTORE <span>OFFICIAL OUTLET</span></div><div style="font-size:12px;color:#475569">Official Digital Subscription Receipt (SSResit)</div></div><div class="rec-meta"><div><strong>Receipt No:</strong> ${recNo}</div><div><strong>Date:</strong> ${dateStr}</div><div><strong>Status:</strong> ${statusLabel}</div></div></div><div class="grid-2"><div class="card"><h4>Issued To</h4><div><strong>${custName}</strong></div><div>WhatsApp: ${custPhone}</div>${custEmail && custEmail !== '-' ? `<div>Email: ${custEmail}</div>` : ''}${custDevice ? `<div>Device: ${custDevice}</div>` : ''}</div><div class="card"><h4>Merchant</h4><div><strong>SPYSTORE OFFICIAL OUTLET</strong></div><div>Payment: ${payMethod}</div><div>WhatsApp: +60189066291</div></div></div><table><thead><tr><th>Subscription Plan</th><th>Duration</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td><strong>${txn.app || 'Subscription'}</strong></td><td>${monthsNum} Month(s)</td><td style="text-align:right">${amountStr}</td></tr><tr class="total-row"><td colspan="2">Total Paid</td><td style="text-align:right;color:#b45309">${amountStr}</td></tr></tbody></table><div class="portal-bar"><span>Synced with <strong>ssresit.vercel.app</strong></span><a href="${ssresitLink}" target="_blank" class="portal-btn">Open in SSResit ↗</a></div><div class="foot"><span>Thank you for purchasing from SPYSTORE OFFICIAL OUTLET.</span><span>100% Warranty throughout active plan.</span></div></div></body></html>`;
   }
 
-  function downloadInvoiceObject(txn) {
+  function downloadSSResitObject(txn) {
     if (!txn) return;
-    const invNo = txn.invoiceNo || txn.ref || generateInvoiceNumber();
-    const blob = new Blob([buildInvoiceHtmlDocument(txn)], { type: 'text/html;charset=utf-8' });
+    const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
+    pushOrderToSSResit(txn);
+    const blob = new Blob([buildSSResitHtmlDocument(txn)], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${invNo}.html`;
+    a.download = `${recNo}.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast(`Invoice ${invNo} downloaded!`);
+    showToast(`Official Receipt ${recNo} downloaded & synced to SSResit!`);
   }
 
-  function downloadInvoiceByIndex(idx) {
+  function openInSSResitPortal(txn) {
+    if (!txn) return;
+    pushOrderToSSResit(txn);
+    window.open(buildSSResitUrl(txn), '_blank', 'noopener');
+  }
+
+  function downloadSSResitByIndex(idx) {
     const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
-    if (list[idx]) downloadInvoiceObject(list[idx]);
+    if (list[idx]) downloadSSResitObject(list[idx]);
   }
 
-  function downloadGlobalTxnInvoice(tIdx) {
+  function openSSResitByIndex(idx) {
+    const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
+    if (list[idx]) openInSSResitPortal(list[idx]);
+  }
+
+  function downloadGlobalTxnSSResit(tIdx) {
     const list = getAllTransactionsDB();
-    if (list[tIdx]) downloadInvoiceObject(list[tIdx]);
+    if (list[tIdx]) downloadSSResitObject(list[tIdx]);
   }
 
-  function downloadLatestInvoice() {
-    if (window._latestReceiptInvoice) { downloadInvoiceObject(window._latestReceiptInvoice); return; }
+  function openGlobalTxnSSResit(tIdx) {
+    const list = getAllTransactionsDB();
+    if (list[tIdx]) openInSSResitPortal(list[tIdx]);
+  }
+
+  function downloadLatestSSResit() {
+    if (window._latestReceiptRecord) { downloadSSResitObject(window._latestReceiptRecord); return; }
     try {
       const p = JSON.parse(localStorage.getItem('spystore_pending_order') || 'null');
       if (p && p.appName) {
-        downloadInvoiceObject({ invoiceNo: p.invoiceNo || generateInvoiceNumber(), app: p.appName, months: p.months || 1, total: p.totalAmount || '0.00', date: new Date().toLocaleDateString('en-MY'), customerName: p.customerName || '-', customerPhone: p.customerPhone || '-', customerEmail: p.customerEmail || '-', customerDevice: p.customerDevice || '-', paymentMethod: 'FPX', status: 'PAID' });
+        downloadSSResitObject({ receiptNo: p.receiptNo || p.invoiceNo || generateReceiptNumber(), app: p.appName, months: p.months || 1, total: p.totalAmount || '0.00', date: new Date().toLocaleDateString('en-MY'), customerName: p.customerName || '-', customerPhone: p.customerPhone || '-', customerEmail: p.customerEmail || '-', customerDevice: p.customerDevice || '-', paymentMethod: 'Online Transfer', status: 'PAID' });
         return;
       }
     } catch (e) {}
     const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
-    if (list[0]) downloadInvoiceObject(list[0]);
-    else showToast('No invoice available yet.');
+    if (list[0]) downloadSSResitObject(list[0]);
+    else showToast('No receipt available yet.');
   }
 
   function renderOrderHistory() {
@@ -3841,21 +3916,24 @@
       container.innerHTML = `<p style="font-size:0.78rem; color:var(--text-muted);">No transaction history saved for this account yet.</p>`;
       return;
     }
-    container.innerHTML = list.map((o, idx) => `
+    container.innerHTML = list.map((o, idx) => {
+      const recCode = o.receiptNo || o.invoiceNo || '';
+      return `
       <div class="order-item" style="cursor:pointer;" onclick="openTransactionDetail(${idx})">
         <div style="display:flex; justify-content:space-between; font-weight:700;">
           <span>${o.app} (${o.months} Mo)</span>
           <span style="color:var(--accent-gold);">RM${o.total}</span>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; color:var(--text-muted); font-size:0.72rem; margin-top:4px; gap:6px; flex-wrap:wrap;">
-          <span>${o.invoiceNo ? `${o.invoiceNo} • ` : ''}${o.date}</span>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <button type="button" onclick="event.stopPropagation(); downloadInvoiceByIndex(${idx});" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">📄 Invois</button>
+          <span>${recCode ? `${recCode} • ` : ''}${o.date}</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button type="button" onclick="event.stopPropagation(); downloadSSResitByIndex(${idx});" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">🧾 Resit</button>
             <span style="color:var(--accent-cyan); font-weight:700;">Details ›</span>
           </div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
   function openTransactionDetail(idx) {
@@ -3865,21 +3943,24 @@
     const user = getCurrentUser();
     const container = document.getElementById('orderHistoryList');
     const refCode = o.ref || o.refno || `SPY-${String(idx + 1).padStart(3, '0')}`;
-    const invNo = o.invoiceNo || refCode;
+    const recNo = o.receiptNo || o.invoiceNo || refCode;
     container.innerHTML = `
       <div class="order-item" style="border-color:var(--accent-cyan); padding:13px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-weight:800; font-size:0.86rem;">🧾 Purchase &amp; Invoice Details</span>
+          <span style="font-weight:800; font-size:0.86rem;">🧾 Order &amp; SSResit Details</span>
           <button type="button" onclick="renderOrderHistory()" style="background:var(--bg-card); border:1px solid var(--border-color); color:var(--accent-cyan); padding:4px 9px; border-radius:8px; font-size:0.7rem; font-weight:700; cursor:pointer;">← Back</button>
         </div>
-        <p style="margin-bottom:4px;"><strong>Invoice No:</strong> <span style="color:var(--accent-cyan); font-weight:800;">${invNo}</span></p>
+        <p style="margin-bottom:4px;"><strong>Receipt No:</strong> <span style="color:var(--accent-cyan); font-weight:800;">${recNo}</span></p>
         <p style="margin-bottom:4px;"><strong>Product:</strong> ${o.app || '-'}</p>
         <p style="margin-bottom:4px;"><strong>Duration:</strong> ${o.months || 1} Month(s)</p>
         <p style="margin-bottom:4px;"><strong>Total Amount:</strong> <span style="color:var(--accent-gold); font-weight:800;">RM${o.total || '0.00'}</span></p>
         <p style="margin-bottom:4px;"><strong>Date:</strong> ${o.date || '-'}</p>
         <p style="margin-bottom:4px;"><strong>Customer:</strong> ${o.customerName || user?.name || '-'}</p>
         <p style="margin-bottom:10px;"><strong>WhatsApp:</strong> ${o.customerPhone || user?.phone || '-'}</p>
-        <button type="button" onclick="downloadInvoiceByIndex(${idx})" style="width:100%; background:rgba(250,204,21,0.16); border:1px solid var(--accent-gold); color:var(--accent-gold); padding:9px 12px; border-radius:10px; font-size:0.78rem; font-weight:800; cursor:pointer;">📄 Download Invoice (${invNo})</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" onclick="downloadSSResitByIndex(${idx})" style="flex:1; background:rgba(250,204,21,0.16); border:1px solid var(--accent-gold); color:var(--accent-gold); padding:9px 12px; border-radius:10px; font-size:0.76rem; font-weight:800; cursor:pointer;">⬇️ Download Receipt</button>
+          <button type="button" onclick="openSSResitByIndex(${idx})" style="flex:1; background:rgba(56,189,248,0.16); border:1px solid var(--accent-cyan); color:var(--accent-cyan); padding:9px 12px; border-radius:10px; font-size:0.76rem; font-weight:800; cursor:pointer;">🔗 Open SSResit ↗</button>
+        </div>
       </div>
     `;
   }
@@ -4216,19 +4297,25 @@
       box.innerHTML = `<div style="font-size:0.76rem; color:var(--text-muted); padding:10px; background:var(--bg-input); border-radius:10px;">No transactions recorded yet.</div>`;
       return;
     }
-    box.innerHTML = allTxns.slice(0, 30).map((t, tIdx) => `
+    box.innerHTML = allTxns.slice(0, 30).map((t, tIdx) => {
+      const recNo = t.receiptNo || t.invoiceNo || t.ref || '-';
+      return `
       <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:9px 11px;">
         <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.82rem;">
           <span>${t.app} (${t.months} Bln)</span>
           <span style="color:var(--accent-gold);">RM${t.total}</span>
         </div>
-        <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:2px;">${t.invoiceNo || t.ref || '-'} • ${t.customerName || '-'} (${t.customerPhone || '-'}) • ${t.date || '-'}</div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-          <span style="font-size:0.66rem; font-weight:700; color:var(--accent-cyan);">${t.status || 'PAID'} • ${t.paymentMethod || 'FPX'}</span>
-          <button type="button" onclick="downloadGlobalTxnInvoice(${tIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">📄 Invois</button>
+        <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:2px;">${recNo} • ${t.customerName || '-'} (${t.customerPhone || '-'}) • ${t.date || '-'}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:6px; flex-wrap:wrap;">
+          <span style="font-size:0.66rem; font-weight:700; color:var(--accent-cyan);">${t.status || 'PAID'} • ${t.paymentMethod || 'Online Transfer'}</span>
+          <div style="display:flex; gap:6px;">
+            <button type="button" onclick="downloadGlobalTxnSSResit(${tIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">⬇️ Resit</button>
+            <button type="button" onclick="openGlobalTxnSSResit(${tIdx})" style="background:rgba(56,189,248,0.14); border:1px solid rgba(56,189,248,0.45); color:var(--accent-cyan); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">🔗 SSResit ↗</button>
+          </div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 
   function refreshVerifyRoleListUI() {
@@ -5267,12 +5354,12 @@
         email: pending.customerEmail || getCurrentUser()?.email || '-'
       });
       const confirmedTxn = recordGlobalTransaction({
-        invoiceNo: pending.invoiceNo || generateInvoiceNumber(),
+        receiptNo: pending.receiptNo || pending.invoiceNo || generateReceiptNumber(),
         ref, app: appName, months, total: totalPaid,
         date: new Date().toLocaleDateString('en-MY'),
         customerName: custName, customerPhone: custPhone,
         customerEmail: pending.customerEmail || getCurrentUser()?.email || '-',
-        customerDevice: custDevice, paymentMethod: 'FPX', status: 'PAID'
+        customerDevice: custDevice, paymentMethod: 'Online Transfer', status: 'PAID'
       });
       sendTelegramBotOrderAlert({
         ref,
@@ -5284,7 +5371,7 @@
         device: custDevice && custDevice !== '-' ? custDevice : '-',
         email: pending.customerEmail || getCurrentUser()?.email || '-'
       });
-      window._latestReceiptInvoice = confirmedTxn;
+      window._latestReceiptRecord = confirmedTxn;
       lastReceiptPlainText = waText;
       document.getElementById('receiptWaLink').href = `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waText)}`;
     }
