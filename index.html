@@ -3827,43 +3827,291 @@
     }
   }
 
-  function buildSSResitHtmlDocument(txn) {
+  function renderSSResitCanvas(txn) {
     const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
     const amountNum = parseFloat(txn.total);
-    const amountStr = !isNaN(amountNum) ? `RM${amountNum.toFixed(2)}` : (txn.total || 'RM0.00');
+    const amountStr = !isNaN(amountNum) ? `RM ${amountNum.toFixed(2)}` : `RM ${String(txn.total || '0.00')}`;
     const monthsNum = Number(txn.months || 1);
     const user = getCurrentUser();
-    const custName = txn.customerName || user?.name || 'Customer';
-    const custPhone = txn.customerPhone || user?.phone || '-';
-    const custEmail = txn.customerEmail || user?.email || '-';
+    const custName = txn.customerName || user?.name || 'Customer Name';
+    const custPhone = txn.customerPhone && txn.customerPhone !== '-' ? txn.customerPhone : '';
+    const custEmail = txn.customerEmail && txn.customerEmail !== '-' ? txn.customerEmail : '';
     const custDevice = txn.customerDevice && txn.customerDevice !== '-' ? txn.customerDevice : '';
     const payMethod = txn.paymentMethod || 'Online Transfer';
-    const statusLabel = txn.status || 'PAID';
     const dateStr = txn.date || new Date().toLocaleDateString('en-MY');
-    const ssresitLink = buildSSResitUrl(txn);
-    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><title>Official Receipt ${recNo} — SPYSTORE OFFICIAL OUTLET</title><style>body{font-family:'Plus Jakarta Sans',Arial,sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:28px}.rec-box{max-width:600px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px;box-shadow:0 12px 30px rgba(15,23,42,0.06)}.rec-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0f172a;padding-bottom:16px;margin-bottom:20px}.brand{font-size:20px;font-weight:800}.brand span{color:#ca8a04}.rec-meta{text-align:right;font-size:13px;color:#475569}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;font-size:13px}.card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px}.card h4{margin:0 0 6px 0;font-size:11px;text-transform:uppercase;color:#64748b}table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:13px}th,td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left}th{background:#f1f5f9}.total-row td{font-weight:800;font-size:15px;border-top:2px solid #0f172a;border-bottom:none}.portal-bar{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#1e3a8a}.portal-btn{background:#2563eb;color:#fff;text-decoration:none;padding:7px 12px;border-radius:8px;font-weight:700}.foot{font-size:12px;color:#64748b;border-top:1px dashed #cbd5e1;padding-top:14px;display:flex;justify-content:space-between}</style></head><body><div class="rec-box"><div class="rec-head"><div><div class="brand">SPYSTORE <span>OFFICIAL OUTLET</span></div><div style="font-size:12px;color:#475569">Official Digital Subscription Receipt (SSResit)</div></div><div class="rec-meta"><div><strong>Receipt No:</strong> ${recNo}</div><div><strong>Date:</strong> ${dateStr}</div><div><strong>Status:</strong> ${statusLabel}</div></div></div><div class="grid-2"><div class="card"><h4>Issued To</h4><div><strong>${custName}</strong></div><div>WhatsApp: ${custPhone}</div>${custEmail && custEmail !== '-' ? `<div>Email: ${custEmail}</div>` : ''}${custDevice ? `<div>Device: ${custDevice}</div>` : ''}</div><div class="card"><h4>Merchant</h4><div><strong>SPYSTORE OFFICIAL OUTLET</strong></div><div>Payment: ${payMethod}</div><div>WhatsApp: +60189066291</div></div></div><table><thead><tr><th>Subscription Plan</th><th>Duration</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td><strong>${txn.app || 'Subscription'}</strong></td><td>${monthsNum} Month(s)</td><td style="text-align:right">${amountStr}</td></tr><tr class="total-row"><td colspan="2">Total Paid</td><td style="text-align:right;color:#b45309">${amountStr}</td></tr></tbody></table><div class="portal-bar"><span>Synced with <strong>ssresit.vercel.app</strong></span><a href="${ssresitLink}" target="_blank" class="portal-btn">Open in SSResit ↗</a></div><div class="foot"><span>Thank you for purchasing from SPYSTORE OFFICIAL OUTLET.</span><span>100% Warranty throughout active plan.</span></div></div></body></html>`;
+    const prodName = txn.app || 'Digital Subscription';
+    const planLabel = `${monthsNum} Month${monthsNum > 1 ? 's' : ''}`;
+
+    const W = 880;
+    const H = 1120;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    // White receipt card background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    // Top accent bar (blue -> indigo -> amber)
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, '#2563eb');
+    grad.addColorStop(0.55, '#4f46e5');
+    grad.addColorStop(1, '#f59e0b');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, 16);
+
+    const padX = 56;
+    let y = 64;
+
+    // Company badge box ("SS")
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.roundRect(padX, y, 108, 108, 24);
+    ctx.fill();
+
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = '800 40px "Space Grotesk", "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SS', padX + 54, y + 56);
+
+    // Company title & contact
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '800 32px "Space Grotesk", "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('SPYSTORE OFFICIAL OUTLET', padX + 132, y + 44);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '600 22px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Contact Number: +60189066291', padX + 132, y + 84);
+
+    // PAID pill & OFFICIAL RECEIPT label on right
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#ecfdf5';
+    ctx.strokeStyle = '#a7f3d0';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(W - padX - 116, y, 116, 44, 12);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#047857';
+    ctx.font = '800 20px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('PAID', W - padX - 58, y + 29);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('OFFICIAL RECEIPT', W - padX, y + 76);
+
+    y += 142;
+
+    // Divider line
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padX, y);
+    ctx.lineTo(W - padX, y);
+    ctx.stroke();
+
+    y += 42;
+
+    // Metadata grid: Billed To & Receipt No
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('BILLED TO', padX, y);
+
+    ctx.textAlign = 'right';
+    ctx.fillText('RECEIPT NO', W - padX, y);
+
+    y += 32;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '700 26px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(String(custName).slice(0, 28), padX, y);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#1d4ed8';
+    ctx.font = '700 22px "JetBrains Mono", monospace';
+    ctx.fillText(String(recNo), W - padX, y);
+
+    y += 46;
+
+    // Metadata grid: Date Issued & Payment Method
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('DATE ISSUED', padX, y);
+
+    ctx.textAlign = 'right';
+    ctx.fillText('PAYMENT METHOD', W - padX, y);
+
+    y += 30;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#334155';
+    ctx.font = '600 22px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(String(dateStr), padX, y);
+
+    ctx.textAlign = 'right';
+    ctx.fillText(String(payMethod), W - padX, y);
+
+    y += 38;
+
+    // Dashed divider
+    ctx.save();
+    ctx.setLineDash([8, 8]);
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padX, y);
+    ctx.lineTo(W - padX, y);
+    ctx.stroke();
+    ctx.restore();
+
+    y += 40;
+
+    // Items header
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('DESCRIPTION', padX, y);
+
+    ctx.textAlign = 'right';
+    ctx.fillText('AMOUNT (MYR)', W - padX, y);
+
+    y += 18;
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.beginPath();
+    ctx.moveTo(padX, y);
+    ctx.lineTo(W - padX, y);
+    ctx.stroke();
+
+    y += 42;
+
+    // Item row
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(String(prodName), padX, y);
+
+    ctx.textAlign = 'right';
+    ctx.font = '700 24px "JetBrains Mono", monospace';
+    ctx.fillText(amountStr, W - padX, y);
+
+    y += 30;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#64748b';
+    ctx.font = '500 20px "Plus Jakarta Sans", sans-serif';
+    const subMeta = `${planLabel} • 1 × ${amountStr}`;
+    ctx.fillText(subMeta, padX, y);
+
+    y += 44;
+    ctx.strokeStyle = '#f1f5f9';
+    ctx.beginPath();
+    ctx.moveTo(padX, y);
+    ctx.lineTo(W - padX, y);
+    ctx.stroke();
+
+    // Totals section
+    y += 42;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#64748b';
+    ctx.font = '600 21px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Subtotal', padX, y);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#334155';
+    ctx.font = '600 21px "JetBrains Mono", monospace';
+    ctx.fillText(amountStr, W - padX, y);
+
+    y += 28;
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.beginPath();
+    ctx.moveTo(padX, y);
+    ctx.lineTo(W - padX, y);
+    ctx.stroke();
+
+    y += 46;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('TOTAL PAID', padX, y);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#1d4ed8';
+    ctx.font = '800 32px "JetBrains Mono", monospace';
+    ctx.fillText(amountStr, W - padX, y);
+
+    // Optional buyer / device details box
+    const extraLines = [];
+    if (custPhone) extraLines.push(`WhatsApp: ${custPhone}`);
+    if (custEmail) extraLines.push(`Email: ${custEmail}`);
+    if (custDevice) extraLines.push(`Device: ${custDevice}`);
+
+    if (extraLines.length) {
+      y += 44;
+      const boxH = 44 + (extraLines.length * 30);
+      ctx.fillStyle = '#f8fafc';
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(padX, y, W - padX * 2, boxH, 16);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '700 15px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('ORDER DETAILS', padX + 22, y + 30);
+
+      ctx.fillStyle = '#475569';
+      ctx.font = '500 19px "Plus Jakarta Sans", sans-serif';
+      extraLines.forEach((line, i) => {
+        ctx.fillText(line, padX + 22, y + 60 + (i * 30));
+      });
+      y += boxH;
+    }
+
+    // Footer
+    const footY = Math.max(y + 64, H - 72);
+    ctx.strokeStyle = '#f1f5f9';
+    ctx.beginPath();
+    ctx.moveTo(padX, footY - 28);
+    ctx.lineTo(W - padX, footY - 28);
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#64748b';
+    ctx.font = '600 20px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Thank you for your purchase!', W / 2, footY + 6);
+
+    return canvas;
   }
 
   function downloadSSResitObject(txn) {
     if (!txn) return;
     const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
     pushOrderToSSResit(txn);
-    const blob = new Blob([buildSSResitHtmlDocument(txn)], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${recNo}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast(`Official Receipt ${recNo} downloaded & synced to SSResit!`);
-  }
 
-  function openInSSResitPortal(txn) {
-    if (!txn) return;
-    pushOrderToSSResit(txn);
-    window.open(buildSSResitUrl(txn), '_blank', 'noopener');
+    const canvas = renderSSResitCanvas(txn);
+    if (canvas && canvas.toDataURL) {
+      try {
+        const dataUrl = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = `${recNo}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast(`Receipt ${recNo}.png downloaded!`);
+        return;
+      } catch (e) {}
+    }
+
+    showToast(`Receipt ${recNo} synced to SSResit.`);
   }
 
   function downloadSSResitByIndex(idx) {
@@ -3871,19 +4119,9 @@
     if (list[idx]) downloadSSResitObject(list[idx]);
   }
 
-  function openSSResitByIndex(idx) {
-    const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
-    if (list[idx]) openInSSResitPortal(list[idx]);
-  }
-
   function downloadGlobalTxnSSResit(tIdx) {
     const list = getAllTransactionsDB();
     if (list[tIdx]) downloadSSResitObject(list[tIdx]);
-  }
-
-  function openGlobalTxnSSResit(tIdx) {
-    const list = getAllTransactionsDB();
-    if (list[tIdx]) openInSSResitPortal(list[tIdx]);
   }
 
   function downloadLatestSSResit() {
@@ -3959,7 +4197,7 @@
         <p style="margin-bottom:10px;"><strong>WhatsApp:</strong> ${o.customerPhone || user?.phone || '-'}</p>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button type="button" onclick="downloadSSResitByIndex(${idx})" style="flex:1; background:rgba(250,204,21,0.16); border:1px solid var(--accent-gold); color:var(--accent-gold); padding:9px 12px; border-radius:10px; font-size:0.76rem; font-weight:800; cursor:pointer;">⬇️ Download Receipt</button>
-          <button type="button" onclick="openSSResitByIndex(${idx})" style="flex:1; background:rgba(56,189,248,0.16); border:1px solid var(--accent-cyan); color:var(--accent-cyan); padding:9px 12px; border-radius:10px; font-size:0.76rem; font-weight:800; cursor:pointer;">🔗 Open SSResit ↗</button>
+          
         </div>
       </div>
     `;
@@ -4310,7 +4548,7 @@
           <span style="font-size:0.66rem; font-weight:700; color:var(--accent-cyan);">${t.status || 'PAID'} • ${t.paymentMethod || 'Online Transfer'}</span>
           <div style="display:flex; gap:6px;">
             <button type="button" onclick="downloadGlobalTxnSSResit(${tIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">⬇️ Resit</button>
-            <button type="button" onclick="openGlobalTxnSSResit(${tIdx})" style="background:rgba(56,189,248,0.14); border:1px solid rgba(56,189,248,0.45); color:var(--accent-cyan); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">🔗 SSResit ↗</button>
+            
           </div>
         </div>
       </div>
