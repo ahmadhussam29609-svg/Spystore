@@ -4186,10 +4186,32 @@
       return;
     }
 
-    // 4. Send order detail to SSResit (`https://ssresit.vercel.app`) to generate the receipt & sync back
-    const ssresitGenUrl = `${buildSSResitUrl(txn)}&autodownload=1`;
-    window.open(ssresitGenUrl, '_blank', 'noopener');
-    showToast(`Sent ${recNo} to SSResit to generate receipt...`);
+    // 4. Background system sync with SSResit without navigating user away from Spystore
+    try {
+      const ssresitSyncUrl = `${buildSSResitUrl(txn)}&background=1`;
+      fetch(ssresitSyncUrl, { mode: 'no-cors', keepalive: true }).catch(() => {});
+    } catch (e) {}
+
+    // Generate official SSResit receipt PNG and download immediately on Spystore
+    const canvas = renderSSResitCanvas(txn);
+    if (canvas && canvas.toDataURL) {
+      try {
+        const generatedPng = canvas.toDataURL('image/png');
+        attachGeneratedReceiptToTransaction(recNo, generatedPng);
+        await pushOrderToSSResit(txn, generatedPng);
+
+        const a = document.createElement('a');
+        a.href = generatedPng;
+        a.download = `${recNo}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast(`Receipt ${recNo}.png downloaded!`);
+        return;
+      } catch (e) {}
+    }
+
+    showToast(`Receipt ${recNo} synced with SSResit.`);
   }
 
   function downloadSSResitByIndex(idx) {
