@@ -2703,76 +2703,76 @@
 
       <!-- Clean Receipt Card (2-Line Header: SPYSTORE / OFFICIAL OUTLET, No-BG Logo) -->
       <div style="display:flex; justify-content:center; padding:4px 0;">
-        <div id="spystore-ssresit-capture-area" style="width:520px; max-width:100%; background:#ffffff; color:#0f172a; border-radius:16px; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.45); font-family:'Plus Jakarta Sans',sans-serif;">
+        <div id="spystore-ssresit-capture-area" style="width:520px; max-width:100%; background:#ffffff; color:#0f172a; border-radius:16px; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.45); font-family:'Plus Jakarta Sans',sans-serif; font-variant-numeric:tabular-nums;">
           <!-- Top Gradient Stripe -->
           <div style="height:6px; background:linear-gradient(90deg,#2563eb 0%,#4f46e5 55%,#eab308 100%);"></div>
 
-          <div style="padding:20px 24px 22px 24px;">
+          <div style="padding:20px 22px 22px 22px;">
             <!-- Header Row -->
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:16px;">
-              <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
-                <div id="ssrReceiptLogoWrap" style="width:56px; height:56px; background:transparent; border:none; box-shadow:none; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding-bottom:16px;">
+              <div style="display:flex; align-items:center; gap:11px; flex:1; min-width:0;">
+                <div id="ssrReceiptLogoWrap" style="width:52px; height:52px; background:transparent; border:none; box-shadow:none; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
                   <img id="ssrReceiptLogoImg" src="receipt-logo.png" alt="SPYSTORE" style="width:100%; height:100%; object-fit:contain; background:transparent; display:block;" onerror="if(this.dataset.fb !== '1'){ this.dataset.fb='1'; this.src='logo.png'; } else { this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex'; }" />
-                  <span style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-weight:800; font-size:1.05rem; color:#0f172a; background:transparent;">SS</span>
+                  <span style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-weight:800; font-size:1rem; color:#0f172a; background:transparent;">SS</span>
                 </div>
                 <div style="min-width:0;">
-                  <div style="font-weight:800; font-size:1.02rem; line-height:1.18; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em; white-space:nowrap;">SPYSTORE</div>
-                  <div style="font-weight:800; font-size:0.94rem; line-height:1.22; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em; margin-top:2px; white-space:nowrap;">OFFICIAL OUTLET</div>
+                  <div style="font-weight:800; font-size:0.98rem; line-height:1.15; color:#0f172a; text-transform:uppercase; letter-spacing:0.01em;">SPYSTORE</div>
+                  <div style="font-weight:800; font-size:0.78rem; line-height:1.25; color:#0f172a; text-transform:uppercase; letter-spacing:0.01em; margin-top:2px;">OFFICIAL OUTLET</div>
                 </div>
               </div>
 
               <div style="text-align:right; flex-shrink:0;">
-                <span style="display:inline-block; padding:3px 10px; border-radius:6px; background:#dcfce7; border:1px solid #86efac; color:#15803d; font-size:0.68rem; font-weight:800; letter-spacing:0.05em;">PAID</span>
-                <div style="font-size:0.64rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase; margin-top:6px;">OFFICIAL RECEIPT</div>
+                <span style="display:inline-block; padding:3px 10px; border-radius:6px; background:#dcfce7; border:1px solid #86efac; color:#15803d; font-size:0.66rem; font-weight:800; letter-spacing:0.05em;">PAID</span>
+                <div style="font-size:0.62rem; font-weight:700; color:#94a3b8; letter-spacing:0.06em; text-transform:uppercase; margin-top:6px; white-space:nowrap;">OFFICIAL RECEIPT</div>
               </div>
             </div>
 
             <!-- Dashed Metadata Block -->
             <div style="border-top:1px dashed #cbd5e1; border-bottom:1px dashed #cbd5e1; padding:14px 0; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
               <div>
-                <div style="font-size:0.62rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase;">BILLED TO</div>
-                <div id="ssrPrevBuyer" style="font-weight:800; font-size:0.94rem; color:#0f172a; margin-top:3px; word-break:break-word;">-</div>
+                <div style="font-size:0.625rem; font-weight:700; color:#94a3b8; letter-spacing:0.07em; text-transform:uppercase;">BILLED TO</div>
+                <div id="ssrPrevBuyer" style="font-weight:800; font-size:0.92rem; color:#0f172a; margin-top:3px; word-break:break-word;">-</div>
               </div>
               <div style="text-align:right;">
-                <div style="font-size:0.62rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase;">ORDER ID</div>
-                <div id="ssrPrevOrderId" style="font-family:'Space Grotesk',monospace; font-weight:700; font-size:0.78rem; color:#1d4ed8; margin-top:4px; word-break:break-all;">-</div>
+                <div style="font-size:0.625rem; font-weight:700; color:#94a3b8; letter-spacing:0.07em; text-transform:uppercase;">ORDER ID</div>
+                <div id="ssrPrevOrderId" style="font-weight:700; font-size:0.78rem; color:#1d4ed8; margin-top:4px; word-break:break-all;">-</div>
               </div>
               <div>
-                <div style="font-size:0.62rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase;">DATE ISSUED</div>
-                <div id="ssrPrevDate" style="font-weight:600; font-size:0.82rem; color:#334155; margin-top:3px;">-</div>
+                <div style="font-size:0.625rem; font-weight:700; color:#94a3b8; letter-spacing:0.07em; text-transform:uppercase;">DATE ISSUED</div>
+                <div id="ssrPrevDate" style="font-weight:600; font-size:0.8rem; color:#334155; margin-top:3px;">-</div>
               </div>
               <div style="text-align:right;">
-                <div style="font-size:0.62rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase;">PAYMENT METHOD</div>
-                <div id="ssrPrevMethod" style="font-weight:600; font-size:0.82rem; color:#334155; margin-top:3px;">Online Transfer</div>
+                <div style="font-size:0.625rem; font-weight:700; color:#94a3b8; letter-spacing:0.07em; text-transform:uppercase;">PAYMENT METHOD</div>
+                <div id="ssrPrevMethod" style="font-weight:600; font-size:0.8rem; color:#334155; margin-top:3px;">Online Transfer</div>
               </div>
             </div>
 
             <!-- Items Block -->
             <div style="padding:14px 0 12px 0;">
-              <div style="display:flex; justify-content:space-between; font-size:0.62rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase; padding-bottom:10px; border-bottom:1px solid #e2e8f0;">
+              <div style="display:flex; justify-content:space-between; font-size:0.625rem; font-weight:700; color:#94a3b8; letter-spacing:0.07em; text-transform:uppercase; padding-bottom:10px; border-bottom:1px solid #e2e8f0;">
                 <span>DESCRIPTION</span>
                 <span>AMOUNT (MYR)</span>
               </div>
 
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding-top:12px;">
                 <div style="min-width:0;">
-                  <div id="ssrPrevProduct" style="font-weight:800; font-size:0.88rem; color:#0f172a; line-height:1.3;">-</div>
-                  <div id="ssrPrevSubLine" style="font-size:0.72rem; color:#64748b; margin-top:2px;">1 Month • 1 × RM 0.00</div>
+                  <div id="ssrPrevProduct" style="font-weight:800; font-size:0.86rem; color:#0f172a; line-height:1.3;">-</div>
+                  <div id="ssrPrevSubLine" style="font-size:0.72rem; font-weight:500; color:#64748b; margin-top:2px;">1 Month • 1 × RM 0.00</div>
                 </div>
-                <div id="ssrPrevLineAmt" style="font-family:'Space Grotesk',monospace; font-weight:800; font-size:0.88rem; color:#0f172a; white-space:nowrap;">RM 0.00</div>
+                <div id="ssrPrevLineAmt" style="font-weight:800; font-size:0.86rem; color:#0f172a; white-space:nowrap;">RM 0.00</div>
               </div>
             </div>
 
             <!-- Subtotal & Total Paid -->
             <div style="border-top:1px solid #e2e8f0; padding-top:10px;">
               <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:#64748b; padding-bottom:12px;">
-                <span>Subtotal</span>
-                <span id="ssrPrevSubtotal" style="font-family:'Space Grotesk',monospace; font-weight:700; color:#334155;">RM 0.00</span>
+                <span style="font-weight:500;">Subtotal</span>
+                <span id="ssrPrevSubtotal" style="font-weight:700; color:#334155;">RM 0.00</span>
               </div>
 
               <div style="border-top:2px solid #0f172a; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight:800; font-size:0.82rem; color:#0f172a; letter-spacing:0.03em; text-transform:uppercase;">TOTAL PAID</span>
-                <span id="ssrPrevTotal" style="font-family:'Space Grotesk',monospace; font-weight:800; font-size:1.18rem; color:#1d4ed8;">RM 0.00</span>
+                <span style="font-weight:800; font-size:0.82rem; color:#0f172a; letter-spacing:0.02em; text-transform:uppercase;">TOTAL PAID</span>
+                <span id="ssrPrevTotal" style="font-weight:800; font-size:1.12rem; color:#1d4ed8;">RM 0.00</span>
               </div>
             </div>
 
@@ -2781,8 +2781,7 @@
               Thank you for your purchase!
             </div>
           </div>
-        </div>
-      </div>
+        </div>      </div>
     </div>
   </div>
 
