@@ -4207,16 +4207,12 @@
       maxWidth: area.style.maxWidth
     };
     try {
-      area.style.width = '540px';
-      area.style.minWidth = '540px';
-      area.style.maxWidth = '540px';
+      area.style.width = '480px';
+      area.style.minWidth = '480px';
+      area.style.maxWidth = '480px';
       await waitForReceiptImagesReady(area);
-      const rect = area.getBoundingClientRect();
       const canvas = await html2canvas(area, {
         scale: 2,
-        width: 540,
-        height: Math.max(1, Math.round(rect.height || area.scrollHeight || 600)),
-        windowWidth: 1024,
         backgroundColor: '#ffffff',
         useCORS: true,
         logging: false
