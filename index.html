@@ -2636,24 +2636,24 @@
 
   <!-- Integrated SSResit Modal (Owner & Admin Only) -->
   <div class="modal-backdrop" id="ownerSSResitModal" onclick="if(event.target===this) closeOwnerSSResitModal()">
-    <div class="modal-card" style="max-width:500px;">
+    <div class="modal-card" style="max-width:560px;">
       <div class="modal-top">
         <div>
           <div style="font-size:0.62rem; font-weight:800; color:var(--accent-gold); letter-spacing:0.07em; text-transform:uppercase;">SPYSTORE INTERNAL MODULE • OWNER / ADMIN</div>
-          <h3 style="font-size:1.05rem;">SSResit • Preview &amp; Export</h3>
+          <h3 style="font-size:1.05rem;">SSResit • Manual Receipt Tools</h3>
         </div>
         <button type="button" class="close-modal" onclick="closeOwnerSSResitModal()">✕</button>
       </div>
 
-      <!-- Action Toolbar Matching Screenshot -->
+      <!-- Action Toolbar for Manual Receipt Editing & Export -->
       <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:space-between; align-items:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:8px; margin-bottom:10px;">
         <button type="button" onclick="copyIntegratedSSResitImage()" style="background:#1e293b; color:#f8fafc; border:1px solid #334155; padding:7px 11px; border-radius:9px; font-size:0.74rem; font-weight:700; cursor:pointer;">📋 Copy</button>
         <button type="button" onclick="downloadIntegratedSSResitPng()" style="background:#2563eb; color:#ffffff; border:none; padding:7px 13px; border-radius:9px; font-size:0.74rem; font-weight:800; cursor:pointer;">⬇ PNG</button>
         <button type="button" onclick="printIntegratedSSResit()" style="background:#1e293b; color:#f8fafc; border:1px solid #334155; padding:7px 11px; border-radius:9px; font-size:0.74rem; font-weight:700; cursor:pointer;">🖨️ PDF</button>
-        <button type="button" onclick="toggleSSResitEditInputs()" id="ssrToggleEditBtn" style="background:rgba(250,204,21,0.14); color:var(--accent-gold); border:1px solid rgba(250,204,21,0.4); padding:7px 10px; border-radius:9px; font-size:0.72rem; font-weight:700; cursor:pointer;">✏️ Edit</button>
+        <button type="button" onclick="toggleSSResitEditInputs()" id="ssrToggleEditBtn" style="background:rgba(250,204,21,0.14); color:var(--accent-gold); border:1px solid rgba(250,204,21,0.4); padding:7px 10px; border-radius:9px; font-size:0.72rem; font-weight:700; cursor:pointer;">✏️ Edit Manual</button>
       </div>
 
-      <!-- Editable Order Fields (Collapsible so receipt preview shines cleanly) -->
+      <!-- Editable Manual Order Fields -->
       <div id="ssrEditFieldsBox" style="display:none; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px; margin-bottom:12px;">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
           <div class="form-group" style="margin-bottom:0;">
@@ -2667,7 +2667,7 @@
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
           <div class="form-group" style="margin-bottom:0;">
-            <label>Billed To *</label>
+            <label>Billed To (Customer Name) *</label>
             <input type="text" class="form-control" id="ssrBuyerInput" oninput="renderIntegratedSSResitPreview()" />
           </div>
           <div class="form-group" style="margin-bottom:0;">
@@ -2691,31 +2691,28 @@
         </div>
       </div>
 
-      <!-- Exact Receipt Card Matching 1001792815.jpg -->
+      <!-- Clean Wider Receipt Card (No Contact Number, Clean Single-Line Store Name) -->
       <div style="display:flex; justify-content:center; padding:4px 0;">
-        <div id="spystore-ssresit-capture-area" style="width:440px; max-width:100%; background:#ffffff; color:#0f172a; border-radius:16px; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.45); font-family:'Plus Jakarta Sans',sans-serif;">
+        <div id="spystore-ssresit-capture-area" style="width:520px; max-width:100%; background:#ffffff; color:#0f172a; border-radius:16px; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.45); font-family:'Plus Jakarta Sans',sans-serif;">
           <!-- Top Gradient Stripe -->
           <div style="height:6px; background:linear-gradient(90deg,#2563eb 0%,#4f46e5 55%,#eab308 100%);"></div>
 
-          <div style="padding:20px 22px 22px 22px;">
+          <div style="padding:20px 24px 22px 24px;">
             <!-- Header Row -->
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding-bottom:16px;">
-              <div style="display:flex; align-items:flex-start; gap:12px; min-width:0;">
-                <div style="width:54px; height:54px; border-radius:14px; background:#090d16; border:1px solid #e2e8f0; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:16px;">
+              <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+                <div style="width:52px; height:52px; border-radius:14px; background:#090d16; border:1px solid #e2e8f0; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
                   <img src="logo.png" alt="SPYSTORE OFFICIAL OUTLET" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
                   <span style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-weight:800; font-size:1rem; color:#facc15;">SS</span>
                 </div>
                 <div style="min-width:0;">
-                  <div style="font-weight:800; font-size:0.95rem; line-height:1.18; color:#0f172a; text-transform:uppercase; letter-spacing:0.01em;">SPYSTORE</div>
-                  <div style="font-weight:800; font-size:0.95rem; line-height:1.18; color:#0f172a; text-transform:uppercase; letter-spacing:0.01em;">OFFICIAL OUTLET</div>
-                  <div style="font-size:0.74rem; line-height:1.35; color:#64748b; margin-top:4px; font-weight:500;">Contact Number:</div>
-                  <div style="font-size:0.76rem; line-height:1.3; color:#64748b; font-weight:600;">60189066291</div>
+                  <div style="font-weight:800; font-size:0.95rem; line-height:1.25; color:#0f172a; text-transform:uppercase; letter-spacing:0.01em; white-space:nowrap;">SPYSTORE OFFICIAL OUTLET</div>
                 </div>
               </div>
 
               <div style="text-align:right; flex-shrink:0;">
                 <span style="display:inline-block; padding:3px 10px; border-radius:6px; background:#dcfce7; border:1px solid #86efac; color:#15803d; font-size:0.68rem; font-weight:800; letter-spacing:0.05em;">PAID</span>
-                <div style="font-size:0.64rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase; margin-top:7px;">OFFICIAL RECEIPT</div>
+                <div style="font-size:0.64rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase; margin-top:6px;">OFFICIAL RECEIPT</div>
               </div>
             </div>
 
@@ -2723,15 +2720,15 @@
             <div style="border-top:1px dashed #cbd5e1; border-bottom:1px dashed #cbd5e1; padding:14px 0; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
               <div>
                 <div style="font-size:0.62rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase;">BILLED TO</div>
-                <div id="ssrPrevBuyer" style="font-weight:800; font-size:0.92rem; color:#0f172a; margin-top:3px; word-break:break-word;">Customer</div>
+                <div id="ssrPrevBuyer" style="font-weight:800; font-size:0.94rem; color:#0f172a; margin-top:3px; word-break:break-word;">-</div>
               </div>
               <div style="text-align:right;">
                 <div style="font-size:0.62rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase;">ORDER ID</div>
-                <div id="ssrPrevOrderId" style="font-family:'Space Grotesk',monospace; font-weight:700; font-size:0.76rem; color:#1d4ed8; margin-top:4px; word-break:break-all;">RES-SPY-261125-6556</div>
+                <div id="ssrPrevOrderId" style="font-family:'Space Grotesk',monospace; font-weight:700; font-size:0.78rem; color:#1d4ed8; margin-top:4px; word-break:break-all;">-</div>
               </div>
               <div>
                 <div style="font-size:0.62rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase;">DATE ISSUED</div>
-                <div id="ssrPrevDate" style="font-weight:600; font-size:0.82rem; color:#334155; margin-top:3px;">25 Nov 2026</div>
+                <div id="ssrPrevDate" style="font-weight:600; font-size:0.82rem; color:#334155; margin-top:3px;">-</div>
               </div>
               <div style="text-align:right;">
                 <div style="font-size:0.62rem; font-weight:700; color:#94a3b8; letter-spacing:0.08em; text-transform:uppercase;">PAYMENT METHOD</div>
@@ -2748,10 +2745,10 @@
 
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding-top:12px;">
                 <div style="min-width:0;">
-                  <div id="ssrPrevProduct" style="font-weight:800; font-size:0.86rem; color:#0f172a; line-height:1.3;">Netflix Premium</div>
-                  <div id="ssrPrevSubLine" style="font-size:0.72rem; color:#64748b; margin-top:2px;">1 Month • 1 × RM 18.00</div>
+                  <div id="ssrPrevProduct" style="font-weight:800; font-size:0.88rem; color:#0f172a; line-height:1.3;">-</div>
+                  <div id="ssrPrevSubLine" style="font-size:0.72rem; color:#64748b; margin-top:2px;">1 Month • 1 × RM 0.00</div>
                 </div>
-                <div id="ssrPrevLineAmt" style="font-family:'Space Grotesk',monospace; font-weight:800; font-size:0.86rem; color:#0f172a; white-space:nowrap;">RM 18.00</div>
+                <div id="ssrPrevLineAmt" style="font-family:'Space Grotesk',monospace; font-weight:800; font-size:0.88rem; color:#0f172a; white-space:nowrap;">RM 0.00</div>
               </div>
             </div>
 
@@ -2759,12 +2756,12 @@
             <div style="border-top:1px solid #e2e8f0; padding-top:10px;">
               <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:#64748b; padding-bottom:12px;">
                 <span>Subtotal</span>
-                <span id="ssrPrevSubtotal" style="font-family:'Space Grotesk',monospace; font-weight:700; color:#334155;">RM 18.00</span>
+                <span id="ssrPrevSubtotal" style="font-family:'Space Grotesk',monospace; font-weight:700; color:#334155;">RM 0.00</span>
               </div>
 
               <div style="border-top:2px solid #0f172a; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:800; font-size:0.82rem; color:#0f172a; letter-spacing:0.03em; text-transform:uppercase;">TOTAL PAID</span>
-                <span id="ssrPrevTotal" style="font-family:'Space Grotesk',monospace; font-weight:800; font-size:1.18rem; color:#1d4ed8;">RM 18.00</span>
+                <span id="ssrPrevTotal" style="font-family:'Space Grotesk',monospace; font-weight:800; font-size:1.18rem; color:#1d4ed8;">RM 0.00</span>
               </div>
             </div>
 
@@ -4066,12 +4063,39 @@
     return s;
   }
 
+  function populateSSResitInputsFromTxn(txn = null) {
+    const recNo = txn?.receiptNo || txn?.invoiceNo || txn?.ref || generateReceiptNumber();
+    const dt = txn?.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    const rawBuyer = String(txn?.customerName || '').trim();
+    const buyer = (rawBuyer && rawBuyer !== '-') ? rawBuyer : (String(getCurrentUser()?.name || '').trim() || '-');
+    const method = txn?.paymentMethod || 'Online Transfer';
+    let rawApp = txn?.app || 'Subscription';
+    let planLabel = `${txn?.months || 1} Month`;
+    const matchParen = rawApp.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+    if (matchParen) {
+      rawApp = matchParen[1].trim();
+      planLabel = matchParen[2].trim();
+    }
+    const amt = parseFloat(txn?.total || '0') || 0;
+
+    if (document.getElementById('ssrReceiptNoInput')) document.getElementById('ssrReceiptNoInput').value = recNo;
+    if (document.getElementById('ssrDateInput')) document.getElementById('ssrDateInput').value = dt;
+    if (document.getElementById('ssrBuyerInput')) document.getElementById('ssrBuyerInput').value = buyer;
+    if (document.getElementById('ssrMethodInput')) document.getElementById('ssrMethodInput').value = method;
+    if (document.getElementById('ssrProductInput')) document.getElementById('ssrProductInput').value = rawApp;
+    if (document.getElementById('ssrPlanInput')) document.getElementById('ssrPlanInput').value = planLabel;
+    if (document.getElementById('ssrAmountInput')) document.getElementById('ssrAmountInput').value = amt > 0 ? amt.toFixed(2) : '0.00';
+
+    renderIntegratedSSResitPreview();
+    return recNo;
+  }
+
   function renderIntegratedSSResitPreview() {
-    const recNo = (document.getElementById('ssrReceiptNoInput')?.value || '').trim() || 'RES-SPY-261125-6556';
+    const recNo = (document.getElementById('ssrReceiptNoInput')?.value || '').trim() || '-';
     const dt = formatReceiptDateEn((document.getElementById('ssrDateInput')?.value || '').trim());
-    const buyer = (document.getElementById('ssrBuyerInput')?.value || '').trim() || 'Customer';
+    const buyer = (document.getElementById('ssrBuyerInput')?.value || '').trim() || '-';
     const method = (document.getElementById('ssrMethodInput')?.value || '').trim() || 'Online Transfer';
-    const prod = (document.getElementById('ssrProductInput')?.value || '').trim() || 'Netflix Premium';
+    const prod = (document.getElementById('ssrProductInput')?.value || '').trim() || '-';
     const plan = (document.getElementById('ssrPlanInput')?.value || '').trim() || '1 Month';
     const amtNum = parseFloat(document.getElementById('ssrAmountInput')?.value || '0') || 0;
     const amtStr = `RM ${amtNum.toFixed(2)}`;
@@ -4092,28 +4116,7 @@
       showToast('Akses SSResit hanya untuk Owner / Admin.');
       return;
     }
-    const recNo = txn?.receiptNo || txn?.invoiceNo || txn?.ref || generateReceiptNumber();
-    const dt = txn?.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    const buyer = (txn?.customerName && txn.customerName !== '-') ? txn.customerName : 'Customer';
-    const method = txn?.paymentMethod || 'Online Transfer';
-    let rawApp = txn?.app || 'Netflix Premium';
-    let planLabel = `${txn?.months || 1} Month`;
-    const matchParen = rawApp.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
-    if (matchParen) {
-      rawApp = matchParen[1].trim();
-      planLabel = matchParen[2].trim();
-    }
-    const amt = parseFloat(txn?.total || '0') || 0;
-
-    if (document.getElementById('ssrReceiptNoInput')) document.getElementById('ssrReceiptNoInput').value = recNo;
-    if (document.getElementById('ssrDateInput')) document.getElementById('ssrDateInput').value = dt;
-    if (document.getElementById('ssrBuyerInput')) document.getElementById('ssrBuyerInput').value = buyer;
-    if (document.getElementById('ssrMethodInput')) document.getElementById('ssrMethodInput').value = method;
-    if (document.getElementById('ssrProductInput')) document.getElementById('ssrProductInput').value = rawApp;
-    if (document.getElementById('ssrPlanInput')) document.getElementById('ssrPlanInput').value = planLabel;
-    if (document.getElementById('ssrAmountInput')) document.getElementById('ssrAmountInput').value = amt > 0 ? amt.toFixed(2) : '';
-
-    renderIntegratedSSResitPreview();
+    populateSSResitInputsFromTxn(txn);
     document.getElementById('ownerSSResitModal')?.classList.add('open');
   }
 
@@ -4177,13 +4180,26 @@
     window.print();
   }
 
+  // Website orders auto-generate & download PNG directly without opening manual SSResit modal
   async function downloadSSResitObject(txn) {
     if (!txn) return;
     if (!isOwnerOrAdmin()) {
-      showToast('Akses resit SSResit hanya untuk Owner / Admin.');
+      showToast('Akses resit hanya untuk Owner / Admin.');
       return;
     }
-    openOwnerSSResitModal(txn);
+    const recNo = populateSSResitInputsFromTxn(txn);
+    const modalEl = document.getElementById('ownerSSResitModal');
+    const wasOpen = modalEl?.classList.contains('open');
+    if (!wasOpen && modalEl) {
+      modalEl.style.visibility = 'hidden';
+      modalEl.classList.add('open');
+    }
+    await new Promise(r => setTimeout(r, 60));
+    await downloadIntegratedSSResitPng();
+    if (!wasOpen && modalEl) {
+      modalEl.classList.remove('open');
+      modalEl.style.visibility = '';
+    }
   }
 
   function downloadSSResitByIndex(idx) {
