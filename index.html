@@ -2653,8 +2653,18 @@
         <button type="button" onclick="toggleSSResitEditInputs()" id="ssrToggleEditBtn" style="background:rgba(250,204,21,0.14); color:var(--accent-gold); border:1px solid rgba(250,204,21,0.4); padding:7px 10px; border-radius:9px; font-size:0.72rem; font-weight:700; cursor:pointer;">✏️ Edit Manual</button>
       </div>
 
-      <!-- Editable Manual Order Fields -->
+      <!-- Editable Manual Order Fields & No-BG Receipt Logo Upload -->
       <div id="ssrEditFieldsBox" style="display:none; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border-color);">
+          <div style="font-size:0.74rem; font-weight:700; color:var(--accent-cyan);">Logo Resit (No Background)</div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <label style="background:var(--accent-blue); color:#ffffff; padding:5px 10px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer;">
+              <span>+ Upload No-BG Logo</span>
+              <input type="file" accept="image/*" onchange="handleReceiptNoBgLogoUpload(event)" style="display:none;" />
+            </label>
+            <button type="button" onclick="clearReceiptNoBgLogo()" style="background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-secondary); padding:5px 9px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer;">Reset</button>
+          </div>
+        </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
           <div class="form-group" style="margin-bottom:0;">
             <label>Order ID *</label>
@@ -2691,7 +2701,7 @@
         </div>
       </div>
 
-      <!-- Clean Wider Receipt Card (No Background Logo, SPYSTORE Stacked Above OFFICIAL OUTLET) -->
+      <!-- Clean Receipt Card (2-Line Header: SPYSTORE / OFFICIAL OUTLET, No-BG Logo) -->
       <div style="display:flex; justify-content:center; padding:4px 0;">
         <div id="spystore-ssresit-capture-area" style="width:520px; max-width:100%; background:#ffffff; color:#0f172a; border-radius:16px; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.45); font-family:'Plus Jakarta Sans',sans-serif;">
           <!-- Top Gradient Stripe -->
@@ -2701,13 +2711,13 @@
             <!-- Header Row -->
             <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:16px;">
               <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
-                <div style="width:54px; height:54px; background:transparent; border:none; box-shadow:none; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
-                  <img src="logo.png" alt="SPYSTORE" style="width:100%; height:100%; object-fit:contain; background:transparent; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                  <span style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-weight:800; font-size:1rem; color:#0f172a; background:transparent;">SS</span>
+                <div id="ssrReceiptLogoWrap" style="width:56px; height:56px; background:transparent; border:none; box-shadow:none; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;">
+                  <img id="ssrReceiptLogoImg" src="receipt-logo.png" alt="SPYSTORE" style="width:100%; height:100%; object-fit:contain; background:transparent; display:block;" onerror="if(this.dataset.fb !== '1'){ this.dataset.fb='1'; this.src='logo.png'; } else { this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex'; }" />
+                  <span style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-weight:800; font-size:1.05rem; color:#0f172a; background:transparent;">SS</span>
                 </div>
                 <div style="min-width:0;">
-                  <div style="font-weight:800; font-size:0.98rem; line-height:1.2; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em;">SPYSTORE</div>
-                  <div style="font-weight:800; font-size:0.86rem; line-height:1.25; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em; margin-top:2px;">OFFICIAL OUTLET</div>
+                  <div style="font-weight:800; font-size:1.02rem; line-height:1.18; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em; white-space:nowrap;">SPYSTORE</div>
+                  <div style="font-weight:800; font-size:0.94rem; line-height:1.22; color:#0f172a; text-transform:uppercase; letter-spacing:0.02em; margin-top:2px; white-space:nowrap;">OFFICIAL OUTLET</div>
                 </div>
               </div>
 
@@ -4034,6 +4044,45 @@
     }
   }
 
+  const RECEIPT_NOBG_LOGO_KEY = 'spystore_receipt_nobg_logo_v1';
+
+  function applySavedReceiptLogo() {
+    const img = document.getElementById('ssrReceiptLogoImg');
+    if (!img) return;
+    const customLogo = localStorage.getItem(RECEIPT_NOBG_LOGO_KEY) || '';
+    if (customLogo) {
+      img.dataset.fb = '1';
+      img.src = customLogo;
+      img.style.display = 'block';
+    } else {
+      img.dataset.fb = '';
+      img.src = 'receipt-logo.png';
+      img.style.display = 'block';
+    }
+  }
+
+  function handleReceiptNoBgLogoUpload(e) {
+    const file = e.target?.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        localStorage.setItem(RECEIPT_NOBG_LOGO_KEY, ev.target.result);
+        applySavedReceiptLogo();
+        showToast('Logo no-background resit dikemas kini!');
+      } catch (err) {
+        showToast('Gagal menyimpan logo resit.');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearReceiptNoBgLogo() {
+    try { localStorage.removeItem(RECEIPT_NOBG_LOGO_KEY); } catch (e) {}
+    applySavedReceiptLogo();
+    showToast('Logo resit ditetapkan semula.');
+  }
+
   function isOwnerOrAdmin() {
     const r = getUserRole();
     return r === 'owner' || r === 'admin';
@@ -4065,6 +4114,7 @@
   }
 
   function populateSSResitInputsFromTxn(txn = null) {
+    applySavedReceiptLogo();
     const recNo = txn?.receiptNo || txn?.invoiceNo || txn?.ref || generateReceiptNumber();
     const dt = txn?.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     const rawBuyer = String(txn?.customerName || '').trim();
@@ -4195,7 +4245,7 @@
     window.print();
   }
 
-  // Render & download PNG directly without using visibility:hidden (which produces blank canvas in html2canvas)
+  // Direct download in-place without navigating or opening modal
   async function downloadSSResitObject(txn) {
     if (!txn) return;
     if (!isOwnerOrAdmin()) {
