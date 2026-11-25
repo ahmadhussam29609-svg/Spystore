@@ -3904,32 +3904,6 @@
     } catch (e) {}
   }
 
-  function buildReceiptSummaryDownload(txn, recNo) {
-    const amountNum = parseFloat(txn.total);
-    const amountStr = !isNaN(amountNum) ? `RM ${amountNum.toFixed(2)}` : `RM ${String(txn.total || '0.00')}`;
-    const custName = txn.customerName && txn.customerName !== '-' ? txn.customerName : (getCurrentUser()?.name || 'Customer');
-    const lines = [
-      'SPYSTORE OFFICIAL OUTLET — SSResit Order Sync',
-      '----------------------------------------------',
-      `Receipt No : ${recNo}`,
-      `Billed To  : ${custName}`,
-      `Product    : ${txn.app || 'Subscription'} (${txn.months || 1} Month)`,
-      `Total Paid : ${amountStr}`,
-      `Date       : ${txn.date || new Date().toLocaleDateString('en-MY')}`,
-      `Payment    : ${txn.paymentMethod || 'Online Transfer'}`,
-      'Status     : PAID'
-    ].join('\n');
-    const blob = new Blob([lines], { type: 'text/plain;charset=utf-8' });
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = `${recNo}-ssresit.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-  }
-
   async function downloadSSResitObject(txn) {
     if (!txn) return;
     const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
@@ -3942,8 +3916,8 @@
     // 2. Check if SSResit already pushed a generated PNG back to /api/ssresit-sync
     let pngDataUrl = txn.generatedReceiptPng || '';
     if (!pngDataUrl) {
-      for (let attempt = 0; attempt < 2; attempt++) {
-        await new Promise(r => setTimeout(r, 450));
+      for (let attempt = 0; attempt < 3; attempt++) {
+        await new Promise(r => setTimeout(r, 500));
         try {
           const res = await fetch(`/api/ssresit-sync?ref=${encodeURIComponent(recNo)}`, { cache: 'no-store' });
           if (res.ok) {
@@ -3958,7 +3932,7 @@
       }
     }
 
-    // 3. Download the SSResit PNG if available
+    // 3. Download ONLY the PNG receipt received from SSResit (no .txt fallback)
     if (pngDataUrl) {
       const a = document.createElement('a');
       a.href = pngDataUrl;
@@ -3966,13 +3940,11 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showToast(`SSResit receipt ${recNo}.png downloaded!`);
+      showToast(`Resit ${recNo}.png daripada SSResit berjaya dimuat turun!`);
       return;
     }
 
-    // 4. Immediately download synced order receipt record on Spystore without blocking or redirecting
-    buildReceiptSummaryDownload(txn, recNo);
-    showToast(`Order ${recNo} synced to SSResit & receipt downloaded.`);
+    showToast(`Maklumat ${recNo} dihantar ke SSResit. Resit PNG akan sedia selepas dijana oleh SSResit.`);
   }
 
   function downloadSSResitByIndex(idx) {
