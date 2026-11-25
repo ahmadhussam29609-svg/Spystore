@@ -3918,8 +3918,7 @@
       `Date       : ${txn.date || new Date().toLocaleDateString('en-MY')}`,
       `Payment    : ${txn.paymentMethod || 'Online Transfer'}`,
       'Status     : PAID'
-    ].join('
-');
+    ].join('\n');
     const blob = new Blob([lines], { type: 'text/plain;charset=utf-8' });
     const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
