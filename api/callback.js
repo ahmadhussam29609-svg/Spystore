@@ -56,6 +56,30 @@ export default async function handler(req, res) {
       });
     }
 
+    const ssresitWebhook = process.env.SSRESIT_WEBHOOK_URL || '';
+    if (ssresitWebhook && statusOk) {
+      try {
+        await fetch(ssresitWebhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source: 'spystore.vercel.app',
+            company: 'SPYSTORE OFFICIAL OUTLET',
+            companyPhone: '60189066291',
+            receiptNo: refno,
+            ref: refno,
+            customerName,
+            customerPhone,
+            customerDevice,
+            product: `${appName} (${months} Month)`,
+            total: !isNaN(rawAmt) ? rawAmt.toFixed(2) : '0.00',
+            paymentMethod: 'Online Transfer',
+            status: 'PAID'
+          })
+        });
+      } catch (e) {}
+    }
+
     return res.status(200).json({ ok: true, message: tgMessage });
   } catch (err) {
     return res.status(500).json({ ok: false, error: 'Callback error' });

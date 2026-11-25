@@ -145,6 +145,7 @@ function formatItem(raw, mediaType, platform, rank) {
     mediaType: mediaType === 'movie' ? 'MOVIE' : 'SERIES',
     platformId: platform.id,
     platformLabel: platform.label,
+    platforms: [{ id: platform.id, label: platform.label }],
     price: platform.price,
     rating: raw.vote_average ? Number(raw.vote_average).toFixed(1) : (raw.rating || '7.8'),
     popularity: raw.popularity || 0,
@@ -175,7 +176,7 @@ async function tmdbGetSafe(path) {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=1800');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   try {
     const todayStr = new Date().toISOString().slice(0, 10);
     const [trendingTvRes, trendingMovRes, kdramaTvRes, kdramaMovRes] = await Promise.all([

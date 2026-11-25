@@ -5,6 +5,34 @@ const APP_META = {
   primevideo: { id: 'primevideo', shortLabel: 'Prime Video', price: 10 }
 };
 
+// Studio / network / franchise fallback rules when TMDB MY flatrate omits first-party titles
+const STUDIO_APP_RULES = [
+  {
+    app: APP_META.disney,
+    companyIds: [420, 2, 3, 1, 7521, 127928], // Marvel Studios, Walt Disney Pictures, Pixar, Lucasfilm, National Geographic, 20th Century Studios
+    networkIds: [2739, 44, 54], // Disney+, Disney Channel, Disney XD
+    keywords: ['avengers', 'captain america', 'iron man', 'thor', 'spider-man', 'loki', 'wandavision', 'mandalorian', 'star wars', 'pixar', 'toy story', 'inside out', 'frozen', 'moana', 'x-men', 'deadpool', 'guardians of the galaxy', 'black panther', 'doctor strange', 'ant-man', 'falcon', 'hawkeye', 'moon knight', 'ms. marvel', 'she-hulk', 'daredevil', 'agatha', 'thunderbolts', 'fantastic four']
+  },
+  {
+    app: APP_META.hbomax,
+    companyIds: [174, 128064, 429, 9993, 3268, 49], // Warner Bros. Pictures, DC Films, DC Comics, HBO, HBO Max
+    networkIds: [49, 3186, 6783], // HBO, Max
+    keywords: ['house of the dragon', 'game of thrones', 'the last of us', 'harry potter', 'fantastic beasts', 'batman', 'superman', 'joker', 'aquaman', 'wonder woman', 'dune', 'euphoria', 'the penguin', 'peacemaker', 'white lotus', 'succession', 'rick and morty', 'conjuring']
+  },
+  {
+    app: APP_META.primevideo,
+    companyIds: [20580, 10246], // Amazon Studios, Amazon MGM Studios
+    networkIds: [1024], // Amazon Prime Video
+    keywords: ['the boys', 'gen v', 'reacher', 'rings of power', 'jack ryan', 'fallout', 'invincible', 'citadel', 'the terminal list', 'wheel of time', 'mr. & mrs. smith', 'saltburn', 'road house', 'the idea of you']
+  },
+  {
+    app: APP_META.netflix,
+    companyIds: [213, 1957], // Netflix
+    networkIds: [213], // Netflix
+    keywords: ['squid game', 'stranger things', 'wednesday', 'bridgerton', 'money heist', 'la casa de papel', 'lupin', 'the witcher', 'one piece', 'queen of tears', 'the glory', 'all of us are dead', 'sweet home', 'extraction', 'red notice', 'glass onion', 'enola holmes', 'boboiboy', 'ejen ali', 'upin & ipin']
+  }
+];
+
 const CURATED_MY_CATALOG = [
   {
     id: 'lupin',
@@ -13,7 +41,7 @@ const CURATED_MY_CATALOG = [
     mediaType: 'SERIES',
     rating: '7.5',
     overview: 'Inspired by the adventures of Arsène Lupin, gentleman thief Assane Diop sets out to avenge his father for an injustice inflicted by a wealthy family.',
-    poster: 'https://image.tmdb.org/t/p/w342/sgxawEB0H9u00n3g8t6G9n3n4x3.jpg',
+    poster: 'https://image.tmdb.org/t/p/w342/s6cQgJbbH2KangdtZahWog5SOBf.jpg',
     availableApps: [APP_META.netflix]
   },
   {
@@ -45,6 +73,36 @@ const CURATED_MY_CATALOG = [
     overview: 'When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.',
     poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
     availableApps: [APP_META.netflix]
+  },
+  {
+    id: 'captain-america-the-first-avenger',
+    title: 'Captain America: The First Avenger',
+    year: '2011',
+    mediaType: 'MOVIE',
+    rating: '7.0',
+    overview: 'During World War II, Steve Rogers volunteers for a top-secret program that turns him into the Super Soldier known as Captain America.',
+    poster: 'https://image.tmdb.org/t/p/w342/vSNxAJTlD0r02V9sPYpOjqDZXUK.jpg',
+    availableApps: [APP_META.disney]
+  },
+  {
+    id: 'captain-america-the-winter-soldier',
+    title: 'Captain America: The Winter Soldier',
+    year: '2014',
+    mediaType: 'MOVIE',
+    rating: '7.7',
+    overview: 'Steve Rogers struggles to embrace his role in the modern world and teams up with Natasha Romanoff to battle a mysterious assassin in Washington, D.C.',
+    poster: 'https://image.tmdb.org/t/p/w342/tVFRpFw3xTedgPGqxW0AOI8Qhh0.jpg',
+    availableApps: [APP_META.disney]
+  },
+  {
+    id: 'captain-america-civil-war',
+    title: 'Captain America: Civil War',
+    year: '2016',
+    mediaType: 'MOVIE',
+    rating: '7.4',
+    overview: 'Political involvement in the Avengers affairs causes a rift between Captain America and Iron Man.',
+    poster: 'https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg',
+    availableApps: [APP_META.disney]
   },
   {
     id: 'avengers-endgame',
@@ -131,11 +189,37 @@ const CURATED_MY_CATALOG = [
 function mapProviderIdsToApps(providerIds = []) {
   const set = new Set(providerIds);
   const apps = [];
-  if (set.has(8)) apps.push(APP_META.netflix);
-  if (set.has(337)) apps.push(APP_META.disney);
-  if (set.has(1899) || set.has(384)) apps.push(APP_META.hbomax);
-  if (set.has(119)) apps.push(APP_META.primevideo);
+  if (set.has(8) || set.has(1796)) apps.push(APP_META.netflix);
+  if (set.has(337) || set.has(390) || set.has(122)) apps.push(APP_META.disney);
+  if (set.has(1899) || set.has(384) || set.has(118)) apps.push(APP_META.hbomax);
+  if (set.has(119) || set.has(9) || set.has(10)) apps.push(APP_META.primevideo);
   return apps;
+}
+
+function dedupeApps(apps = []) {
+  const seen = new Set();
+  return apps.filter(a => {
+    if (!a || seen.has(a.id)) return false;
+    seen.add(a.id);
+    return true;
+  });
+}
+
+function inferFirstPartyApps(title, detailsJson = null) {
+  const matched = [];
+  const lowerTitle = String(title || '').toLowerCase();
+  const companyIds = new Set((detailsJson?.production_companies || []).map(c => c.id));
+  const networkIds = new Set((detailsJson?.networks || []).map(n => n.id));
+
+  for (const rule of STUDIO_APP_RULES) {
+    const hitCompany = rule.companyIds.some(id => companyIds.has(id));
+    const hitNetwork = rule.networkIds.some(id => networkIds.has(id));
+    const hitKeyword = rule.keywords.some(kw => lowerTitle.includes(kw));
+    if (hitCompany || hitNetwork || hitKeyword) {
+      matched.push(rule.app);
+    }
+  }
+  return dedupeApps(matched);
 }
 
 async function searchViaTmdb(q, region) {
@@ -145,22 +229,63 @@ async function searchViaTmdb(q, region) {
   const r = await fetch(searchUrl);
   if (!r.ok) return null;
   const json = await r.json();
-  const raw = (json.results || []).filter(it => it.media_type === 'movie' || it.media_type === 'tv').slice(0, 8);
+  const raw = (json.results || [])
+    .filter(it => it.media_type === 'movie' || it.media_type === 'tv')
+    .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+    .slice(0, 10);
   if (!raw.length) return [];
 
   const enriched = await Promise.all(raw.map(async (it) => {
     const typePath = it.media_type === 'tv' ? 'tv' : 'movie';
+    const title = it.title || it.name || 'Untitled';
     let availableApps = [];
+    let detailsJson = null;
+
     try {
-      const pRes = await fetch(`https://api.themoviedb.org/3/${typePath}/${it.id}/watch/providers?api_key=${encodeURIComponent(apiKey)}`);
+      const [pRes, dRes] = await Promise.all([
+        fetch(`https://api.themoviedb.org/3/${typePath}/${it.id}/watch/providers?api_key=${encodeURIComponent(apiKey)}`),
+        fetch(`https://api.themoviedb.org/3/${typePath}/${it.id}?api_key=${encodeURIComponent(apiKey)}&language=en-US`)
+      ]);
+
+      if (dRes.ok) {
+        detailsJson = await dRes.json();
+      }
+
       if (pRes.ok) {
         const pJson = await pRes.json();
-        const flatrate = pJson.results?.[region]?.flatrate || [];
-        availableApps = mapProviderIdsToApps(flatrate.map(x => x.provider_id));
+        const regionBlock = pJson.results?.[region] || {};
+        const sgBlock = pJson.results?.SG || {};
+        const usBlock = pJson.results?.US || {};
+
+        // 1. Primary: MY flatrate / free / ads
+        const myProviders = [
+          ...(regionBlock.flatrate || []),
+          ...(regionBlock.free || []),
+          ...(regionBlock.ads || [])
+        ];
+        availableApps = mapProviderIdsToApps(myProviders.map(x => x.provider_id));
+
+        // 2. Secondary regional fallback (SG / US) + first-party studio verification
+        if (!availableApps.length) {
+          const regionalProviders = [
+            ...(sgBlock.flatrate || []),
+            ...(usBlock.flatrate || [])
+          ];
+          const regionalApps = mapProviderIdsToApps(regionalProviders.map(x => x.provider_id));
+          const studioApps = inferFirstPartyApps(title, detailsJson);
+          if (studioApps.length) {
+            availableApps = studioApps;
+          } else if (regionalApps.length && (it.popularity || 0) >= 20) {
+            availableApps = regionalApps;
+          }
+        }
       }
     } catch (e) {}
 
-    const title = it.title || it.name || 'Untitled';
+    if (!availableApps.length) {
+      availableApps = inferFirstPartyApps(title, detailsJson);
+    }
+
     const dateStr = it.release_date || it.first_air_date || '';
     const year = dateStr ? dateStr.slice(0, 4) : '-';
 
@@ -170,9 +295,9 @@ async function searchViaTmdb(q, region) {
       year,
       mediaType: it.media_type === 'tv' ? 'SERIES' : 'MOVIE',
       rating: it.vote_average ? Number(it.vote_average).toFixed(1) : 'N/A',
-      overview: it.overview || '',
+      overview: (detailsJson?.overview || it.overview || '').trim(),
       poster: it.poster_path ? `https://image.tmdb.org/t/p/w342${it.poster_path}` : '',
-      availableApps
+      availableApps: dedupeApps(availableApps)
     };
   }));
 
