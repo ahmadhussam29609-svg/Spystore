@@ -4649,9 +4649,7 @@
     triggerTopLoader(400);
     modal.style.display = 'flex';
     renderTrendingModal();
-    if (!_trendingFetchedFromApi) {
-      loadTrendingHero();
-    }
+    loadTrendingHero();
   }
 
   function closeTrendingModal() {
@@ -4881,7 +4879,7 @@
     renderHeroSlidesFromItems(fb.items.slice(0, 6));
 
     try {
-      const res = await fetch('/api/trending');
+      const res = await fetch(`/api/trending?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) return;
       const data = await res.json();
       if (data && data.byApp && Object.keys(data.byApp).length) {
@@ -4979,23 +4977,23 @@
   function collectAllShowCatalog() {
     ensureTrendingStoreReady();
     const extraShows = [
-      { title: 'BoBoiBoy', year: '2011', mediaType: 'SERIES', rating: '7.2', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy gains elemental superpowers to protect Earth from alien invaders.' },
-      { title: 'BoBoiBoy: The Movie', year: '2016', mediaType: 'MOVIE', rating: '6.8', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy and his friends travel to save Ochobot from an ancient power seeker.' },
-      { title: 'BoBoiBoy Galaxy', year: '2016', mediaType: 'SERIES', rating: '7.9', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy embarks on interstellar missions across the galaxy to collect Power Spheras.' },
-      { title: 'BoBoiBoy Movie 2', year: '2019', mediaType: 'MOVIE', rating: '7.4', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Retak’ka returns to reclaim elemental powers from BoBoiBoy.' },
-      { title: "BoBoiBoy Movie 3: Ghost of Gur'latan", year: '2027', mediaType: 'MOVIE', rating: 'N/A', isUnreleased: true, platforms: [], overview: 'Not yet released on platform.' },
-      { title: 'Captain America: The First Avenger', year: '2011', mediaType: 'MOVIE', rating: '7.0', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'During World War II, Steve Rogers volunteers for a top-secret program that turns him into Captain America.' },
-      { title: 'Captain America: The Winter Soldier', year: '2014', mediaType: 'MOVIE', rating: '7.7', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Steve Rogers teams up with Black Widow to uncover a conspiracy inside S.H.I.E.L.D. and face the Winter Soldier.' },
-      { title: 'Captain America: Civil War', year: '2016', mediaType: 'MOVIE', rating: '7.4', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Political oversight divides the Avengers into opposing factions led by Captain America and Iron Man.' },
-      { title: 'Captain America: Brave New World', year: '2025', mediaType: 'MOVIE', rating: '6.2', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Sam Wilson finds himself in the middle of an international incident after meeting newly elected U.S. President Thaddeus Ross.' },
-      { title: 'The Avengers', year: '2012', mediaType: 'MOVIE', rating: '7.8', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Earth’s mightiest heroes assemble to stop Loki and his alien army from enslaving humanity.' },
-      { title: 'Avengers: Age of Ultron', year: '2015', mediaType: 'MOVIE', rating: '7.3', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Tony Stark and Bruce Banner inadvertently create Ultron, an AI bent on human extinction.' },
-      { title: 'Avengers: Infinity War', year: '2018', mediaType: 'MOVIE', rating: '8.3', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The Avengers and their allies must sacrifice all to defeat Thanos before he collects all six Infinity Stones.' },
-      { title: 'Avengers: Endgame', year: '2019', mediaType: 'MOVIE', rating: '8.3', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The surviving Avengers assemble once more to reverse Thanos’s snap and restore order to the universe.' },
-      { title: 'Thunderbolts*', year: '2025', mediaType: 'MOVIE', rating: '7.4', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A team of unconventional antiheroes is recruited for dangerous covert missions.' },
-      { title: 'The Hobbit: The Desolation of Smaug', year: '2013', mediaType: 'MOVIE', rating: '7.8', platformId: 'netflix', platformLabel: 'Netflix / Prime Video', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'primevideo', label: 'Prime Video' }], overview: 'Bilbo Baggins and the dwarves continue their quest toward Erebor and encounter the dragon Smaug.' },
-      { title: 'X-Men: Days of Future Past', year: '2014', mediaType: 'MOVIE', rating: '7.5', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The X-Men send Wolverine to the past to change history and prevent doom for humans and mutants.' },
-      { title: 'X-Men ’97', year: '2024', mediaType: 'SERIES', rating: '8.7', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A band of mutants use their uncanny gifts to protect a world that hates and fears them.' }
+      { title: 'BoBoiBoy', year: '2011', mediaType: 'SERIES', rating: '7.2', poster: 'https://image.tmdb.org/t/p/w342/8w4gA8V0x5x2k7Z3f6L2q9P1m8R.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy gains elemental superpowers to protect Earth from alien invaders.' },
+      { title: 'BoBoiBoy: The Movie', year: '2016', mediaType: 'MOVIE', rating: '6.8', poster: 'https://image.tmdb.org/t/p/w342/4m1Au3YkjqsxF8iwQy0fPYSxE0h.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy and his friends travel to save Ochobot from an ancient power seeker.' },
+      { title: 'BoBoiBoy Galaxy', year: '2016', mediaType: 'SERIES', rating: '7.9', poster: 'https://image.tmdb.org/t/p/w342/8w4gA8V0x5x2k7Z3f6L2q9P1m8R.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy embarks on interstellar missions across the galaxy to collect Power Spheras.' },
+      { title: 'BoBoiBoy Movie 2', year: '2019', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/4m1Au3YkjqsxF8iwQy0fPYSxE0h.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Retak’ka returns to reclaim elemental powers from BoBoiBoy.' },
+      { title: "BoBoiBoy Movie 3: Ghost of Gur'latan", year: '2027', mediaType: 'MOVIE', rating: 'N/A', poster: '', isUnreleased: true, platforms: [], overview: 'Not yet released on platform.' },
+      { title: 'Captain America: The First Avenger', year: '2011', mediaType: 'MOVIE', rating: '7.0', poster: 'https://image.tmdb.org/t/p/w342/vSNxAJTlD0r02V9sPYpOjqDZXUK.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'During World War II, Steve Rogers volunteers for a top-secret program that turns him into Captain America.' },
+      { title: 'Captain America: The Winter Soldier', year: '2014', mediaType: 'MOVIE', rating: '7.7', poster: 'https://image.tmdb.org/t/p/w342/tVFRpFw3xTedgPGqxW0AOI8Qhh0.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Steve Rogers teams up with Black Widow to uncover a conspiracy inside S.H.I.E.L.D. and face the Winter Soldier.' },
+      { title: 'Captain America: Civil War', year: '2016', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Political oversight divides the Avengers into opposing factions led by Captain America and Iron Man.' },
+      { title: 'Captain America: Brave New World', year: '2025', mediaType: 'MOVIE', rating: '6.2', poster: 'https://image.tmdb.org/t/p/w342/pzIddUEMWhWzfvLI3TwxUG2wGoi.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Sam Wilson finds himself in the middle of an international incident after meeting newly elected U.S. President Thaddeus Ross.' },
+      { title: 'The Avengers', year: '2012', mediaType: 'MOVIE', rating: '7.8', poster: 'https://image.tmdb.org/t/p/w342/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Earth’s mightiest heroes assemble to stop Loki and his alien army from enslaving humanity.' },
+      { title: 'Avengers: Age of Ultron', year: '2015', mediaType: 'MOVIE', rating: '7.3', poster: 'https://image.tmdb.org/t/p/w342/4ssDuvEDkSArWEdyBl2X5EHvYKU.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Tony Stark and Bruce Banner inadvertently create Ultron, an AI bent on human extinction.' },
+      { title: 'Avengers: Infinity War', year: '2018', mediaType: 'MOVIE', rating: '8.3', poster: 'https://image.tmdb.org/t/p/w342/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The Avengers and their allies must sacrifice all to defeat Thanos before he collects all six Infinity Stones.' },
+      { title: 'Avengers: Endgame', year: '2019', mediaType: 'MOVIE', rating: '8.3', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The surviving Avengers assemble once more to reverse Thanos’s snap and restore order to the universe.' },
+      { title: 'Thunderbolts*', year: '2025', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/m9EtP1Yrzv6v7dMaC9mRaGhd1um.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A team of unconventional antiheroes is recruited for dangerous covert missions.' },
+      { title: 'The Hobbit: The Desolation of Smaug', year: '2013', mediaType: 'MOVIE', rating: '7.8', poster: 'https://image.tmdb.org/t/p/w342/xQYiXsheRCDBA39DOrmaw1aSpE3.jpg', platformId: 'netflix', platformLabel: 'Netflix / Prime Video', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'primevideo', label: 'Prime Video' }], overview: 'Bilbo Baggins and the dwarves continue their quest toward Erebor and encounter the dragon Smaug.' },
+      { title: 'X-Men: Days of Future Past', year: '2014', mediaType: 'MOVIE', rating: '7.5', poster: 'https://image.tmdb.org/t/p/w342/tYfijzolzgoMOtegh1Y7j2Enorg.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The X-Men send Wolverine to the past to change history and prevent doom for humans and mutants.' },
+      { title: 'X-Men ’97', year: '2024', mediaType: 'SERIES', rating: '8.7', poster: 'https://image.tmdb.org/t/p/w342/9Ycz7yYRf9V4jk3YXwc2QaHvki2.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A band of mutants use their uncanny gifts to protect a world that hates and fears them.' }
     ];
     const trendingShows = [];
     Object.values(trendingByApp || {}).forEach(appObj => {
@@ -5113,52 +5111,67 @@
   let _currentSearchQuery = '';
   let _currentSearchMatches = [];
 
+  function renderSearchPosterThumb(m) {
+    const typeTag = (m.mediaType || 'SHOW').toUpperCase();
+    const fallbackBox = `<div style="width:54px; height:80px; border-radius:10px; background:linear-gradient(145deg,#1e293b,#0f172a); border:1px solid var(--border-strong); display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; gap:3px; color:var(--accent-gold); font-weight:800; font-size:0.62rem;"><span>🎬</span><span>${typeTag}</span></div>`;
+    if (!m.poster) return fallbackBox;
+    const safeAlt = String(m.title || 'Poster').replace(/"/g, '&quot;');
+    const safeFb = fallbackBox.replace(/"/g, '&quot;');
+    return `<img src="${m.poster}" alt="${safeAlt}" loading="lazy" referrerpolicy="no-referrer" style="width:54px; height:80px; object-fit:cover; border-radius:10px; flex-shrink:0; border:1px solid var(--border-color); background:#0f172a;" onerror="this.outerHTML='${safeFb}';" />`;
+  }
+
+  function renderShowResultCardHtml(m, idx, closeModalBeforeCheckout = false) {
+    const plats = getItemPlatforms(m);
+    const stObj = classifyTitleStatus(m);
+    const hasPlats = stObj.kind === 'available' && plats.length > 0;
+    const yearStr = (m.year && m.year !== '-') ? m.year : '';
+    const ratingStr = (m.rating && m.rating !== 'N/A') ? `★ ${m.rating}` : '';
+    const metaParts = [m.mediaType || 'SHOW', yearStr, ratingStr].filter(Boolean).join(' • ');
+
+    const statusBadgeRow = hasPlats
+      ? plats.map(pl => {
+          const pObj = products.find(x => x.id === pl.id) || products[0];
+          const closeCall = closeModalBeforeCheckout ? 'closeShowSearchModal(); ' : '';
+          return `<button type="button" onclick="event.stopPropagation(); ${closeCall}openCheckout('${pObj.id}')" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.5); color:var(--accent-gold); padding:4px 10px; border-radius:999px; font-size:0.69rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">${pl.label} ✓</button>`;
+        }).join('')
+      : `<span style="background:rgba(148,163,184,0.12); border:1px solid var(--border-color); color:var(--text-secondary); padding:3px 9px; border-radius:999px; font-size:0.67rem; font-weight:700;">${stObj.badgeText}</span>`;
+
+    return `
+      <div class="discovery-row-card" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; display:flex; gap:12px; align-items:center; cursor:pointer;" onclick="openSearchedShowDetail(${idx})">
+        ${renderSearchPosterThumb(m)}
+        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:4px;">
+          <div style="font-weight:800; font-size:0.87rem; color:var(--text-primary); line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${m.title}</div>
+          <div style="font-size:0.69rem; color:var(--accent-cyan); font-weight:700;">${metaParts}</div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:3px;">
+            ${statusBadgeRow}
+          </div>
+        </div>
+        <span style="color:var(--text-muted); font-size:0.95rem; font-weight:700; flex-shrink:0;">›</span>
+      </div>
+    `;
+  }
+
   function renderInlineSearchResultsList() {
     const box = document.getElementById('inlineShowResultsBox');
     if (!box) return;
     const q = _currentSearchQuery;
     const matches = _currentSearchMatches;
-    const visibleList = _showAllInlineSearch ? matches : matches.slice(0, 4);
-    const hasMore = matches.length > 4;
+    const visibleList = _showAllInlineSearch ? matches : matches.slice(0, 5);
+    const hasMore = matches.length > 5;
 
     box.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <span style="font-size:0.78rem; font-weight:800; color:var(--accent-gold);">🎬 Verified MY Catalog: "${q}" (${matches.length})</span>
-        <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:none; border:none; color:var(--text-muted); font-size:0.95rem; font-weight:700; cursor:pointer; padding:2px 6px;">✕</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; margin-bottom:10px; border-bottom:1px solid var(--border-color);">
+        <span style="font-size:0.78rem; font-weight:800; color:var(--accent-gold);">🎬 ${currentLang === 'my' ? 'Hasil Carian' : 'Search Results'}: "${q}" (${matches.length})</span>
+        <button type="button" onclick="document.getElementById('inlineShowResultsBox').style.display='none';" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:8px; color:var(--text-secondary); font-size:0.82rem; font-weight:700; cursor:pointer; padding:3px 8px;">✕</button>
       </div>
-      ${visibleList.length ? visibleList.map((m) => {
-        const globalIdx = matches.indexOf(m);
-        const plats = getItemPlatforms(m);
-        const availText = getAvailabilityLabel(m);
-        const stObj = classifyTitleStatus(m); const hasPlats = stObj.kind === 'available' && plats.length > 0;
-        const yearStr = (m.year && m.year !== '-') ? ` (${m.year})` : '';
-        const posterEl = m.poster
-          ? `<img src="${m.poster}" alt="${m.title}" referrerpolicy="no-referrer" style="width:46px; height:68px; object-fit:cover; border-radius:8px; flex-shrink:0; border:1px solid var(--border-color);" onerror="this.style.display='none';" />`
-          : `<div style="width:46px; height:68px; border-radius:8px; background:var(--bg-card); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.85rem;">🎬</div>`;
-
-        const statusBadgeRow = hasPlats
-          ? plats.map(pl => {
-              const pObj = products.find(x => x.id === pl.id) || products[0];
-              return `<button type="button" onclick="event.stopPropagation(); openCheckout('${pObj.id}')" style="background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">${pl.label} ✓</button>`;
-            }).join('')
-          : `<span style="background:rgba(250,204,21,0.1); border:1px solid rgba(250,204,21,0.35); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.68rem; font-weight:700;">${stObj.badgeText}</span>`;
-
-        return `
-          <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; margin-bottom:8px; display:flex; gap:11px; align-items:center; cursor:pointer;" onclick="openSearchedShowDetail(${globalIdx})">
-            ${posterEl}
-            <div style="flex:1; min-width:0;">
-              <div style="font-weight:800; font-size:0.86rem; color:var(--text-primary); line-height:1.25;">${m.title}<span style="color:var(--text-secondary); font-weight:600;">${yearStr}</span></div>
-              <div style="font-size:0.68rem; color:var(--accent-cyan); font-weight:700; margin-top:3px;">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • MY Live</div>
-              <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:7px;">
-                ${statusBadgeRow}
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('') : `<div style="font-size:0.78rem; color:var(--text-muted); padding:6px 0;">No matching movie or show found for "${q}".</div>`}
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${visibleList.length
+          ? visibleList.map(m => renderShowResultCardHtml(m, matches.indexOf(m), false)).join('')
+          : `<div style="font-size:0.78rem; color:var(--text-muted); padding:8px 2px;">${currentLang === 'my' ? `Tiada cerita atau movie ditemui untuk "${q}".` : `No matching movie or show found for "${q}".`}</div>`}
+      </div>
       ${hasMore ? `
-        <button type="button" onclick="toggleInlineSearchExpand()" style="width:100%; margin-top:4px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent-cyan); padding:9px 12px; border-radius:10px; font-size:0.78rem; font-weight:700; cursor:pointer;">
-          ${_showAllInlineSearch ? 'Show Less ▲' : `Show More (${matches.length - 4} more) ▼`}
+        <button type="button" onclick="toggleInlineSearchExpand()" style="width:100%; margin-top:10px; background:var(--bg-input); border:1px solid var(--border-strong); color:var(--accent-cyan); padding:9px 12px; border-radius:11px; font-size:0.78rem; font-weight:800; cursor:pointer;">
+          ${_showAllInlineSearch ? (currentLang === 'my' ? 'Tunjuk Sedikit ▲' : 'Show Less ▲') : (currentLang === 'my' ? `Lihat Lagi (${matches.length - 5} lagi) ▼` : `Show More (${matches.length - 5} more) ▼`)}
         </button>
       ` : ''}
     `;
@@ -5210,29 +5223,9 @@
     const matches = await queryShowsLiveAndLocal(q);
     window._lastSearchedShows = matches;
 
-    box.innerHTML = matches.length ? matches.map((m, idx) => {
-      const plats = getItemPlatforms(m);
-      const availText = getAvailabilityLabel(m);
-      const stObj = classifyTitleStatus(m); const hasPlats = stObj.kind === 'available' && plats.length > 0;
-      const yearStr = (m.year && m.year !== '-') ? ` (${m.year})` : '';
-      return `
-        <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px 12px; display:flex; gap:11px; align-items:center; cursor:pointer;" onclick="openSearchedShowDetail(${idx})">
-          ${m.poster ? `<img src="${m.poster}" alt="${m.title}" referrerpolicy="no-referrer" style="width:46px; height:68px; object-fit:cover; border-radius:8px; flex-shrink:0;" onerror="this.style.display='none';" />` : `<div style="width:46px; height:68px; border-radius:8px; background:var(--bg-card); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.85rem;">🎬</div>`}
-          <div style="flex:1; min-width:0;">
-            <div style="font-weight:800; font-size:0.84rem; color:var(--text-primary);">${m.title}<span style="color:var(--text-secondary); font-weight:600;">${yearStr}</span></div>
-            <div style="font-size:0.68rem; color:var(--accent-cyan); font-weight:700; margin-top:2px;">${m.mediaType || 'SHOW'} • ★ ${m.rating || 'N/A'} • MY Live</div>
-            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:7px;">
-              ${hasPlats
-                ? plats.map(pl => {
-                    const pObj = products.find(x => x.id === pl.id) || products[0];
-                    return `<button type="button" onclick="event.stopPropagation(); closeShowSearchModal(); openCheckout('${pObj.id}')" style="background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:800; cursor:pointer;">${pl.label} ✓</button>`;
-                  }).join('')
-                : `<span style="background:rgba(250,204,21,0.1); border:1px solid rgba(250,204,21,0.35); color:var(--accent-gold); padding:3px 10px; border-radius:999px; font-size:0.68rem; font-weight:700;">${stObj.badgeText}</span>`}
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('') : `<div style="font-size:0.78rem; color:var(--text-muted);">No matching movie or show found for "${q}".</div>`;
+    box.innerHTML = matches.length
+      ? matches.map((m, idx) => renderShowResultCardHtml(m, idx, true)).join('')
+      : `<div style="font-size:0.78rem; color:var(--text-muted);">No matching movie or show found for "${q}".</div>`;
   }
 
   function copyReceiptSummary() {
