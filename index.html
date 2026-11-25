@@ -3912,7 +3912,21 @@
     return raw || new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  function renderSSResitCanvas(txn) {
+  function loadLogoImageForCanvas(src) {
+    return new Promise((resolve) => {
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      } catch (e) {
+        resolve(null);
+      }
+    });
+  }
+
+  async function renderSSResitCanvas(txn) {
     const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
     const amountNum = parseFloat(txn.total);
     const amountStr = !isNaN(amountNum) ? `RM ${amountNum.toFixed(2)}` : `RM ${String(txn.total || '0.00')}`;
@@ -3947,17 +3961,24 @@
     const padX = 56;
     let y = 58;
 
-    // Logo box (rounded square)
+    // Logo box (rounded square matching SSResit logo)
+    const logoImg = await loadLogoImageForCanvas('logo.png');
+    ctx.save();
     ctx.fillStyle = '#0f172a';
     ctx.beginPath();
     ctx.roundRect(padX, y, 112, 112, 28);
     ctx.fill();
-
-    ctx.fillStyle = '#fbbf24';
-    ctx.font = '800 38px "Space Grotesk", "Plus Jakarta Sans", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('SS', padX + 56, y + 58);
+    ctx.clip();
+    if (logoImg) {
+      ctx.drawImage(logoImg, padX, y, 112, 112);
+    } else {
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = '800 38px "Space Grotesk", "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('SS', padX + 56, y + 58);
+    }
+    ctx.restore();
 
     // Company Name & Contact Number
     ctx.textAlign = 'left';
@@ -4193,7 +4214,7 @@
     } catch (e) {}
 
     // Generate official SSResit receipt PNG and download immediately on Spystore
-    const canvas = renderSSResitCanvas(txn);
+    const canvas = await renderSSResitCanvas(txn);
     if (canvas && canvas.toDataURL) {
       try {
         const generatedPng = canvas.toDataURL('image/png');
