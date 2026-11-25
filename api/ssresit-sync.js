@@ -66,6 +66,7 @@ export default async function handler(req, res) {
       paymentMethod: String(body.paymentMethod || 'Online Transfer').trim(),
       date: String(body.date || new Date().toLocaleDateString('en-MY')).trim(),
       status: String(body.status || 'PAID').trim(),
+      generatedReceipt: body.generatedReceipt || null,
       syncedAt: new Date().toISOString()
     };
 
