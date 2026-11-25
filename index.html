@@ -2161,6 +2161,7 @@
           <span id="drawerCurrentRoleTag" style="font-size:0.62rem; font-weight:800; padding:2px 7px; border-radius:999px; background:rgba(56,189,248,0.14); color:var(--accent-cyan);">STAFF</span>
         </div>
         <div class="drawer-links" style="gap:6px;">
+          <button type="button" id="drawerSSResitToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem; border-color:rgba(250,204,21,0.38); color:var(--accent-gold);" onclick="closeDrawer(); openOwnerSSResitModal();">🧾 <span>SSResit (Owner / Admin)</span></button>
           <button type="button" id="drawerMgrToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('catalog');">🛠️ <span id="lblDrawerCatalogMgr">Website Catalog Manager</span></button>
           <button type="button" id="drawerTxnsToolBtn" class="drawer-link" style="padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('transactions');">🧾 <span id="lblDrawerAllTxns">All Transactions</span></button>
           <button type="button" id="drawerCustomersToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('customers');">👥 <span id="lblDrawerCustomers">Registered Customers</span></button>
@@ -2633,6 +2634,106 @@
     </div>
   </div>
 
+  <!-- Integrated SSResit Modal (Owner & Admin Only) -->
+  <div class="modal-backdrop" id="ownerSSResitModal" onclick="if(event.target===this) closeOwnerSSResitModal()">
+    <div class="modal-card" style="max-width:500px;">
+      <div class="modal-top">
+        <div>
+          <div style="font-size:0.62rem; font-weight:800; color:var(--accent-gold); letter-spacing:0.07em; text-transform:uppercase;">SPYSTORE INTERNAL MODULE • OWNER / ADMIN</div>
+          <h3 style="font-size:1.05rem;">🧾 SSResit — Resit Rasmi</h3>
+        </div>
+        <button type="button" class="close-modal" onclick="closeOwnerSSResitModal()">✕</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>No. Resit / Rujukan *</label>
+          <input type="text" class="form-control" id="ssrReceiptNoInput" oninput="renderIntegratedSSResitPreview()" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Tarikh *</label>
+          <input type="text" class="form-control" id="ssrDateInput" oninput="renderIntegratedSSResitPreview()" />
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Nama Pelanggan *</label>
+          <input type="text" class="form-control" id="ssrBuyerInput" oninput="renderIntegratedSSResitPreview()" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Kaedah Bayaran *</label>
+          <input type="text" class="form-control" id="ssrMethodInput" value="Online Transfer" oninput="renderIntegratedSSResitPreview()" />
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:2fr 1fr; gap:8px; margin-bottom:12px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Produk / Langganan *</label>
+          <input type="text" class="form-control" id="ssrProductInput" oninput="renderIntegratedSSResitPreview()" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Jumlah (RM) *</label>
+          <input type="number" step="0.01" min="0" class="form-control" id="ssrAmountInput" oninput="renderIntegratedSSResitPreview()" />
+        </div>
+      </div>
+
+      <!-- Clean Receipt Card Preview -->
+      <div style="background:#f8fafc; color:#0f172a; border-radius:14px; overflow:hidden; border:1px solid #cbd5e1; margin-bottom:12px;">
+        <div id="spystore-ssresit-capture-area" style="background:#ffffff; color:#0f172a; padding:18px; width:440px; max-width:100%; margin:0 auto;">
+          <div style="height:5px; background:linear-gradient(90deg,#2563eb,#4f46e5,#eab308); border-radius:999px; margin-bottom:14px;"></div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding-bottom:12px; border-bottom:1px solid #e2e8f0;">
+            <div>
+              <div style="font-weight:800; font-size:0.92rem; color:#0f172a; text-transform:uppercase;">SPYSTORE OFFICIAL OUTLET</div>
+              <div style="font-size:0.72rem; color:#64748b; margin-top:2px;">Contact Number: 60189066291</div>
+            </div>
+            <div style="text-align:right;">
+              <span style="display:inline-block; padding:2px 8px; border-radius:6px; background:#ecfdf5; border:1px solid #a7f3d0; color:#047857; font-size:0.65rem; font-weight:800;">PAID</span>
+              <div style="font-size:0.6rem; font-weight:700; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Official Receipt</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px 0; border-bottom:1px dashed #cbd5e1; font-size:0.74rem;">
+            <div>
+              <div style="font-size:0.6rem; font-weight:700; color:#94a3b8; text-transform:uppercase;">Billed To</div>
+              <div id="ssrPrevBuyer" style="font-weight:700; color:#0f172a; margin-top:2px;">Customer</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.6rem; font-weight:700; color:#94a3b8; text-transform:uppercase;">Order ID</div>
+              <div id="ssrPrevOrderId" style="font-weight:700; color:#1d4ed8; margin-top:2px;">RES-SPY-001</div>
+            </div>
+            <div>
+              <div style="font-size:0.6rem; font-weight:700; color:#94a3b8; text-transform:uppercase;">Date Issued</div>
+              <div id="ssrPrevDate" style="font-weight:600; color:#334155; margin-top:2px;">-</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.6rem; font-weight:700; color:#94a3b8; text-transform:uppercase;">Payment Method</div>
+              <div id="ssrPrevMethod" style="font-weight:600; color:#334155; margin-top:2px;">Online Transfer</div>
+            </div>
+          </div>
+
+          <div style="padding:12px 0; border-bottom:1px solid #e2e8f0; font-size:0.76rem;">
+            <div style="display:flex; justify-content:space-between; gap:8px;">
+              <span id="ssrPrevProduct" style="font-weight:700; color:#0f172a;">Subscription</span>
+              <span id="ssrPrevLineAmt" style="font-weight:700; color:#0f172a;">RM 0.00</span>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; padding-top:12px;">
+            <span style="font-size:0.78rem; font-weight:800; color:#0f172a; text-transform:uppercase;">Total Paid</span>
+            <span id="ssrPrevTotal" style="font-size:1.05rem; font-weight:800; color:#1d4ed8;">RM 0.00</span>
+          </div>
+
+          <div style="margin-top:14px; padding-top:10px; border-top:1px solid #f1f5f9; text-align:center; font-size:0.68rem; font-weight:600; color:#64748b;">
+            Thank you for your purchase!
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="primary-submit" style="margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="downloadIntegratedSSResitPng()">⬇️ Download Resit PNG</button>
+    </div>
+  </div>
+
   <div class="toast" id="toastBox"></div>
 
   <!-- Trending Top 10 Modal -->
@@ -2736,6 +2837,7 @@
   window.GOOGLE_CLIENT_ID = '912753010767-des0po3rhva859np643rn1onu47up2d0.apps.googleusercontent.com';
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
   const ADMIN_WA = '60189066291';
   const OWNER_EMAIL = 'ahmadhussam29609@gmail.com';
@@ -3890,61 +3992,102 @@
     }
   }
 
-  function triggerHiddenSSResitBackgroundSync(url) {
-    try {
-      let frame = document.getElementById('ssresitBgSyncFrame');
-      if (!frame) {
-        frame = document.createElement('iframe');
-        frame.id = 'ssresitBgSyncFrame';
-        frame.style.display = 'none';
-        frame.setAttribute('aria-hidden', 'true');
-        document.body.appendChild(frame);
-      }
-      frame.src = url;
-    } catch (e) {}
+  function isOwnerOrAdmin() {
+    const r = getUserRole();
+    return r === 'owner' || r === 'admin';
   }
 
-  async function downloadSSResitObject(txn) {
-    if (!txn) return;
-    const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
+  function closeOwnerSSResitModal() {
+    document.getElementById('ownerSSResitModal')?.classList.remove('open');
+  }
 
-    // 1. Send order detail to /api/ssresit-sync and trigger hidden background sync to SSResit (never leaves Spystore)
-    await pushOrderToSSResit(txn, txn.generatedReceiptPng || '');
-    const ssresitSyncUrl = `${buildSSResitUrl(txn)}&background=1&autosave=1`;
-    triggerHiddenSSResitBackgroundSync(ssresitSyncUrl);
+  function renderIntegratedSSResitPreview() {
+    const recNo = (document.getElementById('ssrReceiptNoInput')?.value || '').trim() || 'RES-SPY-001';
+    const dt = (document.getElementById('ssrDateInput')?.value || '').trim() || new Date().toLocaleDateString('en-MY');
+    const buyer = (document.getElementById('ssrBuyerInput')?.value || '').trim() || 'Customer';
+    const method = (document.getElementById('ssrMethodInput')?.value || '').trim() || 'Online Transfer';
+    const prod = (document.getElementById('ssrProductInput')?.value || '').trim() || 'Subscription';
+    const amtNum = parseFloat(document.getElementById('ssrAmountInput')?.value || '0') || 0;
+    const amtStr = `RM ${amtNum.toFixed(2)}`;
 
-    // 2. Check if SSResit already pushed a generated PNG back to /api/ssresit-sync
-    let pngDataUrl = txn.generatedReceiptPng || '';
-    if (!pngDataUrl) {
-      for (let attempt = 0; attempt < 3; attempt++) {
-        await new Promise(r => setTimeout(r, 500));
-        try {
-          const res = await fetch(`/api/ssresit-sync?ref=${encodeURIComponent(recNo)}`, { cache: 'no-store' });
-          if (res.ok) {
-            const data = await res.json();
-            if (data?.order?.generatedReceipt?.pngDataUrl) {
-              pngDataUrl = data.order.generatedReceipt.pngDataUrl;
-              attachGeneratedReceiptToTransaction(recNo, pngDataUrl);
-              break;
-            }
-          }
-        } catch (e) {}
-      }
+    if (document.getElementById('ssrPrevOrderId')) document.getElementById('ssrPrevOrderId').textContent = recNo;
+    if (document.getElementById('ssrPrevDate')) document.getElementById('ssrPrevDate').textContent = dt;
+    if (document.getElementById('ssrPrevBuyer')) document.getElementById('ssrPrevBuyer').textContent = buyer;
+    if (document.getElementById('ssrPrevMethod')) document.getElementById('ssrPrevMethod').textContent = method;
+    if (document.getElementById('ssrPrevProduct')) document.getElementById('ssrPrevProduct').textContent = prod;
+    if (document.getElementById('ssrPrevLineAmt')) document.getElementById('ssrPrevLineAmt').textContent = amtStr;
+    if (document.getElementById('ssrPrevTotal')) document.getElementById('ssrPrevTotal').textContent = amtStr;
+  }
+
+  function openOwnerSSResitModal(txn = null) {
+    if (!isOwnerOrAdmin()) {
+      showToast('Akses SSResit hanya untuk Owner / Admin.');
+      return;
     }
+    const recNo = txn?.receiptNo || txn?.invoiceNo || txn?.ref || generateReceiptNumber();
+    const dt = txn?.date || new Date().toLocaleDateString('en-MY');
+    const buyer = (txn?.customerName && txn.customerName !== '-') ? txn.customerName : (getCurrentUser()?.name || 'Customer');
+    const method = txn?.paymentMethod || 'Online Transfer';
+    const prod = txn?.app ? `${txn.app} (${txn.months || 1} Month)` : 'Subscription (1 Month)';
+    const amt = parseFloat(txn?.total || '0') || 0;
 
-    // 3. Download ONLY the PNG receipt received from SSResit (no .txt fallback)
-    if (pngDataUrl) {
+    if (document.getElementById('ssrReceiptNoInput')) document.getElementById('ssrReceiptNoInput').value = recNo;
+    if (document.getElementById('ssrDateInput')) document.getElementById('ssrDateInput').value = dt;
+    if (document.getElementById('ssrBuyerInput')) document.getElementById('ssrBuyerInput').value = buyer;
+    if (document.getElementById('ssrMethodInput')) document.getElementById('ssrMethodInput').value = method;
+    if (document.getElementById('ssrProductInput')) document.getElementById('ssrProductInput').value = prod;
+    if (document.getElementById('ssrAmountInput')) document.getElementById('ssrAmountInput').value = amt > 0 ? amt.toFixed(2) : '';
+
+    renderIntegratedSSResitPreview();
+    document.getElementById('ownerSSResitModal')?.classList.add('open');
+  }
+
+  async function downloadIntegratedSSResitPng() {
+    if (!isOwnerOrAdmin()) {
+      showToast('Akses SSResit hanya untuk Owner / Admin.');
+      return;
+    }
+    const recNo = (document.getElementById('ssrReceiptNoInput')?.value || '').trim() || generateReceiptNumber();
+    const area = document.getElementById('spystore-ssresit-capture-area');
+    if (!area || typeof html2canvas !== 'function') {
+      showToast('Modul eksport resit tidak tersedia.');
+      return;
+    }
+    try {
+      const canvas = await html2canvas(area, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+      const pngDataUrl = canvas.toDataURL('image/png');
+      attachGeneratedReceiptToTransaction(recNo, pngDataUrl);
+
       const a = document.createElement('a');
       a.href = pngDataUrl;
       a.download = `${recNo}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showToast(`Resit ${recNo}.png daripada SSResit berjaya dimuat turun!`);
+      showToast(`Resit ${recNo}.png berjaya dimuat turun!`);
+    } catch (e) {
+      showToast('Gagal menjana resit PNG.');
+    }
+  }
+
+  async function downloadSSResitObject(txn) {
+    if (!txn) return;
+    if (!isOwnerOrAdmin()) {
+      showToast('Akses resit SSResit hanya untuk Owner / Admin.');
       return;
     }
-
-    showToast(`Maklumat ${recNo} dihantar ke SSResit. Resit PNG akan sedia selepas dijana oleh SSResit.`);
+    const recNo = txn.receiptNo || txn.invoiceNo || txn.ref || generateReceiptNumber();
+    if (txn.generatedReceiptPng) {
+      const a = document.createElement('a');
+      a.href = txn.generatedReceiptPng;
+      a.download = `${recNo}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast(`Resit ${recNo}.png berjaya dimuat turun!`);
+      return;
+    }
+    openOwnerSSResitModal(txn);
   }
 
   function downloadSSResitByIndex(idx) {
