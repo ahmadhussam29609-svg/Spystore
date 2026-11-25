@@ -2608,7 +2608,8 @@
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button type="button" class="primary-submit" style="flex:1; margin-top:0;" onclick="verifyUserToAdminRole()"><span id="lblVerifyBtn">Verify as Admin ✓</span></button>
-          <button type="button" onclick="unverifyUserFromAdminRole()" style="background:rgba(239, 68, 68, 0.14); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:11px 14px; border-radius:12px; font-weight:800; font-size:0.82rem; cursor:pointer;"><span id="lblUnverifyBtn">Unverify Admin</span></button>
+          <button type="button" style="flex:1; background:linear-gradient(135deg, #7c3aed, #5b21b6); color:#ffffff; border:1px solid rgba(196,181,253,0.45); padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;" onclick="verifyUserToJokerRole()">🃏 Verify as Joker</button>
+          <button type="button" onclick="unverifyUserFromAdminRole()" style="background:rgba(239, 68, 68, 0.14); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;"><span id="lblUnverifyBtn">Unverify</span></button>
         </div>
         <div id="verifiedAdminsListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
       </div>
@@ -3139,7 +3140,9 @@
   }
 
   const VERIFIED_ADMINS_KEY = 'spystore_verified_admins_v1';
+  const VERIFIED_JOKERS_KEY = 'spystore_verified_jokers_v1';
   const ADMIN_NOTIF_SEEN_KEY = 'spystore_admin_notif_seen_v1';
+  let _jokerSandboxCatalogSnapshot = null;
 
   function getVerifiedAdminsList() {
     try {
@@ -3151,6 +3154,19 @@
   function saveVerifiedAdminsList(list) {
     try {
       localStorage.setItem(VERIFIED_ADMINS_KEY, JSON.stringify(Array.from(new Set(list))));
+    } catch (e) {}
+  }
+
+  function getVerifiedJokersList() {
+    try {
+      const list = JSON.parse(localStorage.getItem(VERIFIED_JOKERS_KEY) || '[]');
+      return Array.isArray(list) ? list : [];
+    } catch (e) { return []; }
+  }
+
+  function saveVerifiedJokersList(list) {
+    try {
+      localStorage.setItem(VERIFIED_JOKERS_KEY, JSON.stringify(Array.from(new Set(list))));
     } catch (e) {}
   }
 
@@ -3171,12 +3187,38 @@
     return String(u?.role || '').toLowerCase() === 'admin';
   }
 
+  function isUserVerifiedJoker(u) {
+    if (!u) return false;
+    const em = String(u.email || '').trim().toLowerCase();
+    const un = normalizeUsername(u.username || '');
+    const jList = getVerifiedJokersList();
+    if (em && jList.includes(em)) return true;
+    if (un && jList.includes(un)) return true;
+    try {
+      const dbUser = getUsersDB().find(x =>
+        (em && String(x.email || '').trim().toLowerCase() === em) ||
+        (un && normalizeUsername(x.username || '') === un)
+      );
+      if (dbUser && String(dbUser.role || '').toLowerCase() === 'joker') return true;
+    } catch (e) {}
+    return String(u?.role || '').toLowerCase() === 'joker';
+  }
+
   function getUserRole(user = null) {
     const u = user || getCurrentUser();
     if (isDesignatedOwner(u)) return 'owner';
+    if (isUserVerifiedJoker(u)) return 'joker';
     if (isUserVerifiedAdmin(u)) return 'admin';
     const r = String(u?.role || 'customer').toLowerCase();
-    return ['owner', 'admin', 'customer'].includes(r) ? r : 'customer';
+    return ['owner', 'admin', 'joker', 'customer'].includes(r) ? r : 'customer';
+  }
+
+  function isJokerRole() {
+    return getUserRole() === 'joker';
+  }
+
+  function canAccessStaffDrawerTools() {
+    return ['owner', 'admin', 'joker'].includes(getUserRole());
   }
 
   function closeAdminGrantedPopup() {
@@ -3665,6 +3707,10 @@
   function updatePayTotalDisplay() {
     if (!currentProduct) return;
     selectedPaymentMethod = 'fpx';
+    if (isJokerRole()) {
+      document.getElementById('totalPayableText').textContent = 'RM0.00 (Joker Test)';
+      return;
+    }
     const planAmt = selectedMonths === 2 ? getActiveTwoMonthPrice(getActiveUnitPrice()) : getActiveUnitPrice();
     const total = planAmt + 1.00;
     document.getElementById('totalPayableText').textContent = `RM${total.toFixed(2)}`;
@@ -3993,9 +4039,10 @@
     if (needsEmail && !customerEmail) { showToast('Please fill in Account Email Address!'); return; }
 
     const activeAppName = getActiveDisplayAppName();
-    const planAmount = selectedMonths === 2 ? getActiveTwoMonthPrice(getActiveUnitPrice()) : getActiveUnitPrice();
-    const feeAmount = 1.00;
-    const totalAmount = planAmount + feeAmount;
+    const jokerMode = isJokerRole();
+    const planAmount = jokerMode ? 0 : (selectedMonths === 2 ? getActiveTwoMonthPrice(getActiveUnitPrice()) : getActiveUnitPrice());
+    const feeAmount = jokerMode ? 0 : 1.00;
+    const totalAmount = jokerMode ? 0 : (planAmount + feeAmount);
     const receiptNo = generateReceiptNumber();
 
     localStorage.setItem('spystore_pending_order', JSON.stringify({
@@ -4009,22 +4056,35 @@
       customerPhone,
       customerDevice,
       customerEmail,
-      paymentMethod: 'fpx'
+      paymentMethod: jokerMode ? 'Joker Test (RM0.00)' : 'fpx',
+      isJokerTest: jokerMode
     }));
 
-    saveLocalOrder({
+    const savedTxn = saveLocalOrder({
       receiptNo,
-      app: activeAppName,
+      app: jokerMode ? `${activeAppName} [JOKER TEST]` : activeAppName,
       months: selectedMonths,
-      total: totalAmount.toFixed(2),
+      total: '0.00' if False else totalAmount.toFixed(2),
       date: new Date().toLocaleDateString('en-MY'),
       customerName,
       customerPhone,
       customerEmail,
       customerDevice,
-      paymentMethod: 'Online Transfer',
-      status: 'PENDING FPX'
+      paymentMethod: jokerMode ? 'Joker Sandbox (RM0)' : 'Online Transfer',
+      status: jokerMode ? 'PAID (JOKER RM0)' : 'PENDING FPX'
     });
+
+    if (jokerMode) {
+      window._latestReceiptRecord = savedTxn;
+      const banner = document.getElementById('receiptBanner');
+      if (banner) {
+        banner.classList.add('show');
+        document.getElementById('receiptTitle').textContent = `🃏 Joker Test Confirmed • ${receiptNo}`;
+        document.getElementById('receiptDesc').textContent = `${activeAppName} (${selectedMonths} Month) — Transaksi ujian RM0.00 berjaya direkodkan tanpa menjejaskan laman web.`;
+      }
+      showToast(`🃏 Transaksi Joker RM0.00 (${receiptNo}) berjaya!`);
+      return;
+    }
 
     const btn = document.getElementById('payNowBtn');
     btn.disabled = true;
@@ -4086,7 +4146,7 @@
 
   function isOwnerOrAdmin() {
     const r = getUserRole();
-    return r === 'owner' || r === 'admin';
+    return r === 'owner' || r === 'admin' || r === 'joker';
   }
 
   function closeOwnerSSResitModal() {
@@ -4618,17 +4678,18 @@
     const custBtn = document.getElementById('drawerCustomersToolBtn');
     const verifyBtn = document.getElementById('drawerVerifyToolBtn');
     const msgTplBtn = document.getElementById('drawerMsgTemplatesToolBtn');
-    const isStaff = role === 'owner' || role === 'admin';
+    const isStaff = ['owner', 'admin', 'joker'].includes(role);
     if (sec) sec.style.display = isStaff ? 'block' : 'none';
     if (secTitle) {
-      secTitle.textContent = role === 'owner'
-        ? (isMy ? 'Alat Owner' : 'Owner Tools')
-        : (isMy ? 'Alat Admin' : 'Admin Tools');
+      if (role === 'owner') secTitle.textContent = isMy ? 'Alat Owner' : 'Owner Tools';
+      else if (role === 'joker') secTitle.textContent = isMy ? 'Alat Ujian Joker' : 'Joker Sandbox Tools';
+      else secTitle.textContent = isMy ? 'Alat Admin' : 'Admin Tools';
     }
     if (tagEl) tagEl.textContent = role.toUpperCase();
-    if (custBtn) custBtn.style.display = role === 'owner' ? 'flex' : 'none';
-    if (verifyBtn) verifyBtn.style.display = role === 'owner' ? 'flex' : 'none';
-    if (msgTplBtn) msgTplBtn.style.display = role === 'owner' ? 'flex' : 'none';
+    const fullTools = role === 'owner' || role === 'joker';
+    if (custBtn) custBtn.style.display = fullTools ? 'flex' : 'none';
+    if (verifyBtn) verifyBtn.style.display = fullTools ? 'flex' : 'none';
+    if (msgTplBtn) msgTplBtn.style.display = fullTools ? 'flex' : 'none';
   }
 
   function openDrawer() {
@@ -4682,7 +4743,7 @@
 
   function saveDrawerCatalogChanges() {
     const role = getUserRole();
-    if (role !== 'owner' && role !== 'admin') { showToast('Owner or Admin access required.'); return; }
+    if (!['owner', 'admin', 'joker'].includes(role)) { showToast('Owner or Admin access required.'); return; }
     const sel = document.getElementById('drawerMgrTargetSelect');
     const opts = getManagerTargetOptions();
     const found = opts.find(o => o.value === sel?.value);
@@ -4701,6 +4762,21 @@
     applyStatusValueToObj(t, 1, st1);
     applyStatusValueToObj(t, 2, st2);
     if (found.parent && found.parent.mode === 'dual') recomputeDualProductStock(found.parent);
+    if (role === 'joker') {
+      renderProducts();
+      if (currentProduct) {
+        const unit = getActiveUnitPrice();
+        const twoMo = getActiveTwoMonthPrice(unit);
+        document.getElementById('plan1Price').textContent = `RM${unit.toFixed(2)}`;
+        document.getElementById('plan2Price').textContent = `RM${twoMo.toFixed(2)}`;
+        renderSelectedAppHeader();
+        renderSubPlanSelector();
+        updatePayTotalDisplay();
+      }
+      closeOwnerAdminToolsModal();
+      showToast(`🃏 Joker Sandbox: ${found.label} dikemas kini (tidak menjejaskan laman web).`);
+      return;
+    }
     saveCatalogState();
     syncWebsiteCatalog();
     pushSharedStoreToServer();
@@ -4879,6 +4955,54 @@
     showToast(currentLang === 'my' ? `✅ ${users[idx].username || users[idx].email} telah disahkan sebagai ADMIN!` : `✅ ${users[idx].username || users[idx].email} has been verified as ADMIN!`);
   }
 
+  function verifyUserToJokerRole() {
+    const role = getUserRole();
+    if (!['owner', 'joker'].includes(role)) { showToast('Hanya Owner boleh mengesahkan role Joker.'); return; }
+    const rawQ = String(document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
+    const cleanU = normalizeUsername(rawQ);
+    if (!rawQ) { showToast('Masukkan e-mel atau username.'); return; }
+    ensureOwnerAccountSeeded();
+    const users = getUsersDB();
+    let idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === rawQ || (cleanU && normalizeUsername(u.username || '') === cleanU));
+    if (idx === -1 && rawQ.includes('@')) {
+      const derivedUn = normalizeUsername(rawQ.split('@')[0]);
+      const derivedName = rawQ.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      users.push({
+        username: derivedUn,
+        name: derivedName,
+        email: rawQ,
+        phone: '',
+        provider: 'joker-assigned',
+        role: 'joker'
+      });
+      idx = users.length - 1;
+    } else if (idx === -1) {
+      showToast('Akaun pengguna tidak ditemui.');
+      return;
+    }
+    if (isDesignatedOwner(users[idx])) { showToast('Peranan Owner tidak boleh diubah.'); return; }
+    users[idx].role = 'joker';
+    saveUsersDB(users);
+
+    const jList = getVerifiedJokersList();
+    if (users[idx].email) jList.push(String(users[idx].email).trim().toLowerCase());
+    if (users[idx].username) jList.push(normalizeUsername(users[idx].username));
+    saveVerifiedJokersList(jList);
+
+    const activeU = getCurrentUser();
+    if (activeU && (
+      String(activeU.email || '').trim().toLowerCase() === String(users[idx].email || '').trim().toLowerCase() ||
+      normalizeUsername(activeU.username || '') === normalizeUsername(users[idx].username || '')
+    )) {
+      localStorage.setItem('spystore_current_user', JSON.stringify({ ...activeU, role: 'joker' }));
+    }
+
+    if (document.getElementById('verifyEmailOrUsernameInput')) document.getElementById('verifyEmailOrUsernameInput').value = '';
+    refreshVerifyRoleListUI();
+    refreshDrawerRoleTools();
+    showToast(`🃏 ${users[idx].username || users[idx].email} disahkan sebagai JOKER (RM0 Test & Sandbox)!`);
+  }
+
   const WA_TEMPLATE_STORAGE_KEY = 'spystore_wa_support_template_v1';
   const TG_TEMPLATE_STORAGE_KEY = 'spystore_tg_support_template_v1';
 
@@ -4938,10 +5062,16 @@
   }
 
   function saveOwnerMsgTemplates() {
-    if (getUserRole() !== 'owner') { showToast('Only Owner can edit WA & Telegram text.'); return; }
+    const role = getUserRole();
+    if (!['owner', 'joker'].includes(role)) { showToast('Only Owner can edit WA & Telegram text.'); return; }
     const waVal = String(document.getElementById('ownerWaTemplateInput')?.value || '').trim();
     const tgVal = String(document.getElementById('ownerTgTemplateInput')?.value || '').trim();
     if (!waVal || !tgVal) { showToast('Please fill in both WhatsApp and Telegram text.'); return; }
+    if (role === 'joker') {
+      closeOwnerAdminToolsModal();
+      showToast('🃏 Joker Sandbox: Templat mesej diuji tanpa menjejaskan laman web.');
+      return;
+    }
     localStorage.setItem(WA_TEMPLATE_STORAGE_KEY, waVal);
     localStorage.setItem(TG_TEMPLATE_STORAGE_KEY, tgVal);
     applySupportLinksFromTemplates();
@@ -4962,8 +5092,8 @@
 
   function openOwnerAdminManagerModal(tab = 'catalog') {
     const role = getUserRole();
-    if (role !== 'owner' && role !== 'admin') { showToast('Owner or Admin access required.'); return; }
-    if ((tab === 'customers' || tab === 'verify' || tab === 'msg_templates') && role !== 'owner') { showToast('Owner access required.'); return; }
+    if (!['owner', 'admin', 'joker'].includes(role)) { showToast('Owner or Admin access required.'); return; }
+    if ((tab === 'customers' || tab === 'verify' || tab === 'msg_templates') && !['owner', 'joker'].includes(role)) { showToast('Owner access required.'); return; }
     const modal = document.getElementById('ownerAdminToolsModal');
     const catView = document.getElementById('drawerCatalogToolView');
     const txnView = document.getElementById('drawerTransactionsToolView');
