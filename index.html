@@ -4075,14 +4075,53 @@
     });
 
     if (jokerMode) {
+      // 1. Deduct stock just like a real order
+      const targetPlan = getActivePlanTarget();
+      if (targetPlan && typeof targetPlan.stock === 'number' && targetPlan.stock > 0) {
+        targetPlan.stock = Math.max(0, targetPlan.stock - 1);
+      } else if (currentProduct && typeof currentProduct.stock === 'number' && currentProduct.stock > 0) {
+        currentProduct.stock = Math.max(0, currentProduct.stock - 1);
+      }
+      if (currentProduct && currentProduct.mode === 'dual') {
+        recomputeDualProductStock(currentProduct);
+      }
+      saveCatalogState();
+      syncWebsiteCatalog();
+      pushSharedStoreToServer();
+
+      // 2. Send Telegram notification & show confirmed receipt banner
+      await sendTelegramBotOrderAlert({
+        ref: receiptNo,
+        app: activeAppName,
+        months: selectedMonths,
+        total: 'RM0.00',
+        name: customerName,
+        phone: customerPhone,
+        device: customerDevice && customerDevice !== '-' ? customerDevice : '-',
+        email: customerEmail && customerEmail !== '-' ? customerEmail : (getCurrentUser()?.email || '-')
+      });
+
       window._latestReceiptRecord = savedTxn;
+      const waText = formatOrderMessageTemplate(getWaTemplate(), {
+        ref: receiptNo,
+        app: activeAppName,
+        months: selectedMonths,
+        total: 'RM0.00',
+        name: customerName,
+        phone: customerPhone,
+        device: customerDevice && customerDevice !== '-' ? customerDevice : '-',
+        email: customerEmail && customerEmail !== '-' ? customerEmail : (getCurrentUser()?.email || '-')
+      });
+      lastReceiptPlainText = waText;
       const banner = document.getElementById('receiptBanner');
       if (banner) {
         banner.classList.add('show');
-        document.getElementById('receiptTitle').textContent = `🃏 Joker Test Confirmed • ${receiptNo}`;
-        document.getElementById('receiptDesc').textContent = `${activeAppName} (${selectedMonths} Month) — Transaksi ujian RM0.00 berjaya direkodkan tanpa menjejaskan laman web.`;
+        document.getElementById('receiptTitle').textContent = `✅ Payment Confirmed • ${receiptNo}`;
+        document.getElementById('receiptDesc').textContent = `${activeAppName} (${selectedMonths} Month) — Stok dikemas kini & notifikasi Telegram dihantar.`;
+        const waLink = document.getElementById('receiptWaLink');
+        if (waLink) waLink.href = `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waText)}`;
       }
-      showToast(`🃏 Transaksi Joker RM0.00 (${receiptNo}) berjaya!`);
+      showToast(`✅ Transaksi RM0.00 (${receiptNo}) berjaya • Stok dikurangkan!`);
       return;
     }
 
