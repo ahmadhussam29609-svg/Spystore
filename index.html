@@ -2111,13 +2111,14 @@
 
     @media (max-width: 470px) {
       .brand-sub { display: none; }
-      .brand-title { font-size: 0.78rem; max-width: 78px; }
-      .pill-btn { max-width: 112px; overflow: hidden; text-overflow: ellipsis; padding: 6px 8px; font-size: 0.68rem; }
+      .spystore-wordmark-img { height: 32px; max-width: 112px; }
+      .brand-title { font-size: 0.76rem; max-width: 74px; }
+      .pill-btn { max-width: 96px; overflow: hidden; text-overflow: ellipsis; padding: 5px 7px; font-size: 0.66rem; }
       .logo-box { width: 32px; height: 32px; }
-      .menu-btn { width: 30px; height: 30px; }
-      .lang-btn { padding: 5px 7px; font-size: 0.68rem; }
-      .icon-btn { width: 28px; height: 28px; font-size: 0.78rem; }
-      .nav-actions { gap: 4px; }
+      .menu-btn { width: 29px; height: 29px; }
+      .lang-btn { padding: 5px 6px; font-size: 0.66rem; }
+      .icon-btn { width: 27px; height: 27px; font-size: 0.76rem; }
+      .nav-actions { gap: 3px; }
     }
 
   
@@ -2160,9 +2161,9 @@
     }
 
     .spystore-wordmark-img {
-      height: 28px;
+      height: 34px;
       width: auto;
-      max-width: 155px;
+      max-width: 134px;
       object-fit: contain;
       display: block;
     }
@@ -2482,39 +2483,39 @@
       <section class="why-spystore-section" id="landingSection">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
           <span class="hero-pill" style="margin-bottom:0;">SPYSTORE OFFICIAL OUTLET</span>
-          <span class="stock-badge-top">100% Terpercaya</span>
+          <span class="stock-badge-top" id="whyBadgeTop">100% Terpercaya</span>
         </div>
         <div style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-          <img src="spystore-logo.png" alt="SPYSTORE" style="height:30px; width:auto; object-fit:contain;" onerror="this.style.display='none';" />
-          <h2 style="font-size:1.22rem; font-weight:800;">Kenapa Pilih Spystore?</h2>
+          <img src="spystore-logo.png" alt="SPYSTORE" style="height:34px; width:auto; object-fit:contain;" onerror="this.style.display='none';" />
+          <h2 id="whyTitleHeading" style="font-size:1.24rem; font-weight:800;">Kenapa Pilih Spystore?</h2>
         </div>
-        <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">
+        <p id="whyLeadDesc" style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">
           Kami menyediakan langganan aplikasi penstriman, muzik, dan kreatif dengan harga berpatutan, pilihan pelan yang jelas, serta bantuan terus jika anda memerlukan sokongan.
         </p>
 
         <div class="why-spystore-grid">
           <div class="why-spystore-card">
-            <h3>🛡️ Waranti Sepanjang Tempoh</h3>
-            <p>Setiap langganan dilindungi sepanjang tempoh aktif yang dibeli. Sekiranya berlaku isu log masuk, pasukan kami sedia membantu penggantian mengikut syarat penggunaan.</p>
+            <h3 id="whyCard1Title">🛡️ Waranti Sepanjang Tempoh</h3>
+            <p id="whyCard1Desc">Setiap langganan dilindungi sepanjang tempoh aktif yang dibeli. Sekiranya berlaku isu log masuk, pasukan kami sedia membantu penggantian mengikut syarat penggunaan.</p>
           </div>
           <div class="why-spystore-card">
-            <h3>⚡ Proses Pantas &amp; Mudah</h3>
-            <p>Pilih aplikasi, tetapkan tempoh 1 atau 2 bulan, tambah ke troli atau terus ke pembayaran, dan terima panduan akses dengan pantas.</p>
+            <h3 id="whyCard2Title">⚡ Proses Pantas &amp; Mudah</h3>
+            <p id="whyCard2Desc">Pilih aplikasi, tetapkan tempoh 1 atau 2 bulan, tambah ke troli atau terus ke pembayaran, dan terima panduan akses dengan pantas.</p>
           </div>
           <div class="why-spystore-card">
-            <h3>🎯 Pilihan Pelan Fleksibel</h3>
-            <p>Tersedia pilihan mengikut aplikasi seperti akses Private, Invite, atau Share/Private bagi memudahkan anda memilih bajet dan peranti yang sesuai.</p>
+            <h3 id="whyCard3Title">🎯 Pilihan Pelan Fleksibel</h3>
+            <p id="whyCard3Desc">Tersedia pilihan mengikut aplikasi seperti akses Private, Invite, atau Share/Private bagi memudahkan anda memilih bajet dan peranti yang sesuai.</p>
           </div>
           <div class="why-spystore-card">
-            <h3>🧾 Rekod Transaksi &amp; Resit Tersusun</h3>
-            <p>Setiap tempahan direkodkan dengan nombor order seragam serta akses resit rasmi bagi memudahkan rujukan pelanggan dan pentadbiran.</p>
+            <h3 id="whyCard4Title">🧾 Rekod Transaksi &amp; Resit Tersusun</h3>
+            <p id="whyCard4Desc">Setiap tempahan direkodkan dengan nombor order seragam serta akses resit rasmi bagi memudahkan rujukan pelanggan dan pentadbiran.</p>
           </div>
         </div>
 
         <div class="landing-actions-row" style="margin-top:14px;">
-          <button type="button" class="landing-primary-btn" onclick="scrollToCatalogGrid()">↑ Kembali ke Katalog Aplikasi</button>
-          <button type="button" class="landing-secondary-btn" onclick="openCartModal()">🛒 Lihat Troli (<span id="landingCartCount">0</span>)</button>
-          <a href="https://wa.me/60189066291?text=Hi%20SPYSTORE%2C%20saya%20nak%20bertanya%20tentang%20langganan." target="_blank" class="landing-secondary-btn" style="text-decoration:none; display:inline-flex; align-items:center;">💬 Hubungi Admin</a>
+          <button type="button" id="whyBackCatalogBtn" class="landing-primary-btn" onclick="scrollToCatalogGrid()">↑ Kembali ke Katalog Aplikasi</button>
+          <button type="button" id="whyOpenCartBtn" class="landing-secondary-btn" onclick="openCartModal()">🛒 Lihat Troli (<span id="landingCartCount">0</span>)</button>
+          <a href="https://wa.me/60189066291?text=Hi%20SPYSTORE%2C%20saya%20nak%20bertanya%20tentang%20langganan." target="_blank" id="whyWaSupportBtn" class="landing-secondary-btn" style="text-decoration:none; display:inline-flex; align-items:center;">💬 Hubungi Admin</a>
         </div>
       </section>
     </div>
@@ -2751,17 +2752,50 @@
   <!-- Full-Screen Shopping Cart Modal -->
   <div class="fullscreen-modal-backdrop" id="cartModal">
     <div class="fullscreen-modal-head">
-      <h3 style="font-size:1.1rem; color:var(--text-primary);">🛒 Shopping Cart</h3>
+      <h3 id="cartModalHeading" style="font-size:1.1rem; color:var(--text-primary);">🛒 Shopping Cart</h3>
       <button type="button" class="close-modal" onclick="closeCartModal()">✕</button>
     </div>
     <div class="fullscreen-modal-body">
       <div id="cartItemsContainer"></div>
       <div class="step-card" id="cartSummaryBox" style="margin-top:14px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <span style="font-size:0.84rem; color:var(--text-secondary); font-weight:700;">Subtotal Items</span>
+          <span id="cartSubtotalLabel" style="font-size:0.84rem; color:var(--text-secondary); font-weight:700;">Subtotal Items</span>
           <span id="cartSubtotalText" style="font-size:1.1rem; font-weight:800; color:var(--accent-gold);">RM0.00</span>
         </div>
-        <button type="button" class="primary-submit" onclick="checkoutFromCart()">Proceed to Checkout →</button>
+        <button type="button" id="cartProceedBtn" class="primary-submit" onclick="openCartPaymentSection()">Proceed to Checkout →</button>
+      </div>
+
+      <div class="step-card" id="cartCheckoutPaymentBox" style="display:none; margin-top:14px;">
+        <div class="step-head">
+          <span class="step-num">✓</span>
+          <h3 id="cartPaySectionTitle" class="step-title">Customer Details &amp; Payment Method</h3>
+        </div>
+        <div class="form-group">
+          <label id="cartCustNameLabel">Full Name *</label>
+          <input type="text" class="form-control" id="cartCustName" placeholder="e.g. Ahmad Hussam" />
+        </div>
+        <div class="form-group">
+          <label id="cartCustPhoneLabel">WhatsApp Number *</label>
+          <input type="tel" class="form-control" id="cartCustPhone" placeholder="e.g. 0189066291" />
+        </div>
+        <div class="form-group">
+          <label id="cartCustInfoLabel">Device / Email (Optional)</label>
+          <input type="text" class="form-control" id="cartCustInfo" placeholder="e.g. iPhone / Android / email@gmail.com" />
+        </div>
+        <div class="pay-options-list" style="margin-bottom:12px;">
+          <div class="pay-choice-card selected" onclick="selectPaymentMethod('fpx')">
+            <div class="pay-info">
+              <h4 id="cartFpxTitle">Online Banking (FPX)</h4>
+              <p id="cartFpxDesc">Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank &amp; all MY banks via ToyyibPay</p>
+            </div>
+            <span class="fee-tag">+RM1.00 / item</span>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span id="cartTotalPayableLabel" style="font-size:0.8rem; color:var(--text-secondary); font-weight:700;">Total Payable</span>
+          <span id="cartTotalPayableText" style="font-size:1.15rem; font-weight:800; color:var(--accent-gold);">RM0.00</span>
+        </div>
+        <button type="button" id="cartPayNowBtn" class="pay-btn" style="width:100%;" onclick="processCartPayment()">Pay Now →</button>
       </div>
     </div>
   </div>
@@ -3679,6 +3713,45 @@
     setTxt('lblTgTplLabel', isMy ? 'Templat Mesej Telegram *' : 'Telegram Message Template *');
     setTxt('lblSaveTplBtn', isMy ? 'Simpan' : 'Save');
     setTxt('lblResetTplBtn', isMy ? 'Tetapan Asal' : 'Reset Default');
+
+    setTxt('whyBadgeTop', isMy ? '100% Terpercaya' : '100% Trusted');
+    setTxt('whyTitleHeading', isMy ? 'Kenapa Pilih Spystore?' : 'Why Choose Spystore?');
+    setTxt('whyLeadDesc', isMy
+      ? 'Kami menyediakan langganan aplikasi penstriman, muzik, dan kreatif dengan harga berpatutan, pilihan pelan yang jelas, serta bantuan terus jika anda memerlukan sokongan.'
+      : 'We provide streaming, music, and creative app subscriptions at fair prices with clear plan options and direct support whenever you need help.');
+    setTxt('whyCard1Title', isMy ? '🛡️ Waranti Sepanjang Tempoh' : '🛡️ Full Duration Warranty');
+    setTxt('whyCard1Desc', isMy
+      ? 'Setiap langganan dilindungi sepanjang tempoh aktif yang dibeli. Sekiranya berlaku isu log masuk, pasukan kami sedia membantu penggantian mengikut syarat penggunaan.'
+      : 'Every subscription is covered throughout your active plan duration. If a login issue occurs, our team assists with replacement under warranty terms.');
+    setTxt('whyCard2Title', isMy ? '⚡ Proses Pantas & Mudah' : '⚡ Fast & Easy Process');
+    setTxt('whyCard2Desc', isMy
+      ? 'Pilih aplikasi, tetapkan tempoh 1 atau 2 bulan, tambah ke troli atau terus ke pembayaran, dan terima panduan akses dengan pantas.'
+      : 'Choose your app, pick 1 or 2 months, add to cart or proceed to payment, and receive setup guidance promptly.');
+    setTxt('whyCard3Title', isMy ? '🎯 Pilihan Pelan Fleksibel' : '🎯 Flexible Plan Options');
+    setTxt('whyCard3Desc', isMy
+      ? 'Tersedia pilihan mengikut aplikasi seperti akses Private, Invite, atau Share/Private bagi memudahkan anda memilih bajet dan peranti yang sesuai.'
+      : 'App-specific options such as Private, Invite, or Share/Private let you match your budget and preferred device.');
+    setTxt('whyCard4Title', isMy ? '🧾 Rekod Transaksi & Resit Tersusun' : '🧾 Organized Transactions & Receipts');
+    setTxt('whyCard4Desc', isMy
+      ? 'Setiap tempahan direkodkan dengan nombor order seragam serta akses resit rasmi bagi memudahkan rujukan pelanggan dan pentadbiran.'
+      : 'Every order is logged with a standardized order ID and receipt access for clear customer and admin records.');
+    setTxt('whyBackCatalogBtn', isMy ? '↑ Kembali ke Katalog Aplikasi' : '↑ Back to App Catalog');
+    setTxt('whyWaSupportBtn', isMy ? '💬 Hubungi Admin' : '💬 Chat Admin');
+    setTxt('cartModalHeading', isMy ? '🛒 Troli Belian' : '🛒 Shopping Cart');
+    setTxt('cartSubtotalLabel', isMy ? 'Jumlah Item' : 'Subtotal Items');
+    setTxt('cartProceedBtn', isMy ? 'Teruskan ke Pembayaran →' : 'Proceed to Checkout →');
+    setTxt('cartPaySectionTitle', isMy ? 'Maklumat Pelanggan & Kaedah Bayaran' : 'Customer Details & Payment Method');
+    setTxt('cartCustNameLabel', isMy ? 'Nama Penuh *' : 'Full Name *');
+    setTxt('cartCustPhoneLabel', isMy ? 'Nombor WhatsApp *' : 'WhatsApp Number *');
+    setTxt('cartCustInfoLabel', isMy ? 'Peranti / E-mel (Pilihan)' : 'Device / Email (Optional)');
+    setTxt('cartFpxTitle', isMy ? 'Perbankan Dalam Talian (FPX)' : 'Online Banking (FPX)');
+    setTxt('cartFpxDesc', isMy
+      ? 'Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank & semua bank MY melalui ToyyibPay'
+      : 'Maybank2u, CIMB Clicks, Bank Islam, RHB, Public Bank & all MY banks via ToyyibPay');
+    setTxt('cartTotalPayableLabel', isMy ? 'Jumlah Perlu Dibayar' : 'Total Payable');
+    setTxt('cartPayNowBtn', isMy ? 'Bayar Sekarang →' : 'Pay Now →');
+    if (typeof updateCartBadgeUI === 'function') updateCartBadgeUI();
+    if (typeof renderCartModal === 'function' && document.getElementById('cartModal')?.classList.contains('open')) renderCartModal();
 
     refreshVerifyRoleListUI();
     updateAuthUI();
@@ -6533,20 +6606,53 @@
         device: custDevice && custDevice !== '-' ? custDevice : '-',
         email: pending.customerEmail || getCurrentUser()?.email || '-'
       });
-      const confirmedTxn = saveLocalOrder({
-        receiptNo: effectiveOrderId,
-        ref: effectiveOrderId,
-        app: appName,
-        months,
-        total: totalPaid,
-        date: new Date().toLocaleDateString('en-MY'),
-        customerName: custName && custName !== '-' ? custName : (getCurrentUser()?.name || 'Customer'),
-        customerPhone: custPhone,
-        customerEmail: pending.customerEmail || getCurrentUser()?.email || '-',
-        customerDevice: custDevice,
-        paymentMethod: 'Online Transfer',
-        status: 'PAID'
-      });
+      let batchOrders = [];
+      try {
+        const rawBatch = JSON.parse(localStorage.getItem('spystore_pending_cart_batch') || 'null');
+        if (rawBatch && Array.isArray(rawBatch.orders) && rawBatch.orders.length) {
+          batchOrders = rawBatch.orders;
+          localStorage.removeItem('spystore_pending_cart_batch');
+          saveCartItems([]);
+        }
+      } catch (e) {}
+
+      let confirmedTxn = null;
+      if (batchOrders.length > 1) {
+        batchOrders.forEach((bOrd, bIdx) => {
+          const recCode = bIdx === 0 ? effectiveOrderId : normalizeOrderId(bOrd.receiptNo || generateReceiptNumber());
+          const itemPaid = (Number(bOrd.unitPrice || 0) + 1.00).toFixed(2);
+          const createdOne = saveLocalOrder({
+            receiptNo: recCode,
+            ref: recCode,
+            app: bOrd.appName,
+            months: Number(bOrd.months || 1),
+            total: itemPaid,
+            date: new Date().toLocaleDateString('en-MY'),
+            customerName: custName && custName !== '-' ? custName : (getCurrentUser()?.name || 'Customer'),
+            customerPhone: custPhone,
+            customerEmail: pending.customerEmail || getCurrentUser()?.email || '-',
+            customerDevice: custDevice,
+            paymentMethod: 'Online Transfer',
+            status: 'PAID'
+          });
+          if (!confirmedTxn) confirmedTxn = createdOne;
+        });
+      } else {
+        confirmedTxn = saveLocalOrder({
+          receiptNo: effectiveOrderId,
+          ref: effectiveOrderId,
+          app: appName,
+          months,
+          total: totalPaid,
+          date: new Date().toLocaleDateString('en-MY'),
+          customerName: custName && custName !== '-' ? custName : (getCurrentUser()?.name || 'Customer'),
+          customerPhone: custPhone,
+          customerEmail: pending.customerEmail || getCurrentUser()?.email || '-',
+          customerDevice: custDevice,
+          paymentMethod: 'Online Transfer',
+          status: 'PAID'
+        });
+      }
       if (pending.appId) {
         const prodMatch = products.find(p => p.id === pending.appId);
         if (prodMatch && typeof prodMatch.stock === 'number' && prodMatch.stock > 0) {
@@ -6684,46 +6790,211 @@
     renderCartModal();
   }
 
+  function updateCartBadgeUI() {
+    const items = getCartItems();
+    const totalQty = items.reduce((sum, it) => sum + Number(it.qty || 1), 0);
+    const b1 = document.getElementById('cartCountBadge');
+    const b2 = document.getElementById('landingCartCount');
+    if (b1) b1.textContent = String(totalQty);
+    if (b2) {
+      b2.textContent = currentLang === 'my'
+        ? `Lihat Troli (${totalQty})`
+        : `View Cart (${totalQty})`;
+    }
+  }
+
   function renderCartModal() {
     const box = document.getElementById('cartItemsContainer');
     const subEl = document.getElementById('cartSubtotalText');
+    const totEl = document.getElementById('cartTotalPayableText');
     if (!box) return;
     const items = getCartItems();
     if (!items.length) {
-      box.innerHTML = `<div class="step-card" style="text-align:center; color:var(--text-muted);">Troli anda masih kosong. Pilih mana-mana aplikasi di katalog dan tekan <strong>+ Cart</strong>.</div>`;
+      box.innerHTML = `<div class="step-card" style="text-align:center; color:var(--text-muted);">${currentLang === 'my' ? 'Troli anda masih kosong. Pilih aplikasi di katalog dan tekan <strong>+ Cart</strong>.' : 'Your cart is empty. Pick any app in the catalog and tap <strong>+ Cart</strong>.'}</div>`;
       if (subEl) subEl.textContent = 'RM0.00';
+      if (totEl) totEl.textContent = 'RM0.00';
+      const payBox = document.getElementById('cartCheckoutPaymentBox');
+      if (payBox) payBox.style.display = 'none';
       return;
     }
     let subtotal = 0;
+    let totalLines = 0;
+    const moWord = currentLang === 'my' ? 'Bln' : 'Mo';
     box.innerHTML = items.map((it, idx) => {
-      const lineTotal = Number(it.unitPrice || 0) * Number(it.qty || 1);
+      const qty = Number(it.qty || 1);
+      const lineTotal = Number(it.unitPrice || 0) * qty;
       subtotal += lineTotal;
+      totalLines += qty;
       return `
         <div class="cart-item-card">
           <div style="min-width:0;">
             <div style="font-weight:800; font-size:0.9rem;">${it.appName}</div>
-            <div style="font-size:0.74rem; color:var(--text-secondary);">${it.months} Month(s) • RM${Number(it.unitPrice || 0).toFixed(2)} each</div>
+            <div style="font-size:0.74rem; color:var(--text-secondary);">${it.months} ${moWord} • RM${Number(it.unitPrice || 0).toFixed(2)}</div>
             <div style="font-weight:800; font-size:0.86rem; color:var(--accent-gold); margin-top:2px;">RM${lineTotal.toFixed(2)}</div>
           </div>
           <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
             <button type="button" class="qty-ctrl-btn" onclick="changeCartItemQty(${idx}, -1)">-</button>
-            <span style="min-width:20px; text-align:center; font-weight:800;">${it.qty || 1}</span>
+            <span style="min-width:20px; text-align:center; font-weight:800;">${qty}</span>
             <button type="button" class="qty-ctrl-btn" onclick="changeCartItemQty(${idx}, 1)">+</button>
           </div>
         </div>
       `;
     }).join('');
     if (subEl) subEl.textContent = `RM${subtotal.toFixed(2)}`;
+    const payable = isJokerRole() ? 0 : (subtotal + totalLines * 1.00);
+    if (totEl) totEl.textContent = isJokerRole() ? 'RM0.00 (Joker Test)' : `RM${payable.toFixed(2)}`;
   }
 
-  function checkoutFromCart() {
+  function openCartPaymentSection() {
     const items = getCartItems();
-    if (!items.length) { showToast('Troli kosong.'); return; }
-    const first = items[0];
-    closeCartModal();
-    openCheckout(first.productId);
-    if (first.subPlan) selectSubPlan(first.subPlan);
-    if (first.months) selectMonths(Number(first.months));
+    if (!items.length) { showToast(currentLang === 'my' ? 'Troli kosong.' : 'Cart is empty.'); return; }
+    const payBox = document.getElementById('cartCheckoutPaymentBox');
+    if (!payBox) return;
+    payBox.style.display = 'block';
+    const user = getCurrentUser();
+    if (user) {
+      if (document.getElementById('cartCustName') && !document.getElementById('cartCustName').value) {
+        document.getElementById('cartCustName').value = user.name || '';
+      }
+      if (document.getElementById('cartCustPhone') && !document.getElementById('cartCustPhone').value) {
+        document.getElementById('cartCustPhone').value = user.phone || '';
+      }
+    }
+    renderCartModal();
+    payBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function processCartPayment() {
+    const items = getCartItems();
+    if (!items.length) { showToast(currentLang === 'my' ? 'Troli kosong.' : 'Cart is empty.'); return; }
+    const customerName = String(document.getElementById('cartCustName')?.value || getCurrentUser()?.name || '').trim();
+    const customerPhone = String(document.getElementById('cartCustPhone')?.value || getCurrentUser()?.phone || '').trim();
+    const customerInfo = String(document.getElementById('cartCustInfo')?.value || '').trim() || '-';
+    if (!customerName || !customerPhone) {
+      showToast(currentLang === 'my' ? 'Sila isi Nama Penuh dan Nombor WhatsApp!' : 'Please enter Full Name and WhatsApp Number!');
+      return;
+    }
+
+    const jokerMode = isJokerRole();
+    const createdTxns = [];
+    const expandedOrders = [];
+
+    items.forEach(it => {
+      const qty = Math.max(1, Number(it.qty || 1));
+      for (let q = 0; q < qty; q++) {
+        expandedOrders.push({
+          ...it,
+          receiptNo: generateReceiptNumber()
+        });
+      }
+    });
+
+    expandedOrders.forEach(entry => {
+      const itemBase = jokerMode ? 0 : Number(entry.unitPrice || 0);
+      const itemFee = jokerMode ? 0 : 1.00;
+      const itemTotal = jokerMode ? 0 : (itemBase + itemFee);
+      const txn = saveLocalOrder({
+        receiptNo: entry.receiptNo,
+        ref: entry.receiptNo,
+        app: jokerMode ? `${entry.appName} [JOKER TEST]` : entry.appName,
+        months: Number(entry.months || 1),
+        total: itemTotal.toFixed(2),
+        date: new Date().toLocaleDateString('en-MY'),
+        customerName,
+        customerPhone,
+        customerEmail: getCurrentUser()?.email || '-',
+        customerDevice: customerInfo,
+        paymentMethod: jokerMode ? 'Joker Sandbox (RM0)' : 'Online Transfer',
+        status: jokerMode ? 'PAID (JOKER RM0)' : 'CONFIRMED'
+      });
+      createdTxns.push(txn);
+    });
+
+    if (jokerMode) {
+      expandedOrders.forEach(entry => {
+        const pObj = products.find(p => p.id === entry.productId);
+        if (pObj) {
+          if (pObj.mode === 'dual' && Array.isArray(pObj.subPlans)) {
+            const sp = pObj.subPlans.find(x => x.key === entry.subPlan) || pObj.subPlans[0];
+            if (sp && typeof sp.stock === 'number' && sp.stock > 0) sp.stock = Math.max(0, sp.stock - 1);
+            recomputeDualProductStock(pObj);
+          } else if (typeof pObj.stock === 'number' && pObj.stock > 0) {
+            pObj.stock = Math.max(0, pObj.stock - 1);
+          }
+        }
+      });
+      saveCatalogState();
+      syncWebsiteCatalog();
+      pushSharedStoreToServer();
+
+      for (const txn of createdTxns) {
+        await sendTelegramBotOrderAlert({
+          ref: txn.receiptNo,
+          app: txn.app,
+          months: txn.months,
+          total: `RM${txn.total}`,
+          name: customerName,
+          phone: customerPhone,
+          device: customerInfo,
+          email: getCurrentUser()?.email || '-'
+        });
+      }
+
+      saveCartItems([]);
+      closeCartModal();
+      window._latestReceiptRecord = createdTxns[0] || null;
+      const banner = document.getElementById('receiptBanner');
+      if (banner) {
+        banner.classList.add('show');
+        document.getElementById('receiptTitle').textContent = `✅ ${createdTxns.length} Order Receipts Created`;
+        document.getElementById('receiptDesc').textContent = `${createdTxns.map(x => `${x.receiptNo} (${x.app})`).join(' • ')}`;
+      }
+      showToast(`✅ ${createdTxns.length} resit & rekod transaksi berjaya dijana!`);
+      return;
+    }
+
+    const totalCartAmount = expandedOrders.reduce((acc, entry) => acc + Number(entry.unitPrice || 0) + 1.00, 0);
+    localStorage.setItem('spystore_pending_cart_batch', JSON.stringify({
+      orders: expandedOrders,
+      customerName,
+      customerPhone,
+      customerInfo,
+      totalAmount: totalCartAmount.toFixed(2)
+    }));
+
+    const summaryAppNames = expandedOrders.map(x => `${x.appName} (${x.months}M)`).join(', ');
+    const primaryOrder = expandedOrders[0];
+    const btn = document.getElementById('cartPayNowBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating FPX Bill...'; }
+
+    try {
+      const res = await fetch('/api/create-bill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          appId: primaryOrder.productId,
+          appName: summaryAppNames,
+          months: primaryOrder.months,
+          planAmount: expandedOrders.reduce((a, b) => a + Number(b.unitPrice || 0), 0),
+          feeAmount: expandedOrders.length * 1.00,
+          totalAmount: totalCartAmount,
+          customerName,
+          customerPhone,
+          customerDevice: customerInfo,
+          paymentMethod: 'fpx'
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        showToast(data.error || 'Failed to create bill.');
+        if (btn) { btn.disabled = false; btn.textContent = currentLang === 'my' ? 'Bayar Sekarang →' : 'Pay Now →'; }
+      }
+    } catch (err) {
+      showToast('Network error connecting to payment server.');
+      if (btn) { btn.disabled = false; btn.textContent = currentLang === 'my' ? 'Bayar Sekarang →' : 'Pay Now →'; }
+    }
   }
 
   updateCartBadgeUI();
