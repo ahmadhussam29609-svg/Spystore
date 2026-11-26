@@ -2591,7 +2591,10 @@
       <!-- All Transactions (Owner / Admin) -->
       <div id="drawerTransactionsToolView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">
-          Senarai semua transaksi yang disusun kemas & disambungkan ke SSResit (ssresit.vercel.app).
+          Senarai semua transaksi semua pelanggan yang disusun kemas &amp; disambungkan ke SSResit.
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <input type="text" class="form-control" id="drawerTxnSearchInput" placeholder="🔍 Cari no. resit (cth. RES-SPY-...), nama, produk..." oninput="renderDrawerTransactionsList()" />
         </div>
         <div id="drawerAllTransactionsBody" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
@@ -3943,8 +3946,49 @@
 
   function getAllTransactionsDB() {
     try {
-      const list = JSON.parse(localStorage.getItem(ALL_TXNS_STORAGE_KEY) || '[]');
-      return Array.isArray(list) ? list : [];
+      const merged = [];
+      const addItem = (item) => {
+        if (!item || typeof item !== 'object') return;
+        const rec = String(item.receiptNo || item.invoiceNo || item.ref || '').trim();
+        const appStr = String(item.app || item.product || 'Subscription').trim();
+        const dtStr = String(item.date || '').trim();
+        const totStr = String(item.total || item.amount || '0.00').trim();
+        const exists = merged.some(x => {
+          const xRec = String(x.receiptNo || x.invoiceNo || x.ref || '').trim();
+          if (rec && xRec && rec === xRec) return true;
+          return xRec === rec && String(x.app || '') === appStr && String(x.date || '') === dtStr && String(x.total || '') === totStr;
+        });
+        if (!exists) {
+          merged.push({
+            ...item,
+            receiptNo: rec || generateReceiptNumber(),
+            app: appStr,
+            total: totStr
+          });
+        }
+      };
+
+      const globalList = JSON.parse(localStorage.getItem(ALL_TXNS_STORAGE_KEY) || '[]');
+      if (Array.isArray(globalList)) globalList.forEach(addItem);
+
+      const guestList = JSON.parse(localStorage.getItem('spystore_orders') || '[]');
+      if (Array.isArray(guestList)) guestList.forEach(addItem);
+
+      const users = getUsersDB();
+      users.forEach(u => {
+        if (!u || !u.email) return;
+        const saved = loadUserSavedData(u.email);
+        if (Array.isArray(saved.orders)) {
+          saved.orders.forEach(o => addItem({
+            ...o,
+            customerName: o.customerName || u.name || u.username || '-',
+            customerEmail: o.customerEmail || u.email || '-',
+            customerPhone: o.customerPhone || u.phone || '-'
+          }));
+        }
+      });
+
+      return merged;
     } catch (e) { return []; }
   }
 
@@ -4984,13 +5028,27 @@
   function renderDrawerTransactionsList() {
     const box = document.getElementById('drawerAllTransactionsBody');
     if (!box) return;
+    const q = String(document.getElementById('drawerTxnSearchInput')?.value || '').trim().toLowerCase();
     const allTxns = getAllTransactionsDB();
-    if (!allTxns.length) {
-      box.innerHTML = `<div style="font-size:0.76rem; color:var(--text-muted); padding:10px; background:var(--bg-input); border-radius:10px;">No transactions recorded yet.</div>`;
+    const filtered = !q ? allTxns : allTxns.filter(t => {
+      const recNo = String(t.receiptNo || t.invoiceNo || t.ref || '').toLowerCase();
+      const appName = String(t.app || '').toLowerCase();
+      const cName = String(t.customerName || '').toLowerCase();
+      const cPhone = String(t.customerPhone || '').toLowerCase();
+      const cEmail = String(t.customerEmail || '').toLowerCase();
+      const dt = String(t.date || '').toLowerCase();
+      const tot = String(t.total || '').toLowerCase();
+      return recNo.includes(q) || appName.includes(q) || cName.includes(q) || cPhone.includes(q) || cEmail.includes(q) || dt.includes(q) || tot.includes(q);
+    });
+
+    if (!filtered.length) {
+      box.innerHTML = `<div style="font-size:0.76rem; color:var(--text-muted); padding:10px; background:var(--bg-input); border-radius:10px;">${q ? `Tiada transaksi atau resit ditemui untuk "${q}".` : 'No transactions recorded yet.'}</div>`;
       return;
     }
-    box.innerHTML = allTxns.slice(0, 30).map((t, tIdx) => {
+    box.innerHTML = filtered.slice(0, 50).map((t, tIdx) => {
       const recNo = t.receiptNo || t.invoiceNo || t.ref || '-';
+      const origIdx = allTxns.indexOf(t);
+      const safeIdx = origIdx !== -1 ? origIdx : tIdx;
       return `
       <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:9px 11px;">
         <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.82rem;">
@@ -5001,8 +5059,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:6px; flex-wrap:wrap;">
           <span style="font-size:0.66rem; font-weight:700; color:var(--accent-cyan);">${t.status || 'PAID'} • ${t.paymentMethod || 'Online Transfer'}</span>
           <div style="display:flex; gap:6px;">
-            <button type="button" onclick="downloadGlobalTxnSSResit(${tIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">⬇️ Resit</button>
-            
+            <button type="button" onclick="downloadGlobalTxnSSResit(${safeIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">⬇️ Resit</button>
           </div>
         </div>
       </div>
@@ -5334,6 +5391,8 @@
       syncDrawerMgrFromSelect();
     } else if (tab === 'transactions') {
       if (titleEl) titleEl.textContent = 'ALL TRANSACTIONS';
+      const sInp = document.getElementById('drawerTxnSearchInput');
+      if (sInp) sInp.value = '';
       renderDrawerTransactionsList();
     } else if (tab === 'customers') {
       if (titleEl) titleEl.textContent = 'REGISTERED CUSTOMERS';
