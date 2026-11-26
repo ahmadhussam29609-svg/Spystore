@@ -5090,14 +5090,28 @@
 
   async function sendTelegramBotOrderAlert(vars = {}) {
     const text = formatOrderMessageTemplate(getTgTemplate(), vars);
-    if (!text) return;
+    if (!text) return false;
     try {
-      await fetch('/api/send-telegram', {
+      const res = await fetch('/api/send-telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, order: vars })
       });
-    } catch (e) {}
+      if (res.ok) {
+        return true;
+      }
+      if (navigator.clipboard && text) {
+        navigator.clipboard.writeText(text).catch(() => {});
+      }
+      showToast('⚠️ Notifikasi Telegram gagal dihantar (semak /api/send-telegram & env di Vercel). Teks disalin.');
+      return false;
+    } catch (e) {
+      if (navigator.clipboard && text) {
+        navigator.clipboard.writeText(text).catch(() => {});
+      }
+      showToast('⚠️ Tiada sambungan ke /api/send-telegram. Teks notifikasi disalin.');
+      return false;
+    }
   }
 
   function saveOwnerMsgTemplates() {
