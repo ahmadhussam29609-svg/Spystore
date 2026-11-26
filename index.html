@@ -6131,7 +6131,7 @@
   }
 
   function buildRobuxLoginDetailsBlock(vars = {}) {
-    const isRbx = /robux/i.test(String(vars.app || '')) || String(vars.months || '').toLowerCase() === 'via login';
+    const isRbx = /robux|recharge/i.test(String(vars.app || '')) || String(vars.months || '').toLowerCase() === 'via login';
     if (!isRbx) return '';
     const u = vars.robuxUsername || '-';
     const p = vars.robuxPassword || '-';
@@ -6142,11 +6142,10 @@
     const c3 = vars.robuxBackup3 || '-';
     return [
       '',
-      '━━━━━━━━━━━━━━━━━━━━━━',
-      `👤 USERNAME: ${u}`,
-      `🔑 PASSWORD: ${p}`,
-      `💰 ORDER: ${ord}`,
-      `💎 BAKI ROBUX: ${bal}`,
+      `👤 USERNAME   : ${u}`,
+      `🔑 PASSWORD   : ${p}`,
+      `💰 ORDER      : ${ord}`,
+      `💎 BAKI ROBUX : ${bal}`,
       '',
       '🔐 BACKUP CODE:',
       `1. ${c1}`,
@@ -6156,11 +6155,14 @@
   }
 
   function formatOrderMessageTemplate(tpl, vars = {}) {
-    const isRbx = /robux/i.test(String(vars.app || '')) || String(vars.months || '').toLowerCase() === 'via login';
+    const isRbx = /robux|recharge/i.test(String(vars.app || '')) || String(vars.months || '').toLowerCase() === 'via login';
     const cleanApp = formatCleanProductTitle(vars.app || '-');
     let out = String(tpl || '');
     if (isRbx) {
       out = out.replace(/\(?\s*\{months\}\s*(Bulan|Month|Months|Bln)\s*\)?/gi, '(Via Login)');
+      out = out.replace(/^•\s*Peranti\s*:.*$/gim, '• Method  : Via Login');
+    } else {
+      out = out.replace(/^•\s*Method\s*:.*$/gim, `• Peranti : ${vars.device || '-'}`);
     }
     const planStr = isRbx ? 'Via Login' : `${vars.months || '1'} Bulan`;
     const rbxBlock = buildRobuxLoginDetailsBlock(vars);
@@ -6172,15 +6174,15 @@
       .replace(/\{total\}/g, vars.total || '-')
       .replace(/\{name\}/g, vars.name || '-')
       .replace(/\{phone\}/g, vars.phone || '-')
-      .replace(/\{device\}/g, isRbx ? 'Roblox Account (Via Login)' : (vars.device || '-'))
+      .replace(/\{device\}/g, vars.device || '-')
       .replace(/\{email\}/g, vars.email || '-');
 
     if (formatted.includes('{robux_details}')) {
-      formatted = formatted.replace(/\{robux_details\}/g, rbxBlock);
+      formatted = formatted.replace(/\{robux_details\}/g, isRbx ? rbxBlock : '');
     } else if (rbxBlock) {
       formatted = formatted.trimEnd() + '\n' + rbxBlock;
     }
-    return formatted.trim();
+    return formatted.replace(/\n{3,}/g, '\n\n').trim();
   }
 
   async function sendTelegramBotOrderAlert(vars = {}) {
