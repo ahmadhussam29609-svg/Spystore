@@ -2594,7 +2594,7 @@
           Senarai semua transaksi semua pelanggan yang disusun kemas &amp; disambungkan ke SSResit.
         </div>
         <div class="form-group" style="margin-bottom:10px;">
-          <input type="text" class="form-control" id="drawerTxnSearchInput" placeholder="🔍 Cari no. resit (cth. RES-SPY-...), nama, produk..." oninput="renderDrawerTransactionsList()" />
+          <input type="text" class="form-control" id="drawerTxnSearchInput" placeholder="🔍 Cari no. order (cth. SPY-261126-...), nama, produk..." oninput="renderDrawerTransactionsList()" />
         </div>
         <div id="drawerAllTransactionsBody" style="display:flex; flex-direction:column; gap:8px;"></div>
       </div>
@@ -3154,12 +3154,22 @@
     } catch (e) {}
   }
 
+  function resolveEffectiveRoleForUser(u) {
+    if (!u) return 'customer';
+    if (isDesignatedOwner(u)) return 'owner';
+    if (isUserVerifiedJoker(u)) return 'joker';
+    if (isUserVerifiedAdmin(u)) return 'admin';
+    const r = String(u.role || 'customer').toLowerCase();
+    return ['owner', 'admin', 'joker', 'customer'].includes(r) ? r : 'customer';
+  }
+
   function getCurrentUser() {
     try {
       const u = JSON.parse(localStorage.getItem('spystore_current_user') || 'null');
       if (!u) return null;
       if (isDesignatedOwner(u)) return { ...u, email: u.email || OWNER_EMAIL, username: OWNER_USERNAME, role: 'owner' };
-      return u;
+      const effRole = resolveEffectiveRoleForUser(u);
+      return { ...u, role: effRole };
     } catch (e) { return null; }
   }
 
@@ -3299,8 +3309,10 @@
       if (!res.ok) return;
       const data = await res.json();
       if (data && Array.isArray(data.verifiedAdmins)) {
+        const localExisting = getVerifiedAdminsList();
         const localOnly = tokenAdmin ? [tokenAdmin] : [];
         const mergedAdmins = Array.from(new Set([
+          ...localExisting.map(x => String(x || '').trim().toLowerCase()),
           ...data.verifiedAdmins.map(x => String(x || '').trim().toLowerCase()),
           ...localOnly
         ])).filter(Boolean);
@@ -3314,9 +3326,17 @@
           const un = normalizeUsername(u.username || '');
           const shouldBeAdmin = (em && mergedAdmins.includes(em)) || (un && mergedAdmins.includes(un));
           if (shouldBeAdmin && u.role !== 'admin') { u.role = 'admin'; changed = true; }
-          if (!shouldBeAdmin && u.role === 'admin') { u.role = 'customer'; changed = true; }
         });
         if (changed) saveUsersDB(users);
+
+        const curU = JSON.parse(localStorage.getItem('spystore_current_user') || 'null');
+        if (curU && !isDesignatedOwner(curU)) {
+          const curEm = String(curU.email || '').trim().toLowerCase();
+          const curUn = normalizeUsername(curU.username || '');
+          if ((curEm && mergedAdmins.includes(curEm)) || (curUn && mergedAdmins.includes(curUn))) {
+            localStorage.setItem('spystore_current_user', JSON.stringify({ ...curU, role: 'admin' }));
+          }
+        }
       }
 
       if (data && Array.isArray(data.catalog) && data.catalog.length) {
@@ -3826,7 +3846,19 @@
     const m = String(now.getMonth() + 1).padStart(2, '0');
     const d = String(now.getDate()).padStart(2, '0');
     const rand = String(Math.floor(1000 + Math.random() * 9000));
-    return `RES-SPY-${y}${m}${d}-${rand}`;
+    return `SPY-${y}${m}${d}-${rand}`;
+  }
+
+  function normalizeOrderId(rawId) {
+    const clean = String(rawId || '').trim();
+    if (!clean || clean === '-') return generateReceiptNumber();
+    if (/^SPY-\d{6}-\d{4}$/i.test(clean)) return clean.toUpperCase();
+    const digits = clean.replace(/\D/g, '').slice(-4).padStart(4, '0');
+    const now = new Date();
+    const y = String(now.getFullYear()).slice(-2);
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `SPY-${y}${m}${d}-${digits}`;
   }
 
   function buildSSResitUrl(txn) {
@@ -4836,7 +4868,9 @@
     const users = getUsersDB();
     const found = users.find(u => (String(u.email || '').trim().toLowerCase() === idf || (cleanUname && normalizeUsername(u.username || '') === cleanUname)) && u.password === pass);
     if (!found) { showToast('Invalid login details.'); return; }
-    localStorage.setItem('spystore_current_user', JSON.stringify(found));
+    const effLoginRole = resolveEffectiveRoleForUser(found);
+    const loggedUser = { ...found, role: effLoginRole };
+    localStorage.setItem('spystore_current_user', JSON.stringify(loggedUser));
     syncCurrentUserSavedData();
     updateAuthUI();
     refreshDrawerRoleTools();
@@ -4861,7 +4895,8 @@
     const derivedName = String(name || '').trim() || username.replace(/[._-]+/g, ' ').replace(/ \w/g, c => c.toUpperCase());
     const users = getUsersDB();
     const existing = users.find(u => u.email === cleanEmail);
-    const gUser = { username, name: existing?.name || derivedName, email: cleanEmail, phone: phone || existing?.phone || '', provider: 'google' };
+    const preservedRole = resolveEffectiveRoleForUser(existing || { email: cleanEmail, username, role: 'customer' });
+    const gUser = { username, name: existing?.name || derivedName, email: cleanEmail, phone: phone || existing?.phone || '', provider: 'google', role: preservedRole };
     if (existing) Object.assign(existing, gUser);
     else users.push(gUser);
     saveUsersDB(users);
@@ -5068,7 +5103,27 @@
   }
 
   function refreshVerifyRoleListUI() {
-    ensureOwnerAccountSeeded();
+    (function resetAllTransactionsOnce() {
+    const resetFlag = 'spystore_txns_reset_2026_11_26_v1';
+    if (localStorage.getItem(resetFlag)) return;
+    try {
+      localStorage.removeItem(ALL_TXNS_STORAGE_KEY);
+      localStorage.removeItem('spystore_orders');
+      localStorage.removeItem('spystore_pending_order');
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('spystore_user_data_')) {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(k) || '{}');
+            parsed.orders = [];
+            localStorage.setItem(k, JSON.stringify(parsed));
+          } catch (e) {}
+        }
+      });
+      localStorage.setItem(resetFlag, '1');
+    } catch (e) {}
+  })();
+
+  ensureOwnerAccountSeeded();
     const users = getUsersDB().filter(u => !isDesignatedOwner(u));
     const vList = getVerifiedAdminsList();
     const custBox = document.getElementById('registeredCustomersListBox');
@@ -6156,9 +6211,11 @@
     const statusId = params.get('status_id') || (bpPaid === 'true' ? '1' : '');
     const ref = params.get('ref') || params.get('order_id') || bpId || '';
     const billCode = params.get('billcode') || bpId || '-';
-    if (statusId === '1' && ref) {
-      let pending = {};
-      try { pending = JSON.parse(localStorage.getItem('spystore_pending_order') || '{}'); } catch (e) {}
+    const isPaidReturn = statusId === '1' || bpPaid === 'true' || params.get('paid') === 'true';
+    let pending = {};
+    try { pending = JSON.parse(localStorage.getItem('spystore_pending_order') || '{}'); } catch (e) {}
+    const effectiveOrderId = normalizeOrderId(ref || pending.receiptNo || pending.ref || billCode);
+    if (isPaidReturn && (ref || billCode !== '-' || pending.appName)) {
       const appName = params.get('app') || pending.appName || 'Subscription';
       const months = params.get('mo') || pending.months || '1';
       const custName = params.get('name') || pending.customerName || '-';
@@ -6167,11 +6224,11 @@
       const totalPaid = pending.totalAmount || '-';
       const banner = document.getElementById('receiptBanner');
       banner.classList.add('show');
-      document.getElementById('receiptTitle').textContent = `✅ Payment Confirmed • ${ref}`;
+      document.getElementById('receiptTitle').textContent = `✅ Payment Confirmed • ${effectiveOrderId}`;
       document.getElementById('receiptDesc').textContent = `${appName} (${months} Month) — Admin has been notified. Tap below to receive your account on WhatsApp.`;
       const cleanTotal = (totalPaid && totalPaid !== '-' && !isNaN(parseFloat(totalPaid))) ? `RM${parseFloat(totalPaid).toFixed(2)}` : '-';
       const waText = formatOrderMessageTemplate(getWaTemplate(), {
-        ref,
+        ref: effectiveOrderId,
         app: appName,
         months,
         total: cleanTotal,
@@ -6180,16 +6237,30 @@
         device: custDevice && custDevice !== '-' ? custDevice : '-',
         email: pending.customerEmail || getCurrentUser()?.email || '-'
       });
-      const confirmedTxn = recordGlobalTransaction({
-        receiptNo: pending.receiptNo || pending.invoiceNo || generateReceiptNumber(),
-        ref, app: appName, months, total: totalPaid,
+      const confirmedTxn = saveLocalOrder({
+        receiptNo: effectiveOrderId,
+        ref: effectiveOrderId,
+        app: appName,
+        months,
+        total: totalPaid,
         date: new Date().toLocaleDateString('en-MY'),
-        customerName: custName && custName !== '-' ? custName : (getCurrentUser()?.name || 'Customer'), customerPhone: custPhone,
+        customerName: custName && custName !== '-' ? custName : (getCurrentUser()?.name || 'Customer'),
+        customerPhone: custPhone,
         customerEmail: pending.customerEmail || getCurrentUser()?.email || '-',
-        customerDevice: custDevice, paymentMethod: 'Online Transfer', status: 'PAID'
+        customerDevice: custDevice,
+        paymentMethod: 'Online Transfer',
+        status: 'PAID'
       });
-      sendTelegramBotOrderAlert({
-        ref,
+      if (pending.appId) {
+        const prodMatch = products.find(p => p.id === pending.appId);
+        if (prodMatch && typeof prodMatch.stock === 'number' && prodMatch.stock > 0) {
+          prodMatch.stock = Math.max(0, prodMatch.stock - 1);
+          saveCatalogState();
+          syncWebsiteCatalog();
+        }
+      }
+      await sendTelegramBotOrderAlert({
+        ref: effectiveOrderId,
         app: appName,
         months,
         total: cleanTotal,
@@ -6198,6 +6269,7 @@
         device: custDevice && custDevice !== '-' ? custDevice : '-',
         email: pending.customerEmail || getCurrentUser()?.email || '-'
       });
+      localStorage.removeItem('spystore_pending_order');
       window._latestReceiptRecord = confirmedTxn;
       lastReceiptPlainText = waText;
       document.getElementById('receiptWaLink').href = `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waText)}`;
