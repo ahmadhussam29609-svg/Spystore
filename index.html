@@ -2616,11 +2616,11 @@
           <label id="lblVerifyField">Email or Username *</label>
           <input type="text" class="form-control" id="verifyEmailOrUsernameInput" placeholder="e.g. user@gmail.com or username" />
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button type="button" class="primary-submit" style="flex:1; margin-top:0;" onclick="verifyUserToAdminRole()"><span id="lblVerifyBtn">Verify as Admin ✓</span></button>
-          <button type="button" style="flex:1; background:linear-gradient(135deg, #7c3aed, #5b21b6); color:#ffffff; border:1px solid rgba(196,181,253,0.45); padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;" onclick="verifyUserToJokerRole()">🃏 Verify as Joker</button>
-          <button type="button" onclick="unverifyUserFromAdminRole()" style="background:rgba(239, 68, 68, 0.14); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;"><span id="lblUnverifyBtn">Unverify Admin</span></button>
-          <button type="button" onclick="unverifyUserFromJokerRole()" style="background:rgba(124, 58, 237, 0.16); border:1px solid rgba(196, 181, 253, 0.45); color:#c4b5fd; padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;">Unverify Joker</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button type="button" class="primary-submit" style="margin-top:0; padding:11px 12px; font-size:0.8rem;" onclick="verifyUserToAdminRole()"><span id="lblVerifyBtn">Verify as Admin ✓</span></button>
+          <button type="button" style="background:linear-gradient(135deg, #7c3aed, #5b21b6); color:#ffffff; border:1px solid rgba(196,181,253,0.45); padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;" onclick="verifyUserToJokerRole()">🃏 Verify as Joker</button>
+          <button type="button" onclick="unverifyUserFromAdminRole()" style="background:rgba(239, 68, 68, 0.14); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:10px 12px; border-radius:12px; font-weight:800; font-size:0.78rem; cursor:pointer;"><span id="lblUnverifyBtn">Unverify Admin</span></button>
+          <button type="button" onclick="unverifyUserFromJokerRole()" style="background:rgba(124, 58, 237, 0.16); border:1px solid rgba(196, 181, 253, 0.45); color:#c4b5fd; padding:10px 12px; border-radius:12px; font-weight:800; font-size:0.78rem; cursor:pointer;">Unverify Joker</button>
         </div>
         <div id="verifiedAdminsListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
         <div id="activeJokersListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
@@ -3274,6 +3274,19 @@
     document.getElementById('adminGrantedPopupModal')?.classList.add('open');
   }
 
+  function showJokerGrantedPopup() {
+    const isMy = currentLang === 'my';
+    const tEl = document.getElementById('adminGrantedTitle');
+    const dEl = document.getElementById('adminGrantedDesc');
+    const bEl = document.getElementById('adminGrantedOpenMenuBtn');
+    if (tEl) tEl.textContent = isMy ? '🃏 Tahniah! Anda Kini JOKER' : '🃏 Congratulations! You Are Now JOKER';
+    if (dEl) dEl.innerHTML = isMy
+      ? 'Akaun anda telah disahkan sebagai <strong>JOKER</strong> oleh Owner. Akses ujian transaksi <strong>RM0.00</strong>, <strong>SSResit</strong>, dan alat sandbox kini tersedia dalam menu <strong>☰</strong>.'
+      : 'Your account has been verified as <strong>JOKER</strong> by the Owner. <strong>RM0.00</strong> test orders, <strong>SSResit</strong>, and sandbox tools are now unlocked in the <strong>☰</strong> menu.';
+    if (bEl) bEl.textContent = isMy ? 'Buka Menu Joker (☰) →' : 'Open Joker Menu (☰) →';
+    document.getElementById('adminGrantedPopupModal')?.classList.add('open');
+  }
+
   async function pushSharedStoreToServer() {
     try {
       const catalogData = JSON.parse(localStorage.getItem(CATALOG_STORAGE_KEY) || 'null');
@@ -3360,14 +3373,17 @@
   function checkAndNotifyAdminRoleGranted() {
     const u = getCurrentUser();
     if (!u || isDesignatedOwner(u)) return;
-    if (getUserRole(u) === 'admin') {
-      const keyId = String(u.email || u.username || '').trim().toLowerCase();
+    const role = getUserRole(u);
+    if (role === 'admin' || role === 'joker') {
+      const baseId = String(u.email || u.username || '').trim().toLowerCase();
+      const keyId = `${role}:${baseId}`;
       let seen = {};
       try { seen = JSON.parse(localStorage.getItem(ADMIN_NOTIF_SEEN_KEY) || '{}'); } catch (e) {}
       if (!seen[keyId]) {
         seen[keyId] = true;
         try { localStorage.setItem(ADMIN_NOTIF_SEEN_KEY, JSON.stringify(seen)); } catch (e) {}
-        showAdminGrantedPopup();
+        if (role === 'joker') showJokerGrantedPopup();
+        else showAdminGrantedPopup();
       }
     }
   }
