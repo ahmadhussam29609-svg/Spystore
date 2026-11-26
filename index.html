@@ -2235,9 +2235,11 @@
     .modal-backdrop.open,
     .show-detail-backdrop.open {
       display: flex;
+      flex-direction: column;
       padding: 0 !important;
       background: var(--bg-primary) !important;
       backdrop-filter: none !important;
+      overflow: hidden !important;
     }
 
     .modal-backdrop .modal-card,
@@ -2251,15 +2253,17 @@
       box-shadow: none !important;
       padding: 16px 18px 48px 18px !important;
       overflow-y: auto !important;
+      margin: 0 auto !important;
     }
 
     .modal-backdrop .modal-top,
     .show-detail-backdrop .modal-top {
-      position: sticky;
-      top: -16px;
-      z-index: 25;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       background: var(--bg-secondary);
-      margin: -16px -18px 14px -18px;
+      margin: -16px -18px 16px -18px;
       padding: 14px 18px;
       border-bottom: 1px solid var(--border-color);
     }
@@ -2630,11 +2634,7 @@
       <h3 id="authModalTitle" style="font-size:1.1rem; color:var(--text-primary);">SPYSTORE ACCOUNT</h3>
       <button type="button" class="close-modal" onclick="closeAuthModal()">✕</button>
     </div>
-    <div class="fullscreen-modal-body" style="max-width:480px;">
-      <div class="modal-top">
-        <h3 id="authModalTitle">SPYSTORE ACCOUNT</h3>
-        <button type="button" class="close-modal" onclick="closeAuthModal()">✕</button>
-      </div>
+    <div class="fullscreen-modal-body" style="max-width:520px;">
 
       <div id="authFormsView" class="auth-form-anim">
         <div class="auth-tabs">
@@ -2890,11 +2890,11 @@
           <label id="lblVerifyField">Email or Username *</label>
           <input type="text" class="form-control" id="verifyEmailOrUsernameInput" placeholder="e.g. user@gmail.com or username" />
         </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button type="button" class="primary-submit" style="flex:1; margin-top:0;" onclick="verifyUserToAdminRole()"><span id="lblVerifyBtn">Verify as Admin ✓</span></button>
-          <button type="button" style="flex:1; background:linear-gradient(135deg, #7c3aed, #5b21b6); color:#ffffff; border:1px solid rgba(196,181,253,0.45); padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;" onclick="verifyUserToJokerRole()">🃏 Verify as Joker</button>
-          <button type="button" onclick="unverifyUserFromAdminRole()" style="background:rgba(239, 68, 68, 0.14); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;"><span id="lblUnverifyBtn">Unverify Admin</span></button>
-          <button type="button" onclick="unverifyUserFromJokerRole()" style="background:rgba(124, 58, 237, 0.16); border:1px solid rgba(196, 181, 253, 0.45); color:#c4b5fd; padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;">Unverify Joker</button>
+        <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px;">
+          <button type="button" class="primary-submit" style="width:100%; margin-top:0; padding:11px 12px; font-size:0.8rem;" onclick="verifyUserToAdminRole()"><span id="lblVerifyBtn">Verify as Admin ✓</span></button>
+          <button type="button" style="width:100%; background:linear-gradient(135deg, #7c3aed, #5b21b6); color:#ffffff; border:1px solid rgba(196,181,253,0.45); padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;" onclick="verifyUserToJokerRole()">🃏 Verify as Joker</button>
+          <button type="button" onclick="unverifyUserFromAdminRole()" style="width:100%; background:rgba(239, 68, 68, 0.14); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;"><span id="lblUnverifyBtn">Unverify Admin</span></button>
+          <button type="button" onclick="unverifyUserFromJokerRole()" style="width:100%; background:rgba(124, 58, 237, 0.16); border:1px solid rgba(196, 181, 253, 0.45); color:#c4b5fd; padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;">Unverify Joker</button>
         </div>
         <div id="verifiedAdminsListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
         <div id="activeJokersListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
