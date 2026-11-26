@@ -2864,8 +2864,8 @@
           <label>Select Product / Plan *</label>
           <select class="form-control" id="drawerMgrTargetSelect" onchange="syncDrawerMgrFromSelect()"></select>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-          <div class="form-group" style="margin-bottom:0;">
+        <div id="drawerMgrStockPriceRow" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <div class="form-group" id="drawerMgrStockWrap" style="margin-bottom:0;">
             <label>Stock (Stok)</label>
             <input type="number" min="0" class="form-control" id="drawerMgrStockInput" />
           </div>
@@ -2959,12 +2959,12 @@
   </div>
 
   <!-- Integrated SSResit Modal (Owner & Admin Only) -->
-  <div class="modal-backdrop" id="ownerSSResitModal" onclick="if(event.target===this) closeOwnerSSResitModal()">
+  <div class="modal-backdrop" id="ownerSSResitModal" style="z-index:9850;" onclick="if(event.target===this) closeOwnerSSResitModal()">
     <div class="modal-card" style="max-width:560px;">
       <div class="modal-top">
         <div>
-          <div style="font-size:0.62rem; font-weight:800; color:var(--accent-gold); letter-spacing:0.07em; text-transform:uppercase;">SPYSTORE INTERNAL MODULE • OWNER / ADMIN</div>
-          <h3 style="font-size:1.05rem;">SSResit • Manual Receipt Tools</h3>
+          <div id="ssrModalSubTag" style="font-size:0.62rem; font-weight:800; color:var(--accent-gold); letter-spacing:0.07em; text-transform:uppercase;">SPYSTORE OFFICIAL RECEIPT</div>
+          <h3 id="ssrModalMainTitle" style="font-size:1.05rem;">SSResit • Official Receipt</h3>
         </div>
         <button type="button" class="close-modal" onclick="closeOwnerSSResitModal()">✕</button>
       </div>
@@ -3007,7 +3007,7 @@
         <div style="display:grid; grid-template-columns:1.25fr 0.95fr 0.9fr; gap:8px;">
           <div class="form-group" style="margin-bottom:0;">
             <label>Product *</label>
-            <select class="form-control" id="ssrProductInput" onchange="handleManualReceiptProductOrPlanChange()"></select>
+            <select class="form-control" id="ssrProductInput" onchange="handleManualReceiptProductOrPlanChange(true)"></select>
           </div>
           <div class="form-group" style="margin-bottom:0;">
             <label>Plan *</label>
@@ -3234,7 +3234,7 @@
       id: 'robux',
       logo: 'robuxroblox.png',
       frontName: 'Robux',
-      name: 'Roblox Robux Recharge',
+      name: 'Recharge Robux',
       mode: 'robux_pricelist',
       category: 'Gaming',
       price: 19.90,
@@ -4005,9 +4005,14 @@
       return matchCat && matchQuery;
     });
     grid.innerHTML = filtered.map((p, idx) => {
+      const isGameRecharge = p.category === 'Gaming' || p.mode === 'robux_pricelist';
       const isComingSoon = Boolean(p.comingSoon);
-      const inStock = !isComingSoon && p.stock > 0;
-      const stockLabel = isComingSoon ? 'Coming Soon' : (inStock ? (currentLang === 'en' ? `In Stock • ${p.stock}` : `Stok Ada • ${p.stock}`) : (currentLang === 'en' ? 'Out of Stock' : 'Stok Habis'));
+      const inStock = isGameRecharge ? !isComingSoon : (!isComingSoon && p.stock > 0);
+      const stockLabel = isComingSoon
+        ? 'Coming Soon'
+        : (isGameRecharge
+            ? (currentLang === 'en' ? 'Available' : 'Tersedia')
+            : (inStock ? (currentLang === 'en' ? `In Stock • ${p.stock}` : `Stok Ada • ${p.stock}`) : (currentLang === 'en' ? 'Out of Stock' : 'Stok Habis')));
       const pillClass = isComingSoon ? 'mode-invite' : (inStock ? 'stock-in' : 'stock-out');
       const onClickAction = isComingSoon ? `showToast('${p.name} — Coming Soon')` : (inStock ? `openCheckout('${p.id}')` : `showToast('${p.name} out of stock')`);
       return `
@@ -4055,9 +4060,9 @@
       monthsGrid.style.display = 'none';
       grid.innerHTML = currentProduct.robuxPackages.map(pk => {
         const isCS = Boolean(pk.comingSoon1Mo);
-        const isOff = Boolean(pk.disabled1Mo) || (typeof pk.stock === 'number' && pk.stock <= 0 && !isCS);
+        const isOff = Boolean(pk.disabled1Mo);
         const active = pk.key === selectedRobuxPkgKey && !isCS && !isOff;
-        const subTag = isCS ? ' • Coming Soon' : (isOff ? ' • Habis' : (typeof pk.stock === 'number' ? ` • Stok ${pk.stock}` : ''));
+        const subTag = isCS ? ' • Coming Soon' : (isOff ? ' • Off' : '');
         return `
           <div class="plan-option ${active ? 'selected' : ''}" style="${(isCS || isOff) ? 'opacity:0.48; cursor:not-allowed;' : ''}" onclick="selectRobuxPackage('${pk.key}')">
             <div class="plan-mo">${pk.label}${subTag}</div>
@@ -4076,7 +4081,7 @@
       const pk = currentProduct.robuxPackages.find(x => x.key === pkgKey);
       if (pk) {
         if (pk.comingSoon1Mo) { showToast(`${pk.label} — Coming Soon`); return; }
-        if (pk.disabled1Mo || (typeof pk.stock === 'number' && pk.stock <= 0)) {
+        if (pk.disabled1Mo) {
           showToast(currentLang === 'en' ? `${pk.label} is out of stock.` : `${pk.label} kehabisan stok.`);
           return;
         }
@@ -4163,7 +4168,7 @@
             <span style="font-size:1.05rem; font-weight:700;">${currentProduct.name}</span>
             <span class="mode-badge ${badgeClass}" style="margin-bottom:0;">${modeText}</span>
           </div>
-          <div style="font-size:0.76rem; color:var(--accent-cyan);">${dict.rule1} • Stock: ${(getActivePlanTarget()?.stock ?? currentProduct.stock)}</div>
+          <div style="font-size:0.76rem; color:var(--accent-cyan);">${dict.rule1}${currentProduct.mode === 'robux_pricelist' ? '' : ` • Stock: ${(getActivePlanTarget()?.stock ?? currentProduct.stock)}`}</div>
         </div>
       </div>
       <div class="warranty-rules-box">
@@ -4645,6 +4650,12 @@
       customerPhone,
       customerDevice,
       customerEmail,
+      robuxUsername,
+      robuxPassword,
+      robuxBalance,
+      robuxBackup1: b1,
+      robuxBackup2: b2,
+      robuxBackup3: b3,
       paymentMethod: jokerMode ? 'Joker Test (RM0.00)' : 'fpx',
       isJokerTest: jokerMode
     }));
@@ -4687,19 +4698,31 @@
         name: customerName,
         phone: customerPhone,
         device: customerDevice && customerDevice !== '-' ? customerDevice : '-',
-        email: customerEmail && customerEmail !== '-' ? customerEmail : (getCurrentUser()?.email || '-')
+        email: customerEmail && customerEmail !== '-' ? customerEmail : (getCurrentUser()?.email || '-'),
+        robuxUsername,
+        robuxPassword,
+        robuxBalance,
+        robuxBackup1: b1,
+        robuxBackup2: b2,
+        robuxBackup3: b3
       });
 
       window._latestReceiptRecord = savedTxn;
       const waText = formatOrderMessageTemplate(getWaTemplate(), {
         ref: receiptNo,
         app: activeAppName,
-        months: selectedMonths,
+        months: isRobux ? 'Via Login' : selectedMonths,
         total: 'RM0.00',
         name: customerName,
         phone: customerPhone,
         device: customerDevice && customerDevice !== '-' ? customerDevice : '-',
-        email: customerEmail && customerEmail !== '-' ? customerEmail : (getCurrentUser()?.email || '-')
+        email: customerEmail && customerEmail !== '-' ? customerEmail : (getCurrentUser()?.email || '-'),
+        robuxUsername,
+        robuxPassword,
+        robuxBalance,
+        robuxBackup1: b1,
+        robuxBackup2: b2,
+        robuxBackup3: b3
       });
       lastReceiptPlainText = waText;
 
@@ -4805,56 +4828,102 @@
     const items = [];
     products.forEach(p => {
       if (p.mode === 'dual' && Array.isArray(p.subPlans)) {
-        p.subPlans.forEach(sp => {
-          const label = `${p.name} (${sp.label})`;
-          const p1 = Number(sp.price || p.price || 0);
-          const p2 = typeof sp.price2Mo === 'number' && !isNaN(sp.price2Mo) && sp.price2Mo > 0 ? Number(sp.price2Mo) : p1 * 2;
-          items.push({ label, price1: p1, price2: p2, isRobux: false });
+        const spShare = p.subPlans.find(s => s.key === 'share') || p.subPlans[0];
+        const spPriv = p.subPlans.find(s => s.key === 'private') || p.subPlans[1] || spShare;
+        const s1 = Number(spShare?.price || 10);
+        const s2 = typeof spShare?.price2Mo === 'number' && spShare.price2Mo > 0 ? Number(spShare.price2Mo) : s1 * 2;
+        const pr1 = Number(spPriv?.price || 15);
+        const pr2 = typeof spPriv?.price2Mo === 'number' && spPriv.price2Mo > 0 ? Number(spPriv.price2Mo) : pr1 * 2;
+        items.push({
+          label: p.name,
+          mode: 'dual',
+          plans: [
+            { value: 'Share (1 Month)', price: s1 },
+            { value: 'Share (2 Months)', price: s2 },
+            { value: 'Private (1 Month)', price: pr1 },
+            { value: 'Private (2 Months)', price: pr2 }
+          ]
         });
       } else if (p.mode === 'robux_pricelist' && Array.isArray(p.robuxPackages)) {
-        p.robuxPackages.forEach(pk => {
-          const label = `Roblox Robux Recharge — ${pk.label}`;
-          const p1 = Number(pk.price || 0);
-          items.push({ label, price1: p1, price2: p1, isRobux: true });
+        items.push({
+          label: 'Recharge Robux',
+          mode: 'robux',
+          plans: p.robuxPackages.map(pk => ({
+            value: pk.label,
+            price: Number(pk.price || 0)
+          }))
         });
       } else {
         const p1 = Number(p.price || 0);
         const p2 = typeof p.price2Mo === 'number' && !isNaN(p.price2Mo) && p.price2Mo > 0 ? Number(p.price2Mo) : p1 * 2;
-        items.push({ label: p.name, price1: p1, price2: p2, isRobux: false });
+        items.push({
+          label: p.name,
+          mode: 'standard',
+          plans: [
+            { value: '1 Month', price: p1 },
+            { value: '2 Months', price: p2 }
+          ]
+        });
       }
     });
     return items;
   }
 
-  function populateSpystoreProductSelect(selectedVal = '') {
+  function rebuildSSRPlanOptionsForProduct(prodLabel, preferredPlan = '') {
+    const planSel = document.getElementById('ssrPlanInput');
+    if (!planSel) return null;
+    const opts = getSpystoreReceiptProductCatalog();
+    const found = opts.find(o => o.label === prodLabel) || opts[0];
+    if (!found) return null;
+    planSel.innerHTML = found.plans.map(pl => `<option value="${pl.value}">${pl.value}</option>`).join('');
+    if (preferredPlan && found.plans.some(pl => pl.value.toLowerCase() === preferredPlan.toLowerCase())) {
+      const m = found.plans.find(pl => pl.value.toLowerCase() === preferredPlan.toLowerCase());
+      planSel.value = m.value;
+    } else if (found.plans.length) {
+      planSel.value = found.plans[0].value;
+    }
+    return found;
+  }
+
+  function populateSpystoreProductSelect(selectedVal = '', preferredPlan = '') {
     const sel = document.getElementById('ssrProductInput');
     if (!sel) return;
     const opts = getSpystoreReceiptProductCatalog();
     sel.innerHTML = opts.map(o => `<option value="${o.label}">${o.label}</option>`).join('');
-    const normSel = String(selectedVal || '').replace(/\s*\[JOKER TEST\]\s*/i, '').trim().toLowerCase();
-    if (normSel && opts.some(o => o.label.toLowerCase() === normSel)) {
-      const matched = opts.find(o => o.label.toLowerCase() === normSel);
-      sel.value = matched.label;
-    } else if (opts.length) {
-      sel.value = opts[0].label;
+    let normSel = formatCleanProductTitle(String(selectedVal || '').replace(/\s*\[JOKER TEST\]\s*/i, '').trim());
+    let extractedPlan = preferredPlan;
+
+    if (/^Recharge Robux\s*[—-]\s*(.+)$/i.test(normSel)) {
+      const m = normSel.match(/^Recharge Robux\s*[—-]\s*(.+)$/i);
+      normSel = 'Recharge Robux';
+      if (m && m[1]) extractedPlan = m[1].trim();
+    } else if (/^CapCut Pro\s*\((Share|Private)\)$/i.test(normSel)) {
+      const m = normSel.match(/^CapCut Pro\s*\((Share|Private)\)$/i);
+      normSel = 'CapCut Pro';
+      if (m && m[1]) {
+        const moPart = String(preferredPlan || '').includes('2') ? '2 Months' : '1 Month';
+        extractedPlan = `${m[1]} (${moPart})`;
+      }
     }
+
+    const matched = opts.find(o => o.label.toLowerCase() === normSel.toLowerCase()) || opts[0];
+    if (matched) sel.value = matched.label;
+    rebuildSSRPlanOptionsForProduct(sel.value, extractedPlan);
   }
 
-  function handleManualReceiptProductOrPlanChange() {
+  function handleManualReceiptProductOrPlanChange(isProductChange = false) {
     const prodLabel = document.getElementById('ssrProductInput')?.value || '';
     const planSel = document.getElementById('ssrPlanInput');
     const opts = getSpystoreReceiptProductCatalog();
     const found = opts.find(o => o.label === prodLabel);
-    if (found && found.isRobux && planSel) {
-      planSel.value = 'Via Login';
-    } else if (found && !found.isRobux && planSel && planSel.value === 'Via Login') {
-      planSel.value = '1 Month';
+    if (isProductChange && found) {
+      rebuildSSRPlanOptionsForProduct(found.label);
     }
-    const planLabel = planSel?.value || '1 Month';
+    const activePlanVal = planSel?.value || '';
     const amtInp = document.getElementById('ssrAmountInput');
     if (found && amtInp) {
-      const val = (String(planLabel).includes('2') && !found.isRobux) ? found.price2 : found.price1;
-      amtInp.value = Number(val || 0).toFixed(2);
+      const planObj = found.plans.find(pl => pl.value === activePlanVal) || found.plans[0];
+      if (planObj) amtInp.value = Number(planObj.price || 0).toFixed(2);
     }
     renderIntegratedSSResitPreview();
   }
@@ -4884,28 +4953,23 @@
     const allowedMethods = ['Online Transfer', 'QR', 'eWallet', 'Cash'];
     const matchedMethod = allowedMethods.find(m => m.toLowerCase() === rawMethod.toLowerCase()) || 'Online Transfer';
 
-    let rawApp = String(txn?.app || '').replace(/\s*\[JOKER TEST\]\s*/i, '').trim();
-    const isRobuxTxn = /robux/i.test(rawApp) || String(txn?.months || '').toLowerCase() === 'via login';
+    let rawApp = formatCleanProductTitle(String(txn?.app || '').replace(/\s*\[JOKER TEST\]\s*/i, '').trim());
     let planNum = Number(txn?.months || 1);
-    const matchParen = rawApp.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
-    if (matchParen) {
-      rawApp = matchParen[1].trim();
-      if (String(matchParen[2]).includes('2')) planNum = 2;
-    }
-    const planLabel = isRobuxTxn ? 'Via Login' : (planNum === 2 ? '2 Months' : '1 Month');
+    let preferredPlan = planNum === 2 ? '2 Months' : '1 Month';
 
-    populateSpystoreProductSelect(rawApp);
+    populateSpystoreProductSelect(rawApp, preferredPlan);
     const activeProdLabel = document.getElementById('ssrProductInput')?.value || '';
+    const activePlanVal = document.getElementById('ssrPlanInput')?.value || '1 Month';
     const catalogOpts = getSpystoreReceiptProductCatalog();
     const catalogMatch = catalogOpts.find(o => o.label === activeProdLabel);
-    const defaultAmt = catalogMatch ? (planNum === 2 ? catalogMatch.price2 : catalogMatch.price1) : 0;
+    const planObj = catalogMatch?.plans?.find(pl => pl.value === activePlanVal) || catalogMatch?.plans?.[0];
+    const defaultAmt = planObj ? Number(planObj.price || 0) : 0;
     const amt = txn ? (parseFloat(txn?.total || '0') || 0) : defaultAmt;
 
     if (document.getElementById('ssrReceiptNoInput')) document.getElementById('ssrReceiptNoInput').value = recNo;
     if (document.getElementById('ssrDateInput')) document.getElementById('ssrDateInput').value = isoDate;
     if (document.getElementById('ssrBuyerInput')) document.getElementById('ssrBuyerInput').value = buyer;
     if (document.getElementById('ssrMethodInput')) document.getElementById('ssrMethodInput').value = matchedMethod;
-    if (document.getElementById('ssrPlanInput')) document.getElementById('ssrPlanInput').value = planLabel;
     if (document.getElementById('ssrAmountInput')) document.getElementById('ssrAmountInput').value = amt.toFixed(2);
 
     renderIntegratedSSResitPreview();
@@ -4922,12 +4986,23 @@
     const amtNum = parseFloat(document.getElementById('ssrAmountInput')?.value || '0') || 0;
     const amtStr = `RM ${amtNum.toFixed(2)}`;
 
+    let displayTitle = prod;
+    let displaySubLine = `${plan} • 1 × ${amtStr}`;
+    if (prod === 'Recharge Robux') {
+      displayTitle = `Recharge Robux — ${plan}`;
+      displaySubLine = `Via Login • 1 × ${amtStr}`;
+    } else if (prod === 'CapCut Pro' && /^(Share|Private)\s*\((.+)\)$/i.test(plan)) {
+      const m = plan.match(/^(Share|Private)\s*\((.+)\)$/i);
+      displayTitle = `CapCut Pro (${m[1]})`;
+      displaySubLine = `${m[2]} • 1 × ${amtStr}`;
+    }
+
     if (document.getElementById('ssrPrevOrderId')) document.getElementById('ssrPrevOrderId').textContent = recNo;
     if (document.getElementById('ssrPrevDate')) document.getElementById('ssrPrevDate').textContent = dt;
     if (document.getElementById('ssrPrevBuyer')) document.getElementById('ssrPrevBuyer').textContent = buyer;
     if (document.getElementById('ssrPrevMethod')) document.getElementById('ssrPrevMethod').textContent = method;
-    if (document.getElementById('ssrPrevProduct')) document.getElementById('ssrPrevProduct').textContent = prod;
-    if (document.getElementById('ssrPrevSubLine')) document.getElementById('ssrPrevSubLine').textContent = `${plan} • 1 × ${amtStr}`;
+    if (document.getElementById('ssrPrevProduct')) document.getElementById('ssrPrevProduct').textContent = displayTitle;
+    if (document.getElementById('ssrPrevSubLine')) document.getElementById('ssrPrevSubLine').textContent = displaySubLine;
     if (document.getElementById('ssrPrevLineAmt')) document.getElementById('ssrPrevLineAmt').textContent = amtStr;
     if (document.getElementById('ssrPrevSubtotal')) document.getElementById('ssrPrevSubtotal').textContent = amtStr;
     if (document.getElementById('ssrPrevTotal')) document.getElementById('ssrPrevTotal').textContent = amtStr;
@@ -4940,6 +5015,10 @@
     const canEditManual = isOwnerOrAdmin() && isManual;
     const editBtn = document.getElementById('ssrToggleEditBtn');
     const editBox = document.getElementById('ssrEditFieldsBox');
+    const subTag = document.getElementById('ssrModalSubTag');
+    const mainTitle = document.getElementById('ssrModalMainTitle');
+    if (subTag) subTag.textContent = isManual ? 'SPYSTORE INTERNAL MODULE • OWNER / ADMIN' : 'SPYSTORE OFFICIAL RECEIPT';
+    if (mainTitle) mainTitle.textContent = isManual ? 'SSResit • Manual Receipt Tools' : 'SSResit • Official Receipt';
     if (editBtn) editBtn.style.display = canEditManual ? 'inline-flex' : 'none';
     if (editBox) editBox.style.display = 'none';
     document.getElementById('ownerSSResitModal')?.classList.add('open');
@@ -5111,7 +5190,7 @@
       return `
       <div class="order-item" style="cursor:pointer;" onclick="openTransactionDetail(${idx})">
         <div style="display:flex; justify-content:space-between; font-weight:700;">
-          <span>${o.app} (${String(o.months || '').toLowerCase() === 'via login' || /robux/i.test(String(o.app || '')) ? 'Via Login' : `${o.months} Mo`})</span>
+          <span>${formatCleanProductTitle(o.app)} (${String(o.months || '').toLowerCase() === 'via login' || /robux/i.test(String(o.app || '')) ? 'Via Login' : `${o.months} Mo`})</span>
           <span style="color:var(--accent-gold);">RM${o.total}</span>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; color:var(--text-muted); font-size:0.72rem; margin-top:4px; gap:6px; flex-wrap:wrap;">
@@ -5126,6 +5205,13 @@
     }).join('');
   }
 
+  function formatCleanProductTitle(rawTitle) {
+    return String(rawTitle || '-')
+      .replace(/Roblox\s+Robux\s+Recharge/gi, 'Recharge Robux')
+      .replace(/Roblox\s+Robux/gi, 'Recharge Robux')
+      .trim();
+  }
+
   function openTransactionDetail(idx) {
     const list = Array.isArray(window._currentAccountOrders) ? window._currentAccountOrders : [];
     const o = list[idx];
@@ -5134,6 +5220,12 @@
     const container = document.getElementById('orderHistoryList');
     const refCode = o.ref || o.refno || `SPY-${String(idx + 1).padStart(3, '0')}`;
     const recNo = o.receiptNo || o.invoiceNo || refCode;
+    const cleanProd = formatCleanProductTitle(o.app);
+    const isRobuxOrder = /robux/i.test(cleanProd) || String(o.months || '').toLowerCase() === 'via login';
+    const planLabel = isRobuxOrder ? 'Via Login' : `${o.months || 1} Month(s)`;
+    const extraInfoLine = (isRobuxOrder && o.customerDevice && o.customerDevice !== '-')
+      ? `<p style="margin-bottom:4px;"><strong>Account Info:</strong> <span style="color:var(--text-secondary);">${o.customerDevice}</span></p>`
+      : '';
     container.innerHTML = `
       <div class="order-item" style="border-color:var(--accent-cyan); padding:13px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -5141,15 +5233,15 @@
           <button type="button" onclick="renderOrderHistory()" style="background:var(--bg-card); border:1px solid var(--border-color); color:var(--accent-cyan); padding:4px 9px; border-radius:8px; font-size:0.7rem; font-weight:700; cursor:pointer;">← Back</button>
         </div>
         <p style="margin-bottom:4px;"><strong>Receipt No:</strong> <span style="color:var(--accent-cyan); font-weight:800;">${recNo}</span></p>
-        <p style="margin-bottom:4px;"><strong>Product:</strong> ${o.app || '-'}</p>
-        <p style="margin-bottom:4px;"><strong>Duration:</strong> ${o.months || 1} Month(s)</p>
+        <p style="margin-bottom:4px;"><strong>Product:</strong> ${cleanProd}</p>
+        <p style="margin-bottom:4px;"><strong>${isRobuxOrder ? 'Method' : 'Duration'}:</strong> ${planLabel}</p>
+        ${extraInfoLine}
         <p style="margin-bottom:4px;"><strong>Total Amount:</strong> <span style="color:var(--accent-gold); font-weight:800;">RM${o.total || '0.00'}</span></p>
         <p style="margin-bottom:4px;"><strong>Date:</strong> ${o.date || '-'}</p>
         <p style="margin-bottom:4px;"><strong>Customer:</strong> ${o.customerName || user?.name || '-'}</p>
         <p style="margin-bottom:10px;"><strong>WhatsApp:</strong> ${o.customerPhone || user?.phone || '-'}</p>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button type="button" onclick="downloadSSResitByIndex(${idx})" style="flex:1; background:rgba(250,204,21,0.16); border:1px solid var(--accent-gold); color:var(--accent-gold); padding:9px 12px; border-radius:10px; font-size:0.76rem; font-weight:800; cursor:pointer;">⬇️ Download Receipt</button>
-          
         </div>
       </div>
     `;
@@ -5485,7 +5577,7 @@
       if (p.mode === 'dual' && Array.isArray(p.subPlans)) {
         p.subPlans.forEach(sp => opts.push({ value: `${p.id}:${sp.key}`, label: `${p.name} (${sp.label})`, target: sp, parent: p }));
       } else if (p.mode === 'robux_pricelist' && Array.isArray(p.robuxPackages)) {
-        p.robuxPackages.forEach(pk => opts.push({ value: `${p.id}:${pk.key}`, label: `Roblox Robux — ${pk.label}`, target: pk, parent: p }));
+        p.robuxPackages.forEach(pk => opts.push({ value: `${p.id}:${pk.key}`, label: `Recharge Robux — ${pk.label}`, target: pk, parent: p }));
       } else {
         opts.push({ value: p.id, label: p.name, target: p, parent: p });
       }
@@ -5512,11 +5604,15 @@
     if (!found) return;
     const t = found.target;
     const isRobuxItem = found.parent && found.parent.mode === 'robux_pricelist';
+    const spRow = document.getElementById('drawerMgrStockPriceRow');
+    const stockWrap = document.getElementById('drawerMgrStockWrap');
     const p1Lbl = document.getElementById('lblDrawerMgrPrice1');
     const p2Wrap = document.getElementById('drawerMgrPrice2Wrap');
     const st1Lbl = document.getElementById('lblDrawerMgrStatus1');
     const st2Wrap = document.getElementById('drawerMgrStatus2Wrap');
     const stRow = document.getElementById('drawerMgrStatusRow');
+    if (stockWrap) stockWrap.style.display = isRobuxItem ? 'none' : 'block';
+    if (spRow) spRow.style.gridTemplateColumns = isRobuxItem ? '1fr' : '1fr 1fr';
     if (p1Lbl) p1Lbl.textContent = isRobuxItem ? 'Package Price (RM)' : '1-Month Price (RM)';
     if (p2Wrap) p2Wrap.style.display = isRobuxItem ? 'none' : 'block';
     if (st1Lbl) st1Lbl.textContent = isRobuxItem ? 'Package Status' : '1-Month Status';
@@ -5649,7 +5745,7 @@
       return `
       <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:9px 11px;">
         <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.82rem;">
-          <span>${t.app} (${String(t.months || '').toLowerCase() === 'via login' || /robux/i.test(String(t.app || '')) ? 'Via Login' : `${t.months} Bln`})</span>
+          <span>${formatCleanProductTitle(t.app)} (${String(t.months || '').toLowerCase() === 'via login' || /robux/i.test(String(t.app || '')) ? 'Via Login' : `${t.months} Bln`})</span>
           <span style="color:var(--accent-gold);">RM${t.total}</span>
         </div>
         <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:2px;">${recNo} • ${t.customerName || '-'} (${t.customerPhone || '-'}) • ${t.date || '-'}</div>
@@ -5936,15 +6032,16 @@
 
   const DEFAULT_WA_TEMPLATE = 'Hi SPYSTORE BY SAMS, saya nak tanya / perlukan bantuan tentang langganan.';
   const DEFAULT_TG_TEMPLATE = [
-    '✨ TEMPAHAN BAHARU — SPYSTORE BY SAMS ✨',
-    '━━━━━━━━━━━━━━━━━━━━━━',
-    '🧾 No. Rujukan: {ref}',
-    '📱 Produk: {app} ({months} Bulan)',
-    '💰 Jumlah: {total}',
-    '👤 Nama: {name}',
-    '📲 WhatsApp: {phone}',
-    '💻 Peranti: {device}',
-    '━━━━━━━━━━━━━━━━━━━━━━'
+    '🛒 TEMPAHAN BAHARU | SPYSTORE BY SAMS',
+    '✅ Payment Successful',
+    '• Rujukan : {ref}',
+    '• Item    : {app} ({months} Bln)',
+    '• Jumlah  : {total}',
+    '• Pelanggan: {name}',
+    '• WhatsApp: {phone}',
+    '• E-mel   : {email}',
+    '• Peranti : {device}',
+    '{robux_details}'
   ].join('\n');
 
   function getWaTemplate() {
@@ -5965,23 +6062,57 @@
     if (drawerSupportLink) drawerSupportLink.href = waHref;
   }
 
+  function buildRobuxLoginDetailsBlock(vars = {}) {
+    const isRbx = /robux/i.test(String(vars.app || '')) || String(vars.months || '').toLowerCase() === 'via login';
+    if (!isRbx) return '';
+    const u = vars.robuxUsername || '-';
+    const p = vars.robuxPassword || '-';
+    const ord = formatCleanProductTitle(vars.app || '-');
+    const bal = vars.robuxBalance || '0';
+    const c1 = vars.robuxBackup1 || '-';
+    const c2 = vars.robuxBackup2 || '-';
+    const c3 = vars.robuxBackup3 || '-';
+    return [
+      '',
+      '━━━━━━━━━━━━━━━━━━━━━━',
+      `👤 USERNAME: ${u}`,
+      `🔑 PASSWORD: ${p}`,
+      `💰 ORDER: ${ord}`,
+      `💎 BAKI ROBUX: ${bal}`,
+      '',
+      '🔐 BACKUP CODE:',
+      `1. ${c1}`,
+      `2. ${c2}`,
+      `3. ${c3}`
+    ].join('\n');
+  }
+
   function formatOrderMessageTemplate(tpl, vars = {}) {
     const isRbx = /robux/i.test(String(vars.app || '')) || String(vars.months || '').toLowerCase() === 'via login';
+    const cleanApp = formatCleanProductTitle(vars.app || '-');
     let out = String(tpl || '');
     if (isRbx) {
       out = out.replace(/\(?\s*\{months\}\s*(Bulan|Month|Months|Bln)\s*\)?/gi, '(Via Login)');
     }
     const planStr = isRbx ? 'Via Login' : `${vars.months || '1'} Bulan`;
-    return out
+    const rbxBlock = buildRobuxLoginDetailsBlock(vars);
+    let formatted = out
       .replace(/\{ref\}/g, vars.ref || '-')
-      .replace(/\{app\}/g, vars.app || '-')
+      .replace(/\{app\}/g, cleanApp)
       .replace(/\{plan\}/g, planStr)
       .replace(/\{months\}/g, isRbx ? 'Via Login' : String(vars.months || '1'))
       .replace(/\{total\}/g, vars.total || '-')
       .replace(/\{name\}/g, vars.name || '-')
       .replace(/\{phone\}/g, vars.phone || '-')
-      .replace(/\{device\}/g, vars.device || '-')
+      .replace(/\{device\}/g, isRbx ? 'Roblox Account (Via Login)' : (vars.device || '-'))
       .replace(/\{email\}/g, vars.email || '-');
+
+    if (formatted.includes('{robux_details}')) {
+      formatted = formatted.replace(/\{robux_details\}/g, rbxBlock);
+    } else if (rbxBlock) {
+      formatted = formatted.trimEnd() + '\n' + rbxBlock;
+    }
+    return formatted.trim();
   }
 
   async function sendTelegramBotOrderAlert(vars = {}) {
@@ -6915,7 +7046,13 @@
         name: custName,
         phone: custPhone,
         device: custDevice && custDevice !== '-' ? custDevice : '-',
-        email: pending.customerEmail || getCurrentUser()?.email || '-'
+        email: pending.customerEmail || getCurrentUser()?.email || '-',
+        robuxUsername: pending.robuxUsername || '',
+        robuxPassword: pending.robuxPassword || '',
+        robuxBalance: pending.robuxBalance || '',
+        robuxBackup1: pending.robuxBackup1 || '',
+        robuxBackup2: pending.robuxBackup2 || '',
+        robuxBackup3: pending.robuxBackup3 || ''
       });
       localStorage.removeItem('spystore_pending_order');
       window._latestReceiptRecord = confirmedTxn;
