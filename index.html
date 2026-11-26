@@ -4285,11 +4285,12 @@
   }
 
   function openOwnerSSResitModal(txn = null) {
-    if (!isOwnerOrAdmin()) {
-      showToast('Akses SSResit hanya untuk Owner / Admin.');
-      return;
-    }
     populateSSResitInputsFromTxn(txn);
+    const isStaff = isOwnerOrAdmin();
+    const editBtn = document.getElementById('ssrToggleEditBtn');
+    const editBox = document.getElementById('ssrEditFieldsBox');
+    if (editBtn) editBtn.style.display = isStaff ? 'inline-block' : 'none';
+    if (editBox && !isStaff) editBox.style.display = 'none';
     document.getElementById('ownerSSResitModal')?.classList.add('open');
   }
 
@@ -4324,10 +4325,6 @@
   }
 
   async function downloadIntegratedSSResitPng() {
-    if (!isOwnerOrAdmin()) {
-      showToast('Akses SSResit hanya untuk Owner / Admin.');
-      return;
-    }
     const recNo = (document.getElementById('ssrReceiptNoInput')?.value || '').trim() || generateReceiptNumber();
     const area = document.getElementById('spystore-ssresit-capture-area');
     if (!area || typeof html2canvas !== 'function') {
@@ -4353,10 +4350,6 @@
   }
 
   async function copyIntegratedSSResitImage() {
-    if (!isOwnerOrAdmin()) {
-      showToast('Akses SSResit hanya untuk Owner / Admin.');
-      return;
-    }
     const area = document.getElementById('spystore-ssresit-capture-area');
     if (!area || typeof html2canvas !== 'function') return;
     try {
@@ -4378,20 +4371,12 @@
   }
 
   function printIntegratedSSResit() {
-    if (!isOwnerOrAdmin()) {
-      showToast('Akses SSResit hanya untuk Owner / Admin.');
-      return;
-    }
     window.print();
   }
 
   // Show the receipt preview first with download option so user can review & download
   function downloadSSResitObject(txn) {
     if (!txn) return;
-    if (!isOwnerOrAdmin()) {
-      showToast('Akses resit hanya untuk Owner / Admin.');
-      return;
-    }
     openOwnerSSResitModal(txn);
   }
 
