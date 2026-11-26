@@ -5223,9 +5223,45 @@
     const cleanProd = formatCleanProductTitle(o.app);
     const isRobuxOrder = /robux/i.test(cleanProd) || String(o.months || '').toLowerCase() === 'via login';
     const planLabel = isRobuxOrder ? 'Via Login' : `${o.months || 1} Month(s)`;
-    const extraInfoLine = (isRobuxOrder && o.customerDevice && o.customerDevice !== '-')
-      ? `<p style="margin-bottom:4px;"><strong>Account Info:</strong> <span style="color:var(--text-secondary);">${o.customerDevice}</span></p>`
-      : '';
+    function parseRobuxAccountDeviceStr(devStr) {
+      const s = String(devStr || '');
+      const uMatch = s.match(/User:([^|]*)/i);
+      const pMatch = s.match(/Pass:([^|]*)/i);
+      const bMatch = s.match(/Bal:([^|]*)/i);
+      const cMatch = s.match(/Codes:([^|]*)/i);
+      const codesRaw = cMatch ? cMatch[1].trim() : '';
+      const codeParts = codesRaw ? codesRaw.split('/').map(x => x.trim()).filter(Boolean) : [];
+      return {
+        username: uMatch ? uMatch[1].trim() : '',
+        password: pMatch ? pMatch[1].trim() : '',
+        balance: bMatch ? bMatch[1].trim() : '',
+        codes: codeParts
+      };
+    }
+
+    let extraInfoLine = '';
+    if (isRobuxOrder && o.customerDevice && o.customerDevice !== '-') {
+      const parsedRbx = parseRobuxAccountDeviceStr(o.customerDevice);
+      if (parsedRbx.username || parsedRbx.password) {
+        const codesHtml = parsedRbx.codes.length
+          ? `<div style="margin-top:4px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px 10px;">
+               <div style="font-size:0.74rem; font-weight:800; color:var(--accent-gold); margin-bottom:2px;">🔐 BACKUP CODE:</div>
+               ${parsedRbx.codes.map((c, ci) => `<div style="font-size:0.74rem; color:var(--text-secondary); padding-left:8px;">${ci + 1}. ${c}</div>`).join('')}
+             </div>`
+          : '';
+        extraInfoLine = `
+          <div style="margin:6px 0; background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; padding:9px 10px; display:flex; flex-direction:column; gap:3px;">
+            <p style="margin-bottom:2px;"><strong>👤 USERNAME:</strong> <span style="color:var(--text-primary);">${parsedRbx.username || '-'}</span></p>
+            <p style="margin-bottom:2px;"><strong>🔑 PASSWORD:</strong> <span style="color:var(--text-primary);">${parsedRbx.password || '-'}</span></p>
+            <p style="margin-bottom:2px;"><strong>💰 ORDER:</strong> <span style="color:var(--accent-gold);">${cleanProd}</span></p>
+            <p style="margin-bottom:2px;"><strong>💎 BAKI ROBUX:</strong> <span style="color:var(--accent-cyan);">${parsedRbx.balance || '0'}</span></p>
+            ${codesHtml}
+          </div>
+        `;
+      } else {
+        extraInfoLine = `<p style="margin-bottom:4px;"><strong>Account Details:</strong> <span style="color:var(--text-secondary);">${o.customerDevice}</span></p>`;
+      }
+    }
     container.innerHTML = `
       <div class="order-item" style="border-color:var(--accent-cyan); padding:13px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
