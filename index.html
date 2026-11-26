@@ -3100,10 +3100,25 @@
     return { owner: 'OWNER2026', admin: 'ADMIN2026' };
   }
 
+  function normalizeEmailAddr(em) {
+    return String(em || '').trim().toLowerCase();
+  }
+
   function getUsersDB() {
     try {
       const raw = JSON.parse(localStorage.getItem('spystore_users_db') || '[]');
-      return Array.isArray(raw) ? raw.filter(u => u && u.email && String(u.email).toLowerCase() !== 'google.user@gmail.com') : [];
+      if (!Array.isArray(raw)) return [];
+      const seenEmails = new Set();
+      const cleaned = [];
+      for (const u of raw) {
+        if (!u || !u.email) continue;
+        const em = normalizeEmailAddr(u.email);
+        if (!em || em === 'google.user@gmail.com') continue;
+        if (seenEmails.has(em)) continue;
+        seenEmails.add(em);
+        cleaned.push({ ...u, email: em });
+      }
+      return cleaned;
     } catch (e) { return []; }
   }
 
@@ -4370,28 +4385,14 @@
     window.print();
   }
 
-  // Direct download in-place without navigating or opening modal
-  async function downloadSSResitObject(txn) {
+  // Show the receipt preview first with download option so user can review & download
+  function downloadSSResitObject(txn) {
     if (!txn) return;
     if (!isOwnerOrAdmin()) {
       showToast('Akses resit hanya untuk Owner / Admin.');
       return;
     }
-    const recNo = populateSSResitInputsFromTxn(txn);
-    const modalEl = document.getElementById('ownerSSResitModal');
-    const wasOpen = modalEl?.classList.contains('open');
-    if (!wasOpen && modalEl) {
-      modalEl.style.opacity = '0';
-      modalEl.style.pointerEvents = 'none';
-      modalEl.classList.add('open');
-    }
-    await new Promise(r => setTimeout(r, 80));
-    await downloadIntegratedSSResitPng();
-    if (!wasOpen && modalEl) {
-      modalEl.classList.remove('open');
-      modalEl.style.opacity = '';
-      modalEl.style.pointerEvents = '';
-    }
+    openOwnerSSResitModal(txn);
   }
 
   function downloadSSResitByIndex(idx) {
@@ -4586,8 +4587,8 @@
     const box = document.getElementById('savedAccountsQuickList');
     if (!box) return;
     const current = getCurrentUser();
-    const curEmail = String(current?.email || '').trim().toLowerCase();
-    const users = getUsersDB().filter(u => u && u.email && String(u.email).trim().toLowerCase() !== curEmail);
+    const curEmail = normalizeEmailAddr(current?.email || '');
+    const users = getUsersDB().filter(u => u && u.email && normalizeEmailAddr(u.email) !== curEmail).slice(0, 3);
     if (!users.length) {
       box.innerHTML = `<div style="font-size:0.72rem; color:var(--text-muted);">No other saved accounts on this device. Tap <strong>+ Another Account</strong> to log in or sign up.</div>`;
       return;
@@ -4663,17 +4664,20 @@
   function handleSignupSubmit(e) {
     e.preventDefault();
     const username = normalizeUsername(document.getElementById('signupUsernameInput')?.value || '');
-    const email = String(document.getElementById('signupEmailInput')?.value || '').trim().toLowerCase();
+    const email = normalizeEmailAddr(document.getElementById('signupEmailInput')?.value || '');
     const fullName = String(document.getElementById('signupFullNameInput')?.value || '').trim();
     const password = String(document.getElementById('signupPasswordInput')?.value || '');
     if (!username || !email || !fullName || password.length < 6) { showToast('Please complete all fields.'); return; }
     const users = getUsersDB();
-    const taken = users.some(u => normalizeUsername(u.username || '') === username && String(u.email || '').trim().toLowerCase() !== email);
+    const emailExists = users.some(u => normalizeEmailAddr(u.email) === email);
+    if (emailExists) {
+      showToast('E-mel ini sudah mempunyai akaun. Satu e-mel hanya boleh ada 1 akaun.');
+      return;
+    }
+    const taken = users.some(u => normalizeUsername(u.username || '') === username);
     if (taken) { showToast('Username already used.'); return; }
-    const existing = users.find(u => u.email === email);
-    const account = { username, name: fullName, email, password, phone: existing?.phone || '', provider: 'email' };
-    if (existing) Object.assign(existing, account);
-    else users.push(account);
+    const account = { username, name: fullName, email, password, phone: '', provider: 'email', role: 'customer' };
+    users.push(account);
     saveUsersDB(users);
     localStorage.setItem('spystore_current_user', JSON.stringify(account));
     syncCurrentUserSavedData();
@@ -4918,11 +4922,19 @@
     const listBox = document.getElementById('verifiedAdminsListBox');
     const isMy = currentLang === 'my';
     if (custBox) {
-      custBox.innerHTML = `<div style="font-weight:800; color:var(--accent-gold); margin-bottom:4px;">${isMy ? 'Pelanggan Berdaftar' : 'Registered Customers'} (${users.length})</div>` +
-        (users.length ? users.map(u => {
-          const effRole = getUserRole(u);
-          return `<div>• <strong>${u.name || u.username || u.email}</strong> (@${u.username || '-'}) • ${u.email} • [${String(effRole).toUpperCase()}]</div>`;
-        }).join('') : `<div>${isMy ? 'Belum ada pelanggan berdaftar.' : 'No registered customers yet.'}</div>`);
+      custBox.innerHTML = `<div style="font-weight:800; color:var(--accent-gold); margin-bottom:8px;">${isMy ? 'Pelanggan Berdaftar' : 'Registered Customers'} (${users.length})</div>` +
+        (users.length ? `<div style="display:flex; flex-direction:column; gap:7px;">` + users.map(u => {
+          const effRole = String(getUserRole(u) || 'customer').toUpperCase();
+          return `
+            <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:11px; padding:9px 11px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+              <div style="min-width:0;">
+                <div style="font-weight:800; font-size:0.8rem; color:var(--text-primary);">${u.name || u.username || u.email} <span style="color:var(--accent-cyan); font-weight:600;">@${u.username || '-'}</span></div>
+                <div style="font-size:0.7rem; color:var(--text-secondary); word-break:break-all; margin-top:2px;">${u.email}</div>
+              </div>
+              <span style="font-size:0.62rem; font-weight:800; padding:3px 8px; border-radius:999px; background:rgba(250,204,21,0.14); color:var(--accent-gold); border:1px solid rgba(250,204,21,0.35); flex-shrink:0;">${effRole}</span>
+            </div>
+          `;
+        }).join('') + `</div>` : `<div>${isMy ? 'Belum ada pelanggan berdaftar.' : 'No registered customers yet.'}</div>`);
     }
     if (listBox) {
       const admins = users.filter(u => {
