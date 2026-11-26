@@ -2232,7 +2232,8 @@
     }
 
   
-    .modal-backdrop.open {
+    .modal-backdrop.open,
+    .show-detail-backdrop.open {
       display: flex;
       padding: 0 !important;
       background: var(--bg-primary) !important;
@@ -2248,13 +2249,19 @@
       border-radius: 0 !important;
       border: none !important;
       box-shadow: none !important;
-      padding: 20px 18px 48px 18px !important;
+      padding: 16px 18px 48px 18px !important;
+      overflow-y: auto !important;
     }
 
-    .show-detail-backdrop.open {
-      padding: 0 !important;
-      background: var(--bg-primary) !important;
-      backdrop-filter: none !important;
+    .modal-backdrop .modal-top,
+    .show-detail-backdrop .modal-top {
+      position: sticky;
+      top: -16px;
+      z-index: 25;
+      background: var(--bg-secondary);
+      margin: -16px -18px 14px -18px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .why-spystore-section {
@@ -2394,19 +2401,6 @@
   </header>
 
   <main class="container">
-
-    <!-- Payment Return Receipt -->
-    <div class="receipt-banner" id="receiptBanner">
-      <h4 id="receiptTitle">Payment Successful!</h4>
-      <p id="receiptDesc">Your order has been confirmed. Tap below to send your verified order slip to Admin on WhatsApp.</p>
-      <div class="receipt-actions-row">
-        <button type="button" class="copy-order-btn" style="background:rgba(250,204,21,0.16); border-color:var(--accent-gold); color:var(--accent-gold);" id="receiptDownloadReceiptBtn" onclick="downloadLatestSSResit()">🧾 Download Receipt (SSResit)</button>
-        <button type="button" class="copy-order-btn" onclick="copyReceiptSummary()" data-i18n="copyOrderBtn">Copy Order Summary</button>
-        <a href="https://wa.me/60189066291" target="_blank" class="receipt-wa-btn" id="receiptWaLink">
-          <span data-i18n="claimWaBtn">Claim Account on WhatsApp →</span>
-        </a>
-      </div>
-    </div>
 
     <!-- Catalog & Landing View -->
     <div id="catalogView">
@@ -4531,14 +4525,7 @@
         email: customerEmail && customerEmail !== '-' ? customerEmail : (getCurrentUser()?.email || '-')
       });
       lastReceiptPlainText = waText;
-      const banner = document.getElementById('receiptBanner');
-      if (banner) {
-        banner.classList.add('show');
-        document.getElementById('receiptTitle').textContent = `✅ Payment Confirmed • ${receiptNo}`;
-        document.getElementById('receiptDesc').textContent = `${activeAppName} (${selectedMonths} Month) — Stok dikemas kini & notifikasi Telegram dihantar.`;
-        const waLink = document.getElementById('receiptWaLink');
-        if (waLink) waLink.href = `https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waText)}`;
-      }
+
       showToast(`✅ Transaksi RM0.00 (${receiptNo}) berjaya • Stok dikurangkan!`);
       return;
     }
@@ -5381,6 +5368,55 @@
     showToast(`Updated ${found.label}!`);
   }
 
+  function deleteTransactionByIndex(tIdx) {
+    if (getUserRole() !== 'owner') {
+      showToast('Hanya Owner boleh memadam transaksi.');
+      return;
+    }
+    const allTxns = getAllTransactionsDB();
+    const target = allTxns[tIdx];
+    if (!target) return;
+    const recNo = String(target.receiptNo || target.invoiceNo || target.ref || '').trim();
+    const appStr = String(target.app || '').trim();
+    const dtStr = String(target.date || '').trim();
+    const totStr = String(target.total || '').trim();
+
+    const matchesTarget = (x) => {
+      if (!x || typeof x !== 'object') return false;
+      const xRec = String(x.receiptNo || x.invoiceNo || x.ref || '').trim();
+      if (recNo && xRec && recNo === xRec) return true;
+      return String(x.app || '').trim() === appStr && String(x.date || '').trim() === dtStr && String(x.total || '').trim() === totStr;
+    };
+
+    try {
+      const nextGlobal = getAllTransactionsDB().filter(x => !matchesTarget(x));
+      localStorage.setItem(ALL_TXNS_STORAGE_KEY, JSON.stringify(nextGlobal));
+    } catch (e) {}
+
+    try {
+      const guestList = JSON.parse(localStorage.getItem('spystore_orders') || '[]');
+      if (Array.isArray(guestList)) {
+        localStorage.setItem('spystore_orders', JSON.stringify(guestList.filter(x => !matchesTarget(x))));
+      }
+    } catch (e) {}
+
+    try {
+      getUsersDB().forEach(u => {
+        if (!u || !u.email) return;
+        const key = getUserDataKey(u.email);
+        const saved = JSON.parse(localStorage.getItem(key) || '{"orders":[],"profile":{}}');
+        if (Array.isArray(saved.orders)) {
+          saved.orders = saved.orders.filter(x => !matchesTarget(x));
+          localStorage.setItem(key, JSON.stringify(saved));
+        }
+      });
+    } catch (e) {}
+
+    renderDrawerTransactionsList();
+    renderOrderHistory();
+    showToast(`🗑️ Transaksi ${recNo || appStr} telah dipadam.`);
+  }
+
   function renderDrawerTransactionsList() {
     const box = document.getElementById('drawerAllTransactionsBody');
     if (!box) return;
@@ -5414,8 +5450,9 @@
         <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:2px;">${recNo} • ${t.customerName || '-'} (${t.customerPhone || '-'}) • ${t.date || '-'}</div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:6px; flex-wrap:wrap;">
           <span style="font-size:0.66rem; font-weight:700; color:var(--accent-cyan);">${t.status || 'PAID'} • ${t.paymentMethod || 'Online Transfer'}</span>
-          <div style="display:flex; gap:6px;">
+          <div style="display:flex; gap:6px; align-items:center;">
             <button type="button" onclick="downloadGlobalTxnSSResit(${safeIdx})" style="background:rgba(250,204,21,0.14); border:1px solid rgba(250,204,21,0.45); color:var(--accent-gold); padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">⬇️ Resit</button>
+            ${getUserRole() === 'owner' ? `<button type="button" onclick="deleteTransactionByIndex(${safeIdx})" style="background:rgba(239,68,68,0.14); border:1px solid rgba(239,68,68,0.45); color:#f87171; padding:3px 9px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer;">🗑️ Padam</button>` : ''}
           </div>
         </div>
       </div>
@@ -6591,10 +6628,7 @@
       const custPhone = pending.customerPhone || '-';
       const custDevice = pending.customerDevice || '-';
       const totalPaid = pending.totalAmount || '-';
-      const banner = document.getElementById('receiptBanner');
-      banner.classList.add('show');
-      document.getElementById('receiptTitle').textContent = `✅ Payment Confirmed • ${effectiveOrderId}`;
-      document.getElementById('receiptDesc').textContent = `${appName} (${months} Month) — Admin has been notified. Tap below to receive your account on WhatsApp.`;
+
       const cleanTotal = (totalPaid && totalPaid !== '-' && !isNaN(parseFloat(totalPaid))) ? `RM${parseFloat(totalPaid).toFixed(2)}` : '-';
       const waText = formatOrderMessageTemplate(getWaTemplate(), {
         ref: effectiveOrderId,
@@ -6943,12 +6977,7 @@
       saveCartItems([]);
       closeCartModal();
       window._latestReceiptRecord = createdTxns[0] || null;
-      const banner = document.getElementById('receiptBanner');
-      if (banner) {
-        banner.classList.add('show');
-        document.getElementById('receiptTitle').textContent = `✅ ${createdTxns.length} Order Receipts Created`;
-        document.getElementById('receiptDesc').textContent = `${createdTxns.map(x => `${x.receiptNo} (${x.app})`).join(' • ')}`;
-      }
+
       showToast(`✅ ${createdTxns.length} resit & rekod transaksi berjaya dijana!`);
       return;
     }
