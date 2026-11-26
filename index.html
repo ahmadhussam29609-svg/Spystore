@@ -2809,9 +2809,41 @@
           <label id="cartCustPhoneLabel">WhatsApp Number *</label>
           <input type="tel" class="form-control" id="cartCustPhone" placeholder="e.g. 0189066291" />
         </div>
-        <div class="form-group">
+        <div class="form-group" id="cartCustInfoGroup">
           <label id="cartCustInfoLabel">Device / Email (Optional)</label>
           <input type="text" class="form-control" id="cartCustInfo" placeholder="e.g. iPhone / Android / email@gmail.com" />
+        </div>
+        <div id="cartRobuxViaLoginBox" style="display:none; margin-bottom:12px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:14px; padding:12px;">
+          <div style="font-size:0.78rem; font-weight:800; color:var(--accent-gold); margin-bottom:10px;">ROBLOX ROBUX VIA LOGIN</div>
+          <div class="form-group">
+            <label>👤 USERNAME *</label>
+            <input type="text" class="form-control" id="cartRobuxUsername" placeholder="Roblox Username" />
+          </div>
+          <div class="form-group">
+            <label>🔑 PASSWORD *</label>
+            <input type="password" class="form-control" id="cartRobuxPassword" placeholder="Roblox Password" />
+          </div>
+          <div class="form-group">
+            <label>💎 BAKI ROBUX</label>
+            <input type="text" class="form-control" id="cartRobuxBalance" placeholder="e.g. 0" />
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>🔐 BACKUP CODE (1, 2, 3 — Optional)</label>
+            <div style="display:grid; grid-template-columns:1fr; gap:6px;">
+              <input type="text" class="form-control" id="cartRobuxBackup1" placeholder="1. Backup Code 1" />
+              <input type="text" class="form-control" id="cartRobuxBackup2" placeholder="2. Backup Code 2" />
+              <input type="text" class="form-control" id="cartRobuxBackup3" placeholder="3. Backup Code 3" />
+            </div>
+          </div>
+          <div style="background:var(--bg-card); border:1px solid rgba(250,204,21,0.35); border-radius:10px; padding:10px; font-size:0.72rem; color:var(--text-secondary);">
+            <strong style="color:var(--accent-gold); display:block; margin-bottom:4px;">📌 NOTED ‼️</strong>
+            <ul style="padding-left:15px; display:flex; flex-direction:column; gap:3px;">
+              <li>Backup Code membantu mempercepatkan proses login.</li>
+              <li>Backup Code tidak wajib disediakan.</li>
+              <li>Sila standby untuk proses Account Verification.</li>
+              <li>Pastikan akaun boleh diakses sepanjang proses berlangsung.</li>
+            </ul>
+          </div>
         </div>
         <div class="pay-options-list" style="margin-bottom:12px;">
           <div class="pay-choice-card selected" onclick="selectPaymentMethod('fpx')">
@@ -7167,11 +7199,13 @@
       showToast('Pilih produk terlebih dahulu sebelum menambah ke troli.');
       return;
     }
+    const isRbx = currentProduct.mode === 'robux_pricelist';
     const appName = getActiveDisplayAppName();
     const unit = getActiveUnitPrice();
-    const planPrice = selectedMonths === 2 ? getActiveTwoMonthPrice(unit) : unit;
+    const planPrice = isRbx ? unit : (selectedMonths === 2 ? getActiveTwoMonthPrice(unit) : unit);
+    const planIdentifier = isRbx ? selectedRobuxPkgKey : `${selectedSubPlan}|${selectedMonths}`;
     const items = getCartItems();
-    const key = `${currentProduct.id}|${selectedSubPlan}|${selectedMonths}`;
+    const key = `${currentProduct.id}|${planIdentifier}`;
     const existingIdx = items.findIndex(x => x.key === key);
     if (existingIdx !== -1) {
       items[existingIdx].qty = Number(items[existingIdx].qty || 1) + 1;
@@ -7180,14 +7214,15 @@
         key,
         productId: currentProduct.id,
         appName,
-        months: selectedMonths,
-        subPlan: selectedSubPlan,
+        months: isRbx ? 'Via Login' : selectedMonths,
+        subPlan: isRbx ? selectedRobuxPkgKey : selectedSubPlan,
         unitPrice: Number(planPrice),
         qty: 1
       });
     }
     saveCartItems(items);
-    showToast(`🛒 ${appName} (${selectedMonths} Bln) ditambah ke troli!`);
+    const toastTag = isRbx ? 'Via Login' : `${selectedMonths} Bln`;
+    showToast(`🛒 ${appName} (${toastTag}) ditambah ke troli!`);
   }
 
   function openCartModal() {
@@ -7206,6 +7241,7 @@
     if (nextQty <= 0) items.splice(idx, 1);
     else items[idx].qty = nextQty;
     saveCartItems(items);
+    syncCartRobuxFormVisibility();
     renderCartModal();
   }
 
@@ -7244,11 +7280,13 @@
       const lineTotal = Number(it.unitPrice || 0) * qty;
       subtotal += lineTotal;
       totalLines += qty;
+      const isRbxItem = it.productId === 'robux' || /robux/i.test(String(it.appName || '')) || String(it.months || '').toLowerCase() === 'via login';
+      const subText = isRbxItem ? `Via Login • RM${Number(it.unitPrice || 0).toFixed(2)}` : `${it.months} ${moWord} • RM${Number(it.unitPrice || 0).toFixed(2)}`;
       return `
         <div class="cart-item-card">
           <div style="min-width:0;">
-            <div style="font-weight:800; font-size:0.9rem;">${it.appName}</div>
-            <div style="font-size:0.74rem; color:var(--text-secondary);">${it.months} ${moWord} • RM${Number(it.unitPrice || 0).toFixed(2)}</div>
+            <div style="font-weight:800; font-size:0.9rem;">${formatCleanProductTitle(it.appName)}</div>
+            <div style="font-size:0.74rem; color:var(--text-secondary);">${subText}</div>
             <div style="font-weight:800; font-size:0.86rem; color:var(--accent-gold); margin-top:2px;">RM${lineTotal.toFixed(2)}</div>
           </div>
           <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
@@ -7262,6 +7300,31 @@
     if (subEl) subEl.textContent = `RM${subtotal.toFixed(2)}`;
     const payable = isJokerRole() ? 0 : (subtotal + totalLines * 1.00);
     if (totEl) totEl.textContent = isJokerRole() ? 'RM0.00 (Joker Test)' : `RM${payable.toFixed(2)}`;
+  }
+
+  function syncCartRobuxFormVisibility() {
+    const items = getCartItems();
+    const hasRobux = items.some(it => it.productId === 'robux' || /robux/i.test(String(it.appName || '')));
+    const hasNonRobux = items.some(it => !(it.productId === 'robux' || /robux/i.test(String(it.appName || ''))));
+    const rbxBox = document.getElementById('cartRobuxViaLoginBox');
+    const infoGroup = document.getElementById('cartCustInfoGroup');
+    if (rbxBox) rbxBox.style.display = hasRobux ? 'block' : 'none';
+    if (infoGroup) infoGroup.style.display = (!hasRobux || hasNonRobux) ? 'block' : 'none';
+    if (hasRobux) {
+      const copyIfEmpty = (srcId, dstId) => {
+        const s = document.getElementById(srcId);
+        const d = document.getElementById(dstId);
+        if (s && d && !d.value && s.value) d.value = s.value;
+      };
+      copyIfEmpty('custName', 'cartCustName');
+      copyIfEmpty('custPhone', 'cartCustPhone');
+      copyIfEmpty('custRobuxUsername', 'cartRobuxUsername');
+      copyIfEmpty('custRobuxPassword', 'cartRobuxPassword');
+      copyIfEmpty('custRobuxBalance', 'cartRobuxBalance');
+      copyIfEmpty('custRobuxBackup1', 'cartRobuxBackup1');
+      copyIfEmpty('custRobuxBackup2', 'cartRobuxBackup2');
+      copyIfEmpty('custRobuxBackup3', 'cartRobuxBackup3');
+    }
   }
 
   function openCartPaymentSection() {
@@ -7279,6 +7342,7 @@
         document.getElementById('cartCustPhone').value = user.phone || '';
       }
     }
+    syncCartRobuxFormVisibility();
     renderCartModal();
     payBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -7289,8 +7353,24 @@
     const customerName = String(document.getElementById('cartCustName')?.value || getCurrentUser()?.name || '').trim();
     const customerPhone = String(document.getElementById('cartCustPhone')?.value || getCurrentUser()?.phone || '').trim();
     const customerInfo = String(document.getElementById('cartCustInfo')?.value || '').trim() || '-';
+    const hasRobux = items.some(it => it.productId === 'robux' || /robux/i.test(String(it.appName || '')));
+    const rbxUser = hasRobux ? String(document.getElementById('cartRobuxUsername')?.value || '').trim() : '';
+    const rbxPass = hasRobux ? String(document.getElementById('cartRobuxPassword')?.value || '').trim() : '';
+    const rbxBal = hasRobux ? String(document.getElementById('cartRobuxBalance')?.value || '').trim() : '';
+    const rbxB1 = hasRobux ? String(document.getElementById('cartRobuxBackup1')?.value || '').trim() : '';
+    const rbxB2 = hasRobux ? String(document.getElementById('cartRobuxBackup2')?.value || '').trim() : '';
+    const rbxB3 = hasRobux ? String(document.getElementById('cartRobuxBackup3')?.value || '').trim() : '';
+    const rbxCodesStr = [rbxB1, rbxB2, rbxB3].filter(Boolean).join(' / ');
+    const rbxDeviceFormatted = hasRobux
+      ? `User:${rbxUser} | Pass:${rbxPass} | Bal:${rbxBal || '0'}${rbxCodesStr ? ` | Codes:${rbxCodesStr}` : ''}`
+      : customerInfo;
+
     if (!customerName || !customerPhone) {
       showToast(currentLang === 'my' ? 'Sila isi Nama Penuh dan Nombor WhatsApp!' : 'Please enter Full Name and WhatsApp Number!');
+      return;
+    }
+    if (hasRobux && (!rbxUser || !rbxPass)) {
+      showToast(currentLang === 'my' ? 'Sila isi Roblox Username dan Password!' : 'Please fill in Roblox Username and Password!');
       return;
     }
 
@@ -7309,6 +7389,7 @@
     });
 
     expandedOrders.forEach(entry => {
+      const isRbxEntry = entry.productId === 'robux' || /robux/i.test(String(entry.appName || ''));
       const itemBase = jokerMode ? 0 : Number(entry.unitPrice || 0);
       const itemFee = jokerMode ? 0 : 1.00;
       const itemTotal = jokerMode ? 0 : (itemBase + itemFee);
@@ -7316,13 +7397,13 @@
         receiptNo: entry.receiptNo,
         ref: entry.receiptNo,
         app: jokerMode ? `${entry.appName} [JOKER TEST]` : entry.appName,
-        months: Number(entry.months || 1),
+        months: isRbxEntry ? 'Via Login' : Number(entry.months || 1),
         total: itemTotal.toFixed(2),
         date: new Date().toLocaleDateString('en-MY'),
         customerName,
         customerPhone,
         customerEmail: getCurrentUser()?.email || '-',
-        customerDevice: customerInfo,
+        customerDevice: isRbxEntry ? rbxDeviceFormatted : customerInfo,
         paymentMethod: jokerMode ? 'Joker Sandbox (RM0)' : 'Online Transfer',
         status: jokerMode ? 'PAID (JOKER RM0)' : 'CONFIRMED'
       });
@@ -7337,7 +7418,7 @@
             const sp = pObj.subPlans.find(x => x.key === entry.subPlan) || pObj.subPlans[0];
             if (sp && typeof sp.stock === 'number' && sp.stock > 0) sp.stock = Math.max(0, sp.stock - 1);
             recomputeDualProductStock(pObj);
-          } else if (typeof pObj.stock === 'number' && pObj.stock > 0) {
+          } else if (pObj.mode !== 'robux_pricelist' && typeof pObj.stock === 'number' && pObj.stock > 0) {
             pObj.stock = Math.max(0, pObj.stock - 1);
           }
         }
@@ -7347,6 +7428,7 @@
       pushSharedStoreToServer();
 
       for (const txn of createdTxns) {
+        const isRbxTxn = /robux/i.test(String(txn.app || ''));
         await sendTelegramBotOrderAlert({
           ref: txn.receiptNo,
           app: txn.app,
@@ -7354,8 +7436,14 @@
           total: `RM${txn.total}`,
           name: customerName,
           phone: customerPhone,
-          device: customerInfo,
-          email: getCurrentUser()?.email || '-'
+          device: isRbxTxn ? rbxDeviceFormatted : customerInfo,
+          email: getCurrentUser()?.email || '-',
+          robuxUsername: isRbxTxn ? rbxUser : '',
+          robuxPassword: isRbxTxn ? rbxPass : '',
+          robuxBalance: isRbxTxn ? rbxBal : '',
+          robuxBackup1: isRbxTxn ? rbxB1 : '',
+          robuxBackup2: isRbxTxn ? rbxB2 : '',
+          robuxBackup3: isRbxTxn ? rbxB3 : ''
         });
       }
 
@@ -7372,7 +7460,13 @@
       orders: expandedOrders,
       customerName,
       customerPhone,
-      customerInfo,
+      customerInfo: hasRobux ? rbxDeviceFormatted : customerInfo,
+      robuxUsername: rbxUser,
+      robuxPassword: rbxPass,
+      robuxBalance: rbxBal,
+      robuxBackup1: rbxB1,
+      robuxBackup2: rbxB2,
+      robuxBackup3: rbxB3,
       totalAmount: totalCartAmount.toFixed(2)
     }));
 
