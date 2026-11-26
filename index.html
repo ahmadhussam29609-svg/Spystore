@@ -2230,6 +2230,74 @@
       cursor: pointer;
     }
 
+  
+    .modal-backdrop.open {
+      display: flex;
+      padding: 0 !important;
+      background: var(--bg-primary) !important;
+      backdrop-filter: none !important;
+    }
+
+    .modal-backdrop .modal-card,
+    .show-detail-backdrop .show-detail-card {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 20px 18px 48px 18px !important;
+    }
+
+    .show-detail-backdrop.open {
+      padding: 0 !important;
+      background: var(--bg-primary) !important;
+      backdrop-filter: none !important;
+    }
+
+    .why-spystore-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      padding: 20px 16px;
+      margin-top: 22px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .why-spystore-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    @media (min-width: 768px) {
+      .why-spystore-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+    }
+
+    .why-spystore-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 13px 14px;
+    }
+
+    .why-spystore-card h3 {
+      font-size: 0.9rem;
+      color: var(--accent-gold);
+      margin-bottom: 4px;
+    }
+
+    .why-spystore-card p {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
   </style>
 </head>
 <body>
@@ -2341,24 +2409,6 @@
 
     <!-- Catalog & Landing View -->
     <div id="catalogView">
-      <section class="landing-hero-card" id="landingSection">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-          <span class="hero-pill" style="margin-bottom:0;">OFFICIAL DIGITAL SUBSCRIPTION STORE</span>
-          <span class="stock-badge-top" id="liveStockStatus">Live Stock ✓</span>
-        </div>
-        <div style="margin-top:10px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-          <img src="spystore-logo.png" alt="SPYSTORE" style="height:36px; width:auto; object-fit:contain;" onerror="this.style.display='none';" />
-          <h1 style="font-size:1.35rem; line-height:1.25;">Langganan Aplikasi Digital Pantas &amp; Berwaranti</h1>
-        </div>
-        <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:6px;">
-          Dapatkan akses Netflix, Disney+, HBO Max, Prime Video, YouTube Premium, Spotify, Canva Pro &amp; CapCut Pro dengan panduan jelas dan sokongan pantas.
-        </p>
-        <div class="landing-actions-row">
-          <button type="button" class="landing-primary-btn" onclick="scrollToCatalogGrid()">Lihat Katalog Aplikasi ↓</button>
-          <button type="button" class="landing-secondary-btn" onclick="openCartModal()">🛒 Buka Troli (<span id="landingCartCount">0</span>)</button>
-        </div>
-      </section>
-
       <div class="status-strip">
         <div class="status-left">
           <span class="pulse-dot"></span>
@@ -2428,6 +2478,45 @@
         <div class="skeleton-card"><div class="skeleton-bar" style="width:68px;height:18px;"></div><div class="skeleton-icon"></div><div class="skeleton-bar" style="width:84px;height:14px;"></div><div class="skeleton-bar" style="width:56px;height:18px;"></div></div>
         <div class="skeleton-card"><div class="skeleton-bar" style="width:68px;height:18px;"></div><div class="skeleton-icon"></div><div class="skeleton-bar" style="width:84px;height:14px;"></div><div class="skeleton-bar" style="width:56px;height:18px;"></div></div>
       </div>
+
+      <section class="why-spystore-section" id="landingSection">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <span class="hero-pill" style="margin-bottom:0;">SPYSTORE OFFICIAL OUTLET</span>
+          <span class="stock-badge-top">100% Terpercaya</span>
+        </div>
+        <div style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <img src="spystore-logo.png" alt="SPYSTORE" style="height:30px; width:auto; object-fit:contain;" onerror="this.style.display='none';" />
+          <h2 style="font-size:1.22rem; font-weight:800;">Kenapa Pilih Spystore?</h2>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">
+          Kami menyediakan langganan aplikasi penstriman, muzik, dan kreatif dengan harga berpatutan, pilihan pelan yang jelas, serta bantuan terus jika anda memerlukan sokongan.
+        </p>
+
+        <div class="why-spystore-grid">
+          <div class="why-spystore-card">
+            <h3>🛡️ Waranti Sepanjang Tempoh</h3>
+            <p>Setiap langganan dilindungi sepanjang tempoh aktif yang dibeli. Sekiranya berlaku isu log masuk, pasukan kami sedia membantu penggantian mengikut syarat penggunaan.</p>
+          </div>
+          <div class="why-spystore-card">
+            <h3>⚡ Proses Pantas &amp; Mudah</h3>
+            <p>Pilih aplikasi, tetapkan tempoh 1 atau 2 bulan, tambah ke troli atau terus ke pembayaran, dan terima panduan akses dengan pantas.</p>
+          </div>
+          <div class="why-spystore-card">
+            <h3>🎯 Pilihan Pelan Fleksibel</h3>
+            <p>Tersedia pilihan mengikut aplikasi seperti akses Private, Invite, atau Share/Private bagi memudahkan anda memilih bajet dan peranti yang sesuai.</p>
+          </div>
+          <div class="why-spystore-card">
+            <h3>🧾 Rekod Transaksi &amp; Resit Tersusun</h3>
+            <p>Setiap tempahan direkodkan dengan nombor order seragam serta akses resit rasmi bagi memudahkan rujukan pelanggan dan pentadbiran.</p>
+          </div>
+        </div>
+
+        <div class="landing-actions-row" style="margin-top:14px;">
+          <button type="button" class="landing-primary-btn" onclick="scrollToCatalogGrid()">↑ Kembali ke Katalog Aplikasi</button>
+          <button type="button" class="landing-secondary-btn" onclick="openCartModal()">🛒 Lihat Troli (<span id="landingCartCount">0</span>)</button>
+          <a href="https://wa.me/60189066291?text=Hi%20SPYSTORE%2C%20saya%20nak%20bertanya%20tentang%20langganan." target="_blank" class="landing-secondary-btn" style="text-decoration:none; display:inline-flex; align-items:center;">💬 Hubungi Admin</a>
+        </div>
+      </section>
     </div>
 
     <!-- Checkout View -->
@@ -5263,122 +5352,6 @@
 
   function refreshVerifyRoleListUI() {
   
-  const CART_STORAGE_KEY = 'spystore_cart_v1';
-
-  function getCartItems() {
-    try {
-      const list = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]');
-      return Array.isArray(list) ? list : [];
-    } catch (e) { return []; }
-  }
-
-  function saveCartItems(items) {
-    try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-    } catch (e) {}
-    updateCartBadgeUI();
-  }
-
-  function updateCartBadgeUI() {
-    const items = getCartItems();
-    const totalQty = items.reduce((sum, it) => sum + Number(it.qty || 1), 0);
-    const b1 = document.getElementById('cartCountBadge');
-    const b2 = document.getElementById('landingCartCount');
-    if (b1) b1.textContent = String(totalQty);
-    if (b2) b2.textContent = String(totalQty);
-  }
-
-  function scrollToCatalogGrid() {
-    document.getElementById('productGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function addCurrentSelectionToCart() {
-    if (!currentProduct) return;
-    const appName = getActiveDisplayAppName();
-    const unit = getActiveUnitPrice();
-    const planPrice = selectedMonths === 2 ? getActiveTwoMonthPrice(unit) : unit;
-    const items = getCartItems();
-    const key = `${currentProduct.id}|${selectedSubPlan}|${selectedMonths}`;
-    const existingIdx = items.findIndex(x => x.key === key);
-    if (existingIdx !== -1) {
-      items[existingIdx].qty = Number(items[existingIdx].qty || 1) + 1;
-    } else {
-      items.push({
-        key,
-        productId: currentProduct.id,
-        appName,
-        months: selectedMonths,
-        subPlan: selectedSubPlan,
-        unitPrice: Number(planPrice),
-        qty: 1
-      });
-    }
-    saveCartItems(items);
-    showToast(`🛒 ${appName} (${selectedMonths} Bln) ditambah ke troli!`);
-  }
-
-  function openCartModal() {
-    renderCartModal();
-    document.getElementById('cartModal')?.classList.add('open');
-  }
-
-  function closeCartModal() {
-    document.getElementById('cartModal')?.classList.remove('open');
-  }
-
-  function changeCartItemQty(idx, delta) {
-    const items = getCartItems();
-    if (!items[idx]) return;
-    const nextQty = Number(items[idx].qty || 1) + delta;
-    if (nextQty <= 0) items.splice(idx, 1);
-    else items[idx].qty = nextQty;
-    saveCartItems(items);
-    renderCartModal();
-  }
-
-  function renderCartModal() {
-    const box = document.getElementById('cartItemsContainer');
-    const subEl = document.getElementById('cartSubtotalText');
-    if (!box) return;
-    const items = getCartItems();
-    if (!items.length) {
-      box.innerHTML = `<div class="step-card" style="text-align:center; color:var(--text-muted);">Troli anda masih kosong. Pilih mana-mana aplikasi di katalog dan tekan <strong>+ Cart</strong>.</div>`;
-      if (subEl) subEl.textContent = 'RM0.00';
-      return;
-    }
-    let subtotal = 0;
-    box.innerHTML = items.map((it, idx) => {
-      const lineTotal = Number(it.unitPrice || 0) * Number(it.qty || 1);
-      subtotal += lineTotal;
-      return `
-        <div class="cart-item-card">
-          <div style="min-width:0;">
-            <div style="font-weight:800; font-size:0.9rem;">${it.appName}</div>
-            <div style="font-size:0.74rem; color:var(--text-secondary);">${it.months} Month(s) • RM${Number(it.unitPrice || 0).toFixed(2)} each</div>
-            <div style="font-weight:800; font-size:0.86rem; color:var(--accent-gold); margin-top:2px;">RM${lineTotal.toFixed(2)}</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-            <button type="button" class="qty-ctrl-btn" onclick="changeCartItemQty(${idx}, -1)">-</button>
-            <span style="min-width:20px; text-align:center; font-weight:800;">${it.qty || 1}</span>
-            <button type="button" class="qty-ctrl-btn" onclick="changeCartItemQty(${idx}, 1)">+</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-    if (subEl) subEl.textContent = `RM${subtotal.toFixed(2)}`;
-  }
-
-  function checkoutFromCart() {
-    const items = getCartItems();
-    if (!items.length) { showToast('Troli kosong.'); return; }
-    const first = items[0];
-    closeCartModal();
-    openCheckout(first.productId);
-    if (first.subPlan) selectSubPlan(first.subPlan);
-    if (first.months) selectMonths(Number(first.months));
-  }
-
-  updateCartBadgeUI();
   ensureOwnerAccountSeeded();
     const users = getUsersDB().filter(u => !isDesignatedOwner(u));
     const vList = getVerifiedAdminsList();
@@ -6634,6 +6607,126 @@
       e.returnValue = '';
     });
   })();
+
+  const CART_STORAGE_KEY = 'spystore_cart_v1';
+
+  function getCartItems() {
+    try {
+      const list = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]');
+      return Array.isArray(list) ? list : [];
+    } catch (e) { return []; }
+  }
+
+  function saveCartItems(items) {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } catch (e) {}
+    updateCartBadgeUI();
+  }
+
+  function updateCartBadgeUI() {
+    const items = getCartItems();
+    const totalQty = items.reduce((sum, it) => sum + Number(it.qty || 1), 0);
+    const b1 = document.getElementById('cartCountBadge');
+    const b2 = document.getElementById('landingCartCount');
+    if (b1) b1.textContent = String(totalQty);
+    if (b2) b2.textContent = String(totalQty);
+  }
+
+  function scrollToCatalogGrid() {
+    document.getElementById('productGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function addCurrentSelectionToCart() {
+    if (!currentProduct) {
+      showToast('Pilih produk terlebih dahulu sebelum menambah ke troli.');
+      return;
+    }
+    const appName = getActiveDisplayAppName();
+    const unit = getActiveUnitPrice();
+    const planPrice = selectedMonths === 2 ? getActiveTwoMonthPrice(unit) : unit;
+    const items = getCartItems();
+    const key = `${currentProduct.id}|${selectedSubPlan}|${selectedMonths}`;
+    const existingIdx = items.findIndex(x => x.key === key);
+    if (existingIdx !== -1) {
+      items[existingIdx].qty = Number(items[existingIdx].qty || 1) + 1;
+    } else {
+      items.push({
+        key,
+        productId: currentProduct.id,
+        appName,
+        months: selectedMonths,
+        subPlan: selectedSubPlan,
+        unitPrice: Number(planPrice),
+        qty: 1
+      });
+    }
+    saveCartItems(items);
+    showToast(`🛒 ${appName} (${selectedMonths} Bln) ditambah ke troli!`);
+  }
+
+  function openCartModal() {
+    renderCartModal();
+    document.getElementById('cartModal')?.classList.add('open');
+  }
+
+  function closeCartModal() {
+    document.getElementById('cartModal')?.classList.remove('open');
+  }
+
+  function changeCartItemQty(idx, delta) {
+    const items = getCartItems();
+    if (!items[idx]) return;
+    const nextQty = Number(items[idx].qty || 1) + delta;
+    if (nextQty <= 0) items.splice(idx, 1);
+    else items[idx].qty = nextQty;
+    saveCartItems(items);
+    renderCartModal();
+  }
+
+  function renderCartModal() {
+    const box = document.getElementById('cartItemsContainer');
+    const subEl = document.getElementById('cartSubtotalText');
+    if (!box) return;
+    const items = getCartItems();
+    if (!items.length) {
+      box.innerHTML = `<div class="step-card" style="text-align:center; color:var(--text-muted);">Troli anda masih kosong. Pilih mana-mana aplikasi di katalog dan tekan <strong>+ Cart</strong>.</div>`;
+      if (subEl) subEl.textContent = 'RM0.00';
+      return;
+    }
+    let subtotal = 0;
+    box.innerHTML = items.map((it, idx) => {
+      const lineTotal = Number(it.unitPrice || 0) * Number(it.qty || 1);
+      subtotal += lineTotal;
+      return `
+        <div class="cart-item-card">
+          <div style="min-width:0;">
+            <div style="font-weight:800; font-size:0.9rem;">${it.appName}</div>
+            <div style="font-size:0.74rem; color:var(--text-secondary);">${it.months} Month(s) • RM${Number(it.unitPrice || 0).toFixed(2)} each</div>
+            <div style="font-weight:800; font-size:0.86rem; color:var(--accent-gold); margin-top:2px;">RM${lineTotal.toFixed(2)}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+            <button type="button" class="qty-ctrl-btn" onclick="changeCartItemQty(${idx}, -1)">-</button>
+            <span style="min-width:20px; text-align:center; font-weight:800;">${it.qty || 1}</span>
+            <button type="button" class="qty-ctrl-btn" onclick="changeCartItemQty(${idx}, 1)">+</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    if (subEl) subEl.textContent = `RM${subtotal.toFixed(2)}`;
+  }
+
+  function checkoutFromCart() {
+    const items = getCartItems();
+    if (!items.length) { showToast('Troli kosong.'); return; }
+    const first = items[0];
+    closeCartModal();
+    openCheckout(first.productId);
+    if (first.subPlan) selectSubPlan(first.subPlan);
+    if (first.months) selectMonths(Number(first.months));
+  }
+
+  updateCartBadgeUI();
 
   ensureOwnerAccountSeeded();
   applySupportLinksFromTemplates();
