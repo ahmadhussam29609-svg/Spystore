@@ -2654,11 +2654,11 @@
       </div>
 
       <!-- Action Toolbar for Manual Receipt Editing & Export -->
-      <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:space-between; align-items:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:8px; margin-bottom:10px;">
-        <button type="button" onclick="copyIntegratedSSResitImage()" style="background:#1e293b; color:#f8fafc; border:1px solid #334155; padding:7px 11px; border-radius:9px; font-size:0.74rem; font-weight:700; cursor:pointer;">📋 Copy</button>
-        <button type="button" onclick="downloadIntegratedSSResitPng()" style="background:#2563eb; color:#ffffff; border:none; padding:7px 13px; border-radius:9px; font-size:0.74rem; font-weight:800; cursor:pointer;">⬇ PNG</button>
-        <button type="button" onclick="printIntegratedSSResit()" style="background:#1e293b; color:#f8fafc; border:1px solid #334155; padding:7px 11px; border-radius:9px; font-size:0.74rem; font-weight:700; cursor:pointer;">🖨️ PDF</button>
-        <button type="button" onclick="toggleSSResitEditInputs()" id="ssrToggleEditBtn" style="background:rgba(250,204,21,0.14); color:var(--accent-gold); border:1px solid rgba(250,204,21,0.4); padding:7px 10px; border-radius:9px; font-size:0.72rem; font-weight:700; cursor:pointer;">✏️ Edit Manual</button>
+      <div id="ssrActionToolbar" style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; align-items:center; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:8px; margin-bottom:10px;">
+        <button type="button" onclick="copyIntegratedSSResitImage()" style="width:100%; background:#1e293b; color:#f8fafc; border:1px solid #334155; padding:8px 10px; border-radius:9px; font-size:0.74rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">📋 Copy</button>
+        <button type="button" onclick="downloadIntegratedSSResitPng()" style="width:100%; background:#2563eb; color:#ffffff; border:none; padding:8px 10px; border-radius:9px; font-size:0.74rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">⬇ PNG</button>
+        <button type="button" onclick="printIntegratedSSResit()" style="width:100%; background:#1e293b; color:#f8fafc; border:1px solid #334155; padding:8px 10px; border-radius:9px; font-size:0.74rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">📄 PDF</button>
+        <button type="button" onclick="toggleSSResitEditInputs()" id="ssrToggleEditBtn" style="grid-column:1 / -1; width:100%; background:rgba(250,204,21,0.14); color:var(--accent-gold); border:1px solid rgba(250,204,21,0.4); padding:7px 10px; border-radius:9px; font-size:0.73rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">✏️ Edit Manual (WhatsApp / Manual Order)</button>
       </div>
 
       <!-- Editable Manual Order Fields & No-BG Receipt Logo Upload -->
@@ -2897,6 +2897,7 @@
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
   const ADMIN_WA = '60189066291';
   const OWNER_EMAIL = 'ahmadhussam29609@gmail.com';
@@ -4214,7 +4215,13 @@
     document.getElementById('ownerSSResitModal')?.classList.remove('open');
   }
 
+  let _ssrIsManualOrder = false;
+
   function toggleSSResitEditInputs() {
+    if (!_ssrIsManualOrder) {
+      showToast('Resit transaksi automatik tidak boleh diedit secara manual.');
+      return;
+    }
     const box = document.getElementById('ssrEditFieldsBox');
     if (!box) return;
     box.style.display = box.style.display === 'none' ? 'block' : 'none';
@@ -4286,11 +4293,13 @@
 
   function openOwnerSSResitModal(txn = null) {
     populateSSResitInputsFromTxn(txn);
-    const isStaff = isOwnerOrAdmin();
+    const isManual = !txn;
+    _ssrIsManualOrder = isManual;
+    const canEditManual = isOwnerOrAdmin() && isManual;
     const editBtn = document.getElementById('ssrToggleEditBtn');
     const editBox = document.getElementById('ssrEditFieldsBox');
-    if (editBtn) editBtn.style.display = isStaff ? 'inline-block' : 'none';
-    if (editBox && !isStaff) editBox.style.display = 'none';
+    if (editBtn) editBtn.style.display = canEditManual ? 'inline-flex' : 'none';
+    if (editBox) editBox.style.display = 'none';
     document.getElementById('ownerSSResitModal')?.classList.add('open');
   }
 
@@ -4370,8 +4379,43 @@
     } catch (e) {}
   }
 
-  function printIntegratedSSResit() {
-    window.print();
+  async function printIntegratedSSResit() {
+    const recNo = (document.getElementById('ssrReceiptNoInput')?.value || '').trim() || generateReceiptNumber();
+    const area = document.getElementById('spystore-ssresit-capture-area');
+    const jsPdfLib = window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF : null;
+    if (!area || typeof html2canvas !== 'function' || !jsPdfLib) {
+      showToast('Modul eksport PDF tidak tersedia.');
+      return;
+    }
+    try {
+      showToast('Menjana fail PDF...');
+      await waitForReceiptImagesReady(area);
+      const canvas = await html2canvas(area, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPdfLib({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const maxW = pageW - margin * 2;
+      const ratio = canvas.height / canvas.width;
+      let imgW = maxW;
+      let imgH = imgW * ratio;
+      if (imgH > pageH - margin * 2) {
+        imgH = pageH - margin * 2;
+        imgW = imgH / ratio;
+      }
+      const x = (pageW - imgW) / 2;
+      const y = margin;
+      pdf.addImage(imgData, 'PNG', x, y, imgW, imgH);
+      pdf.save(`${recNo}.pdf`);
+      showToast(`Resit ${recNo}.pdf berjaya dimuat turun!`);
+    } catch (e) {
+      showToast('Gagal menjana fail PDF.');
+    }
   }
 
   // Show the receipt preview first with download option so user can review & download
