@@ -2567,10 +2567,6 @@
             <input type="password" class="form-control" id="custRobuxPassword" placeholder="Roblox Password" />
           </div>
           <div class="form-group">
-            <label>💰 ORDER (Selected Pricelist)</label>
-            <input type="text" class="form-control" id="custRobuxOrderDisplay" readonly style="opacity:0.85;" />
-          </div>
-          <div class="form-group">
             <label>💎 BAKI ROBUX</label>
             <input type="text" class="form-control" id="custRobuxBalance" placeholder="e.g. 0" />
           </div>
@@ -3235,7 +3231,7 @@
     { id: 'capcut', logo: 'capcut.png', frontName: 'CapCut', name: 'CapCut Pro', mode: 'dual', subPlans: [{ key: 'share', label: 'Share', price: 10, stock: 5 }, { key: 'private', label: 'Private', price: 15, stock: 3 }], category: 'Creative', price: 10, stock: 8, badge: 'CC', bg: '#18181b', color: '#facc15' },
     {
       id: 'robux',
-      logo: 'robux.png',
+      logo: 'robuxroblox.png',
       frontName: 'Robux',
       name: 'Roblox Robux Recharge',
       mode: 'robux_pricelist',
@@ -4012,15 +4008,6 @@
     return currentProduct.robuxPackages.find(pk => pk.key === selectedRobuxPkgKey) || currentProduct.robuxPackages[0];
   }
 
-  function syncRobuxOrderDisplayField() {
-    const disp = document.getElementById('custRobuxOrderDisplay');
-    if (!disp || !currentProduct || currentProduct.mode !== 'robux_pricelist') return;
-    const pk = getActiveRobuxPackage();
-    if (pk) {
-      disp.value = `${pk.label} — RM${Number(pk.price).toFixed(2)}`;
-    }
-  }
-
   function renderRobuxPricelistGrid() {
     const wrap = document.getElementById('robuxPricelistWrap');
     const grid = document.getElementById('robuxPricelistGrid');
@@ -4038,7 +4025,6 @@
           </div>
         `;
       }).join('');
-      syncRobuxOrderDisplayField();
     } else {
       wrap.style.display = 'none';
       monthsGrid.style.display = 'grid';
