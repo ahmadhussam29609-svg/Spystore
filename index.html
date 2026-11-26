@@ -2658,29 +2658,19 @@
         <button type="button" onclick="copyIntegratedSSResitImage()" style="width:100%; background:#1e293b; color:#f8fafc; border:1px solid #334155; padding:8px 10px; border-radius:9px; font-size:0.74rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">📋 Copy</button>
         <button type="button" onclick="downloadIntegratedSSResitPng()" style="width:100%; background:#2563eb; color:#ffffff; border:none; padding:8px 10px; border-radius:9px; font-size:0.74rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">⬇ PNG</button>
         <button type="button" onclick="printIntegratedSSResit()" style="width:100%; background:#1e293b; color:#f8fafc; border:1px solid #334155; padding:8px 10px; border-radius:9px; font-size:0.74rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">📄 PDF</button>
-        <button type="button" onclick="toggleSSResitEditInputs()" id="ssrToggleEditBtn" style="grid-column:1 / -1; width:100%; background:rgba(250,204,21,0.14); color:var(--accent-gold); border:1px solid rgba(250,204,21,0.4); padding:7px 10px; border-radius:9px; font-size:0.73rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">✏️ Edit Manual (WhatsApp / Manual Order)</button>
+        <button type="button" onclick="toggleSSResitEditInputs()" id="ssrToggleEditBtn" style="grid-column:1 / -1; width:100%; background:rgba(250,204,21,0.14); color:var(--accent-gold); border:1px solid rgba(250,204,21,0.4); padding:7px 10px; border-radius:9px; font-size:0.73rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">✏️ Manual Receipt Editor</button>
       </div>
 
-      <!-- Editable Manual Order Fields & No-BG Receipt Logo Upload -->
-      <div id="ssrEditFieldsBox" style="display:none; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:10px; margin-bottom:12px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border-color);">
-          <div style="font-size:0.74rem; font-weight:700; color:var(--accent-cyan);">Logo Resit (No Background)</div>
-          <div style="display:flex; gap:6px; align-items:center;">
-            <label style="background:var(--accent-blue); color:#ffffff; padding:5px 10px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer;">
-              <span>+ Upload No-BG Logo</span>
-              <input type="file" accept="image/*" onchange="handleReceiptNoBgLogoUpload(event)" style="display:none;" />
-            </label>
-            <button type="button" onclick="clearReceiptNoBgLogo()" style="background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-secondary); padding:5px 9px; border-radius:8px; font-size:0.72rem; font-weight:700; cursor:pointer;">Reset</button>
-          </div>
-        </div>
+      <!-- Editable Manual Order Fields (Logo & Order ID Locked) -->
+      <div id="ssrEditFieldsBox" style="display:none; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:12px; margin-bottom:12px;">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
           <div class="form-group" style="margin-bottom:0;">
-            <label>Order ID *</label>
-            <input type="text" class="form-control" id="ssrReceiptNoInput" oninput="renderIntegratedSSResitPreview()" />
+            <label>Order ID (Locked) 🔒</label>
+            <input type="text" class="form-control" id="ssrReceiptNoInput" readonly style="opacity:0.75; cursor:not-allowed;" />
           </div>
           <div class="form-group" style="margin-bottom:0;">
             <label>Date Issued *</label>
-            <input type="text" class="form-control" id="ssrDateInput" oninput="renderIntegratedSSResitPreview()" />
+            <input type="date" class="form-control" id="ssrDateInput" onchange="renderIntegratedSSResitPreview()" />
           </div>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
@@ -2690,17 +2680,25 @@
           </div>
           <div class="form-group" style="margin-bottom:0;">
             <label>Payment Method *</label>
-            <input type="text" class="form-control" id="ssrMethodInput" value="Online Transfer" oninput="renderIntegratedSSResitPreview()" />
+            <select class="form-control" id="ssrMethodInput" onchange="renderIntegratedSSResitPreview()">
+              <option value="Online Transfer">Online Transfer</option>
+              <option value="QR">QR</option>
+              <option value="eWallet">eWallet</option>
+              <option value="Cash">Cash</option>
+            </select>
           </div>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+        <div style="display:grid; grid-template-columns:1.25fr 0.95fr 0.9fr; gap:8px;">
           <div class="form-group" style="margin-bottom:0;">
             <label>Product *</label>
-            <input type="text" class="form-control" id="ssrProductInput" oninput="renderIntegratedSSResitPreview()" />
+            <select class="form-control" id="ssrProductInput" onchange="handleManualReceiptProductOrPlanChange()"></select>
           </div>
           <div class="form-group" style="margin-bottom:0;">
             <label>Plan *</label>
-            <input type="text" class="form-control" id="ssrPlanInput" value="1 Month" oninput="renderIntegratedSSResitPreview()" />
+            <select class="form-control" id="ssrPlanInput" onchange="handleManualReceiptProductOrPlanChange()">
+              <option value="1 Month">1 Month</option>
+              <option value="2 Months">2 Months</option>
+            </select>
           </div>
           <div class="form-group" style="margin-bottom:0;">
             <label>Amount (RM) *</label>
@@ -4242,29 +4240,98 @@
     return s;
   }
 
+  function getSpystoreReceiptProductCatalog() {
+    const items = [];
+    products.forEach(p => {
+      if (p.mode === 'dual' && Array.isArray(p.subPlans)) {
+        p.subPlans.forEach(sp => {
+          const label = `${p.name} (${sp.label})`;
+          const p1 = Number(sp.price || p.price || 0);
+          const p2 = typeof sp.price2Mo === 'number' && !isNaN(sp.price2Mo) && sp.price2Mo > 0 ? Number(sp.price2Mo) : p1 * 2;
+          items.push({ label, price1: p1, price2: p2 });
+        });
+      } else {
+        const p1 = Number(p.price || 0);
+        const p2 = typeof p.price2Mo === 'number' && !isNaN(p.price2Mo) && p.price2Mo > 0 ? Number(p.price2Mo) : p1 * 2;
+        items.push({ label: p.name, price1: p1, price2: p2 });
+      }
+    });
+    return items;
+  }
+
+  function populateSpystoreProductSelect(selectedVal = '') {
+    const sel = document.getElementById('ssrProductInput');
+    if (!sel) return;
+    const opts = getSpystoreReceiptProductCatalog();
+    sel.innerHTML = opts.map(o => `<option value="${o.label}">${o.label}</option>`).join('');
+    if (selectedVal && opts.some(o => o.label.toLowerCase() === String(selectedVal).toLowerCase())) {
+      const matched = opts.find(o => o.label.toLowerCase() === String(selectedVal).toLowerCase());
+      sel.value = matched.label;
+    } else if (opts.length) {
+      sel.value = opts[0].label;
+    }
+  }
+
+  function handleManualReceiptProductOrPlanChange() {
+    const prodLabel = document.getElementById('ssrProductInput')?.value || '';
+    const planLabel = document.getElementById('ssrPlanInput')?.value || '1 Month';
+    const opts = getSpystoreReceiptProductCatalog();
+    const found = opts.find(o => o.label === prodLabel);
+    const amtInp = document.getElementById('ssrAmountInput');
+    if (found && amtInp) {
+      const val = String(planLabel).includes('2') ? found.price2 : found.price1;
+      amtInp.value = Number(val || 0).toFixed(2);
+    }
+    renderIntegratedSSResitPreview();
+  }
+
+  function toIsoDateInputValue(rawDate) {
+    const s = String(rawDate || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    const dmy = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if (dmy) {
+      return `${dmy[3]}-${String(dmy[2]).padStart(2, '0')}-${String(dmy[1]).padStart(2, '0')}`;
+    }
+    const parsed = new Date(s || Date.now());
+    const valid = isNaN(parsed.getTime()) ? new Date() : parsed;
+    const y = valid.getFullYear();
+    const m = String(valid.getMonth() + 1).padStart(2, '0');
+    const d = String(valid.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
   function populateSSResitInputsFromTxn(txn = null) {
     applySavedReceiptLogo();
     const recNo = txn?.receiptNo || txn?.invoiceNo || txn?.ref || generateReceiptNumber();
-    const dt = txn?.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    const isoDate = toIsoDateInputValue(txn?.date || '');
     const rawBuyer = String(txn?.customerName || '').trim();
     const buyer = (rawBuyer && rawBuyer !== '-') ? rawBuyer : (String(getCurrentUser()?.name || '').trim() || '-');
-    const method = txn?.paymentMethod || 'Online Transfer';
-    let rawApp = txn?.app || 'Subscription';
-    let planLabel = `${txn?.months || 1} Month`;
-    const matchParen = rawApp.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+    const rawMethod = String(txn?.paymentMethod || 'Online Transfer').trim();
+    const allowedMethods = ['Online Transfer', 'QR', 'eWallet', 'Cash'];
+    const matchedMethod = allowedMethods.find(m => m.toLowerCase() === rawMethod.toLowerCase()) || 'Online Transfer';
+
+    let rawApp = txn?.app || '';
+    let planNum = Number(txn?.months || 1);
+    const matchParen = String(rawApp).match(/^(.*?)\s*\(([^)]+)\)\s*$/);
     if (matchParen) {
       rawApp = matchParen[1].trim();
-      planLabel = matchParen[2].trim();
+      if (String(matchParen[2]).includes('2')) planNum = 2;
     }
-    const amt = parseFloat(txn?.total || '0') || 0;
+    const planLabel = planNum === 2 ? '2 Months' : '1 Month';
+
+    populateSpystoreProductSelect(rawApp);
+    const activeProdLabel = document.getElementById('ssrProductInput')?.value || '';
+    const catalogOpts = getSpystoreReceiptProductCatalog();
+    const catalogMatch = catalogOpts.find(o => o.label === activeProdLabel);
+    const defaultAmt = catalogMatch ? (planNum === 2 ? catalogMatch.price2 : catalogMatch.price1) : 0;
+    const amt = txn ? (parseFloat(txn?.total || '0') || 0) : defaultAmt;
 
     if (document.getElementById('ssrReceiptNoInput')) document.getElementById('ssrReceiptNoInput').value = recNo;
-    if (document.getElementById('ssrDateInput')) document.getElementById('ssrDateInput').value = dt;
+    if (document.getElementById('ssrDateInput')) document.getElementById('ssrDateInput').value = isoDate;
     if (document.getElementById('ssrBuyerInput')) document.getElementById('ssrBuyerInput').value = buyer;
-    if (document.getElementById('ssrMethodInput')) document.getElementById('ssrMethodInput').value = method;
-    if (document.getElementById('ssrProductInput')) document.getElementById('ssrProductInput').value = rawApp;
+    if (document.getElementById('ssrMethodInput')) document.getElementById('ssrMethodInput').value = matchedMethod;
     if (document.getElementById('ssrPlanInput')) document.getElementById('ssrPlanInput').value = planLabel;
-    if (document.getElementById('ssrAmountInput')) document.getElementById('ssrAmountInput').value = amt > 0 ? amt.toFixed(2) : '0.00';
+    if (document.getElementById('ssrAmountInput')) document.getElementById('ssrAmountInput').value = amt.toFixed(2);
 
     renderIntegratedSSResitPreview();
     return recNo;
