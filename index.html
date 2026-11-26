@@ -2460,10 +2460,11 @@
       <div id="inlineShowResultsBox" style="display:none; background:var(--bg-card); border:1px solid var(--border-strong); border-radius:14px; padding:12px; margin-bottom:14px; max-height:none; overflow:visible;"></div>
 
       <div class="filter-row" id="filterRow">
-        <button class="filter-chip active" onclick="setCategory('All', this)" data-i18n="catAll">All (8)</button>
+        <button class="filter-chip active" onclick="setCategory('All', this)" data-i18n="catAll">All (9)</button>
         <button class="filter-chip" onclick="setCategory('Streaming', this)" data-i18n="catStreaming">Streaming (5)</button>
         <button class="filter-chip" onclick="setCategory('Music', this)" data-i18n="catMusic">Music (1)</button>
         <button class="filter-chip" onclick="setCategory('Creative', this)" data-i18n="catCreative">Creative (2)</button>
+        <button class="filter-chip" onclick="setCategory('Gaming', this)">Gaming (1)</button>
       </div>
 
       <div class="section-head">
@@ -2555,6 +2556,42 @@
           <label data-i18n="labelEmail">Account Email Address *</label>
           <input type="email" class="form-control" id="custEmail" placeholder="e.g. name@gmail.com" />
         </div>
+        <div id="robuxViaLoginBox" style="display:none; margin-top:4px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:14px; padding:12px;">
+          <div style="font-size:0.78rem; font-weight:800; color:var(--accent-gold); margin-bottom:10px;">ROBLOX ROBUX VIA LOGIN</div>
+          <div class="form-group">
+            <label>👤 USERNAME *</label>
+            <input type="text" class="form-control" id="custRobuxUsername" placeholder="Roblox Username" />
+          </div>
+          <div class="form-group">
+            <label>🔑 PASSWORD *</label>
+            <input type="password" class="form-control" id="custRobuxPassword" placeholder="Roblox Password" />
+          </div>
+          <div class="form-group">
+            <label>💰 ORDER (Selected Pricelist)</label>
+            <input type="text" class="form-control" id="custRobuxOrderDisplay" readonly style="opacity:0.85;" />
+          </div>
+          <div class="form-group">
+            <label>💎 BAKI ROBUX</label>
+            <input type="text" class="form-control" id="custRobuxBalance" placeholder="e.g. 0" />
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>🔐 BACKUP CODE (1, 2, 3 — Optional)</label>
+            <div style="display:grid; grid-template-columns:1fr; gap:6px;">
+              <input type="text" class="form-control" id="custRobuxBackup1" placeholder="1. Backup Code 1" />
+              <input type="text" class="form-control" id="custRobuxBackup2" placeholder="2. Backup Code 2" />
+              <input type="text" class="form-control" id="custRobuxBackup3" placeholder="3. Backup Code 3" />
+            </div>
+          </div>
+          <div style="background:var(--bg-card); border:1px solid rgba(250,204,21,0.35); border-radius:10px; padding:10px; font-size:0.72rem; color:var(--text-secondary);">
+            <strong style="color:var(--accent-gold); display:block; margin-bottom:4px;">📌 NOTED ‼️</strong>
+            <ul style="padding-left:15px; display:flex; flex-direction:column; gap:3px;">
+              <li>Backup Code membantu mempercepatkan proses login.</li>
+              <li>Backup Code tidak wajib disediakan.</li>
+              <li>Sila standby untuk proses Account Verification.</li>
+              <li>Pastikan akaun boleh diakses sepanjang proses berlangsung.</li>
+            </ul>
+          </div>
+        </div>
         <div id="noExtraInfoNote" style="display:none; font-size:0.74rem; color:var(--text-secondary); padding-top:2px;" data-i18n="noExtraInfoNote">
         </div>
       </div>
@@ -2568,7 +2605,11 @@
           <label style="display:block; font-size:0.76rem; font-weight:600; color:var(--text-secondary); margin-bottom:6px;" data-i18n="labelAccountType">Account Plan Type *</label>
           <div class="plan-grid" id="subPlanGrid"></div>
         </div>
-        <div class="plan-grid">
+        <div id="robuxPricelistWrap" style="display:none; margin-bottom:10px;">
+          <label style="display:block; font-size:0.76rem; font-weight:600; color:var(--text-secondary); margin-bottom:6px;" id="labelRobuxPricelist">Robux Recharge Pricelist *</label>
+          <div class="plan-grid" id="robuxPricelistGrid"></div>
+        </div>
+        <div class="plan-grid" id="standardMonthsGrid">
           <div class="plan-option selected" id="plan1Btn" onclick="selectMonths(1)">
             <div class="plan-mo" data-i18n="mo1">1 Month</div>
             <div class="plan-amt" id="plan1Price">RM0.00</div>
@@ -3191,7 +3232,32 @@
     { id: 'youtube', logo: 'youtube.png', frontName: 'YouTube', name: 'YouTube Premium', mode: 'invite', category: 'Streaming', price: 5, stock: 4, badge: 'YT', bg: '#271313', color: '#f87171' },
     { id: 'spotify', logo: 'spotify.png', frontName: 'Spotify', name: 'Spotify Premium', mode: 'invite', category: 'Music', price: 13, stock: 4, badge: 'SP', bg: '#0d2618', color: '#22c55e' },
     { id: 'canva', logo: 'canva.png', frontName: 'Canva', name: 'Canva Pro', mode: 'invite', category: 'Creative', price: 5, stock: 20, badge: 'C', bg: '#0e2933', color: '#22d3ee' },
-    { id: 'capcut', logo: 'capcut.png', frontName: 'CapCut', name: 'CapCut Pro', mode: 'dual', subPlans: [{ key: 'share', label: 'Share', price: 10, stock: 5 }, { key: 'private', label: 'Private', price: 15, stock: 3 }], category: 'Creative', price: 10, stock: 8, badge: 'CC', bg: '#18181b', color: '#facc15' }
+    { id: 'capcut', logo: 'capcut.png', frontName: 'CapCut', name: 'CapCut Pro', mode: 'dual', subPlans: [{ key: 'share', label: 'Share', price: 10, stock: 5 }, { key: 'private', label: 'Private', price: 15, stock: 3 }], category: 'Creative', price: 10, stock: 8, badge: 'CC', bg: '#18181b', color: '#facc15' },
+    {
+      id: 'robux',
+      logo: 'robux.png',
+      frontName: 'Robux',
+      name: 'Roblox Robux Recharge',
+      mode: 'robux_pricelist',
+      category: 'Gaming',
+      price: 5.50,
+      stock: 50,
+      badge: 'RBX',
+      bg: '#111827',
+      color: '#38bdf8',
+      robuxPackages: [
+        { key: '500_rbx', label: '500 Robux', price: 19.90 },
+        { key: '1000_rbx', label: '1,000 Robux', price: 39.90 },
+        { key: '1500_rbx', label: '1,500 Robux', price: 59.90 },
+        { key: '2000_rbx', label: '2,000 Robux', price: 79.90 },
+        { key: '2500_rbx', label: '2,500 Robux', price: 99.90 },
+        { key: '3000_rbx', label: '3,000 Robux', price: 119.90 },
+        { key: '3500_rbx', label: '3,500 Robux', price: 139.90 },
+        { key: '4000_rbx', label: '4,000 Robux', price: 159.90 },
+        { key: '4500_rbx', label: '4,500 Robux', price: 179.90 },
+        { key: '5000_rbx', label: '5,000 Robux', price: 199.90 }
+      ]
+    }
   ];
 
   let selectedCategory = 'All';
@@ -3939,8 +4005,59 @@
     return bothDisabled || bothComingSoon || zeroStock;
   }
 
+  let selectedRobuxPkgKey = '500_rbx';
+
+  function getActiveRobuxPackage() {
+    if (!currentProduct || currentProduct.mode !== 'robux_pricelist' || !Array.isArray(currentProduct.robuxPackages)) return null;
+    return currentProduct.robuxPackages.find(pk => pk.key === selectedRobuxPkgKey) || currentProduct.robuxPackages[0];
+  }
+
+  function syncRobuxOrderDisplayField() {
+    const disp = document.getElementById('custRobuxOrderDisplay');
+    if (!disp || !currentProduct || currentProduct.mode !== 'robux_pricelist') return;
+    const pk = getActiveRobuxPackage();
+    if (pk) {
+      disp.value = `${pk.label} — RM${Number(pk.price).toFixed(2)}`;
+    }
+  }
+
+  function renderRobuxPricelistGrid() {
+    const wrap = document.getElementById('robuxPricelistWrap');
+    const grid = document.getElementById('robuxPricelistGrid');
+    const monthsGrid = document.getElementById('standardMonthsGrid');
+    if (!wrap || !grid || !monthsGrid) return;
+    if (currentProduct && currentProduct.mode === 'robux_pricelist' && Array.isArray(currentProduct.robuxPackages)) {
+      wrap.style.display = 'block';
+      monthsGrid.style.display = 'none';
+      grid.innerHTML = currentProduct.robuxPackages.map(pk => {
+        const active = pk.key === selectedRobuxPkgKey;
+        return `
+          <div class="plan-option ${active ? 'selected' : ''}" onclick="selectRobuxPackage('${pk.key}')">
+            <div class="plan-mo">${pk.label}</div>
+            <div class="plan-amt">RM${Number(pk.price).toFixed(2)}</div>
+          </div>
+        `;
+      }).join('');
+      syncRobuxOrderDisplayField();
+    } else {
+      wrap.style.display = 'none';
+      monthsGrid.style.display = 'grid';
+    }
+  }
+
+  function selectRobuxPackage(pkgKey) {
+    selectedRobuxPkgKey = pkgKey;
+    renderRobuxPricelistGrid();
+    renderSelectedAppHeader();
+    updatePayTotalDisplay();
+  }
+
   function getActiveUnitPrice() {
     if (!currentProduct) return 0;
+    if (currentProduct.mode === 'robux_pricelist') {
+      const pk = getActiveRobuxPackage();
+      return pk ? Number(pk.price) : Number(currentProduct.price);
+    }
     if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
       const found = currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
       return found ? Number(found.price) : Number(currentProduct.price);
@@ -3949,6 +4066,9 @@
   }
 
   function getActiveTwoMonthPrice(unitPrice) {
+    if (currentProduct && currentProduct.mode === 'robux_pricelist') {
+      return Number(unitPrice);
+    }
     if (currentProduct && currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
       const found = currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
       if (found && typeof found.price2Mo === 'number' && !isNaN(found.price2Mo) && found.price2Mo > 0) return Number(found.price2Mo);
@@ -3961,6 +4081,10 @@
 
   function getActiveDisplayAppName() {
     if (!currentProduct) return '';
+    if (currentProduct.mode === 'robux_pricelist') {
+      const pk = getActiveRobuxPackage();
+      return `${currentProduct.name} — ${pk ? pk.label : 'Recharge'}`;
+    }
     if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
       const found = currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
       return `${currentProduct.name} (${found.label})`;
@@ -3988,7 +4112,7 @@
   function renderSelectedAppHeader() {
     if (!currentProduct) return;
     const dict = I18N[currentLang] || I18N.en;
-    let modeText = currentProduct.mode === 'invite' ? 'Via Invite' : 'Private';
+    let modeText = currentProduct.mode === 'robux_pricelist' ? 'Robux Pricelist' : (currentProduct.mode === 'invite' ? 'Via Invite' : 'Private');
     let badgeClass = currentProduct.mode === 'invite' ? 'mode-invite' : 'mode-private';
     if (currentProduct.mode === 'dual' && Array.isArray(currentProduct.subPlans)) {
       const found = currentProduct.subPlans.find(sp => sp.key === selectedSubPlan) || currentProduct.subPlans[0];
@@ -4128,11 +4252,17 @@
       if (!document.getElementById('custName').value) document.getElementById('custName').value = user.name || '';
       if (!document.getElementById('custPhone').value) document.getElementById('custPhone').value = user.phone || '';
     }
-    const needsDevice = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(currentProduct.id);
-    const needsEmail = ['youtube', 'canva'].includes(currentProduct.id);
+    const isRobux = currentProduct.mode === 'robux_pricelist';
+    if (isRobux && Array.isArray(currentProduct.robuxPackages) && currentProduct.robuxPackages.length) {
+      selectedRobuxPkgKey = currentProduct.robuxPackages[0].key;
+    }
+    renderRobuxPricelistGrid();
+    const needsDevice = !isRobux && ['netflix', 'disney', 'hbomax', 'primevideo'].includes(currentProduct.id);
+    const needsEmail = !isRobux && ['youtube', 'canva'].includes(currentProduct.id);
+    document.getElementById('robuxViaLoginBox').style.display = isRobux ? 'block' : 'none';
     document.getElementById('deviceFieldGroup').style.display = needsDevice ? 'block' : 'none';
     document.getElementById('emailFieldGroup').style.display = needsEmail ? 'block' : 'none';
-    document.getElementById('noExtraInfoNote').style.display = (!needsDevice && !needsEmail) ? 'block' : 'none';
+    document.getElementById('noExtraInfoNote').style.display = (!isRobux && !needsDevice && !needsEmail) ? 'block' : 'none';
     if (user && needsEmail && !document.getElementById('custEmail').value) document.getElementById('custEmail').value = user.email || '';
 
     const unit = getActiveUnitPrice();
@@ -4442,11 +4572,22 @@
     _bypassLoginPromptOnce = false;
     const customerName = document.getElementById('custName').value.trim();
     const customerPhone = document.getElementById('custPhone').value.trim();
-    const needsDevice = ['netflix', 'disney', 'hbomax', 'primevideo'].includes(currentProduct.id);
-    const needsEmail = ['youtube', 'canva'].includes(currentProduct.id);
-    const customerDevice = needsDevice ? document.getElementById('custDevice').value.trim() : '-';
+    const isRobux = currentProduct.mode === 'robux_pricelist';
+    const needsDevice = !isRobux && ['netflix', 'disney', 'hbomax', 'primevideo'].includes(currentProduct.id);
+    const needsEmail = !isRobux && ['youtube', 'canva'].includes(currentProduct.id);
+    const robuxUsername = isRobux ? String(document.getElementById('custRobuxUsername')?.value || '').trim() : '';
+    const robuxPassword = isRobux ? String(document.getElementById('custRobuxPassword')?.value || '').trim() : '';
+    const robuxBalance = isRobux ? String(document.getElementById('custRobuxBalance')?.value || '').trim() : '';
+    const b1 = isRobux ? String(document.getElementById('custRobuxBackup1')?.value || '').trim() : '';
+    const b2 = isRobux ? String(document.getElementById('custRobuxBackup2')?.value || '').trim() : '';
+    const b3 = isRobux ? String(document.getElementById('custRobuxBackup3')?.value || '').trim() : '';
+    const backupsStr = [b1, b2, b3].filter(Boolean).join(' / ');
+    const customerDevice = isRobux
+      ? `User:${robuxUsername} | Pass:${robuxPassword} | Bal:${robuxBalance || '0'}${backupsStr ? ` | Codes:${backupsStr}` : ''}`
+      : (needsDevice ? document.getElementById('custDevice').value.trim() : '-');
     const customerEmail = needsEmail ? document.getElementById('custEmail').value.trim() : '-';
     if (!customerName || !customerPhone) { showToast('Please fill in Full Name and WhatsApp Number!'); return; }
+    if (isRobux && (!robuxUsername || !robuxPassword)) { showToast('Please fill in Roblox Username and Password!'); return; }
     if (needsDevice && !customerDevice) { showToast('Please fill in Device Used!'); return; }
     if (needsEmail && !customerEmail) { showToast('Please fill in Account Email Address!'); return; }
 
