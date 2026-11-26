@@ -2619,9 +2619,11 @@
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button type="button" class="primary-submit" style="flex:1; margin-top:0;" onclick="verifyUserToAdminRole()"><span id="lblVerifyBtn">Verify as Admin ✓</span></button>
           <button type="button" style="flex:1; background:linear-gradient(135deg, #7c3aed, #5b21b6); color:#ffffff; border:1px solid rgba(196,181,253,0.45); padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;" onclick="verifyUserToJokerRole()">🃏 Verify as Joker</button>
-          <button type="button" onclick="unverifyUserFromAdminRole()" style="background:rgba(239, 68, 68, 0.14); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;"><span id="lblUnverifyBtn">Unverify</span></button>
+          <button type="button" onclick="unverifyUserFromAdminRole()" style="background:rgba(239, 68, 68, 0.14); border:1px solid rgba(239, 68, 68, 0.45); color:#f87171; padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;"><span id="lblUnverifyBtn">Unverify Admin</span></button>
+          <button type="button" onclick="unverifyUserFromJokerRole()" style="background:rgba(124, 58, 237, 0.16); border:1px solid rgba(196, 181, 253, 0.45); color:#c4b5fd; padding:11px 12px; border-radius:12px; font-weight:800; font-size:0.8rem; cursor:pointer;">Unverify Joker</button>
         </div>
         <div id="verifiedAdminsListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
+        <div id="activeJokersListBox" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border-color); font-size:0.75rem; color:var(--text-secondary);"></div>
       </div>
 
       <!-- Edit WhatsApp & Telegram Text Templates (Owner Only) -->
@@ -5103,31 +5105,13 @@
   }
 
   function refreshVerifyRoleListUI() {
-    (function resetAllTransactionsOnce() {
-    const resetFlag = 'spystore_txns_reset_2026_11_26_v1';
-    if (localStorage.getItem(resetFlag)) return;
-    try {
-      localStorage.removeItem(ALL_TXNS_STORAGE_KEY);
-      localStorage.removeItem('spystore_orders');
-      localStorage.removeItem('spystore_pending_order');
-      Object.keys(localStorage).forEach(k => {
-        if (k.startsWith('spystore_user_data_')) {
-          try {
-            const parsed = JSON.parse(localStorage.getItem(k) || '{}');
-            parsed.orders = [];
-            localStorage.setItem(k, JSON.stringify(parsed));
-          } catch (e) {}
-        }
-      });
-      localStorage.setItem(resetFlag, '1');
-    } catch (e) {}
-  })();
-
-  ensureOwnerAccountSeeded();
+    ensureOwnerAccountSeeded();
     const users = getUsersDB().filter(u => !isDesignatedOwner(u));
     const vList = getVerifiedAdminsList();
+    const jList = getVerifiedJokersList();
     const custBox = document.getElementById('registeredCustomersListBox');
     const listBox = document.getElementById('verifiedAdminsListBox');
+    const jokersBox = document.getElementById('activeJokersListBox');
     const isMy = currentLang === 'my';
     if (custBox) {
       custBox.innerHTML = `<div style="font-weight:800; color:var(--accent-gold); margin-bottom:8px;">${isMy ? 'Pelanggan Berdaftar' : 'Registered Customers'} (${users.length})</div>` +
@@ -5165,6 +5149,71 @@
           </div>`;
         }).join('') : `<div>${isMy ? 'Belum ada admin disahkan.' : 'No verified admins yet.'}</div>`);
     }
+    if (jokersBox) {
+      const jokers = users.filter(u => {
+        const em = String(u.email || '').trim().toLowerCase();
+        const un = normalizeUsername(u.username || '');
+        return String(u.role || '').toLowerCase() === 'joker' || (em && jList.includes(em)) || (un && jList.includes(un));
+      });
+      jokersBox.innerHTML = `<div style="font-weight:800; color:#c4b5fd; margin-bottom:6px;">${isMy ? 'Joker Aktif' : 'Active Jokers'} (${jokers.length})</div>` +
+        (jokers.length ? jokers.map(j => {
+          const targetId = j.email || j.username || '';
+          const escapedId = String(targetId).replace(/'/g, "\\'");
+          return `<div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:5px; padding:5px 8px; border-radius:8px; background:var(--bg-input);">
+            <span style="min-width:0; overflow:hidden; text-overflow:ellipsis;">🃏 <strong>${j.username || j.email}</strong> (${j.email})</span>
+            <button type="button" onclick="unverifyUserFromJokerRole('${escapedId}')" style="background:rgba(124, 58, 237, 0.2); border:1px solid rgba(196, 181, 253, 0.45); color:#c4b5fd; padding:3px 7px; border-radius:7px; font-size:0.66rem; font-weight:800; cursor:pointer; flex-shrink:0;">${isMy ? 'Batal Joker' : 'Unverify Joker'}</button>
+          </div>`;
+        }).join('') : `<div>${isMy ? 'Belum ada Joker aktif.' : 'No active Jokers yet.'}</div>`);
+    }
+  }
+
+  function unverifyUserFromJokerRole(explicitTarget = '') {
+    if (getUserRole() !== 'owner') { showToast('Hanya Owner boleh membatalkan peranan Joker.'); return; }
+    const rawQ = String(explicitTarget || document.getElementById('verifyEmailOrUsernameInput')?.value || '').trim().toLowerCase();
+    const cleanU = normalizeUsername(rawQ);
+    if (!rawQ) { showToast('Masukkan e-mel atau username Joker untuk dibatalkan.'); return; }
+    ensureOwnerAccountSeeded();
+    const users = getUsersDB();
+    const idx = users.findIndex(u => String(u.email || '').trim().toLowerCase() === rawQ || (cleanU && normalizeUsername(u.username || '') === cleanU));
+    if (idx !== -1 && isDesignatedOwner(users[idx])) { showToast('Peranan Owner tidak boleh diubah.'); return; }
+
+    let removedLabel = rawQ;
+    if (idx !== -1) {
+      if (String(users[idx].role || '').toLowerCase() === 'joker') {
+        users[idx].role = 'customer';
+      }
+      removedLabel = users[idx].username || users[idx].email;
+      saveUsersDB(users);
+    }
+
+    const filteredJokers = getVerifiedJokersList().filter(item => {
+      const it = String(item || '').trim().toLowerCase();
+      if (it === rawQ || (cleanU && it === cleanU)) return false;
+      if (idx !== -1) {
+        const uEm = String(users[idx].email || '').trim().toLowerCase();
+        const uUn = normalizeUsername(users[idx].username || '');
+        if ((uEm && it === uEm) || (uUn && it === uUn)) return false;
+      }
+      return true;
+    });
+    saveVerifiedJokersList(filteredJokers);
+
+    const activeU = getCurrentUser();
+    if (activeU && !isDesignatedOwner(activeU) && (
+      String(activeU.email || '').trim().toLowerCase() === rawQ ||
+      (cleanU && normalizeUsername(activeU.username || '') === cleanU) ||
+      (idx !== -1 && String(activeU.email || '').trim().toLowerCase() === String(users[idx].email || '').trim().toLowerCase())
+    )) {
+      const nextRole = isUserVerifiedAdmin(activeU) ? 'admin' : 'customer';
+      localStorage.setItem('spystore_current_user', JSON.stringify({ ...activeU, role: nextRole }));
+    }
+
+    if (!explicitTarget && document.getElementById('verifyEmailOrUsernameInput')) {
+      document.getElementById('verifyEmailOrUsernameInput').value = '';
+    }
+    refreshVerifyRoleListUI();
+    refreshDrawerRoleTools();
+    showToast(`🃏 ${removedLabel} telah di-unverify daripada JOKER.`);
   }
 
   function unverifyUserFromAdminRole(explicitTarget = '') {
