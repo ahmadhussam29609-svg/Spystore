@@ -201,6 +201,19 @@ module.exports = async (req, res) => {
       }
     }
 
+    if (/spider/i.test(q)) {
+      tasks.push(
+        (async () => {
+          const u = `https://api.themoviedb.org/3/search/movie?api_key=${encodeURIComponent(TMDB_KEY)}&query=${encodeURIComponent('The Amazing Spider-Man')}&include_adult=false&language=en-US&page=1`;
+          const r = await fetch(u);
+          if (!r.ok) return [];
+          const j = await r.json();
+          const arr = Array.isArray(j.results) ? j.results : [];
+          return arr.map(m => ({ ...m, media_type: 'movie' }));
+        })()
+      );
+    }
+
     const nestedResults = await Promise.all(tasks);
     const combinedRaw = nestedResults.flat().filter(r => r && (r.media_type === 'movie' || r.media_type === 'tv'));
 
@@ -223,11 +236,15 @@ module.exports = async (req, res) => {
 
     const rawResults = filteredRaw
       .sort((a, b) => {
-        const sa = normalizeMatchScore(a.title || a.name, q) + (a.popularity || 0);
-        const sb = normalizeMatchScore(b.title || b.name, q) + (b.popularity || 0);
+        const tA = String(a.title || a.name || '').toLowerCase();
+        const tB = String(b.title || b.name || '').toLowerCase();
+        const boostA = /^the amazing spider-?man( 2)?$/i.test(tA) ? 5000 : 0;
+        const boostB = /^the amazing spider-?man( 2)?$/i.test(tB) ? 5000 : 0;
+        const sa = boostA + normalizeMatchScore(a.title || a.name, q) + (a.popularity || 0);
+        const sb = boostB + normalizeMatchScore(b.title || b.name, q) + (b.popularity || 0);
         return sb - sa;
       })
-      .slice(0, 24);
+      .slice(0, 30);
 
     const enriched = await Promise.all(rawResults.map(async (item) => {
       const mType = item.media_type === 'tv' ? 'tv' : 'movie';
