@@ -2992,23 +2992,23 @@
       <!-- Owner Trending & Show Resources Updater -->
       <div id="drawerTrendingResourcesToolView" style="display:none;">
         <div style="font-size:0.74rem; color:var(--text-secondary); margin-bottom:10px;">
-          Kemaskini senarai cerita &amp; movie terkini mengikut platform (<strong>Netflix, Disney+, HBO Max, Prime Video</strong>) &amp; 7 kategori trending + hasil carian terus ke laman web.
+          Segarkan data <strong>Trending (12 Jam)</strong> secara manual atau masukkan tajuk custom ke dalam tab <strong>Trending</strong> menggunakan <strong>IMDb Rating</strong>.
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
-          <button type="button" onclick="syncNowOwnerTrending12h()" style="background:rgba(56,189,248,0.14); border:1px solid rgba(56,189,248,0.45); color:var(--accent-cyan); padding:9px 10px; border-radius:10px; font-size:0.74rem; font-weight:800; cursor:pointer;">🔄 Sync Live API Sekarang</button>
-          <button type="button" onclick="resetOwnerTrendingResourcesToDefault()" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:9px 10px; border-radius:10px; font-size:0.74rem; font-weight:700; cursor:pointer;">↺ Reset Senarai Asal</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+          <button type="button" onclick="syncNowOwnerTrending12h()" style="background:rgba(56,189,248,0.16); border:1px solid rgba(56,189,248,0.45); color:var(--accent-cyan); padding:10px; border-radius:10px; font-size:0.76rem; font-weight:800; cursor:pointer;">🔄 Refresh Trending Sekarang</button>
+          <button type="button" onclick="resetOwnerTrendingResourcesToDefault()" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:10px; border-radius:10px; font-size:0.76rem; font-weight:700; cursor:pointer;">↺ Reset Custom</button>
         </div>
 
         <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:11px; margin-bottom:12px;">
-          <div style="font-size:0.74rem; font-weight:800; color:var(--accent-gold); margin-bottom:8px;">+ Tambah / Kemaskini Tajuk Terkini</div>
+          <div style="font-size:0.74rem; font-weight:800; color:var(--accent-gold); margin-bottom:8px;">+ Masukkan Tajuk ke Tab Trending</div>
           <div class="form-group" style="margin-bottom:8px;">
             <label>Tajuk Cerita / Movie *</label>
             <input type="text" class="form-control" id="ownerResTitleInput" placeholder="cth. Spider-Man: Brand New Day" />
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
             <div class="form-group" style="margin-bottom:0;">
-              <label>Platform Semasa *</label>
+              <label>Platform *</label>
               <select class="form-control" id="ownerResPlatformSelect">
                 <option value="netflix">Netflix</option>
                 <option value="disney">Disney+</option>
@@ -3017,7 +3017,7 @@
               </select>
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label>Jenis Format *</label>
+              <label>Format *</label>
               <select class="form-control" id="ownerResTypeSelect">
                 <option value="MOVIE">MOVIE</option>
                 <option value="SERIES">SERIES (TV Show)</option>
@@ -3030,29 +3030,18 @@
               <input type="text" class="form-control" id="ownerResYearInput" value="2026" placeholder="2026" />
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label>Rating (1 - 10)</label>
-              <input type="text" class="form-control" id="ownerResRatingInput" value="8.5" placeholder="8.5" />
-            </div>
-          </div>
-          <div class="form-group" style="margin-bottom:8px;">
-            <label>Masukkan Dalam Tab Trending *</label>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; font-size:0.72rem; color:var(--text-primary); background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px;">
-              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatTop10" checked /> Top 10 TV / Movie</label>
-              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatNew" checked /> New Release</label>
-              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatPopcorn" /> Perfect Popcorn</label>
-              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatKdrama" /> Kdrama</label>
-              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatRewatched" /> Most Rewatched</label>
-              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatOnlyOn" /> Only on Platform</label>
+              <label>IMDb Rating (1 - 10) *</label>
+              <input type="text" class="form-control" id="ownerResRatingInput" value="8.2" placeholder="cth. 8.2" />
             </div>
           </div>
           <div class="form-group" style="margin-bottom:8px;">
             <label>Sinopsis Ringkas (Pilihan)</label>
-            <input type="text" class="form-control" id="ownerResOverviewInput" placeholder="Ringkasan cerita terkini..." />
+            <input type="text" class="form-control" id="ownerResOverviewInput" placeholder="Ringkasan cerita..." />
           </div>
-          <button type="button" class="primary-submit" style="margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerCustomShowResource()">Simpan &amp; Terbitkan Sekarang ✓</button>
+          <button type="button" class="primary-submit" style="margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerCustomShowResource()">Masukkan ke Trending ✓</button>
         </div>
 
-        <div style="font-size:0.74rem; font-weight:800; color:var(--accent-cyan); margin-bottom:6px;">Senarai Custom Owner Aktif</div>
+        <div style="font-size:0.74rem; font-weight:800; color:var(--accent-cyan); margin-bottom:6px;">Custom Trending Aktif</div>
         <div id="ownerCustomResourcesListBox" style="display:flex; flex-direction:column; gap:6px; font-size:0.74rem;"></div>
       </div>
     </div>
@@ -3406,7 +3395,7 @@
       trust2Desc: '5–15 mins via WA',
       trust3Title: 'Auto FPX',
       trust3Desc: 'All MY Banks',
-      catAll: 'All (8)',
+      catAll: 'All (9)',
       catStreaming: 'Streaming (5)',
       catMusic: 'Music (1)',
       catCreative: 'Creative (2)',
@@ -3459,7 +3448,7 @@
       trust2Desc: '5–15 minit via WA',
       trust3Title: 'FPX Automatik',
       trust3Desc: 'Semua Bank MY',
-      catAll: 'Semua (8)',
+      catAll: 'Semua (9)',
       catStreaming: 'Penstriman (5)',
       catMusic: 'Muzik (1)',
       catCreative: 'Kreatif (2)',
@@ -3928,6 +3917,20 @@
     triggerTopLoader(450);
     applyLanguage();
     renderProducts();
+    if (document.getElementById('inlineShowResultsBox')?.style.display === 'block') {
+      renderInlineSearchResultsList();
+    }
+    if (document.getElementById('showSearchModal')?.classList.contains('open')) {
+      runShowSearch();
+    }
+    if (document.getElementById('trendingModal')?.style.display === 'flex') {
+      renderTrendingModal();
+    }
+    if (currentProduct && document.getElementById('checkoutView')?.classList.contains('active')) {
+      renderSelectedAppHeader();
+      renderSubPlanSelector();
+      updatePayTotalDisplay();
+    }
   }
 
   function toggleTheme() {
@@ -6374,13 +6377,13 @@
   let _trendingFetchedFromApi = false;
   let _showAllInlineSearch = false;
 
-  const TRENDING_CACHE_KEY = 'spystore_trending_cache_v2';
+  const TRENDING_CACHE_KEY = 'spystore_trending_cache_v3';
   const TRENDING_INTERVAL_MS = 12 * 60 * 60 * 1000;
 
   function buildFallbackTrendingData() {
     const rawByApp = {
       netflix: [
-        { id: 969681, title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.7', popularity: 100, isNew: true, isOnlyOn: false, overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.', backdrop: 'https://image.tmdb.org/t/p/w780/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg', poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg' },
+        { id: 969681, title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', popularity: 100, isNew: true, isOnlyOn: false, overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/g6TidT7be954rrzPPBTIXkSmfXj.jpg' },
         { id: 93405, title: 'Squid Game: Final Season', year: '2025', mediaType: 'SERIES', rating: '8.3', popularity: 99, isNew: true, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Gi-hun returns to dismantle the deadly games from within as the final arena begins.', backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
         { id: 66732, title: 'Stranger Things 5', year: '2025', mediaType: 'SERIES', rating: '8.8', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Hawkins faces its ultimate showdown against Vecna and the Upside Down.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' },
         { id: 119051, title: 'Wednesday: Season 2', year: '2025', mediaType: 'SERIES', rating: '8.5', popularity: 97, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Wednesday Addams returns to Nevermore Academy with darker visions and new threats.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
@@ -6715,7 +6718,7 @@
           <div class="spec-val">${yearStr}</div>
         </div>
         <div class="spec-box">
-          <div class="spec-label">RATING</div>
+          <div class="spec-label">IMDb RATING</div>
           <div class="spec-val" style="color:var(--accent-gold);">${ratingVal}</div>
         </div>
         <div class="spec-box">
@@ -6825,36 +6828,27 @@
     const list = getOwnerCustomShowResources();
     const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
     if (!list.length) {
-      box.innerHTML = `<div style="color:var(--text-muted); background:var(--bg-input); border:1px solid var(--border-color); border-radius:9px; padding:9px;">Belum ada tajuk custom ditambah. Gunakan borang di atas untuk tambah cerita terkini mengikut platform.</div>`;
+      box.innerHTML = `<div style="color:var(--text-muted); background:var(--bg-input); border:1px solid var(--border-color); border-radius:9px; padding:9px;">Belum ada tajuk custom dalam Trending.</div>`;
       return;
     }
-    box.innerHTML = list.map((item, idx) => {
-      const tags = [];
-      if (item.catTop10) tags.push('Top 10');
-      if (item.isNew) tags.push('New');
-      if (item.isPopcorn) tags.push('Popcorn');
-      if (item.isKdrama) tags.push('Kdrama');
-      if (item.isRewatched) tags.push('Rewatched');
-      if (item.isOnlyOn) tags.push('Only On');
-      return `
-        <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-          <div style="min-width:0;">
-            <div style="font-weight:800; color:var(--text-primary);">${item.title} <span style="color:var(--accent-gold);">(${appLabels[item.platformId] || item.platformId})</span></div>
-            <div style="font-size:0.68rem; color:var(--text-secondary);">${item.mediaType} • ${item.year || '2026'} • ★ ${item.rating || '8.5'} • ${tags.join(', ')}</div>
-          </div>
-          <button type="button" onclick="deleteOwnerCustomShowResource(${idx})" style="background:rgba(239,68,68,0.16); border:1px solid rgba(239,68,68,0.45); color:#f87171; padding:4px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer; flex-shrink:0;">Padam</button>
+    box.innerHTML = list.map((item, idx) => `
+      <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <div style="min-width:0;">
+          <div style="font-weight:800; color:var(--text-primary);">${item.title} <span style="color:var(--accent-gold);">(${appLabels[item.platformId] || item.platformId})</span></div>
+          <div style="font-size:0.68rem; color:var(--text-secondary);">${item.mediaType} • ${item.year || '2026'} • IMDb ★ ${item.rating || '8.2'}</div>
         </div>
-      `;
-    }).join('');
+        <button type="button" onclick="deleteOwnerCustomShowResource(${idx})" style="background:rgba(239,68,68,0.16); border:1px solid rgba(239,68,68,0.45); color:#f87171; padding:4px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer; flex-shrink:0;">Padam</button>
+      </div>
+    `).join('');
   }
 
   function saveOwnerCustomShowResource() {
-    if (!['owner', 'joker'].includes(getUserRole())) { showToast('Hanya Owner boleh mengemaskini sumber cerita.'); return; }
+    if (!['owner', 'joker'].includes(getUserRole())) { showToast('Hanya Owner boleh mengemaskini Trending.'); return; }
     const title = String(document.getElementById('ownerResTitleInput')?.value || '').trim();
     const platformId = String(document.getElementById('ownerResPlatformSelect')?.value || 'netflix');
     const mediaType = String(document.getElementById('ownerResTypeSelect')?.value || 'MOVIE');
     const year = String(document.getElementById('ownerResYearInput')?.value || '2026').trim() || '2026';
-    const rating = String(document.getElementById('ownerResRatingInput')?.value || '8.5').trim() || '8.5';
+    const rating = String(document.getElementById('ownerResRatingInput')?.value || '8.2').trim() || '8.2';
     const overview = String(document.getElementById('ownerResOverviewInput')?.value || '').trim();
 
     if (!title) { showToast('Sila masukkan tajuk cerita atau movie!'); return; }
@@ -6870,13 +6864,13 @@
       year,
       rating,
       popularity: 100,
-      catTop10: Boolean(document.getElementById('ownerResCatTop10')?.checked),
-      isNew: Boolean(document.getElementById('ownerResCatNew')?.checked),
-      isPopcorn: Boolean(document.getElementById('ownerResCatPopcorn')?.checked),
-      isKdrama: Boolean(document.getElementById('ownerResCatKdrama')?.checked),
-      isRewatched: Boolean(document.getElementById('ownerResCatRewatched')?.checked),
-      isOnlyOn: Boolean(document.getElementById('ownerResCatOnlyOn')?.checked),
-      overview: overview || `${title} (${year}) kini tersedia di ${appLabels[platformId] || 'Netflix'}.`,
+      catTop10: true,
+      isNew: true,
+      isPopcorn: mediaType === 'MOVIE',
+      isKdrama: false,
+      isRewatched: false,
+      isOnlyOn: false,
+      overview: overview || `${title} (${year}) kini trending di ${appLabels[platformId] || 'Netflix'}.`,
       poster: '',
       backdrop: ''
     };
@@ -6933,14 +6927,23 @@
       platformLabel: 'Netflix',
       platforms: [{ id: 'netflix', label: 'Netflix' }],
       price: 18,
-      rating: '8.7',
+      rating: '8.2',
       popularity: 100,
       isNew: true,
       isOnlyOn: false,
       overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.',
-      backdrop: 'https://image.tmdb.org/t/p/w780/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg',
-      poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg'
+      backdrop: '',
+      poster: 'https://image.tmdb.org/t/p/w342/g6TidT7be954rrzPPBTIXkSmfXj.jpg'
     };
+    ['disney', 'hbomax', 'primevideo'].forEach(otherApp => {
+      const oObj = dataObj.byApp[otherApp];
+      if (!oObj) return;
+      ['all', 'movies', 'newMovies', 'newReleases', 'popcorn', 'onlyOn'].forEach(k => {
+        if (Array.isArray(oObj[k])) {
+          oObj[k] = oObj[k].filter(x => !/spider-?man:\s*brand\s*new\s*day/i.test(String(x.title || '')));
+        }
+      });
+    });
     const nf = dataObj.byApp.netflix;
     const injectUnique = (arr) => {
       if (!Array.isArray(arr)) return;
@@ -7134,7 +7137,7 @@
   function collectAllShowCatalog() {
     ensureTrendingStoreReady();
     const extraShows = [
-      { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.7', poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
+      { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', poster: 'https://image.tmdb.org/t/p/w342/g6TidT7be954rrzPPBTIXkSmfXj.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
       { title: 'Spider-Man: No Way Home', year: '2021', mediaType: 'MOVIE', rating: '8.2', poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker asks Doctor Strange to restore his secret identity, accidentally tearing open the multiverse.' },
       { title: 'Squid Game: Final Season', year: '2025', mediaType: 'SERIES', rating: '8.3', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Gi-hun returns to dismantle the deadly games from within as the final arena begins.' },
       { title: 'Stranger Things 5', year: '2025', mediaType: 'SERIES', rating: '8.8', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Hawkins faces its ultimate showdown against Vecna and the Upside Down.' },
@@ -7201,22 +7204,26 @@
         .filter(it => classifyTitleStatus(it).kind !== 'non_existent')
         .map(it => {
           const apps = Array.isArray(it.availableApps) && it.availableApps.length ? it.availableApps : [];
-          const plats = apps.map(a => ({ id: a.id, label: a.shortLabel || a.label || a.id }));
+          let plats = apps.map(a => ({ id: a.id, label: a.shortLabel || a.label || a.id }));
           const yearNum = parseInt(String(it.year || ''), 10);
           const titleL = String(it.title || '').toLowerCase();
+          const isBrandNewDay = /spider-?man:\s*brand\s*new\s*day/i.test(titleL);
+          if (isBrandNewDay) {
+            plats = [{ id: 'netflix', label: 'Netflix' }];
+          }
           const isUnreleased = (!isNaN(yearNum) && yearNum > 2026) || titleL.includes('movie 3') || titleL.includes("gur'latan");
           return {
             id: it.id,
             title: it.title,
             year: it.year || '',
             mediaType: it.mediaType || 'SHOW',
-            rating: it.rating || 'N/A',
+            rating: isBrandNewDay ? '8.2' : (it.rating || 'N/A'),
             overview: it.overview || '',
             poster: it.poster || '',
             isUnreleased,
-            platformId: plats[0]?.id || (/spider-man:\s*brand\s*new\s*day/i.test(String(it.title || '')) ? 'netflix' : ''),
-            platformLabel: plats.length ? plats.map(a => a.label).join(', ') : (/spider-man:\s*brand\s*new\s*day/i.test(String(it.title || '')) ? 'Netflix' : ''),
-            platforms: isUnreleased ? [] : (plats.length ? plats : (/spider-man:\s*brand\s*new\s*day/i.test(String(it.title || '')) ? [{ id: 'netflix', label: 'Netflix' }] : []))
+            platformId: isBrandNewDay ? 'netflix' : (plats[0]?.id || ''),
+            platformLabel: isBrandNewDay ? 'Netflix' : plats.map(a => a.label).join(', '),
+            platforms: isUnreleased ? [] : plats
           };
         });
 
@@ -7234,13 +7241,16 @@
         seen.add(k);
         const matchedApi = apiByKey.get(k);
         if (matchedApi) {
-          const matchedPlats = getItemPlatforms(matchedApi);
+          const isBND = /spider-?man:\s*brand\s*new\s*day/i.test(String(loc.title || ''));
+          const matchedPlats = isBND ? [{ id: 'netflix', label: 'Netflix' }] : getItemPlatforms(matchedApi);
           merged.push({
             ...loc,
             poster: matchedApi.poster || loc.poster || '',
             overview: matchedApi.overview || loc.overview || '',
-            rating: (matchedApi.rating && matchedApi.rating !== 'N/A') ? matchedApi.rating : (loc.rating || 'N/A'),
+            rating: isBND ? '8.2' : ((matchedApi.rating && matchedApi.rating !== 'N/A') ? matchedApi.rating : (loc.rating || 'N/A')),
             year: (matchedApi.year && matchedApi.year !== '-') ? matchedApi.year : (loc.year || ''),
+            platformId: isBND ? 'netflix' : (matchedPlats[0]?.id || loc.platformId || ''),
+            platformLabel: isBND ? 'Netflix' : (matchedPlats.length ? matchedPlats.map(p => p.label).join(', ') : (loc.platformLabel || '')),
             platforms: matchedPlats.length ? matchedPlats : getItemPlatforms(loc)
           });
         } else {
