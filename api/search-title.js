@@ -36,20 +36,31 @@ function buildQueryVariants(rawQuery) {
   const lower = q.toLowerCase();
   const variants = [q];
 
-  if (lower === 'spider' || lower === 'spiderman' || lower === 'spider-man' || lower === 'spider man') {
-    variants.push('Spider-Man', 'Spiderman', 'Spider');
-  } else if (lower.includes('spiderman') && !lower.includes('spider-man')) {
-    variants.push(q.replace(/spiderman/gi, 'Spider-Man'));
-  } else if (lower.includes('spider-man')) {
-    variants.push(q.replace(/spider-man/gi, 'Spiderman'));
+  if (lower.includes('spider')) {
+    variants.push('Spider-Man', 'Spiderman', 'The Amazing Spider-Man', 'Spider');
+  } else if (lower.includes('marvel')) {
+    variants.push('Marvel', 'Captain Marvel', 'The Marvels', 'Ms. Marvel');
+  } else if (lower.includes('avengers')) {
+    variants.push('Avengers', 'Avengers: Doomsday');
+  } else if (lower.includes('doraemon')) {
+    variants.push('Doraemon', 'Stand by Me Doraemon');
+  } else if (lower.includes('boboiboy')) {
+    variants.push('BoBoiBoy', 'BoBoiBoy Galaxy', 'BoBoiBoy Movie');
+  } else if (lower.includes('ejen ali')) {
+    variants.push('Ejen Ali', 'Ejen Ali: The Movie');
   }
 
-  return Array.from(new Set(variants.map(v => v.trim()).filter(Boolean))).slice(0, 3);
+  return Array.from(new Set(variants.map(v => v.trim()).filter(Boolean))).slice(0, 4);
 }
 
-function isFakeOrInvalidTitle(title, yearStr) {
+function isBlockedNonExistentOrFake(title, yearStr, overviewStr) {
   const t = String(title || '').toLowerCase().trim();
+  const ov = String(overviewStr || '').toLowerCase().trim();
   if (!t) return true;
+
+  // Keep upcoming major studio releases like Avengers: Doomsday
+  const isAllowedUpcoming = /avengers:\s*doomsday/i.test(t) || /spider-?man:\s*brand\s*new\s*day/i.test(t);
+  if (isAllowedUpcoming) return false;
 
   const blockedPatterns = [
     'evil spiderman',
@@ -64,14 +75,20 @@ function isFakeOrInvalidTitle(title, yearStr) {
     'untitled ',
     'elemental heroes',
     'sinopsis ',
-    'synopsis '
+    'synopsis ',
+    'fan film',
+    'fan-made',
+    'fanmade',
+    'parody',
+    'cancelled',
+    'canceled'
   ];
-  if (blockedPatterns.some(pat => t.includes(pat))) {
+  if (blockedPatterns.some(pat => t.includes(pat) || ov.includes('cancelled') || ov.includes('canceled'))) {
     return true;
   }
 
   const yNum = parseInt(String(yearStr || ''), 10);
-  if (!isNaN(yNum) && yNum > 2026) {
+  if (!isNaN(yNum) && yNum > 2027) {
     return true;
   }
 
@@ -108,7 +125,7 @@ module.exports = async (req, res) => {
 
   try {
     const queryVariants = buildQueryVariants(q);
-    const pagesToFetch = q.length <= 10 ? [1, 2] : [1];
+    const pagesToFetch = q.length <= 12 ? [1, 2] : [1];
 
     const tasks = [];
     for (const qVar of queryVariants) {
@@ -140,7 +157,8 @@ module.exports = async (req, res) => {
       const t = r.title || r.name || '';
       const rel = r.release_date || r.first_air_date || '';
       const yr = rel ? rel.slice(0, 4) : '';
-      return !isFakeOrInvalidTitle(t, yr);
+      const ov = r.overview || '';
+      return !isBlockedNonExistentOrFake(t, yr, ov);
     });
 
     const rawResults = filteredRaw
@@ -149,7 +167,7 @@ module.exports = async (req, res) => {
         const sb = normalizeMatchScore(b.title || b.name, q) + (b.popularity || 0);
         return sb - sa;
       })
-      .slice(0, 18);
+      .slice(0, 20);
 
     const enriched = await Promise.all(rawResults.map(async (item) => {
       const mType = item.media_type === 'tv' ? 'tv' : 'movie';
@@ -158,12 +176,15 @@ module.exports = async (req, res) => {
       const year = releaseDate ? releaseDate.slice(0, 4) : '-';
       const isBND = /spider-?man:\s*brand\s*new\s*day/i.test(title);
       const isNoWayHome = /spider-?man:\s*no\s*way\s*home/i.test(title);
+      const isInsidiousOut = /insidious:\s*out\s*of\s*the\s*further/i.test(title);
 
       let availableApps = [];
       let detailsJson = null;
 
       if (isBND) {
         availableApps = [APP_META.netflix];
+      } else if (isInsidiousOut) {
+        availableApps = [];
       } else {
         try {
           const [wpRes, dRes] = await Promise.all([
