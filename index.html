@@ -3284,6 +3284,12 @@
     </div>
   </div>
 
+  <!-- Poster Zoom Lightbox Modal -->
+  <div id="posterZoomModal" onclick="closePosterZoomModal()" style="display:none; position:fixed; inset:0; background:rgba(2, 6, 23, 0.94); backdrop-filter:blur(10px); z-index:10200; align-items:center; justify-content:center; padding:18px; cursor:zoom-out;">
+    <button type="button" onclick="event.stopPropagation(); closePosterZoomModal();" class="close-modal" style="position:fixed; top:16px; right:16px; width:38px; height:38px; font-size:1.05rem; z-index:10210;">✕</button>
+    <img id="posterZoomImg" src="" alt="Zoomed Poster" onclick="event.stopPropagation(); togglePosterZoomScale(this);" style="max-width:92vw; max-height:84vh; width:auto; height:auto; border-radius:16px; border:1.5px solid rgba(56,189,248,0.45); box-shadow:0 25px 60px rgba(0,0,0,0.85); transition:transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); cursor:zoom-in;" />
+  </div>
+
 <script>
   window.GOOGLE_CLIENT_ID = '912753010767-des0po3rhva859np643rn1onu47up2d0.apps.googleusercontent.com';
 </script>
@@ -3468,6 +3474,40 @@
       claimWaBtn: 'Hantar Resit & Tuntut di WhatsApp →'
     }
   };
+
+
+  function openPosterZoomModal(srcUrl, altText = 'Poster') {
+    const cleanSrc = String(srcUrl || '').trim();
+    if (!cleanSrc) return;
+    const m = document.getElementById('posterZoomModal');
+    const img = document.getElementById('posterZoomImg');
+    if (!m || !img) return;
+    img.dataset.zoomed = '0';
+    img.style.transform = 'scale(1)';
+    img.style.cursor = 'zoom-in';
+    img.src = cleanSrc;
+    img.alt = altText || 'Poster';
+    m.style.display = 'flex';
+  }
+
+  function togglePosterZoomScale(imgEl) {
+    if (!imgEl) return;
+    const zoomed = imgEl.dataset.zoomed === '1';
+    if (!zoomed) {
+      imgEl.dataset.zoomed = '1';
+      imgEl.style.transform = 'scale(1.35)';
+      imgEl.style.cursor = 'zoom-out';
+    } else {
+      imgEl.dataset.zoomed = '0';
+      imgEl.style.transform = 'scale(1)';
+      imgEl.style.cursor = 'zoom-in';
+    }
+  }
+
+  function closePosterZoomModal() {
+    const m = document.getElementById('posterZoomModal');
+    if (m) m.style.display = 'none';
+  }
 
   function dismissSplash() {
     const splash = document.getElementById('splashIntro');
@@ -3893,6 +3933,30 @@
     setTxt('cartPayNowBtn', isMy ? 'Bayar Sekarang →' : 'Pay Now →');
     if (typeof updateCartBadgeUI === 'function') updateCartBadgeUI();
     if (typeof renderCartModal === 'function' && document.getElementById('cartModal')?.classList.contains('open')) renderCartModal();
+
+    // Sync Robux & Trending Resources modal texts strictly to currentLang ('en' vs 'my')
+    const rbxBalLbl = document.querySelector('#robuxViaLoginBox .form-group:nth-child(3) label');
+    if (rbxBalLbl) rbxBalLbl.textContent = isMy ? '💎 BAKI ROBUX' : '💎 ROBUX BALANCE';
+    const rbxBalInp = document.getElementById('custRobuxBalance');
+    if (rbxBalInp) rbxBalInp.placeholder = isMy ? 'cth. 0' : 'e.g. 0';
+    const rbxNotesUl = document.querySelector('#robuxViaLoginBox ul');
+    if (rbxNotesUl) {
+      rbxNotesUl.innerHTML = isMy
+        ? '<li>Backup Code membantu mempercepatkan proses login.</li><li>Backup Code tidak wajib disediakan.</li><li>Sila standby untuk proses Account Verification.</li><li>Pastikan akaun boleh diakses sepanjang proses berlangsung.</li>'
+        : '<li>Backup codes help speed up the login process.</li><li>Backup codes are not mandatory.</li><li>Please stand by for Account Verification.</li><li>Ensure your account remains accessible throughout the process.</li>';
+    }
+    const trResDesc = document.querySelector('#drawerTrendingResourcesToolView > div:first-child');
+    if (trResDesc) {
+      trResDesc.innerHTML = isMy
+        ? 'Segarkan senarai <strong>Trending (Auto-Sync 12 Jam)</strong> secara terus dari sumber carian live dan pilih tab kategori mana yang dipaparkan kepada pelanggan.'
+        : 'Refresh the <strong>Trending (12-Hour Auto-Sync)</strong> list directly from live search and choose which category tabs are shown to customers.';
+    }
+    const trRefreshBtn = document.querySelector('#drawerTrendingResourcesToolView button[onclick*="syncNowOwnerTrending12h"]');
+    if (trRefreshBtn) trRefreshBtn.textContent = isMy ? '🔄 Refresh Trending & Poster Sekarang' : '🔄 Refresh Trending & Posters Now';
+    const trCustomTitle = document.querySelector('#drawerTrendingResourcesToolView div[style*="Customize Tab Trending"]');
+    if (trCustomTitle) trCustomTitle.textContent = isMy ? '🎛️ Customize Tab Trending Dipaparkan' : '🎛️ Customize Displayed Trending Tabs';
+    const trSaveBtn = document.querySelector('#drawerTrendingResourcesToolView button[onclick*="saveOwnerTrendingTabsConfig"]');
+    if (trSaveBtn) trSaveBtn.textContent = isMy ? 'Simpan Tetapan Tab Trending ✓' : 'Save Trending Tabs Settings ✓';
 
     refreshVerifyRoleListUI();
     updateAuthUI();
@@ -6865,7 +6929,9 @@
 
     body.innerHTML = `
       <div class="spec-hero">
-        ${renderPosterCardWithImage(item, 92, 136)}
+        <div onclick="openPosterZoomModal('${String(item.poster || item.backdrop || '').replace(/'/g, "\'")}', '${String(item.title || 'Poster').replace(/'/g, "\'")}');" style="cursor:${item.poster ? 'zoom-in' : 'default'}; flex-shrink:0;" title="${item.poster ? 'Tap to enlarge poster' : ''}">
+          ${renderPosterCardWithImage(item, 92, 136)}
+        </div>
         <div style="flex:1; min-width:0;">
           <div class="spec-title">${item.title}</div>
           <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700;">${mediaTypeStr} • ${yearStr}</div>
@@ -7351,6 +7417,10 @@ function readTrendingCache() {
     ensureTrendingStoreReady();
     const extraShows = [
       { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
+      { title: 'The Amazing Spider-Man', year: '2012', mediaType: 'MOVIE', rating: '7.0', poster: '', platforms: [], overview: 'Peter Parker investigates his parents’ disappearance and confronts The Lizard in New York.' },
+      { title: 'The Amazing Spider-Man 2', year: '2014', mediaType: 'MOVIE', rating: '6.6', poster: '', platforms: [], overview: 'Peter Parker faces Electro and new threats to New York while trying to keep his promise to Gwen Stacy.' },
+      { title: 'Captain Marvel', year: '2019', mediaType: 'MOVIE', rating: '6.8', poster: '', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Carol Danvers becomes one of the universe’s most powerful heroes as Earth is caught in the middle of a galactic conflict.' },
+      { title: 'Avengers: Doomsday', year: '2026', mediaType: 'MOVIE', rating: 'N/A', poster: '', isUpcoming: true, platforms: [], overview: 'Upcoming theatrical release. Not yet available on streaming platforms.' },
       { title: 'Stand by Me Doraemon', year: '2014', mediaType: 'MOVIE', rating: '7.8', poster: '', platforms: [], overview: 'Nobita and Doraemon embark on an emotional journey to secure a happier future.' },
       { title: "BoBoiBoy Movie 3: Ghost of Gur'latan", year: '2027', mediaType: 'MOVIE', rating: 'N/A', poster: '', isUnreleased: true, platforms: [], overview: 'Not yet released on platform.' }
     ];
@@ -7433,6 +7503,11 @@ function readTrendingCache() {
             platformLabel: finalPlats.map(a => a.label).join(', '),
             platforms: isUnreleased ? [] : finalPlats
           };
+          if (/insidious:\s*out\s*of\s*the\s*further/i.test(mappedObj.title)) {
+            mappedObj.platforms = [];
+            mappedObj.platformId = '';
+            mappedObj.platformLabel = '';
+          }
           saveMediaMetaEntry(mappedObj.title, mappedObj);
           return mappedObj;
         });
