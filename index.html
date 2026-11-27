@@ -1,55 +1,3 @@
-  function renderTrendingModal() {
-    ensureTrendingStoreReady();
-    applyEnabledTrendingTabsUI();
-    const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
-    const baseTitle = CATEGORY_TITLES[activeDiscoveryCat] || 'Streaming Picks';
-    const titleEl = document.getElementById('trendingModalTitle');
-    if (titleEl) titleEl.textContent = `${appLabels[activeAppSubFilter] || 'Netflix'} • ${baseTitle}`;
-    ['netflix', 'disney', 'hbomax', 'primevideo'].forEach(appId => {
-      const sBtn = document.getElementById(`appSub_${appId}`);
-      if (!sBtn) return;
-      const active = activeAppSubFilter === appId;
-      sBtn.style.background = active ? 'var(--accent-blue)' : 'var(--bg-card)';
-      sBtn.style.color = active ? '#ffffff' : 'var(--text-secondary)';
-      sBtn.style.border = active ? 'none' : '1px solid var(--border-color)';
-    });
-    Object.keys(CATEGORY_TITLES).forEach(key => {
-      const btn = document.getElementById(`catTab_${key}`);
-      if (!btn) return;
-      const isActive = key === activeDiscoveryCat;
-      btn.style.background = isActive ? 'var(--accent-gold)' : 'var(--bg-card)';
-      btn.style.color = isActive ? '#09090b' : 'var(--text-secondary)';
-      btn.style.border = isActive ? 'none' : '1px solid var(--border-color)';
-    });
-    const body = document.getElementById('trendingModalBody');
-    if (!body) return;
-    const list = getAppItems(activeAppSubFilter, activeDiscoveryCat);
-    if (!list || !list.length) {
-      body.innerHTML = `<div style="text-align:center; padding:22px; color:var(--text-muted); font-size:0.8rem;">No titles available for this selection right now.</div>`;
-      return;
-    }
-    body.innerHTML = list.map((item, idx) => {
-      const prod = products.find(p => p.id === item.platformId) || products[0];
-      const priceVal = prod ? Number(prod.price) : Number(item.price || 10);
-      return `
-        <div class="discovery-row-card" style="display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
-          <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${idx + 1}</div>
-          ${renderPosterOrFallback(item)}
-          <div style="flex:1; min-width:0;">
-            <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap;">
-              <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel || prod.name}</span>
-              <span style="font-size:0.64rem; color:var(--accent-cyan); font-weight:700;">${item.mediaType || 'SHOW'}</span>
-              <span style="font-size:0.68rem; color:var(--accent-gold); font-weight:700;">★ ${item.rating || 'N/A'}</span>
-            </div>
-            <div style="font-weight:700; font-size:0.9rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
-            <div style="font-size:0.73rem; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px;">${item.overview || ''}</div>
-            <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId || prod.id}');">Order ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} ✓</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -6662,6 +6610,58 @@
   function switchAppSubFilter(appKey) {
     activeAppSubFilter = appKey;
     renderTrendingModal();
+  }
+
+  function renderTrendingModal() {
+    ensureTrendingStoreReady();
+    applyEnabledTrendingTabsUI();
+    const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
+    const baseTitle = CATEGORY_TITLES[activeDiscoveryCat] || 'Streaming Picks';
+    const titleEl = document.getElementById('trendingModalTitle');
+    if (titleEl) titleEl.textContent = `${appLabels[activeAppSubFilter] || 'Netflix'} • ${baseTitle}`;
+    ['netflix', 'disney', 'hbomax', 'primevideo'].forEach(appId => {
+      const sBtn = document.getElementById(`appSub_${appId}`);
+      if (!sBtn) return;
+      const active = activeAppSubFilter === appId;
+      sBtn.style.background = active ? 'var(--accent-blue)' : 'var(--bg-card)';
+      sBtn.style.color = active ? '#ffffff' : 'var(--text-secondary)';
+      sBtn.style.border = active ? 'none' : '1px solid var(--border-color)';
+    });
+    Object.keys(CATEGORY_TITLES).forEach(key => {
+      const btn = document.getElementById(`catTab_${key}`);
+      if (!btn) return;
+      const isActive = key === activeDiscoveryCat;
+      btn.style.background = isActive ? 'var(--accent-gold)' : 'var(--bg-card)';
+      btn.style.color = isActive ? '#09090b' : 'var(--text-secondary)';
+      btn.style.border = isActive ? 'none' : '1px solid var(--border-color)';
+    });
+    const body = document.getElementById('trendingModalBody');
+    if (!body) return;
+    const list = getAppItems(activeAppSubFilter, activeDiscoveryCat);
+    if (!list || !list.length) {
+      body.innerHTML = `<div style="text-align:center; padding:22px; color:var(--text-muted); font-size:0.8rem;">No titles available for this selection right now.</div>`;
+      return;
+    }
+    body.innerHTML = list.map((item, idx) => {
+      const prod = products.find(p => p.id === item.platformId) || products[0];
+      const priceVal = prod ? Number(prod.price) : Number(item.price || 10);
+      return `
+        <div class="discovery-row-card" style="display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
+          <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${idx + 1}</div>
+          ${renderPosterOrFallback(item)}
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap;">
+              <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel || prod.name}</span>
+              <span style="font-size:0.64rem; color:var(--accent-cyan); font-weight:700;">${item.mediaType || 'SHOW'}</span>
+              <span style="font-size:0.68rem; color:var(--accent-gold); font-weight:700;">★ ${item.rating || 'N/A'}</span>
+            </div>
+            <div style="font-weight:700; font-size:0.9rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
+            <div style="font-size:0.73rem; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px;">${item.overview || ''}</div>
+            <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId || prod.id}');">Order ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} ✓</button>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   const POSTER_THEMES = [
