@@ -2357,6 +2357,7 @@
           <button type="button" id="drawerCustomersToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('customers');">👥 <span id="lblDrawerCustomers">Registered Customers</span></button>
           <button type="button" id="drawerVerifyToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('verify');">👑 <span id="lblDrawerAddAdmin">Add Admin Role</span></button>
           <button type="button" id="drawerMsgTemplatesToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('msg_templates');">✉️ <span id="lblDrawerMsgTemplates">Messaging Templates</span></button>
+          <button type="button" id="drawerTrendingResourcesToolBtn" class="drawer-link" style="display:none; padding:9px 11px; font-size:0.78rem;" onclick="closeDrawer(); openOwnerAdminManagerModal('trending_resources');">🎬 <span id="lblDrawerTrendingResources">Trending &amp; Show Resources</span></button>
         </div>
       </div>
 
@@ -2986,6 +2987,73 @@
           <button type="button" class="primary-submit" style="flex:1; margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerMsgTemplates()"><span id="lblSaveTplBtn">Save</span></button>
           <button type="button" onclick="resetOwnerMsgTemplatesToDefault()" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:11px 12px; border-radius:12px; font-size:0.76rem; font-weight:700; cursor:pointer;"><span id="lblResetTplBtn">Reset Default</span></button>
         </div>
+      </div>
+
+      <!-- Owner Trending & Show Resources Updater -->
+      <div id="drawerTrendingResourcesToolView" style="display:none;">
+        <div style="font-size:0.74rem; color:var(--text-secondary); margin-bottom:10px;">
+          Kemaskini senarai cerita &amp; movie terkini mengikut platform (<strong>Netflix, Disney+, HBO Max, Prime Video</strong>) &amp; 7 kategori trending + hasil carian terus ke laman web.
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+          <button type="button" onclick="syncNowOwnerTrending12h()" style="background:rgba(56,189,248,0.14); border:1px solid rgba(56,189,248,0.45); color:var(--accent-cyan); padding:9px 10px; border-radius:10px; font-size:0.74rem; font-weight:800; cursor:pointer;">🔄 Sync Live API Sekarang</button>
+          <button type="button" onclick="resetOwnerTrendingResourcesToDefault()" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:9px 10px; border-radius:10px; font-size:0.74rem; font-weight:700; cursor:pointer;">↺ Reset Senarai Asal</button>
+        </div>
+
+        <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:11px; margin-bottom:12px;">
+          <div style="font-size:0.74rem; font-weight:800; color:var(--accent-gold); margin-bottom:8px;">+ Tambah / Kemaskini Tajuk Terkini</div>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label>Tajuk Cerita / Movie *</label>
+            <input type="text" class="form-control" id="ownerResTitleInput" placeholder="cth. Spider-Man: Brand New Day" />
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Platform Semasa *</label>
+              <select class="form-control" id="ownerResPlatformSelect">
+                <option value="netflix">Netflix</option>
+                <option value="disney">Disney+</option>
+                <option value="hbomax">HBO Max</option>
+                <option value="primevideo">Prime Video</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Jenis Format *</label>
+              <select class="form-control" id="ownerResTypeSelect">
+                <option value="MOVIE">MOVIE</option>
+                <option value="SERIES">SERIES (TV Show)</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Tahun Release</label>
+              <input type="text" class="form-control" id="ownerResYearInput" value="2026" placeholder="2026" />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Rating (1 - 10)</label>
+              <input type="text" class="form-control" id="ownerResRatingInput" value="8.5" placeholder="8.5" />
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label>Masukkan Dalam Tab Trending *</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; font-size:0.72rem; color:var(--text-primary); background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px;">
+              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatTop10" checked /> Top 10 TV / Movie</label>
+              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatNew" checked /> New Release</label>
+              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatPopcorn" /> Perfect Popcorn</label>
+              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatKdrama" /> Kdrama</label>
+              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatRewatched" /> Most Rewatched</label>
+              <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;"><input type="checkbox" id="ownerResCatOnlyOn" /> Only on Platform</label>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label>Sinopsis Ringkas (Pilihan)</label>
+            <input type="text" class="form-control" id="ownerResOverviewInput" placeholder="Ringkasan cerita terkini..." />
+          </div>
+          <button type="button" class="primary-submit" style="margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerCustomShowResource()">Simpan &amp; Terbitkan Sekarang ✓</button>
+        </div>
+
+        <div style="font-size:0.74rem; font-weight:800; color:var(--accent-cyan); margin-bottom:6px;">Senarai Custom Owner Aktif</div>
+        <div id="ownerCustomResourcesListBox" style="display:flex; flex-direction:column; gap:6px; font-size:0.74rem;"></div>
       </div>
     </div>
   </div>
@@ -3652,6 +3720,7 @@
         body: JSON.stringify({
           verifiedAdmins: getVerifiedAdminsList(),
           catalog: catalogData,
+          customShows: getOwnerCustomShowResources(),
           templates: {
             wa: getWaTemplate(),
             tg: getTgTemplate()
@@ -3715,6 +3784,11 @@
         syncWebsiteCatalog();
       }
 
+      if (data && Array.isArray(data.customShows)) {
+        saveOwnerCustomShowResources(data.customShows, false);
+        loadTrendingHero(false);
+      }
+
       if (data && data.templates) {
         if (data.templates.wa) localStorage.setItem(WA_TEMPLATE_STORAGE_KEY, data.templates.wa);
         if (data.templates.tg) localStorage.setItem(TG_TEMPLATE_STORAGE_KEY, data.templates.tg);
@@ -3768,6 +3842,7 @@
     setTxt('lblDrawerCustomers', isMy ? 'Pelanggan Berdaftar' : 'Registered Customers');
     setTxt('lblDrawerAddAdmin', isMy ? 'Tambah Peranan Admin' : 'Add Admin Role');
     setTxt('lblDrawerMsgTemplates', isMy ? 'Templat Mesej' : 'Messaging Templates');
+    setTxt('lblDrawerTrendingResources', isMy ? 'Sumber Cerita & Trending' : 'Trending & Show Resources');
     refreshDrawerRoleTools();
 
     setTxt('leaveModalTitle', isMy ? 'Sahkan Keluar Dari Laman Web' : 'Confirm to Leave Website');
@@ -5621,10 +5696,12 @@
       else secTitle.textContent = isMy ? 'Alat Admin' : 'Admin Tools';
     }
     if (tagEl) tagEl.textContent = role.toUpperCase();
+    const trResBtn = document.getElementById('drawerTrendingResourcesToolBtn');
     const fullTools = role === 'owner' || role === 'joker';
     if (custBtn) custBtn.style.display = fullTools ? 'flex' : 'none';
     if (verifyBtn) verifyBtn.style.display = fullTools ? 'flex' : 'none';
     if (msgTplBtn) msgTplBtn.style.display = fullTools ? 'flex' : 'none';
+    if (trResBtn) trResBtn.style.display = fullTools ? 'flex' : 'none';
   }
 
   function openDrawer() {
@@ -6243,20 +6320,22 @@
   function openOwnerAdminManagerModal(tab = 'catalog') {
     const role = getUserRole();
     if (!['owner', 'admin', 'joker'].includes(role)) { showToast('Owner or Admin access required.'); return; }
-    if ((tab === 'customers' || tab === 'verify' || tab === 'msg_templates') && !['owner', 'joker'].includes(role)) { showToast('Owner access required.'); return; }
+    if ((tab === 'customers' || tab === 'verify' || tab === 'msg_templates' || tab === 'trending_resources') && !['owner', 'joker'].includes(role)) { showToast('Owner access required.'); return; }
     const modal = document.getElementById('ownerAdminToolsModal');
     const catView = document.getElementById('drawerCatalogToolView');
     const txnView = document.getElementById('drawerTransactionsToolView');
     const custView = document.getElementById('drawerCustomersOnlyView');
     const verView = document.getElementById('drawerVerifyRoleToolView');
     const msgView = document.getElementById('drawerMsgTemplatesToolView');
+    const resView = document.getElementById('drawerTrendingResourcesToolView');
     const titleEl = document.getElementById('ownerAdminToolsTitle');
-    if (!modal || !catView || !txnView || !custView || !verView || !msgView) return;
+    if (!modal || !catView || !txnView || !custView || !verView || !msgView || !resView) return;
     catView.style.display = tab === 'catalog' ? 'block' : 'none';
     txnView.style.display = tab === 'transactions' ? 'block' : 'none';
     custView.style.display = tab === 'customers' ? 'block' : 'none';
     verView.style.display = tab === 'verify' ? 'block' : 'none';
     msgView.style.display = tab === 'msg_templates' ? 'block' : 'none';
+    resView.style.display = tab === 'trending_resources' ? 'block' : 'none';
     if (tab === 'catalog') {
       if (titleEl) titleEl.textContent = 'WEBSITE CATALOG MANAGER';
       const sel = document.getElementById('drawerMgrTargetSelect');
@@ -6280,6 +6359,9 @@
       const tgInp = document.getElementById('ownerTgTemplateInput');
       if (waInp) waInp.value = getWaTemplate();
       if (tgInp) tgInp.value = getTgTemplate();
+    } else if (tab === 'trending_resources') {
+      if (titleEl) titleEl.textContent = 'TRENDING & SHOW RESOURCES';
+      renderOwnerCustomResourcesList();
     }
     modal.classList.add('open');
   }
@@ -6292,34 +6374,45 @@
   let _trendingFetchedFromApi = false;
   let _showAllInlineSearch = false;
 
+  const TRENDING_CACHE_KEY = 'spystore_trending_cache_v2';
+  const TRENDING_INTERVAL_MS = 12 * 60 * 60 * 1000;
+
   function buildFallbackTrendingData() {
     const rawByApp = {
       netflix: [
-        { id: 93405, title: 'Squid Game', mediaType: 'SERIES', rating: '7.9', popularity: 98, isNew: true, isKdrama: true, overview: 'Hundreds of cash-strapped players compete in high-stakes survival games.', backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
-        { id: 119051, title: 'Wednesday', mediaType: 'SERIES', rating: '8.5', popularity: 95, isNew: true, overview: 'Wednesday Addams investigates a mystery at Nevermore Academy.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
-        { id: 66732, title: 'Stranger Things', mediaType: 'SERIES', rating: '8.6', popularity: 96, overview: 'A small town uncovers secret experiments and supernatural forces.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' },
-        { id: 76669, title: 'Doraemon: Stand by Me', mediaType: 'MOVIE', rating: '7.6', popularity: 89, overview: 'Nobita and Doraemon embark on an emotional journey for a brighter future.', backdrop: '', poster: '' },
-        { id: 204082, title: 'The Glory', mediaType: 'SERIES', rating: '8.3', popularity: 91, isKdrama: true, overview: 'A former bullying victim plans an intricate revenge years later.', backdrop: '', poster: '' },
-        { id: 902640, title: 'Extraction 2', mediaType: 'MOVIE', rating: '7.5', popularity: 88, isNew: true, overview: 'Mercenary Tyler Rake takes on another deadly extraction mission.', backdrop: '', poster: '' }
+        { id: 969681, title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.7', popularity: 100, isNew: true, isOnlyOn: false, overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.', backdrop: 'https://image.tmdb.org/t/p/w780/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg', poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg' },
+        { id: 93405, title: 'Squid Game: Final Season', year: '2025', mediaType: 'SERIES', rating: '8.3', popularity: 99, isNew: true, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Gi-hun returns to dismantle the deadly games from within as the final arena begins.', backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
+        { id: 66732, title: 'Stranger Things 5', year: '2025', mediaType: 'SERIES', rating: '8.8', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Hawkins faces its ultimate showdown against Vecna and the Upside Down.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' },
+        { id: 119051, title: 'Wednesday: Season 2', year: '2025', mediaType: 'SERIES', rating: '8.5', popularity: 97, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Wednesday Addams returns to Nevermore Academy with darker visions and new threats.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
+        { id: 240459, title: 'All of Us Are Dead: Season 2', year: '2026', mediaType: 'SERIES', rating: '8.4', popularity: 95, isNew: true, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Survivors in Seoul confront a new wave of mutated infection.', backdrop: '', poster: '' },
+        { id: 247881, title: 'When Life Gives You Tangerines', year: '2025', mediaType: 'SERIES', rating: '8.9', popularity: 94, isKdrama: true, isOnlyOn: true, overview: 'An unforgettable Jeju Island romance spanning decades of hardship and devotion.', backdrop: '', poster: '' },
+        { id: 204082, title: 'The Glory', year: '2023', mediaType: 'SERIES', rating: '8.4', popularity: 92, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'A former bullying victim executes a meticulous lifelong plan for justice.', backdrop: '', poster: '' },
+        { id: 811941, title: 'Devara: Part 1', year: '2024', mediaType: 'MOVIE', rating: '7.6', popularity: 91, overview: 'A fearless coastal leader protects his people from smuggling syndicates.', backdrop: '', poster: '' },
+        { id: 902640, title: 'Extraction 2', year: '2023', mediaType: 'MOVIE', rating: '7.7', popularity: 90, isOnlyOn: true, overview: 'Tyler Rake embarks on a high-octane prison rescue mission across Eastern Europe.', backdrop: '', poster: '' },
+        { id: 76669, title: 'Doraemon: Stand by Me', year: '2014', mediaType: 'MOVIE', rating: '7.8', popularity: 89, isRewatched: true, overview: 'Nobita and Doraemon embark on an emotional journey to secure a happier future.', backdrop: '', poster: '' }
       ],
       disney: [
-        { id: 299534, title: 'Avengers: Endgame', mediaType: 'MOVIE', rating: '8.3', popularity: 97, overview: 'The Avengers assemble once more to reverse Thanos’s actions.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg' },
-        { id: 82684, title: 'The Mandalorian', mediaType: 'SERIES', rating: '8.5', popularity: 94, overview: 'A lone bounty hunter travels across the galaxy protecting Grogu.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
-        { id: 1022796, title: 'Inside Out 2', mediaType: 'MOVIE', rating: '7.6', popularity: 95, isNew: true, overview: 'Riley’s mind headquarters welcomes brand-new emotions.', backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' },
-        { id: 205940, title: 'Moving', mediaType: 'SERIES', rating: '8.4', popularity: 90, isKdrama: true, overview: 'Teens with hidden superpowers protect their secrets with their parents.', backdrop: '', poster: '' },
-        { id: 508943, title: 'Luca', mediaType: 'MOVIE', rating: '7.9', popularity: 86, overview: 'Two sea monster friends enjoy a summer on the Italian Riviera.', backdrop: '', poster: '' }
+        { id: 986056, title: 'Thunderbolts*', year: '2025', mediaType: 'MOVIE', rating: '7.8', popularity: 97, isNew: true, isOnlyOn: true, overview: 'An unconventional squad of antiheroes takes on a covert mission for the government.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/m9EtP1Yrzv6v7dMaC9mRaGhd1um.jpg' },
+        { id: 822119, title: 'Captain America: Brave New World', year: '2025', mediaType: 'MOVIE', rating: '7.2', popularity: 96, isNew: true, isOnlyOn: true, overview: 'Sam Wilson uncovers a global conspiracy after a meeting with President Thaddeus Ross.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/pzIddUEMWhWzfvLI3TwxUG2wGoi.jpg' },
+        { id: 1022796, title: 'Inside Out 2', year: '2024', mediaType: 'MOVIE', rating: '8.0', popularity: 96, isRewatched: true, isOnlyOn: true, overview: 'Riley’s mind headquarters welcomes Anxiety, Envy, Ennui, and Embarrassment.', backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' },
+        { id: 138501, title: 'Daredevil: Born Again', year: '2025', mediaType: 'SERIES', rating: '8.6', popularity: 96, isNew: true, isOnlyOn: true, overview: 'Matt Murdock fights for justice in New York while Wilson Fisk rises in politics.', backdrop: '', poster: '' },
+        { id: 82684, title: 'The Mandalorian', year: '2025', mediaType: 'SERIES', rating: '8.5', popularity: 95, isRewatched: true, isOnlyOn: true, overview: 'Din Djarin and Grogu navigate a dangerous galaxy after the fall of the Empire.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1KkVAaqZNhd3C8u9k30sG7E4.jpg' },
+        { id: 205940, title: 'Moving', year: '2024', mediaType: 'SERIES', rating: '8.6', popularity: 94, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Teens with inherited superpowers hide their abilities from ruthless intelligence agents.', backdrop: '', poster: '' },
+        { id: 231857, title: 'A Shop for Killers', year: '2025', mediaType: 'SERIES', rating: '8.4', popularity: 92, isNew: true, isKdrama: true, isOnlyOn: true, overview: 'A young woman defends herself against elite assassins after inheriting her uncle’s secret warehouse.', backdrop: '', poster: '' },
+        { id: 299534, title: 'Avengers: Endgame', year: '2019', mediaType: 'MOVIE', rating: '8.4', popularity: 98, isRewatched: true, isOnlyOn: true, overview: 'Earth’s mightiest heroes assemble one final time to undo Thanos’s snap.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg' }
       ],
       hbomax: [
-        { id: 94997, title: 'House of the Dragon', mediaType: 'SERIES', rating: '8.4', popularity: 95, isNew: true, overview: 'The Targaryen civil war unfolds before Game of Thrones.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
-        { id: 693134, title: 'Dune: Part Two', mediaType: 'MOVIE', rating: '8.1', popularity: 94, isNew: true, overview: 'Paul Atreides joins Chani and the Fremen on Arrakis.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
-        { id: 87472, title: 'The Last of Us', mediaType: 'SERIES', rating: '8.7', popularity: 93, overview: 'Joel and Ellie cross a post-pandemic America where survival is brutal.', backdrop: '', poster: '' },
-        { id: 414906, title: 'The Batman', mediaType: 'MOVIE', rating: '7.7', popularity: 89, overview: 'Batman uncovers corruption in Gotham City.', backdrop: '', poster: '' }
+        { id: 94997, title: 'House of the Dragon: Season 3', year: '2026', mediaType: 'SERIES', rating: '8.6', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'The Targaryen civil war escalates into full-scale dragon warfare across Westeros.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/3iF646K7n4z1f3x4n4o4Z3P9k7.jpg' },
+        { id: 87472, title: 'The Last of Us: Season 2', year: '2025', mediaType: 'SERIES', rating: '8.8', popularity: 97, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Joel and Ellie face devastating consequences in Jackson and Seattle.', backdrop: '', poster: '' },
+        { id: 693134, title: 'Dune: Part Two', year: '2024', mediaType: 'MOVIE', rating: '8.3', popularity: 95, isOnlyOn: true, overview: 'Paul Atreides unites with Chani and the Fremen on a path of vengeance.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
+        { id: 194764, title: 'The Penguin', year: '2024', mediaType: 'SERIES', rating: '8.5', popularity: 94, isOnlyOn: true, overview: 'Oz Cobb seizes control of Gotham’s criminal underworld in the aftermath of flood chaos.', backdrop: '', poster: '' },
+        { id: 414906, title: 'The Batman', year: '2022', mediaType: 'MOVIE', rating: '7.8', popularity: 91, isRewatched: true, overview: 'Batman investigates a sadistic killer targeting Gotham’s political elite.', backdrop: '', poster: '' }
       ],
       primevideo: [
-        { id: 76600, title: 'The Boys', mediaType: 'SERIES', rating: '8.5', popularity: 95, isNew: true, overview: 'Vigilantes confront corrupt superheroes who abuse their power.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg' },
-        { id: 84621, title: 'Reacher', mediaType: 'SERIES', rating: '8.1', popularity: 91, isNew: true, overview: 'Jack Reacher takes down criminals across town.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' },
-        { id: 609681, title: 'The Idea of You', mediaType: 'MOVIE', rating: '7.4', popularity: 87, isNew: true, overview: 'A single mother begins an unexpected romance with a young singer.', backdrop: '', poster: '' },
-        { id: 823464, title: 'Air', mediaType: 'MOVIE', rating: '7.5', popularity: 84, overview: 'The story behind the partnership that launched Air Jordan.', backdrop: '', poster: '' }
+        { id: 76600, title: 'The Boys: Season 5', year: '2026', mediaType: 'SERIES', rating: '8.7', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Billy Butcher and The Boys make their final stand against Homelander’s regime.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngkjx9g2R8b4c9h2e2w8s2g.jpg' },
+        { id: 84621, title: 'Reacher: Season 3', year: '2025', mediaType: 'SERIES', rating: '8.3', popularity: 95, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Jack Reacher goes undercover to rescue a DEA informant from a deadly criminal enterprise.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' },
+        { id: 242001, title: 'Marry My Husband', year: '2024', mediaType: 'SERIES', rating: '8.3', popularity: 92, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Betrayed by her husband and best friend, a woman wakes up ten years in the past to rewrite her fate.', backdrop: '', poster: '' },
+        { id: 609681, title: 'The Idea of You', year: '2024', mediaType: 'MOVIE', rating: '7.5', popularity: 89, isOnlyOn: true, overview: 'A 40-year-old single mom begins an unexpected romance with the lead singer of a hit boy band.', backdrop: '', poster: '' }
       ]
     };
 
@@ -6340,6 +6433,7 @@
         rank: i + 1,
         id: x.id,
         title: x.title,
+        year: x.year || '2026',
         mediaType: x.mediaType,
         platformId: appKey,
         platformLabel: meta.label,
@@ -6349,6 +6443,8 @@
         popularity: x.popularity || (95 - i * 4),
         isNew: Boolean(x.isNew),
         isKdrama: Boolean(x.isKdrama),
+        isRewatched: Boolean(x.isRewatched),
+        isOnlyOn: Boolean(x.isOnlyOn),
         overview: x.overview,
         backdrop: x.backdrop || '',
         poster: x.poster || ''
@@ -6357,6 +6453,8 @@
       const series = list.filter(i => i.mediaType === 'SERIES');
       const newReleases = list.filter(i => i.isNew);
       const kdramaList = list.filter(i => i.isKdrama);
+      const rewatchedList = list.filter(i => i.isRewatched);
+      const onlyOnList = list.filter(i => i.isOnlyOn);
       byApp[appKey] = {
         label: meta.label,
         price: unitPrice,
@@ -6365,27 +6463,36 @@
         series: series.length ? series : list,
         newMovies: newReleases.filter(i => i.mediaType === 'MOVIE'),
         newSeries: newReleases.filter(i => i.mediaType === 'SERIES'),
-        newReleases: newReleases.length ? newReleases : list.slice(0, 4),
+        newReleases: newReleases.length ? newReleases : list.slice(0, 5),
         popcorn: (movies.length ? movies : list).slice().sort((a, b) => Number(b.rating) - Number(a.rating)),
         kdrama: kdramaList.length ? kdramaList : list.slice(0, 4),
-        rewatched: (series.length ? series : list).slice().sort((a, b) => (b.popularity * Number(b.rating)) - (a.popularity * Number(a.rating))),
-        onlyOn: list.slice(0, 6)
+        rewatched: (rewatchedList.length ? rewatchedList : series).slice().sort((a, b) => (b.popularity * Number(b.rating)) - (a.popularity * Number(a.rating))),
+        onlyOn: onlyOnList.length ? onlyOnList : list.slice(0, 6)
       };
       allFlat.push(...list);
     });
 
+    const heroFeatured = [
+      byApp.netflix.all.find(x => x.title === 'Spider-Man: Brand New Day') || byApp.netflix.all[0],
+      byApp.netflix.all.find(x => x.title.includes('Squid Game')) || byApp.netflix.all[1],
+      byApp.disney.all[0],
+      byApp.hbomax.all[0],
+      byApp.primevideo.all[0],
+      byApp.netflix.all.find(x => x.title.includes('Stranger Things')) || byApp.netflix.all[2]
+    ].filter(Boolean).map((it, idx) => ({ ...it, rank: idx + 1 }));
+
     return {
       byApp,
       categories: {
-        tv_my: allFlat.filter(i => i.mediaType === 'SERIES').slice(0, 10),
-        movie_my: allFlat.filter(i => i.mediaType === 'MOVIE').slice(0, 10),
-        new_in: allFlat.filter(i => i.isNew).slice(0, 10),
+        tv_my: allFlat.filter(i => i.mediaType === 'SERIES').sort((a, b) => b.popularity - a.popularity).slice(0, 10),
+        movie_my: allFlat.filter(i => i.mediaType === 'MOVIE').sort((a, b) => b.popularity - a.popularity).slice(0, 10),
+        new_in: allFlat.filter(i => i.isNew).sort((a, b) => b.popularity - a.popularity).slice(0, 10),
         popcorn: allFlat.filter(i => i.mediaType === 'MOVIE').sort((a, b) => Number(b.rating) - Number(a.rating)).slice(0, 10),
-        kdrama: allFlat.filter(i => i.isKdrama).slice(0, 10),
-        rewatched: allFlat.filter(i => i.mediaType === 'SERIES').sort((a, b) => b.popularity - a.popularity).slice(0, 10),
-        only_on: allFlat.slice(0, 10)
+        kdrama: allFlat.filter(i => i.isKdrama).sort((a, b) => b.popularity - a.popularity).slice(0, 10),
+        rewatched: allFlat.filter(i => i.isRewatched || i.mediaType === 'SERIES').sort((a, b) => b.popularity - a.popularity).slice(0, 10),
+        only_on: allFlat.filter(i => i.isOnlyOn).sort((a, b) => b.popularity - a.popularity).slice(0, 10)
       },
-      items: [byApp.netflix.all[0], byApp.disney.all[0], byApp.hbomax.all[0], byApp.primevideo.all[0], byApp.netflix.all[1], byApp.disney.all[1]].filter(Boolean).map((it, idx) => ({ ...it, rank: idx + 1 }))
+      items: heroFeatured
     };
   }
 
@@ -6404,23 +6511,25 @@
     const fbApp = fb.byApp[appId] || {};
     let list = [];
     if (catKey === 'movie_my') {
-      list = appObj.movies || [];
+      list = appObj.movies || fbApp.movies || [];
     } else if (catKey === 'tv_my') {
-      list = appObj.series || [];
+      list = appObj.series || fbApp.series || [];
     } else if (catKey === 'new_in') {
       list = [...(appObj.newMovies || []), ...(appObj.newSeries || [])];
-      if (!list.length) list = appObj.newReleases || [];
+      if (!list.length) list = appObj.newReleases || fbApp.newReleases || [];
     } else if (catKey === 'popcorn') {
-      const src = appObj.movies || appObj.popcorn || [];
+      const src = (appObj.movies && appObj.movies.length) ? appObj.movies : (fbApp.popcorn || []);
       list = src.slice().sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
     } else if (catKey === 'kdrama') {
-      list = appObj.kdrama || [];
+      list = (appObj.kdrama && appObj.kdrama.length) ? appObj.kdrama : (fbApp.kdrama || []);
     } else if (catKey === 'rewatched') {
-      const src = appObj.series || appObj.rewatched || [];
+      const src = (appObj.rewatched && appObj.rewatched.length) ? appObj.rewatched : ((appObj.series && appObj.series.length) ? appObj.series : (fbApp.rewatched || []));
       list = src.slice().sort((a, b) => ((b.popularity || 10) * Number(b.rating || 7)) - ((a.popularity || 10) * Number(a.rating || 7)));
+    } else if (catKey === 'only_on') {
+      list = (appObj.onlyOn && appObj.onlyOn.length) ? appObj.onlyOn : (fbApp.onlyOn || []);
     } else {
       list = [...(appObj.movies || []).slice(0, 5), ...(appObj.series || []).slice(0, 5)];
-      if (!list.length) list = appObj.onlyOn || appObj.all || [];
+      if (!list.length) list = appObj.all || fbApp.all || [];
     }
     if (!list || !list.length) {
       list = fbApp.all || fb.items || [];
@@ -6660,32 +6769,292 @@
     dotsWrap.innerHTML = items.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i + 1}"></button>`).join('');
   }
 
-  async function loadTrendingHero() {
-    const fb = buildFallbackTrendingData();
-    trendingByApp = fb.byApp;
-    discoveryCategories = fb.categories;
-    renderHeroSlidesFromItems(fb.items.slice(0, 6));
+  function readTrendingCache() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(TRENDING_CACHE_KEY) || 'null');
+      if (!raw || typeof raw.fetchedAt !== 'number' || !raw.byApp || !Array.isArray(raw.items)) return null;
+      return raw;
+    } catch (e) { return null; }
+  }
+
+  function writeTrendingCache(payload) {
+    try {
+      localStorage.setItem(TRENDING_CACHE_KEY, JSON.stringify({
+        fetchedAt: Date.now(),
+        byApp: payload.byApp,
+        categories: payload.categories,
+        items: payload.items
+      }));
+    } catch (e) {}
+  }
+
+  function formatNext12hSyncLabel(fetchedAtMs) {
+    const nextMs = Number(fetchedAtMs || Date.now()) + TRENDING_INTERVAL_MS;
+    const nextDt = new Date(nextMs);
+    const hh = String(nextDt.getHours()).padStart(2, '0');
+    const mm = String(nextDt.getMinutes()).padStart(2, '0');
+    return `Auto-sync every 12h • Next ${hh}:${mm}`;
+  }
+
+  function updateTrending12hSubLabel(fetchedAtMs) {
+    const subEl = document.querySelector('#trendingModal .discovery-modal-box div[style*="STREAMING DISCOVERY"]');
+    if (subEl) {
+      subEl.textContent = `STREAMING DISCOVERY • ${formatNext12hSyncLabel(fetchedAtMs)}`;
+    }
+  }
+
+  const OWNER_CUSTOM_SHOWS_KEY = 'spystore_owner_custom_shows_v1';
+
+  function getOwnerCustomShowResources() {
+    try {
+      const list = JSON.parse(localStorage.getItem(OWNER_CUSTOM_SHOWS_KEY) || '[]');
+      return Array.isArray(list) ? list : [];
+    } catch (e) { return []; }
+  }
+
+  function saveOwnerCustomShowResources(list, syncRemote = true) {
+    try {
+      localStorage.setItem(OWNER_CUSTOM_SHOWS_KEY, JSON.stringify(list));
+    } catch (e) {}
+    if (syncRemote) pushSharedStoreToServer();
+  }
+
+  function renderOwnerCustomResourcesList() {
+    const box = document.getElementById('ownerCustomResourcesListBox');
+    if (!box) return;
+    const list = getOwnerCustomShowResources();
+    const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
+    if (!list.length) {
+      box.innerHTML = `<div style="color:var(--text-muted); background:var(--bg-input); border:1px solid var(--border-color); border-radius:9px; padding:9px;">Belum ada tajuk custom ditambah. Gunakan borang di atas untuk tambah cerita terkini mengikut platform.</div>`;
+      return;
+    }
+    box.innerHTML = list.map((item, idx) => {
+      const tags = [];
+      if (item.catTop10) tags.push('Top 10');
+      if (item.isNew) tags.push('New');
+      if (item.isPopcorn) tags.push('Popcorn');
+      if (item.isKdrama) tags.push('Kdrama');
+      if (item.isRewatched) tags.push('Rewatched');
+      if (item.isOnlyOn) tags.push('Only On');
+      return `
+        <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div style="min-width:0;">
+            <div style="font-weight:800; color:var(--text-primary);">${item.title} <span style="color:var(--accent-gold);">(${appLabels[item.platformId] || item.platformId})</span></div>
+            <div style="font-size:0.68rem; color:var(--text-secondary);">${item.mediaType} • ${item.year || '2026'} • ★ ${item.rating || '8.5'} • ${tags.join(', ')}</div>
+          </div>
+          <button type="button" onclick="deleteOwnerCustomShowResource(${idx})" style="background:rgba(239,68,68,0.16); border:1px solid rgba(239,68,68,0.45); color:#f87171; padding:4px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer; flex-shrink:0;">Padam</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function saveOwnerCustomShowResource() {
+    if (!['owner', 'joker'].includes(getUserRole())) { showToast('Hanya Owner boleh mengemaskini sumber cerita.'); return; }
+    const title = String(document.getElementById('ownerResTitleInput')?.value || '').trim();
+    const platformId = String(document.getElementById('ownerResPlatformSelect')?.value || 'netflix');
+    const mediaType = String(document.getElementById('ownerResTypeSelect')?.value || 'MOVIE');
+    const year = String(document.getElementById('ownerResYearInput')?.value || '2026').trim() || '2026';
+    const rating = String(document.getElementById('ownerResRatingInput')?.value || '8.5').trim() || '8.5';
+    const overview = String(document.getElementById('ownerResOverviewInput')?.value || '').trim();
+
+    if (!title) { showToast('Sila masukkan tajuk cerita atau movie!'); return; }
+
+    const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
+    const entry = {
+      id: Date.now(),
+      title,
+      platformId,
+      platformLabel: appLabels[platformId] || 'Netflix',
+      platforms: [{ id: platformId, label: appLabels[platformId] || 'Netflix' }],
+      mediaType,
+      year,
+      rating,
+      popularity: 100,
+      catTop10: Boolean(document.getElementById('ownerResCatTop10')?.checked),
+      isNew: Boolean(document.getElementById('ownerResCatNew')?.checked),
+      isPopcorn: Boolean(document.getElementById('ownerResCatPopcorn')?.checked),
+      isKdrama: Boolean(document.getElementById('ownerResCatKdrama')?.checked),
+      isRewatched: Boolean(document.getElementById('ownerResCatRewatched')?.checked),
+      isOnlyOn: Boolean(document.getElementById('ownerResCatOnlyOn')?.checked),
+      overview: overview || `${title} (${year}) kini tersedia di ${appLabels[platformId] || 'Netflix'}.`,
+      poster: '',
+      backdrop: ''
+    };
+
+    const existing = getOwnerCustomShowResources().filter(x => !(String(x.title || '').toLowerCase() === title.toLowerCase() && x.platformId === platformId));
+    existing.unshift(entry);
+    saveOwnerCustomShowResources(existing, getUserRole() !== 'joker');
+
+    if (document.getElementById('ownerResTitleInput')) document.getElementById('ownerResTitleInput').value = '';
+    if (document.getElementById('ownerResOverviewInput')) document.getElementById('ownerResOverviewInput').value = '';
+
+    renderOwnerCustomResourcesList();
+    localStorage.removeItem(TRENDING_CACHE_KEY);
+    loadTrendingHero(true);
+    showToast(`✅ "${title}" dikemaskini ke ${entry.platformLabel}!`);
+  }
+
+  function deleteOwnerCustomShowResource(idx) {
+    if (!['owner', 'joker'].includes(getUserRole())) return;
+    const list = getOwnerCustomShowResources();
+    if (!list[idx]) return;
+    const removed = list.splice(idx, 1)[0];
+    saveOwnerCustomShowResources(list, getUserRole() !== 'joker');
+    renderOwnerCustomResourcesList();
+    localStorage.removeItem(TRENDING_CACHE_KEY);
+    loadTrendingHero(true);
+    showToast(`🗑️ "${removed.title}" dipadam daripada senarai custom.`);
+  }
+
+  function syncNowOwnerTrending12h() {
+    localStorage.removeItem(TRENDING_CACHE_KEY);
+    loadTrendingHero(true);
+    showToast('🔄 Senarai Trending & 7 kategori disegarkan sekarang!');
+  }
+
+  function resetOwnerTrendingResourcesToDefault() {
+    if (!['owner', 'joker'].includes(getUserRole())) return;
+    saveOwnerCustomShowResources([], getUserRole() !== 'joker');
+    localStorage.removeItem(TRENDING_CACHE_KEY);
+    renderOwnerCustomResourcesList();
+    loadTrendingHero(true);
+    showToast('↺ Senarai Trending & sumber cerita ditetapkan semula.');
+  }
+
+  function ensureSpiderManInTrending(dataObj) {
+    if (!dataObj || !dataObj.byApp || !dataObj.byApp.netflix) return dataObj;
+    const smItem = {
+      rank: 1,
+      id: 969681,
+      title: 'Spider-Man: Brand New Day',
+      year: '2026',
+      mediaType: 'MOVIE',
+      platformId: 'netflix',
+      platformLabel: 'Netflix',
+      platforms: [{ id: 'netflix', label: 'Netflix' }],
+      price: 18,
+      rating: '8.7',
+      popularity: 100,
+      isNew: true,
+      isOnlyOn: false,
+      overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.',
+      backdrop: 'https://image.tmdb.org/t/p/w780/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg',
+      poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg'
+    };
+    const nf = dataObj.byApp.netflix;
+    const injectUnique = (arr) => {
+      if (!Array.isArray(arr)) return;
+      const idx = arr.findIndex(x => String(x.title || '').toLowerCase().includes('spider-man: brand new day'));
+      if (idx !== -1) arr.splice(idx, 1);
+      arr.unshift(smItem);
+    };
+    injectUnique(nf.all);
+    injectUnique(nf.movies);
+    injectUnique(nf.newMovies);
+    injectUnique(nf.newReleases);
+    injectUnique(nf.popcorn);
+    if (dataObj.categories) {
+      injectUnique(dataObj.categories.movie_my);
+      injectUnique(dataObj.categories.new_in);
+      injectUnique(dataObj.categories.popcorn);
+    }
+    const customShows = getOwnerCustomShowResources();
+    if (Array.isArray(customShows) && customShows.length) {
+      customShows.slice().reverse().forEach(cs => {
+        const appTarget = dataObj.byApp[cs.platformId];
+        if (!appTarget) return;
+        const injectCustom = (arr) => {
+          if (!Array.isArray(arr)) return;
+          const idx = arr.findIndex(x => String(x.title || '').toLowerCase() === String(cs.title || '').toLowerCase());
+          if (idx !== -1) arr.splice(idx, 1);
+          arr.unshift(cs);
+        };
+        injectCustom(appTarget.all);
+        if (cs.catTop10 !== false) {
+          if (cs.mediaType === 'MOVIE') injectCustom(appTarget.movies);
+          else injectCustom(appTarget.series);
+        }
+        if (cs.isNew) {
+          if (cs.mediaType === 'MOVIE') injectCustom(appTarget.newMovies);
+          else injectCustom(appTarget.newSeries);
+          injectCustom(appTarget.newReleases);
+        }
+        if (cs.isPopcorn) injectCustom(appTarget.popcorn);
+        if (cs.isKdrama) injectCustom(appTarget.kdrama);
+        if (cs.isRewatched) injectCustom(appTarget.rewatched);
+        if (cs.isOnlyOn) injectCustom(appTarget.onlyOn);
+        if (Array.isArray(dataObj.items)) injectCustom(dataObj.items);
+      });
+    }
+
+    if (Array.isArray(dataObj.items)) {
+      injectUnique(dataObj.items);
+      dataObj.items = dataObj.items.slice(0, 6).map((it, idx) => ({ ...it, rank: idx + 1 }));
+    }
+    return dataObj;
+  }
+
+  async function loadTrendingHero(forceRefresh = false) {
+    const fb = ensureSpiderManInTrending(buildFallbackTrendingData());
+    const cached = readTrendingCache();
+    const isCacheFresh = cached && (Date.now() - cached.fetchedAt < TRENDING_INTERVAL_MS);
+
+    if (cached && !forceRefresh) {
+      const mergedCached = ensureSpiderManInTrending({
+        byApp: cached.byApp,
+        categories: cached.categories || fb.categories,
+        items: cached.items
+      });
+      trendingByApp = mergedCached.byApp;
+      discoveryCategories = mergedCached.categories;
+      renderHeroSlidesFromItems(mergedCached.items.slice(0, 6));
+      updateTrending12hSubLabel(cached.fetchedAt);
+      const modal = document.getElementById('trendingModal');
+      if (modal && modal.style.display === 'flex') renderTrendingModal();
+      if (isCacheFresh) return;
+    } else {
+      trendingByApp = fb.byApp;
+      discoveryCategories = fb.categories;
+      renderHeroSlidesFromItems(fb.items.slice(0, 6));
+      updateTrending12hSubLabel(Date.now());
+    }
 
     try {
       const res = await fetch(`/api/trending?t=${Date.now()}`, { cache: 'no-store' });
-      if (!res.ok) return;
+      if (!res.ok) {
+        writeTrendingCache(fb);
+        return;
+      }
       const data = await res.json();
+      let finalPayload = fb;
       if (data && data.byApp && Object.keys(data.byApp).length) {
-        trendingByApp = data.byApp;
+        finalPayload = ensureSpiderManInTrending({
+          byApp: data.byApp,
+          categories: data.categories || fb.categories,
+          items: Array.isArray(data.items) && data.items.length ? data.items : fb.items
+        });
         _trendingFetchedFromApi = true;
       }
-      if (data && data.categories) {
-        discoveryCategories = data.categories;
-      }
-      if (data && Array.isArray(data.items) && data.items.length) {
-        renderHeroSlidesFromItems(data.items.slice(0, 6));
-      }
+      trendingByApp = finalPayload.byApp;
+      discoveryCategories = finalPayload.categories;
+      writeTrendingCache(finalPayload);
+      renderHeroSlidesFromItems(finalPayload.items.slice(0, 6));
+      updateTrending12hSubLabel(Date.now());
       const modal = document.getElementById('trendingModal');
       if (modal && modal.style.display === 'flex') {
         renderTrendingModal();
       }
-    } catch (e) {}
+    } catch (e) {
+      writeTrendingCache(fb);
+    }
   }
+
+  setInterval(() => {
+    const cached = readTrendingCache();
+    if (!cached || (Date.now() - cached.fetchedAt >= TRENDING_INTERVAL_MS)) {
+      loadTrendingHero(true);
+    }
+  }, 15 * 60 * 1000);
 
   function goToSlide(index) {
     const track = document.getElementById('heroTrack');
@@ -6765,6 +7134,14 @@
   function collectAllShowCatalog() {
     ensureTrendingStoreReady();
     const extraShows = [
+      { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.7', poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
+      { title: 'Spider-Man: No Way Home', year: '2021', mediaType: 'MOVIE', rating: '8.2', poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker asks Doctor Strange to restore his secret identity, accidentally tearing open the multiverse.' },
+      { title: 'Squid Game: Final Season', year: '2025', mediaType: 'SERIES', rating: '8.3', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Gi-hun returns to dismantle the deadly games from within as the final arena begins.' },
+      { title: 'Stranger Things 5', year: '2025', mediaType: 'SERIES', rating: '8.8', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Hawkins faces its ultimate showdown against Vecna and the Upside Down.' },
+      { title: 'Wednesday: Season 2', year: '2025', mediaType: 'SERIES', rating: '8.5', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Wednesday Addams returns to Nevermore Academy with darker visions and new threats.' },
+      { title: 'All of Us Are Dead: Season 2', year: '2026', mediaType: 'SERIES', rating: '8.4', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Survivors in Seoul confront a new wave of mutated infection.' },
+      { title: 'When Life Gives You Tangerines', year: '2025', mediaType: 'SERIES', rating: '8.9', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'An unforgettable Jeju Island romance spanning decades of hardship and devotion.' },
+      { title: 'Daredevil: Born Again', year: '2025', mediaType: 'SERIES', rating: '8.6', poster: '', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Matt Murdock fights for justice in New York while Wilson Fisk rises in politics.' },
       { title: 'BoBoiBoy', year: '2011', mediaType: 'SERIES', rating: '7.2', poster: 'https://image.tmdb.org/t/p/w342/8w4gA8V0x5x2k7Z3f6L2q9P1m8R.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy gains elemental superpowers to protect Earth from alien invaders.' },
       { title: 'BoBoiBoy: The Movie', year: '2016', mediaType: 'MOVIE', rating: '6.8', poster: 'https://image.tmdb.org/t/p/w342/4m1Au3YkjqsxF8iwQy0fPYSxE0h.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy and his friends travel to save Ochobot from an ancient power seeker.' },
       { title: 'BoBoiBoy Galaxy', year: '2016', mediaType: 'SERIES', rating: '7.9', poster: 'https://image.tmdb.org/t/p/w342/8w4gA8V0x5x2k7Z3f6L2q9P1m8R.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy embarks on interstellar missions across the galaxy to collect Power Spheras.' },
@@ -6773,12 +7150,12 @@
       { title: 'Captain America: The First Avenger', year: '2011', mediaType: 'MOVIE', rating: '7.0', poster: 'https://image.tmdb.org/t/p/w342/vSNxAJTlD0r02V9sPYpOjqDZXUK.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'During World War II, Steve Rogers volunteers for a top-secret program that turns him into Captain America.' },
       { title: 'Captain America: The Winter Soldier', year: '2014', mediaType: 'MOVIE', rating: '7.7', poster: 'https://image.tmdb.org/t/p/w342/tVFRpFw3xTedgPGqxW0AOI8Qhh0.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Steve Rogers teams up with Black Widow to uncover a conspiracy inside S.H.I.E.L.D. and face the Winter Soldier.' },
       { title: 'Captain America: Civil War', year: '2016', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Political oversight divides the Avengers into opposing factions led by Captain America and Iron Man.' },
-      { title: 'Captain America: Brave New World', year: '2025', mediaType: 'MOVIE', rating: '6.2', poster: 'https://image.tmdb.org/t/p/w342/pzIddUEMWhWzfvLI3TwxUG2wGoi.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Sam Wilson finds himself in the middle of an international incident after meeting newly elected U.S. President Thaddeus Ross.' },
+      { title: 'Captain America: Brave New World', year: '2025', mediaType: 'MOVIE', rating: '7.2', poster: 'https://image.tmdb.org/t/p/w342/pzIddUEMWhWzfvLI3TwxUG2wGoi.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Sam Wilson finds himself in the middle of an international incident after meeting newly elected U.S. President Thaddeus Ross.' },
       { title: 'The Avengers', year: '2012', mediaType: 'MOVIE', rating: '7.8', poster: 'https://image.tmdb.org/t/p/w342/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Earth’s mightiest heroes assemble to stop Loki and his alien army from enslaving humanity.' },
       { title: 'Avengers: Age of Ultron', year: '2015', mediaType: 'MOVIE', rating: '7.3', poster: 'https://image.tmdb.org/t/p/w342/4ssDuvEDkSArWEdyBl2X5EHvYKU.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Tony Stark and Bruce Banner inadvertently create Ultron, an AI bent on human extinction.' },
       { title: 'Avengers: Infinity War', year: '2018', mediaType: 'MOVIE', rating: '8.3', poster: 'https://image.tmdb.org/t/p/w342/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The Avengers and their allies must sacrifice all to defeat Thanos before he collects all six Infinity Stones.' },
-      { title: 'Avengers: Endgame', year: '2019', mediaType: 'MOVIE', rating: '8.3', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The surviving Avengers assemble once more to reverse Thanos’s snap and restore order to the universe.' },
-      { title: 'Thunderbolts*', year: '2025', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/m9EtP1Yrzv6v7dMaC9mRaGhd1um.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A team of unconventional antiheroes is recruited for dangerous covert missions.' },
+      { title: 'Avengers: Endgame', year: '2019', mediaType: 'MOVIE', rating: '8.4', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The surviving Avengers assemble once more to reverse Thanos’s snap and restore order to the universe.' },
+      { title: 'Thunderbolts*', year: '2025', mediaType: 'MOVIE', rating: '7.8', poster: 'https://image.tmdb.org/t/p/w342/m9EtP1Yrzv6v7dMaC9mRaGhd1um.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A team of unconventional antiheroes is recruited for dangerous covert missions.' },
       { title: 'The Hobbit: The Desolation of Smaug', year: '2013', mediaType: 'MOVIE', rating: '7.8', poster: 'https://image.tmdb.org/t/p/w342/xQYiXsheRCDBA39DOrmaw1aSpE3.jpg', platformId: 'netflix', platformLabel: 'Netflix / Prime Video', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'primevideo', label: 'Prime Video' }], overview: 'Bilbo Baggins and the dwarves continue their quest toward Erebor and encounter the dragon Smaug.' },
       { title: 'X-Men: Days of Future Past', year: '2014', mediaType: 'MOVIE', rating: '7.5', poster: 'https://image.tmdb.org/t/p/w342/tYfijzolzgoMOtegh1Y7j2Enorg.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The X-Men send Wolverine to the past to change history and prevent doom for humans and mutants.' },
       { title: 'X-Men ’97', year: '2024', mediaType: 'SERIES', rating: '8.7', poster: 'https://image.tmdb.org/t/p/w342/9Ycz7yYRf9V4jk3YXwc2QaHvki2.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A band of mutants use their uncanny gifts to protect a world that hates and fears them.' }
@@ -6788,7 +7165,8 @@
       [...(appObj.all || []), ...(appObj.movies || []), ...(appObj.series || [])].forEach(it => trendingShows.push(it));
     });
     const seen = new Set();
-    return [...extraShows, ...trendingShows].filter(item => {
+    const customShows = getOwnerCustomShowResources();
+    return [...customShows, ...extraShows, ...trendingShows].filter(item => {
       if (classifyTitleStatus(item).kind === 'non_existent') return false;
       const key = canonicalTitleKey(item);
       if (seen.has(key)) return false;
@@ -6836,9 +7214,9 @@
             overview: it.overview || '',
             poster: it.poster || '',
             isUnreleased,
-            platformId: plats[0]?.id || '',
-            platformLabel: plats.map(a => a.label).join(', '),
-            platforms: isUnreleased ? [] : plats
+            platformId: plats[0]?.id || (/spider-man:\s*brand\s*new\s*day/i.test(String(it.title || '')) ? 'netflix' : ''),
+            platformLabel: plats.length ? plats.map(a => a.label).join(', ') : (/spider-man:\s*brand\s*new\s*day/i.test(String(it.title || '')) ? 'Netflix' : ''),
+            platforms: isUnreleased ? [] : (plats.length ? plats : (/spider-man:\s*brand\s*new\s*day/i.test(String(it.title || '')) ? [{ id: 'netflix', label: 'Netflix' }] : []))
           };
         });
 
