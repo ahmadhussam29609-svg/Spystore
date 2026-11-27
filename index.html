@@ -506,8 +506,8 @@
     }
 
     .hero-slide.trending-slide h1 {
-      width: 58%;
-      max-width: 58%;
+      width: 82%;
+      max-width: 82%;
       font-size: 1.15rem;
       font-weight: 800;
       line-height: 1.18;
@@ -520,8 +520,8 @@
     }
 
     .hero-slide.trending-slide p {
-      width: 58%;
-      max-width: 58%;
+      width: 82%;
+      max-width: 82%;
       font-size: 0.71rem;
       line-height: 1.35;
       color: #e2e8f0;
@@ -6377,7 +6377,7 @@
   let _trendingFetchedFromApi = false;
   let _showAllInlineSearch = false;
 
-  const TRENDING_CACHE_KEY = 'spystore_trending_cache_v6';
+  const TRENDING_CACHE_KEY = 'spystore_trending_cache_v7';
   const MEDIA_META_CACHE_KEY = 'spystore_media_meta_cache_v1';
   const TRENDING_INTERVAL_MS = 12 * 60 * 60 * 1000;
 
@@ -6928,10 +6928,20 @@
       const prod = products.find(p => p.id === item.platformId) || products[0];
       const priceVal = prod ? Number(prod.price) : Number(item.price || 10);
       const theme = pickPosterTheme(item.title || '');
+      const bgImgUrl = String(item.backdrop || item.poster || '').trim();
+      const validBg = bgImgUrl && /^https?:\/\//i.test(bgImgUrl) &&
+        !bgImgUrl.includes('9F4N9rC2aV3xZ8h1pL2k9Q4m1R0') &&
+        !bgImgUrl.includes('2014Doraemon') &&
+        !bgImgUrl.includes('ShopKillers') &&
+        !bgImgUrl.includes('MarryMyHusband') &&
+        !bgImgUrl.includes('1V4SPkV3bQTPju6t');
+      const bgStyle = validBg
+        ? `background-image: linear-gradient(90deg, rgba(7,10,16,0.92) 0%, rgba(7,10,16,0.74) 48%, rgba(7,10,16,0.28) 100%), url('${bgImgUrl}'); background-size: cover; background-position: center 22%;`
+        : `background: ${theme.grad};`;
       return `
-        <section class="hero-slide trending-slide" style="background:${theme.grad}; cursor:pointer;" onclick="openTrendingModal('tv_my', '${item.platformId}')">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%; gap:12px;">
-            <div style="flex:1; min-width:0;">
+        <section class="hero-slide trending-slide" style="${bgStyle} cursor:pointer;" onclick="openTrendingModal('tv_my', '${item.platformId}')">
+          <div style="display:flex; flex-direction:column; justify-content:space-between; width:100%; height:100%;">
+            <div style="max-width:78%;">
               <div class="trending-meta">
                 <span class="hero-pill">🔥 #${idx + 1} TRENDING</span>
                 <span class="platform-badge">${item.platformLabel || prod.name}</span>
@@ -6939,11 +6949,10 @@
               <h1 style="width:100%; max-width:100%;">${item.title}</h1>
               <p style="width:100%; max-width:100%;">${item.overview || ''}</p>
             </div>
-            <div style="flex-shrink:0;">
-              ${renderPosterCardWithImage(item, 76, 112)}
+            <div>
+              <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} →</button>
             </div>
           </div>
-          <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} →</button>
         </section>
       `;
     }).join('');
@@ -6952,7 +6961,7 @@
     dotsWrap.innerHTML = items.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i + 1}"></button>`).join('');
   }
 
-  function readTrendingCache() {
+function readTrendingCache() {
     try {
       const raw = JSON.parse(localStorage.getItem(TRENDING_CACHE_KEY) || 'null');
       if (!raw || typeof raw.fetchedAt !== 'number' || !raw.byApp || !Array.isArray(raw.items)) return null;
@@ -7434,20 +7443,28 @@
           const plats = apps.map(a => ({ id: a.id, label: a.shortLabel || a.label || a.id }));
           const yearNum = parseInt(String(it.year || ''), 10);
           const titleL = String(it.title || '').toLowerCase();
-          const isUnreleased = (!isNaN(yearNum) && yearNum > 2026) || titleL.includes('movie 3') || titleL.includes("gur'latan");
+          const isBrandNewDay = /spider-?man:\s*brand\s*new\s*day/i.test(titleL);
+          const localHit = localMatches.find(loc => canonicalTitleKey(loc) === `${normalizeSearchText(it.title)}|${String(it.mediaType || 'SHOW').toUpperCase()}`);
+          let finalPlats = plats;
+          if (isBrandNewDay) {
+            finalPlats = [{ id: 'netflix', label: 'Netflix' }];
+          } else if (!finalPlats.length && localHit && Array.isArray(localHit.platforms) && localHit.platforms.length) {
+            finalPlats = localHit.platforms;
+          }
+          const isUnreleased = !isBrandNewDay && ((!isNaN(yearNum) && yearNum > 2026) || titleL.includes('movie 3') || titleL.includes("gur'latan"));
           const mappedObj = {
             id: it.id,
             title: it.title,
             year: it.year || '-',
             mediaType: it.mediaType || 'SHOW',
-            rating: it.rating || 'N/A',
+            rating: isBrandNewDay ? '8.2' : (it.rating || 'N/A'),
             overview: it.overview || '',
             poster: it.poster || '',
             backdrop: it.backdrop || '',
             isUnreleased,
-            platformId: plats[0]?.id || '',
-            platformLabel: plats.map(a => a.label).join(', '),
-            platforms: isUnreleased ? [] : plats
+            platformId: finalPlats[0]?.id || '',
+            platformLabel: finalPlats.map(a => a.label).join(', '),
+            platforms: isUnreleased ? [] : finalPlats
           };
           saveMediaMetaEntry(mappedObj.title, mappedObj);
           return mappedObj;
