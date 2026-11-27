@@ -6769,21 +6769,9 @@
 
   function buildPosterCardHtml(item, wPx = 62, hPx = 92) {
     const theme = pickPosterTheme(item?.title || '');
-    const mType = String(item?.mediaType || 'SHOW').toUpperCase();
-    const shortType = mType === 'SERIES' ? 'TV' : 'FILM';
-    const rawTitle = String(item?.title || 'TITLE').trim();
-    const words = rawTitle.split(/\s+/).filter(Boolean);
-    const shortTitle = words.slice(0, 3).join(' ');
     return `
-      <div style="width:${wPx}px; height:${hPx}px; border-radius:10px; background:${theme.grad}; border:1px solid rgba(255,255,255,0.16); display:flex; flex-direction:column; justify-content:space-between; padding:6px; flex-shrink:0; overflow:hidden; box-shadow:0 6px 16px rgba(0,0,0,0.38);">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:0.52rem; font-weight:900; letter-spacing:0.05em; color:${theme.accent}; background:rgba(0,0,0,0.42); padding:1px 5px; border-radius:4px;">${shortType}</span>
-          <span style="font-size:0.56rem; color:#f8fafc; opacity:0.85;">★</span>
-        </div>
-        <div style="font-family:'Space Grotesk',sans-serif; font-size:0.64rem; font-weight:800; line-height:1.15; color:#ffffff; text-align:left; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-shadow:0 1px 4px rgba(0,0,0,0.75);">
-          ${shortTitle}
-        </div>
-        <div style="height:2.5px; width:100%; border-radius:999px; background:${theme.accent}; opacity:0.85;"></div>
+      <div style="width:${wPx}px; height:${hPx}px; border-radius:10px; background:${theme.grad}; border:1px solid rgba(255,255,255,0.14); display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 6px 16px rgba(0,0,0,0.35);">
+        <span style="font-size:1.05rem; opacity:0.55;">🎬</span>
       </div>
     `;
   }
@@ -6793,7 +6781,7 @@
     const posterUrl = String(item?.poster || '').trim();
     if (posterUrl && /^https?:\/\//i.test(posterUrl) && !posterUrl.includes('9F4N9rC2aV3xZ8h1pL2k9Q4m1R0') && !posterUrl.includes('2014Doraemon') && !posterUrl.includes('ShopKillers') && !posterUrl.includes('MarryMyHusband') && !posterUrl.includes('1V4SPkV3bQTPju6t')) {
       const safeAlt = String(item?.title || 'Poster').replace(/"/g, '&quot;');
-      return `<img src="${posterUrl}" alt="${safeAlt}" loading="lazy" referrerpolicy="no-referrer" style="width:${wPx}px; height:${hPx}px; object-fit:cover; border-radius:10px; flex-shrink:0; border:1px solid rgba(255,255,255,0.16); background:#0f172a; box-shadow:0 6px 16px rgba(0,0,0,0.38);" onerror="this.outerHTML='${fallbackHtml}';" />`;
+      return `<img src="${posterUrl}" alt="${safeAlt}" loading="eager" decoding="async" referrerpolicy="no-referrer" style="width:${wPx}px; height:${hPx}px; object-fit:cover; border-radius:10px; flex-shrink:0; border:1px solid rgba(255,255,255,0.16); background:#0f172a; box-shadow:0 6px 16px rgba(0,0,0,0.38);" onerror="this.outerHTML='${fallbackHtml}';" />`;
     }
     return buildPosterCardHtml(item, wPx, hPx);
   }
@@ -7353,39 +7341,8 @@ function readTrendingCache() {
     ensureTrendingStoreReady();
     const extraShows = [
       { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
-      { title: 'Spider-Man: Homecoming', year: '2017', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/c24sv2weTHPsmDa7jEMN0m2P3RT.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker balances high school life in Queens with proving himself as Spider-Man under Tony Stark’s mentorship.' },
-      { title: 'Spider-Man: Far From Home', year: '2019', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/4q2NNj485uRkuDROPswL6y9kxt7.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker’s European school trip turns into a global mission alongside Mysterio and Nick Fury.' },
-      { title: 'Spider-Man: Into the Spider-Verse', year: '2018', mediaType: 'MOVIE', rating: '8.4', poster: 'https://image.tmdb.org/t/p/w342/iiZZdoQBEYBv6id8su7ImL0oCbD.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Miles Morales becomes Spider-Man and teams up with Spider-Heroes from across the multiverse.' },
-      { title: 'Spider-Man: Across the Spider-Verse', year: '2023', mediaType: 'MOVIE', rating: '8.6', poster: 'https://image.tmdb.org/t/p/w342/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Miles Morales journeys across the multiverse and clashes with the Spider-Society over fate and destiny.' },
-      { title: 'Doraemon: Nobita’s Sky Utopia', year: '2023', mediaType: 'MOVIE', rating: '7.5', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Doraemon, Nobita, and friends search for a sky paradise where everyone is a perfectionist.' },
-      { title: 'Doraemon: Nobita’s Earth Symphony', year: '2024', mediaType: 'MOVIE', rating: '7.6', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Music powers a grand adventure to save a musical planet from an ominous threat.' },
-      { title: 'Jujutsu Kaisen', year: '2024', mediaType: 'SERIES', rating: '8.7', poster: 'https://image.tmdb.org/t/p/w342/hFWP5bKHOqnaG5g90903200Jujutsu.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Yuji Itadori enters a secret world of sorcery and curses to protect others.' },
-      { title: 'Demon Slayer: Kimetsu no Yaiba', year: '2024', mediaType: 'SERIES', rating: '8.7', poster: 'https://image.tmdb.org/t/p/w342/xUfR9bWkll7V6GWKX6j001Demon.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Tanjiro Kamado joins the Demon Slayer Corps to cure his sister Nezuko and defeat demons.' },
-      { title: 'One Piece', year: '2024', mediaType: 'SERIES', rating: '8.9', poster: 'https://image.tmdb.org/t/p/w342/cMD9Ygz11zjJzAovURpO75Qg7rT.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Monkey D. Luffy and the Straw Hat Pirates set sail across the Grand Line in search of the One Piece.' },
-      { title: 'Spider-Man: No Way Home', year: '2021', mediaType: 'MOVIE', rating: '8.2', poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker asks Doctor Strange to restore his secret identity, accidentally tearing open the multiverse.' },
-      { title: 'Squid Game: Final Season', year: '2025', mediaType: 'SERIES', rating: '8.3', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Gi-hun returns to dismantle the deadly games from within as the final arena begins.' },
-      { title: 'Stranger Things 5', year: '2025', mediaType: 'SERIES', rating: '8.8', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Hawkins faces its ultimate showdown against Vecna and the Upside Down.' },
-      { title: 'Wednesday: Season 2', year: '2025', mediaType: 'SERIES', rating: '8.5', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Wednesday Addams returns to Nevermore Academy with darker visions and new threats.' },
-      { title: 'All of Us Are Dead: Season 2', year: '2026', mediaType: 'SERIES', rating: '8.4', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Survivors in Seoul confront a new wave of mutated infection.' },
-      { title: 'When Life Gives You Tangerines', year: '2025', mediaType: 'SERIES', rating: '8.9', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'An unforgettable Jeju Island romance spanning decades of hardship and devotion.' },
-      { title: 'Daredevil: Born Again', year: '2025', mediaType: 'SERIES', rating: '8.6', poster: '', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Matt Murdock fights for justice in New York while Wilson Fisk rises in politics.' },
-      { title: 'BoBoiBoy', year: '2011', mediaType: 'SERIES', rating: '7.2', poster: 'https://image.tmdb.org/t/p/w342/8w4gA8V0x5x2k7Z3f6L2q9P1m8R.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy gains elemental superpowers to protect Earth from alien invaders.' },
-      { title: 'BoBoiBoy: The Movie', year: '2016', mediaType: 'MOVIE', rating: '6.8', poster: 'https://image.tmdb.org/t/p/w342/4m1Au3YkjqsxF8iwQy0fPYSxE0h.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy and his friends travel to save Ochobot from an ancient power seeker.' },
-      { title: 'BoBoiBoy Galaxy', year: '2016', mediaType: 'SERIES', rating: '7.9', poster: 'https://image.tmdb.org/t/p/w342/8w4gA8V0x5x2k7Z3f6L2q9P1m8R.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'BoBoiBoy embarks on interstellar missions across the galaxy to collect Power Spheras.' },
-      { title: 'BoBoiBoy Movie 2', year: '2019', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/4m1Au3YkjqsxF8iwQy0fPYSxE0h.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Retak’ka returns to reclaim elemental powers from BoBoiBoy.' },
-      { title: "BoBoiBoy Movie 3: Ghost of Gur'latan", year: '2027', mediaType: 'MOVIE', rating: 'N/A', poster: '', isUnreleased: true, platforms: [], overview: 'Not yet released on platform.' },
-      { title: 'Captain America: The First Avenger', year: '2011', mediaType: 'MOVIE', rating: '7.0', poster: 'https://image.tmdb.org/t/p/w342/vSNxAJTlD0r02V9sPYpOjqDZXUK.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'During World War II, Steve Rogers volunteers for a top-secret program that turns him into Captain America.' },
-      { title: 'Captain America: The Winter Soldier', year: '2014', mediaType: 'MOVIE', rating: '7.7', poster: 'https://image.tmdb.org/t/p/w342/tVFRpFw3xTedgPGqxW0AOI8Qhh0.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Steve Rogers teams up with Black Widow to uncover a conspiracy inside S.H.I.E.L.D. and face the Winter Soldier.' },
-      { title: 'Captain America: Civil War', year: '2016', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Political oversight divides the Avengers into opposing factions led by Captain America and Iron Man.' },
-      { title: 'Captain America: Brave New World', year: '2025', mediaType: 'MOVIE', rating: '7.2', poster: 'https://image.tmdb.org/t/p/w342/pzIddUEMWhWzfvLI3TwxUG2wGoi.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Sam Wilson finds himself in the middle of an international incident after meeting newly elected U.S. President Thaddeus Ross.' },
-      { title: 'The Avengers', year: '2012', mediaType: 'MOVIE', rating: '7.8', poster: 'https://image.tmdb.org/t/p/w342/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Earth’s mightiest heroes assemble to stop Loki and his alien army from enslaving humanity.' },
-      { title: 'Avengers: Age of Ultron', year: '2015', mediaType: 'MOVIE', rating: '7.3', poster: 'https://image.tmdb.org/t/p/w342/4ssDuvEDkSArWEdyBl2X5EHvYKU.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Tony Stark and Bruce Banner inadvertently create Ultron, an AI bent on human extinction.' },
-      { title: 'Avengers: Infinity War', year: '2018', mediaType: 'MOVIE', rating: '8.3', poster: 'https://image.tmdb.org/t/p/w342/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The Avengers and their allies must sacrifice all to defeat Thanos before he collects all six Infinity Stones.' },
-      { title: 'Avengers: Endgame', year: '2019', mediaType: 'MOVIE', rating: '8.4', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The surviving Avengers assemble once more to reverse Thanos’s snap and restore order to the universe.' },
-      { title: 'Thunderbolts*', year: '2025', mediaType: 'MOVIE', rating: '7.8', poster: 'https://image.tmdb.org/t/p/w342/m9EtP1Yrzv6v7dMaC9mRaGhd1um.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A team of unconventional antiheroes is recruited for dangerous covert missions.' },
-      { title: 'The Hobbit: The Desolation of Smaug', year: '2013', mediaType: 'MOVIE', rating: '7.8', poster: 'https://image.tmdb.org/t/p/w342/xQYiXsheRCDBA39DOrmaw1aSpE3.jpg', platformId: 'netflix', platformLabel: 'Netflix / Prime Video', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'primevideo', label: 'Prime Video' }], overview: 'Bilbo Baggins and the dwarves continue their quest toward Erebor and encounter the dragon Smaug.' },
-      { title: 'X-Men: Days of Future Past', year: '2014', mediaType: 'MOVIE', rating: '7.5', poster: 'https://image.tmdb.org/t/p/w342/tYfijzolzgoMOtegh1Y7j2Enorg.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'The X-Men send Wolverine to the past to change history and prevent doom for humans and mutants.' },
-      { title: 'X-Men ’97', year: '2024', mediaType: 'SERIES', rating: '8.7', poster: 'https://image.tmdb.org/t/p/w342/9Ycz7yYRf9V4jk3YXwc2QaHvki2.jpg', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'A band of mutants use their uncanny gifts to protect a world that hates and fears them.' }
+      { title: 'Stand by Me Doraemon', year: '2014', mediaType: 'MOVIE', rating: '7.8', poster: '', platforms: [], overview: 'Nobita and Doraemon embark on an emotional journey to secure a happier future.' },
+      { title: "BoBoiBoy Movie 3: Ghost of Gur'latan", year: '2027', mediaType: 'MOVIE', rating: 'N/A', poster: '', isUnreleased: true, platforms: [], overview: 'Not yet released on platform.' }
     ];
     const trendingShows = [];
     Object.values(trendingByApp || {}).forEach(appObj => {
@@ -7444,12 +7401,9 @@ function readTrendingCache() {
           const yearNum = parseInt(String(it.year || ''), 10);
           const titleL = String(it.title || '').toLowerCase();
           const isBrandNewDay = /spider-?man:\s*brand\s*new\s*day/i.test(titleL);
-          const localHit = localMatches.find(loc => canonicalTitleKey(loc) === `${normalizeSearchText(it.title)}|${String(it.mediaType || 'SHOW').toUpperCase()}`);
           let finalPlats = plats;
           if (isBrandNewDay) {
             finalPlats = [{ id: 'netflix', label: 'Netflix' }];
-          } else if (!finalPlats.length && localHit && Array.isArray(localHit.platforms) && localHit.platforms.length) {
-            finalPlats = localHit.platforms;
           }
           const isUnreleased = !isBrandNewDay && ((!isNaN(yearNum) && yearNum > 2026) || titleL.includes('movie 3') || titleL.includes("gur'latan"));
           const mappedObj = {
