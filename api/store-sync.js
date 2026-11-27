@@ -1,66 +1,70 @@
-import fs from 'fs';
+const { initializeApp, getApps, cert } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
 
-const STATE_FILE = '/tmp/spystore_shared_state.json';
+let memoryStore = {
+  verifiedAdmins: [],
+  catalog: null,
+  trendingTabs: null,
+  templates: null,
+  updatedAt: null
+};
 
-function readState() {
-  if (!global.__SPYSTORE_SHARED_STATE) {
-    try {
-      if (fs.existsSync(STATE_FILE)) {
-        global.__SPYSTORE_SHARED_STATE = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-      }
-    } catch (e) {}
-  }
-  if (!global.__SPYSTORE_SHARED_STATE || typeof global.__SPYSTORE_SHARED_STATE !== 'object') {
-    global.__SPYSTORE_SHARED_STATE = {
-      verifiedAdmins: [],
-      catalog: null,
-      templates: null,
-      updatedAt: Date.now()
-    };
-  }
-  return global.__SPYSTORE_SHARED_STATE;
-}
-
-function writeState(nextState) {
-  global.__SPYSTORE_SHARED_STATE = nextState;
+function getDb() {
   try {
-    fs.writeFileSync(STATE_FILE, JSON.stringify(nextState), 'utf8');
-  } catch (e) {}
+    const rawCreds = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    if (!rawCreds) return null;
+    if (!getApps().length) {
+      initializeApp({ credential: cert(JSON.parse(rawCreds)) });
+    }
+    return getFirestore();
+  } catch (e) {
+    return null;
+  }
 }
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  const state = readState();
+  const db = getDb();
 
   if (req.method === 'GET') {
-    return res.status(200).json({ ok: true, ...state });
+    if (db) {
+      try {
+        const snap = await db.collection('spystore_config').doc('shared_store').get();
+        if (snap.exists) {
+          memoryStore = { ...memoryStore, ...snap.data() };
+        }
+      } catch (e) {}
+    }
+    return res.status(200).json(memoryStore);
   }
 
   if (req.method === 'POST') {
     const body = req.body || {};
     if (Array.isArray(body.verifiedAdmins)) {
-      state.verifiedAdmins = Array.from(new Set(
-        body.verifiedAdmins.map(x => String(x || '').trim().toLowerCase()).filter(Boolean)
-      ));
+      memoryStore.verifiedAdmins = Array.from(new Set(body.verifiedAdmins.map(x => String(x || '').trim().toLowerCase()).filter(Boolean)));
     }
-    if (body.catalog !== undefined) {
-      state.catalog = body.catalog;
+    if (Array.isArray(body.catalog)) {
+      memoryStore.catalog = body.catalog;
     }
-    if (body.templates !== undefined) {
-      state.templates = body.templates;
+    if (Array.isArray(body.trendingTabs)) {
+      memoryStore.trendingTabs = body.trendingTabs;
     }
-    state.updatedAt = Date.now();
-    writeState(state);
-    return res.status(200).json({ ok: true, ...state });
+    if (body.templates && typeof body.templates === 'object') {
+      memoryStore.templates = body.templates;
+    }
+    memoryStore.updatedAt = new Date().toISOString();
+
+    if (db) {
+      try {
+        await db.collection('spystore_config').doc('shared_store').set(memoryStore, { merge: true });
+      } catch (e) {}
+    }
+    return res.status(200).json({ ok: true, ...memoryStore });
   }
 
-  return res.status(405).json({ ok: false, error: 'Method not allowed' });
-}
+  return res.status(405).json({ error: 'Method not allowed' });
+};
