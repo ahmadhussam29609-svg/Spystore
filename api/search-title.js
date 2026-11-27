@@ -32,26 +32,13 @@ function dedupeApps(apps = []) {
 
 function applySpiderManPlatformAvailability(title, currentApps = []) {
   const t = String(title || '').toLowerCase().trim();
-  const apps = dedupeApps(Array.isArray(currentApps) ? [...currentApps] : []);
-
-  // Spider-Man: Brand New Day currently set to Netflix
   if (/spider-?man:\s*brand\s*new\s*day/i.test(t)) {
     return [APP_META.netflix];
   }
-
-  // Spider-Man: No Way Home
-  if (/spider-?man:\s*no\s*way\s*home/i.test(t)) {
-    if (apps.length > 0) return apps;
-    return [APP_META.disney];
-  }
-
-  // The Amazing Spider-Man & The Amazing Spider-Man 2
-  if (/the\s+amazing\s+spider-?man/i.test(t)) {
-    if (apps.length > 0) return apps;
+  if (/spider-?man|spiderman|spider\s*man/i.test(t)) {
     return [APP_META.netflix, APP_META.disney];
   }
-
-  return apps;
+  return dedupeApps(Array.isArray(currentApps) ? [...currentApps] : []);
 }
 
 function tokenizeQuery(rawQuery) {
