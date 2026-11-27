@@ -30,6 +30,37 @@ function dedupeApps(apps = []) {
   });
 }
 
+function isFakeOrInvalidTitle(title, yearStr) {
+  const t = String(title || '').toLowerCase().trim();
+  if (!t) return true;
+
+  const blockedPatterns = [
+    'evil spiderman',
+    'the spiderman',
+    'italian spiderman',
+    'japanese spiderman',
+    'neukölln spiderman',
+    'neukolln spiderman',
+    'spiderman ultimate',
+    'spiderman graveyard',
+    'low budget',
+    'untitled ',
+    'elemental heroes',
+    'sinopsis ',
+    'synopsis '
+  ];
+  if (blockedPatterns.some(pat => t.includes(pat))) {
+    return true;
+  }
+
+  const yNum = parseInt(String(yearStr || ''), 10);
+  if (!isNaN(yNum) && yNum > 2026) {
+    return true;
+  }
+
+  return false;
+}
+
 function normalizeMatchScore(title, query) {
   const t = String(title || '').toLowerCase().trim();
   const q = String(query || '').toLowerCase().trim();
@@ -59,7 +90,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const pagesToFetch = q.length <= 12 ? [1, 2] : [1];
+    const pagesToFetch = q.length <= 14 ? [1, 2] : [1];
     const pageResponses = await Promise.all(
       pagesToFetch.map(async (pg) => {
         const u = `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(TMDB_KEY)}&query=${encodeURIComponent(q)}&include_adult=false&language=en-US&page=${pg}`;
@@ -79,7 +110,14 @@ module.exports = async (req, res) => {
       return true;
     });
 
-    const rawResults = uniqueRaw
+    const filteredRaw = uniqueRaw.filter(r => {
+      const t = r.title || r.name || '';
+      const rel = r.release_date || r.first_air_date || '';
+      const yr = rel ? rel.slice(0, 4) : '';
+      return !isFakeOrInvalidTitle(t, yr);
+    });
+
+    const rawResults = filteredRaw
       .sort((a, b) => {
         const sa = normalizeMatchScore(a.title || a.name, q) + (a.popularity || 0);
         const sb = normalizeMatchScore(b.title || b.name, q) + (b.popularity || 0);
