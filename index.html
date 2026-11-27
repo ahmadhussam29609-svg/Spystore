@@ -7389,6 +7389,19 @@ function readTrendingCache() {
       t.includes('deleted scenes') ||
       t.includes('gag reel') ||
       t.includes('bloopers') ||
+      t.includes('recap') ||
+      t.includes('episodes ') ||
+      t.includes('episode ') ||
+      t.includes('compilation') ||
+      t.includes('spiderman tech') ||
+      t.includes('spider-man tech') ||
+      t.includes('secret wars') ||
+      t.includes('vs doc ock') ||
+      t.includes('vs. doc ock') ||
+      t.includes('ultimate villain showdown') ||
+      t.includes('dragons challenge') ||
+      t.includes('dragon's challenge') ||
+      t.includes('strikes back') ||
       t.includes('low budget') ||
       t.includes('untitled ')
     );
@@ -7564,11 +7577,20 @@ function readTrendingCache() {
 
       const outArr = Array.from(byTitleMap.values());
       if (/spider/i.test(cleanQ)) {
-        outArr.sort((a, b) => {
-          const aSp = /spider-?man|amazing spider-?man/i.test(String(a?.title || '')) ? 1 : 0;
-          const bSp = /spider-?man|amazing spider-?man/i.test(String(b?.title || '')) ? 1 : 0;
-          return bSp - aSp;
-        });
+        const rankSp = (it) => {
+          const t = String(it?.title || '').toLowerCase();
+          if (/spider-?man:\s*brand\s*new\s*day/i.test(t)) return 100;
+          if (/^the amazing spider-?man$/i.test(t)) return 95;
+          if (/^the amazing spider-?man 2$/i.test(t)) return 90;
+          if (/spider-?man:\s*no\s*way\s*home/i.test(t)) return 85;
+          if (/spider-?man:\s*homecoming/i.test(t)) return 80;
+          if (/spider-?man:\s*far\s*from\s*home/i.test(t)) return 75;
+          if (/spider-?verse/i.test(t)) return 70;
+          if (/^spider-?man$/i.test(t)) return 65;
+          if (/spider-?man|amazing spider-?man/i.test(t)) return 40;
+          return 0;
+        };
+        outArr.sort((a, b) => rankSp(b) - rankSp(a));
       }
       return outArr;
     } catch (e) {
