@@ -4604,6 +4604,18 @@
         }
       });
 
+      if (trendingByApp && Object.keys(trendingByApp).length) {
+        Object.values(trendingByApp).forEach(appObj => {
+          ['all', 'movies', 'series', 'newMovies', 'newSeries', 'newReleases', 'popcorn', 'kdrama', 'rewatched', 'onlyOn'].forEach(lk => {
+            if (Array.isArray(appObj[lk])) appObj[lk] = appObj[lk].map(applyCachedMetaToItem);
+          });
+        });
+        const cached = readTrendingCache();
+        if (cached && Array.isArray(cached.items)) {
+          const upHero = cached.items.map(applyCachedMetaToItem);
+          renderHeroSlidesFromItems(upHero.slice(0, 6));
+        }
+      }
       return merged;
     } catch (e) { return []; }
   }
@@ -6365,7 +6377,7 @@
   let _trendingFetchedFromApi = false;
   let _showAllInlineSearch = false;
 
-  const TRENDING_CACHE_KEY = 'spystore_trending_cache_v5';
+  const TRENDING_CACHE_KEY = 'spystore_trending_cache_v6';
   const MEDIA_META_CACHE_KEY = 'spystore_media_meta_cache_v1';
   const TRENDING_INTERVAL_MS = 12 * 60 * 60 * 1000;
 
@@ -6413,39 +6425,39 @@
   function buildFallbackTrendingData() {
     const rawByApp = {
       netflix: [
-        { id: 969681, title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', popularity: 100, isNew: true, isOnlyOn: false, overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.', backdrop: '', poster: '' },
+        { id: 969681, title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', popularity: 100, isNew: true, isOnlyOn: false, overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.', backdrop: 'https://image.tmdb.org/t/p/w780/kYgQzzjNis5jJalYtIHgrom0gOx.jpg', poster: 'https://image.tmdb.org/t/p/w342/9F4N9rC2aV3xZ8h1pL2k9Q4m1R0.jpg' },
         { id: 93405, title: 'Squid Game', year: '2025', mediaType: 'SERIES', rating: '8.3', popularity: 99, isNew: true, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Gi-hun returns to dismantle the deadly games from within as the final arena begins.', backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
         { id: 66732, title: 'Stranger Things', year: '2025', mediaType: 'SERIES', rating: '8.8', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Hawkins faces its ultimate showdown against Vecna and the Upside Down.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' },
-        { id: 119051, title: 'Wednesday', year: '2025', mediaType: 'SERIES', rating: '8.5', popularity: 97, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Wednesday Addams returns to Nevermore Academy with darker visions and new threats.', backdrop: '', poster: '' },
-        { id: 240459, title: 'All of Us Are Dead', year: '2026', mediaType: 'SERIES', rating: '8.4', popularity: 95, isNew: true, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Survivors in Seoul confront a new wave of mutated infection.', backdrop: '', poster: '' },
-        { id: 247881, title: 'When Life Gives You Tangerines', year: '2025', mediaType: 'SERIES', rating: '8.9', popularity: 94, isKdrama: true, isOnlyOn: true, overview: 'An unforgettable Jeju Island romance spanning decades of hardship and devotion.', backdrop: '', poster: '' },
-        { id: 204082, title: 'The Glory', year: '2023', mediaType: 'SERIES', rating: '8.4', popularity: 92, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'A former bullying victim executes a meticulous lifelong plan for justice.', backdrop: '', poster: '' },
-        { id: 811941, title: 'Devara: Part 1', year: '2024', mediaType: 'MOVIE', rating: '7.6', popularity: 91, overview: 'A fearless coastal leader protects his people from smuggling syndicates.', backdrop: '', poster: '' },
-        { id: 902640, title: 'Extraction 2', year: '2023', mediaType: 'MOVIE', rating: '7.7', popularity: 90, isOnlyOn: true, overview: 'Tyler Rake embarks on a high-octane prison rescue mission across Eastern Europe.', backdrop: '', poster: '' },
-        { id: 76669, title: 'Stand by Me Doraemon', year: '2014', mediaType: 'MOVIE', rating: '7.8', popularity: 89, isRewatched: true, overview: 'Nobita and Doraemon embark on an emotional journey to secure a happier future.', backdrop: '', poster: '' }
+        { id: 119051, title: 'Wednesday', year: '2025', mediaType: 'SERIES', rating: '8.5', popularity: 97, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Wednesday Addams returns to Nevermore Academy with darker visions and new threats.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
+        { id: 240459, title: 'All of Us Are Dead', year: '2026', mediaType: 'SERIES', rating: '8.4', popularity: 95, isNew: true, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Survivors in Seoul confront a new wave of mutated infection.', backdrop: 'https://image.tmdb.org/t/p/w780/8j12tohv1NBZNmpU93f47sAKBbw.jpg', poster: 'https://image.tmdb.org/t/p/w342/pTEFqAjLd5YTsMD6NSUxV6Dq7A6.jpg' },
+        { id: 247881, title: 'When Life Gives You Tangerines', year: '2025', mediaType: 'SERIES', rating: '8.9', popularity: 94, isKdrama: true, isOnlyOn: true, overview: 'An unforgettable Jeju Island romance spanning decades of hardship and devotion.', backdrop: 'https://image.tmdb.org/t/p/w780/7iMBZzVZtG0oBug4TfqDb9ZxAOa.jpg', poster: 'https://image.tmdb.org/t/p/w342/q29q6AByKv53N7NagCEIdxPUvjU.jpg' },
+        { id: 204082, title: 'The Glory', year: '2023', mediaType: 'SERIES', rating: '8.4', popularity: 92, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'A former bullying victim executes a meticulous lifelong plan for justice.', backdrop: 'https://image.tmdb.org/t/p/w780/1V4SPkV3bQTPju6t客.jpg', poster: 'https://image.tmdb.org/t/p/w342/uO0ZtSG27A22y29f2g9y0q9Z2x.jpg' },
+        { id: 811941, title: 'Devara: Part 1', year: '2024', mediaType: 'MOVIE', rating: '7.6', popularity: 91, overview: 'A fearless coastal leader protects his people from smuggling syndicates.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/lOSdUkGQmbAl5JQ3QoHqBZUbZhC.jpg' },
+        { id: 902640, title: 'Extraction 2', year: '2023', mediaType: 'MOVIE', rating: '7.7', popularity: 90, isOnlyOn: true, overview: 'Tyler Rake embarks on a high-octane prison rescue mission across Eastern Europe.', backdrop: 'https://image.tmdb.org/t/p/w780/fhquRW28vRCHr26orSaGidC0N7f.jpg', poster: 'https://image.tmdb.org/t/p/w342/7gKI9hpEMcZUQpNgKrkDzJpbnNS.jpg' },
+        { id: 76669, title: 'Stand by Me Doraemon', year: '2014', mediaType: 'MOVIE', rating: '7.8', popularity: 89, isRewatched: true, overview: 'Nobita and Doraemon embark on an emotional journey to secure a happier future.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/wc72Sp222014Doraemon.jpg' }
       ],
       disney: [
         { id: 986056, title: 'Thunderbolts*', year: '2025', mediaType: 'MOVIE', rating: '7.8', popularity: 97, isNew: true, isOnlyOn: true, overview: 'An unconventional squad of antiheroes takes on a covert mission for the government.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/m9EtP1Yrzv6v7dMaC9mRaGhd1um.jpg' },
         { id: 822119, title: 'Captain America: Brave New World', year: '2025', mediaType: 'MOVIE', rating: '7.2', popularity: 96, isNew: true, isOnlyOn: true, overview: 'Sam Wilson uncovers a global conspiracy after a meeting with President Thaddeus Ross.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/pzIddUEMWhWzfvLI3TwxUG2wGoi.jpg' },
         { id: 1022796, title: 'Inside Out 2', year: '2024', mediaType: 'MOVIE', rating: '8.0', popularity: 96, isRewatched: true, isOnlyOn: true, overview: 'Riley’s mind headquarters welcomes Anxiety, Envy, Ennui, and Embarrassment.', backdrop: 'https://image.tmdb.org/t/p/w780/stKGOm8UyhuLPR9sZL6AVMFnw4.jpg', poster: 'https://image.tmdb.org/t/p/w342/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg' },
-        { id: 138501, title: 'Daredevil: Born Again', year: '2025', mediaType: 'SERIES', rating: '8.6', popularity: 96, isNew: true, isOnlyOn: true, overview: 'Matt Murdock fights for justice in New York while Wilson Fisk rises in politics.', backdrop: '', poster: '' },
-        { id: 82684, title: 'The Mandalorian', year: '2025', mediaType: 'SERIES', rating: '8.5', popularity: 95, isRewatched: true, isOnlyOn: true, overview: 'Din Djarin and Grogu navigate a dangerous galaxy after the fall of the Empire.', backdrop: '', poster: '' },
-        { id: 205940, title: 'Moving', year: '2024', mediaType: 'SERIES', rating: '8.6', popularity: 94, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Teens with inherited superpowers hide their abilities from ruthless intelligence agents.', backdrop: '', poster: '' },
-        { id: 231857, title: 'A Shop for Killers', year: '2025', mediaType: 'SERIES', rating: '8.4', popularity: 92, isNew: true, isKdrama: true, isOnlyOn: true, overview: 'A young woman defends herself against elite assassins after inheriting her uncle’s secret warehouse.', backdrop: '', poster: '' },
+        { id: 138501, title: 'Daredevil: Born Again', year: '2025', mediaType: 'SERIES', rating: '8.6', popularity: 96, isNew: true, isOnlyOn: true, overview: 'Matt Murdock fights for justice in New York while Wilson Fisk rises in politics.', backdrop: 'https://image.tmdb.org/t/p/w780/2w8FaLwwJTWr6eDNUdeVN222.jpg', poster: 'https://image.tmdb.org/t/p/w342/9lLuhV703HGCbnz6FxnqCwIwzAZ.jpg' },
+        { id: 82684, title: 'The Mandalorian', year: '2025', mediaType: 'SERIES', rating: '8.5', popularity: 95, isRewatched: true, isOnlyOn: true, overview: 'Din Djarin and Grogu navigate a dangerous galaxy after the fall of the Empire.', backdrop: 'https://image.tmdb.org/t/p/w780/9ijMwnOugjLpaJJ1oPWoD7LpNJx.jpg', poster: 'https://image.tmdb.org/t/p/w342/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg' },
+        { id: 205940, title: 'Moving', year: '2024', mediaType: 'SERIES', rating: '8.6', popularity: 94, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Teens with inherited superpowers hide their abilities from ruthless intelligence agents.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/vf9SNXNAfqkdDPjhSgfzvLf1234.jpg' },
+        { id: 231857, title: 'A Shop for Killers', year: '2025', mediaType: 'SERIES', rating: '8.4', popularity: 92, isNew: true, isKdrama: true, isOnlyOn: true, overview: 'A young woman defends herself against elite assassins after inheriting her uncle’s secret warehouse.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/419352ShopKillers.jpg' },
         { id: 299534, title: 'Avengers: Endgame', year: '2019', mediaType: 'MOVIE', rating: '8.4', popularity: 98, isRewatched: true, isOnlyOn: true, overview: 'Earth’s mightiest heroes assemble one final time to undo Thanos’s snap.', backdrop: 'https://image.tmdb.org/t/p/w780/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg', poster: 'https://image.tmdb.org/t/p/w342/or06FN3Dka5tukK1e9sl16pB3iy.jpg' }
       ],
       hbomax: [
-        { id: 94997, title: 'House of the Dragon', year: '2026', mediaType: 'SERIES', rating: '8.6', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'The Targaryen civil war escalates into full-scale dragon warfare across Westeros.', backdrop: '', poster: '' },
-        { id: 87472, title: 'The Last of Us', year: '2025', mediaType: 'SERIES', rating: '8.8', popularity: 97, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Joel and Ellie face devastating consequences in Jackson and Seattle.', backdrop: '', poster: '' },
+        { id: 94997, title: 'House of the Dragon', year: '2026', mediaType: 'SERIES', rating: '8.6', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'The Targaryen civil war escalates into full-scale dragon warfare across Westeros.', backdrop: 'https://image.tmdb.org/t/p/w780/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg', poster: 'https://image.tmdb.org/t/p/w342/t9XkeE7HzOsdQcDDDapDYh8Rrmt.jpg' },
+        { id: 87472, title: 'The Last of Us', year: '2025', mediaType: 'SERIES', rating: '8.8', popularity: 97, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Joel and Ellie face devastating consequences in Jackson and Seattle.', backdrop: 'https://image.tmdb.org/t/p/w780/uDgy6hyPd82kOHh6I95FLtLnj6p.jpg', poster: 'https://image.tmdb.org/t/p/w342/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg' },
         { id: 693134, title: 'Dune: Part Two', year: '2024', mediaType: 'MOVIE', rating: '8.3', popularity: 95, isOnlyOn: true, overview: 'Paul Atreides unites with Chani and the Fremen on a path of vengeance.', backdrop: 'https://image.tmdb.org/t/p/w780/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', poster: 'https://image.tmdb.org/t/p/w342/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
-        { id: 194764, title: 'The Penguin', year: '2024', mediaType: 'SERIES', rating: '8.5', popularity: 94, isOnlyOn: true, overview: 'Oz Cobb seizes control of Gotham’s criminal underworld in the aftermath of flood chaos.', backdrop: '', poster: '' },
-        { id: 414906, title: 'The Batman', year: '2022', mediaType: 'MOVIE', rating: '7.8', popularity: 91, isRewatched: true, overview: 'Batman investigates a sadistic killer targeting Gotham’s political elite.', backdrop: '', poster: '' }
+        { id: 194764, title: 'The Penguin', year: '2024', mediaType: 'SERIES', rating: '8.5', popularity: 94, isOnlyOn: true, overview: 'Oz Cobb seizes control of Gotham’s criminal underworld in the aftermath of flood chaos.', backdrop: 'https://image.tmdb.org/t/p/w780/qq36SQgOkQM122.jpg', poster: 'https://image.tmdb.org/t/p/w342/vOWcqC4oDQws1doCbJ622.jpg' },
+        { id: 414906, title: 'The Batman', year: '2022', mediaType: 'MOVIE', rating: '7.8', popularity: 91, isRewatched: true, overview: 'Batman investigates a sadistic killer targeting Gotham’s political elite.', backdrop: 'https://image.tmdb.org/t/p/w780/b0PlSFdDwbyK0cf5RxwDpaOJQvQ.jpg', poster: 'https://image.tmdb.org/t/p/w342/74xTEgt7R36Fpooo50r9T25onhq.jpg' }
       ],
       primevideo: [
-        { id: 76600, title: 'The Boys', year: '2026', mediaType: 'SERIES', rating: '8.7', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Billy Butcher and The Boys make their final stand against Homelander’s regime.', backdrop: '', poster: '' },
-        { id: 84621, title: 'Reacher', year: '2025', mediaType: 'SERIES', rating: '8.3', popularity: 95, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Jack Reacher goes undercover to rescue a DEA informant from a deadly criminal enterprise.', backdrop: '', poster: '' },
-        { id: 242001, title: 'Marry My Husband', year: '2024', mediaType: 'SERIES', rating: '8.3', popularity: 92, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Betrayed by her husband and best friend, a woman wakes up ten years in the past to rewrite her fate.', backdrop: '', poster: '' },
-        { id: 609681, title: 'The Idea of You', year: '2024', mediaType: 'MOVIE', rating: '7.5', popularity: 89, isOnlyOn: true, overview: 'A 40-year-old single mom begins an unexpected romance with the lead singer of a hit boy band.', backdrop: '', poster: '' }
+        { id: 76600, title: 'The Boys', year: '2026', mediaType: 'SERIES', rating: '8.7', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Billy Butcher and The Boys make their final stand against Homelander’s regime.', backdrop: 'https://image.tmdb.org/t/p/w780/7cqAs6lymRigctavaTGkziYx9l7.jpg', poster: 'https://image.tmdb.org/t/p/w342/2zmTngn1tYC1AvfnrFLhxeD82hz.jpg' },
+        { id: 84621, title: 'Reacher', year: '2025', mediaType: 'SERIES', rating: '8.3', popularity: 95, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Jack Reacher goes undercover to rescue a DEA informant from a deadly criminal enterprise.', backdrop: 'https://image.tmdb.org/t/p/w780/31GlRQMiBQ9h8Z1o4Z5Z7x9x1n7.jpg', poster: 'https://image.tmdb.org/t/p/w342/jFuH0vh4i716n5152626953467.jpg' },
+        { id: 242001, title: 'Marry My Husband', year: '2024', mediaType: 'SERIES', rating: '8.3', popularity: 92, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Betrayed by her husband and best friend, a woman wakes up ten years in the past to rewrite her fate.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/MarryMyHusband2024.jpg' },
+        { id: 609681, title: 'The Idea of You', year: '2024', mediaType: 'MOVIE', rating: '7.5', popularity: 89, isOnlyOn: true, overview: 'A 40-year-old single mom begins an unexpected romance with the lead singer of a hit boy band.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/zDi2U7WYkdIoGYHcYbM9X5yReVD.jpg' }
       ]
     };
 
@@ -6559,7 +6571,10 @@
       const src = (appObj.rewatched && appObj.rewatched.length) ? appObj.rewatched : ((appObj.series && appObj.series.length) ? appObj.series : (fbApp.rewatched || []));
       list = src.slice().sort((a, b) => ((b.popularity || 10) * Number(b.rating || 7)) - ((a.popularity || 10) * Number(a.rating || 7)));
     } else if (catKey === 'only_on') {
-      list = (appObj.onlyOn && appObj.onlyOn.length) ? appObj.onlyOn : (fbApp.onlyOn || []);
+      const apiOnly = Array.isArray(appObj.onlyOn) ? appObj.onlyOn : [];
+      const fbOnly = Array.isArray(fbApp.onlyOn) ? fbApp.onlyOn : [];
+      const seenNorm = new Set(apiOnly.map(x => normalizeSearchText(x.title)));
+      list = [...apiOnly, ...fbOnly.filter(x => !seenNorm.has(normalizeSearchText(x.title)))];
     } else {
       list = [...(appObj.movies || []).slice(0, 5), ...(appObj.series || []).slice(0, 5)];
       if (!list.length) list = appObj.all || fbApp.all || [];
@@ -6889,73 +6904,106 @@
     showToast('🔄 Senarai Trending & poster disegarkan dari sumber live!');
   }
 
+  async function fetchLiveMetaForSingleTitle(title, isBND = false) {
+    const targetNorm = normalizeSearchText(title);
+    const queryCandidates = isBND
+      ? ['Spiderman', 'Spider-Man: Brand New Day', 'Spider-Man']
+      : [
+          String(title || '').trim(),
+          String(title || '').replace(/:\s*(Final Season|Season\s*\d+|Part\s*\d+)$/i, '').trim()
+        ].filter((v, idx, arr) => v && arr.indexOf(v) === idx);
+
+    for (const qStr of queryCandidates) {
+      try {
+        const res = await fetch(`/api/search-title?q=${encodeURIComponent(qStr)}&region=MY`);
+        if (!res.ok) continue;
+        const data = await res.json();
+        const hits = Array.isArray(data.items) ? data.items : [];
+        if (!hits.length) continue;
+        const exact = hits.find(h => normalizeSearchText(h.title) === targetNorm && h.poster) ||
+                      hits.find(h => normalizeSearchText(h.title).includes(targetNorm) && h.poster) ||
+                      hits.find(h => targetNorm.includes(normalizeSearchText(h.title)) && h.poster) ||
+                      hits.find(h => normalizeSearchText(h.title) === targetNorm) ||
+                      hits.find(h => h.poster) ||
+                      hits[0];
+        if (exact && (exact.poster || exact.overview)) {
+          saveMediaMetaEntry(title, {
+            poster: exact.poster || '',
+            backdrop: exact.backdrop || '',
+            overview: exact.overview || '',
+            rating: isBND ? '8.2' : (exact.rating || ''),
+            year: exact.year || ''
+          });
+          return exact;
+        }
+      } catch (e) {}
+    }
+    return null;
+  }
+
   async function enrichTrendingItemsViaSearchApi(dataObj) {
     if (!dataObj || !dataObj.byApp) return dataObj;
-    const uniqueTitles = new Map();
+    const uniqueMap = new Map();
     Object.values(dataObj.byApp).forEach(appObj => {
-      (appObj.all || []).forEach(it => {
-        const key = normalizeSearchText(it.title);
-        if (key && !uniqueTitles.has(key)) uniqueTitles.set(key, it);
+      ['all', 'movies', 'series', 'newMovies', 'newSeries', 'newReleases', 'popcorn', 'kdrama', 'rewatched', 'onlyOn'].forEach(lk => {
+        (appObj[lk] || []).forEach(it => {
+          const k = normalizeSearchText(it.title);
+          if (k && !uniqueMap.has(k)) uniqueMap.set(k, it);
+        });
       });
     });
 
-    await Promise.all(Array.from(uniqueTitles.values()).map(async (item) => {
-      const targetNorm = normalizeSearchText(item.title);
-      const isBND = /spider-?man:\s*brand\s*new\s*day/i.test(String(item.title || ''));
-      const queryCandidates = isBND
-        ? ['Spiderman', 'Spider-Man: Brand New Day']
-        : [
-            String(item.title || '').trim(),
-            String(item.title || '').replace(/:\s*(Final Season|Season\s*\d+|Part\s*\d+)$/i, '').trim()
-          ].filter((v, idx, arr) => v && arr.indexOf(v) === idx);
+    const entries = Array.from(uniqueMap.values());
+    const BATCH_SIZE = 4;
+    for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+      const slice = entries.slice(i, i + BATCH_SIZE);
+      await Promise.all(slice.map(async (item) => {
+        const isBND = /spider-?man:\s*brand\s*new\s*day/i.test(String(item.title || ''));
+        const cachedFirst = applyCachedMetaToItem(item);
+        if (cachedFirst.poster && cachedFirst.poster.includes('image.tmdb.org') && !cachedFirst.poster.includes('2014Doraemon') && !cachedFirst.poster.includes('ShopKillers') && !cachedFirst.poster.includes('MarryMyHusband') && !cachedFirst.poster.includes('9F4N9rC2aV3xZ8h1pL2k9Q4m1R0')) {
+          Object.assign(item, cachedFirst);
+        }
+        const liveHit = await fetchLiveMetaForSingleTitle(item.title, isBND);
+        if (liveHit) {
+          if (liveHit.poster) item.poster = liveHit.poster;
+          if (liveHit.backdrop) item.backdrop = liveHit.backdrop;
+          if (liveHit.overview && liveHit.overview.trim()) item.overview = liveHit.overview.trim();
+          if (!isBND && liveHit.rating && liveHit.rating !== 'N/A') item.rating = liveHit.rating;
+          if (liveHit.year && liveHit.year !== '-') item.year = liveHit.year;
+        }
+      }));
+    }
 
-      for (const qStr of queryCandidates) {
-        try {
-          const res = await fetch(`/api/search-title?q=${encodeURIComponent(qStr)}&region=MY`);
-          if (!res.ok) continue;
-          const data = await res.json();
-          const hits = Array.isArray(data.items) ? data.items : [];
-          if (!hits.length) continue;
-          const exact = hits.find(h => normalizeSearchText(h.title) === targetNorm && h.poster) ||
-                        hits.find(h => normalizeSearchText(h.title) === targetNorm) ||
-                        hits.find(h => normalizeSearchText(h.title).includes(targetNorm) && h.poster) ||
-                        hits.find(h => h.poster) ||
-                        hits[0];
-          if (!exact) continue;
-          if (exact.poster) item.poster = exact.poster;
-          if (exact.backdrop) item.backdrop = exact.backdrop;
-          if (exact.overview && exact.overview.trim()) item.overview = exact.overview.trim();
-          if (!isBND && exact.rating && exact.rating !== 'N/A') item.rating = exact.rating;
-          if (exact.year && exact.year !== '-') item.year = exact.year;
-          saveMediaMetaEntry(item.title, {
-            poster: item.poster,
-            backdrop: item.backdrop,
-            overview: item.overview,
-            rating: item.rating,
-            year: item.year
-          });
-          if (item.poster) break;
-        } catch (e) {}
-      }
-    }));
+    const enrichedByNorm = new Map();
+    entries.forEach(e => enrichedByNorm.set(normalizeSearchText(e.title), e));
 
     Object.values(dataObj.byApp).forEach(appObj => {
-      const mapByNorm = new Map((appObj.all || []).map(x => [normalizeSearchText(x.title), x]));
-      ['movies', 'series', 'newMovies', 'newSeries', 'newReleases', 'popcorn', 'kdrama', 'rewatched', 'onlyOn'].forEach(listKey => {
+      ['all', 'movies', 'series', 'newMovies', 'newSeries', 'newReleases', 'popcorn', 'kdrama', 'rewatched', 'onlyOn'].forEach(listKey => {
         if (!Array.isArray(appObj[listKey])) return;
         appObj[listKey] = appObj[listKey].map(entry => {
-          const updated = mapByNorm.get(normalizeSearchText(entry.title));
-          return updated ? { ...entry, poster: updated.poster || entry.poster, backdrop: updated.backdrop || entry.backdrop, overview: updated.overview || entry.overview, rating: updated.rating || entry.rating, year: updated.year || entry.year } : entry;
+          const updated = enrichedByNorm.get(normalizeSearchText(entry.title)) || applyCachedMetaToItem(entry);
+          return {
+            ...entry,
+            poster: updated.poster || entry.poster || '',
+            backdrop: updated.backdrop || entry.backdrop || '',
+            overview: updated.overview || entry.overview || '',
+            rating: updated.rating || entry.rating || 'N/A',
+            year: updated.year || entry.year || '2026'
+          };
         });
       });
     });
 
     if (Array.isArray(dataObj.items)) {
-      const allByNorm = new Map();
-      Object.values(dataObj.byApp).forEach(appObj => (appObj.all || []).forEach(x => allByNorm.set(normalizeSearchText(x.title), x)));
       dataObj.items = dataObj.items.map(it => {
-        const up = allByNorm.get(normalizeSearchText(it.title));
-        return up ? { ...it, poster: up.poster || it.poster, backdrop: up.backdrop || it.backdrop, overview: up.overview || it.overview, rating: up.rating || it.rating } : it;
+        const up = enrichedByNorm.get(normalizeSearchText(it.title)) || applyCachedMetaToItem(it);
+        return {
+          ...it,
+          poster: up.poster || it.poster || '',
+          backdrop: up.backdrop || it.backdrop || '',
+          overview: up.overview || it.overview || '',
+          rating: up.rating || it.rating || 'N/A'
+        };
       });
     }
     return dataObj;
