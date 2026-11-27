@@ -6612,62 +6612,48 @@
     renderTrendingModal();
   }
 
-  function renderPosterOrFallback(item) {
-    const fallbackHtml = `<div style="width:62px;height:92px;border-radius:10px;background:var(--bg-input);border:1px solid var(--border-color);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent-gold);font-weight:800;font-size:0.72rem;">🎬<span>${item.mediaType || 'SHOW'}</span></div>`;
-    if (!item.poster) return fallbackHtml;
-    return `<img src="${item.poster}" alt="${item.title}" style="width:62px; height:92px; object-fit:cover; border-radius:10px; flex-shrink:0; background:#0f172a;" onerror="this.outerHTML = \`${fallbackHtml.replace(/"/g, '&quot;')}\`;" />`;
+  const POSTER_THEMES = [
+    { grad: 'linear-gradient(145deg, #1d4ed8 0%, #0f172a 100%)', accent: '#38bdf8' },
+    { grad: 'linear-gradient(145deg, #b91c1c 0%, #18181b 100%)', accent: '#f87171' },
+    { grad: 'linear-gradient(145deg, #6d28d9 0%, #0f172a 100%)', accent: '#c4b5fd' },
+    { grad: 'linear-gradient(145deg, #047857 0%, #090d16 100%)', accent: '#4ade80' },
+    { grad: 'linear-gradient(145deg, #b45309 0%, #111827 100%)', accent: '#facc15' },
+    { grad: 'linear-gradient(145deg, #0369a1 0%, #090d16 100%)', accent: '#7dd3fc' }
+  ];
+
+  function pickPosterTheme(title) {
+    const s = String(title || '');
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) {
+      hash = ((hash << 5) - hash) + s.charCodeAt(i);
+      hash |= 0;
+    }
+    return POSTER_THEMES[Math.abs(hash) % POSTER_THEMES.length];
   }
 
-  function renderTrendingModal() {
-    ensureTrendingStoreReady();
-    applyEnabledTrendingTabsUI();
-    const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
-    const baseTitle = CATEGORY_TITLES[activeDiscoveryCat] || 'Streaming Picks';
-    const titleEl = document.getElementById('trendingModalTitle');
-    if (titleEl) titleEl.textContent = `${appLabels[activeAppSubFilter] || 'Netflix'} • ${baseTitle}`;
-    ['netflix', 'disney', 'hbomax', 'primevideo'].forEach(appId => {
-      const sBtn = document.getElementById(`appSub_${appId}`);
-      if (!sBtn) return;
-      const active = activeAppSubFilter === appId;
-      sBtn.style.background = active ? 'var(--accent-blue)' : 'var(--bg-card)';
-      sBtn.style.color = active ? '#ffffff' : 'var(--text-secondary)';
-      sBtn.style.border = active ? 'none' : '1px solid var(--border-color)';
-    });
-    Object.keys(CATEGORY_TITLES).forEach(key => {
-      const btn = document.getElementById(`catTab_${key}`);
-      if (!btn) return;
-      const isActive = key === activeDiscoveryCat;
-      btn.style.background = isActive ? 'var(--accent-gold)' : 'var(--bg-card)';
-      btn.style.color = isActive ? '#09090b' : 'var(--text-secondary)';
-      btn.style.border = isActive ? 'none' : '1px solid var(--border-color)';
-    });
-    const body = document.getElementById('trendingModalBody');
-    if (!body) return;
-    const list = getAppItems(activeAppSubFilter, activeDiscoveryCat);
-    if (!list || !list.length) {
-      body.innerHTML = `<div style="text-align:center; padding:22px; color:var(--text-muted); font-size:0.8rem;">No titles available for this selection right now.</div>`;
-      return;
-    }
-    body.innerHTML = list.map((item, idx) => {
-      const prod = products.find(p => p.id === item.platformId) || products[0];
-      const priceVal = prod ? Number(prod.price) : Number(item.price || 10);
-      return `
-        <div class="discovery-row-card" style="display:flex; gap:12px; align-items:center; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:10px 12px; cursor:pointer;" onclick="openShowDetailByIndex('${activeAppSubFilter}', '${activeDiscoveryCat}', ${idx});">
-          <div style="font-weight:800; font-size:0.9rem; color:var(--accent-gold); min-width:26px; text-align:center;">#${idx + 1}</div>
-          ${renderPosterOrFallback(item)}
-          <div style="flex:1; min-width:0;">
-            <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px; flex-wrap:wrap;">
-              <span class="platform-badge" style="font-size:0.6rem; padding:2px 7px;">${item.platformLabel || prod.name}</span>
-              <span style="font-size:0.64rem; color:var(--accent-cyan); font-weight:700;">${item.mediaType || 'SHOW'}</span>
-              <span style="font-size:0.68rem; color:var(--accent-gold); font-weight:700;">★ ${item.rating || 'N/A'}</span>
-            </div>
-            <div style="font-weight:700; font-size:0.9rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
-            <div style="font-size:0.73rem; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px;">${item.overview || ''}</div>
-            <button type="button" class="discovery-quick-order" onclick="event.stopPropagation(); closeTrendingModal(); openCheckout('${item.platformId || prod.id}');">Order ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} ✓</button>
-          </div>
+  function buildPosterCardHtml(item, wPx = 62, hPx = 92) {
+    const theme = pickPosterTheme(item?.title || '');
+    const mType = String(item?.mediaType || 'SHOW').toUpperCase();
+    const shortType = mType === 'SERIES' ? 'TV' : 'FILM';
+    const rawTitle = String(item?.title || 'TITLE').trim();
+    const words = rawTitle.split(/\s+/).filter(Boolean);
+    const shortTitle = words.slice(0, 3).join(' ');
+    return `
+      <div style="width:${wPx}px; height:${hPx}px; border-radius:10px; background:${theme.grad}; border:1px solid rgba(255,255,255,0.16); display:flex; flex-direction:column; justify-content:space-between; padding:6px; flex-shrink:0; overflow:hidden; box-shadow:0 6px 16px rgba(0,0,0,0.38);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.52rem; font-weight:900; letter-spacing:0.05em; color:${theme.accent}; background:rgba(0,0,0,0.42); padding:1px 5px; border-radius:4px;">${shortType}</span>
+          <span style="font-size:0.56rem; color:#f8fafc; opacity:0.85;">★</span>
         </div>
-      `;
-    }).join('');
+        <div style="font-family:'Space Grotesk',sans-serif; font-size:0.64rem; font-weight:800; line-height:1.15; color:#ffffff; text-align:left; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-shadow:0 1px 4px rgba(0,0,0,0.75);">
+          ${shortTitle}
+        </div>
+        <div style="height:2.5px; width:100%; border-radius:999px; background:${theme.accent}; opacity:0.85;"></div>
+      </div>
+    `;
+  }
+
+  function renderPosterOrFallback(item) {
+    return buildPosterCardHtml(item, 62, 92);
   }
 
   function getItemPlatforms(item) {
@@ -6745,9 +6731,7 @@
 
     body.innerHTML = `
       <div class="spec-hero">
-        ${item.poster
-          ? `<img src="${item.poster}" alt="${item.title}" class="spec-poster" onerror="this.style.display='none';" />`
-          : `<div class="spec-poster" style="background:var(--bg-input); display:flex; align-items:center; justify-content:center; color:var(--accent-gold); font-weight:800;">🎬</div>`}
+        ${buildPosterCardHtml(item, 92, 136)}
         <div style="flex:1; min-width:0;">
           <div class="spec-title">${item.title}</div>
           <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700;">${mediaTypeStr} • ${yearStr}</div>
@@ -6797,18 +6781,22 @@
     track.innerHTML = items.map((item, idx) => {
       const prod = products.find(p => p.id === item.platformId) || products[0];
       const priceVal = prod ? Number(prod.price) : Number(item.price || 10);
-      const bgImg = item.backdrop || item.poster || '';
-      const bgStyle = bgImg
-        ? `style="background-image:url('${bgImg}'); cursor:pointer;"`
-        : `style="background:linear-gradient(135deg,#0b132b 0%,#172554 58%,#09152b 100%); cursor:pointer;"`;
+      const theme = pickPosterTheme(item.title || '');
       return `
-        <section class="hero-slide trending-slide" ${bgStyle} onclick="openTrendingModal('tv_my', '${item.platformId}')">
-          <div class="trending-meta">
-            <span class="hero-pill">🔥 #${idx + 1} TRENDING</span>
-            <span class="platform-badge">${item.platformLabel || prod.name}</span>
+        <section class="hero-slide trending-slide" style="background:${theme.grad}; cursor:pointer;" onclick="openTrendingModal('tv_my', '${item.platformId}')">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%; gap:12px;">
+            <div style="flex:1; min-width:0;">
+              <div class="trending-meta">
+                <span class="hero-pill">🔥 #${idx + 1} TRENDING</span>
+                <span class="platform-badge">${item.platformLabel || prod.name}</span>
+              </div>
+              <h1 style="width:100%; max-width:100%;">${item.title}</h1>
+              <p style="width:100%; max-width:100%;">${item.overview || ''}</p>
+            </div>
+            <div style="flex-shrink:0;">
+              ${buildPosterCardHtml(item, 76, 112)}
+            </div>
           </div>
-          <h1>${item.title}</h1>
-          <p>${item.overview || ''}</p>
           <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} →</button>
         </section>
       `;
