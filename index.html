@@ -6730,7 +6730,9 @@
       });
     }
 
-    return merged.slice(0, 10);
+    return merged
+      .filter(it => !(appId === 'primevideo' && /insidious:\s*out\s*of\s*the\s*further/i.test(String(it.title || ''))))
+      .slice(0, 10);
   }
 
   function openTrendingModal(defaultCat = 'tv_my', appFilter = 'netflix') {
@@ -7428,6 +7430,8 @@ function readTrendingCache() {
     ensureTrendingStoreReady();
     const extraShows = [
       { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
+      { title: 'The Amazing Spider-Man', year: '2012', mediaType: 'MOVIE', rating: '7.0', poster: '', platformId: 'netflix', platformLabel: 'Netflix, Disney+', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'disney', label: 'Disney+' }], overview: 'Peter Parker investigates his parents’ disappearance and confronts The Lizard in New York.' },
+      { title: 'The Amazing Spider-Man 2', year: '2014', mediaType: 'MOVIE', rating: '6.6', poster: '', platformId: 'netflix', platformLabel: 'Netflix, Disney+', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'disney', label: 'Disney+' }], overview: 'Peter Parker faces Electro and new threats to New York while trying to keep his promise to Gwen Stacy.' },
       { title: 'Avengers: Doomsday', year: '2026', mediaType: 'MOVIE', rating: 'N/A', poster: '', isUpcoming: true, platforms: [], overview: 'Upcoming theatrical release. Not yet available on streaming platforms.' },
       { title: 'Stand by Me Doraemon', year: '2014', mediaType: 'MOVIE', rating: '7.8', poster: '', platforms: [], overview: 'Nobita and Doraemon embark on an emotional journey to secure a happier future.' }
     ];
@@ -7445,17 +7449,26 @@ function readTrendingCache() {
     });
   }
 
+  function matchesClientKeywordStrict(item, rawQuery) {
+    const titleStr = String(item?.title || '').toLowerCase();
+    const tCompact = titleStr.replace(/[^a-z0-9]/g, '');
+    const qLower = String(rawQuery || '').toLowerCase().trim();
+    const qCompact = qLower.replace(/[^a-z0-9]/g, '');
+    if (!qCompact) return false;
+    if (qCompact === 'spiderman' || qCompact === 'spider') {
+      return tCompact.includes('spiderman') || tCompact.includes('spider');
+    }
+    const tokens = qLower.replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/).filter(Boolean);
+    if (tokens.length > 1) {
+      return tokens.every(tok => tCompact.includes(tok.replace(/[^a-z0-9]/g, '')) || titleStr.includes(tok));
+    }
+    return tCompact.includes(qCompact) || titleStr.includes(qLower);
+  }
+
   function findMatchingShowsLocal(query) {
     const ql = String(query || '').trim().toLowerCase();
-    const qNorm = normalizeSearchText(ql);
     if (!ql) return [];
-    return collectAllShowCatalog().filter(item =>
-      String(item.title || '').toLowerCase().includes(ql) ||
-      (qNorm && normalizeSearchText(item.title || '').includes(qNorm)) ||
-      String(item.platformLabel || '').toLowerCase().includes(ql) ||
-      String(item.mediaType || '').toLowerCase().includes(ql) ||
-      String(item.overview || '').toLowerCase().includes(ql)
-    );
+    return collectAllShowCatalog().filter(item => matchesClientKeywordStrict(item, ql));
   }
 
   let _activeShowSearchController = null;
@@ -7488,12 +7501,9 @@ function readTrendingCache() {
           const yearNum = parseInt(String(it.year || ''), 10);
           const titleL = String(it.title || '').toLowerCase();
           const isBrandNewDay = /spider-?man:\s*brand\s*new\s*day/i.test(titleL);
-          const isNoWayHome = /spider-?man:\s*no\s*way\s*home/i.test(titleL);
-          let finalPlats = plats;
+          let finalPlats = [...plats];
           if (isBrandNewDay) {
             finalPlats = [{ id: 'netflix', label: 'Netflix' }];
-          } else if (isNoWayHome && !finalPlats.some(p => p.id === 'disney')) {
-            finalPlats = [...finalPlats, { id: 'disney', label: 'Disney+' }];
           }
           const isUnreleased = !isBrandNewDay && ((!isNaN(yearNum) && yearNum > 2026) || titleL.includes('movie 3') || titleL.includes("gur'latan"));
           const mappedObj = {
@@ -7534,6 +7544,7 @@ function readTrendingCache() {
       [...mappedApi, ...localMatches].forEach(cand => {
         const st = classifyTitleStatus(cand).kind;
         if (st === 'non_existent' || st === 'unreleased') return;
+        if (!matchesClientKeywordStrict(cand, cleanQ)) return;
         const k = canonicalTitleKey(cand);
         const existing = byTitleMap.get(k);
         if (!existing || scoreItem(cand) > scoreItem(existing)) {
@@ -7541,7 +7552,15 @@ function readTrendingCache() {
         }
       });
 
-      return Array.from(byTitleMap.values());
+      const outArr = Array.from(byTitleMap.values());
+      if (/spider/i.test(cleanQ)) {
+        outArr.sort((a, b) => {
+          const aSp = /spider-?man|amazing spider-?man/i.test(String(a?.title || '')) ? 1 : 0;
+          const bSp = /spider-?man|amazing spider-?man/i.test(String(b?.title || '')) ? 1 : 0;
+          return bSp - aSp;
+        });
+      }
+      return outArr;
     } catch (e) {
       if (e && e.name === 'AbortError') return _currentSearchMatches || localMatches;
       return localMatches;
