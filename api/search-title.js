@@ -39,7 +39,18 @@ function applySpiderManPlatformAvailability(title, currentApps = []) {
     return [APP_META.netflix];
   }
 
-  // Preserve exact verified platform(s) (1 or 2) from watch providers; do not invent platforms when none exist
+  // Spider-Man: No Way Home
+  if (/spider-?man:\s*no\s*way\s*home/i.test(t)) {
+    if (apps.length > 0) return apps;
+    return [APP_META.disney];
+  }
+
+  // The Amazing Spider-Man & The Amazing Spider-Man 2
+  if (/the\s+amazing\s+spider-?man/i.test(t)) {
+    if (apps.length > 0) return apps;
+    return [APP_META.netflix, APP_META.disney];
+  }
+
   return apps;
 }
 
