@@ -6937,9 +6937,17 @@
     const mediaTypeStr = item.mediaType || 'MOVIE';
     const yearStr = (item.year && item.year !== '-') ? item.year : (item.releaseDate ? String(item.releaseDate).slice(0, 4) : '-');
     const ratingVal = item.rating && item.rating !== 'N/A' ? `★ ${item.rating} / 10` : '★ N/A';
-    const synopsisText = item.overview && item.overview.trim()
+    const rawSyn = (item.overview && item.overview.trim())
       ? item.overview.trim()
       : `${item.title} (${yearStr}) — ${statusObj.detailText}.`;
+    const isBrandNewDayModal = /spider-?man:\s*brand\s*new\s*day/i.test(String(item.title || ''));
+    const synopsisText = isBrandNewDayModal
+      ? 'A forgotten Peter Parker lives alone as a full-time Spider-Man until mounting pressure triggers a dangerous change and a powerful new enemy emerges.'
+      : rawSyn;
+    const extraInfoLine = [
+      item.runtime ? `${item.runtime} min` : '',
+      Array.isArray(item.genres) && item.genres.length ? item.genres.slice(0, 3).join(', ') : ''
+    ].filter(Boolean).join(' • ');
 
     const platformBoxContent = isAvailable
       ? `<div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:2px;">${plats.map(pl => renderPlatformLogoOnly(pl)).join('')}</div>`
@@ -6948,7 +6956,7 @@
     const actionBtnHtml = (isAvailable && plats.length > 0)
       ? plats.map(pl => {
           const pMatch = products.find(p => p.id === pl.id) || products[0];
-          return `<button type="button" class="primary-submit" style="flex:1; min-width:140px; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${pMatch.id}');">Order ${pl.label} →</button>`;
+          return `<button type="button" class="primary-submit" style="flex:1; min-width:140px; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${pMatch.id}');">Continue to ${pl.label} →</button>`;
         }).join('')
       : `<div style="width:100%; text-align:center; padding:10px 12px; border-radius:10px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent-gold); font-size:0.78rem; font-weight:700;">${statusObj.badgeText}</div>`;
 
@@ -6983,8 +6991,11 @@
       </div>
 
       <div class="spec-synopsis">
-        <div class="spec-label" style="margin-bottom:5px;">SHORT SYNOPSIS</div>
-        <div>${synopsisText}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+          <span class="spec-label" style="margin-bottom:0;">SHORT SYNOPSIS</span>
+          ${extraInfoLine ? `<span style="font-size:0.68rem; color:var(--accent-cyan); font-weight:700;">${extraInfoLine}</span>` : ''}
+        </div>
+        <div style="font-size:0.83rem; line-height:1.52; color:var(--text-primary);">${synopsisText}</div>
       </div>
 
       <div class="spec-actions">
@@ -7570,7 +7581,11 @@ function readTrendingCache() {
             year: it.year || '-',
             mediaType: it.mediaType || 'SHOW',
             rating: isBrandNewDay ? '8.2' : (it.rating || 'N/A'),
-            overview: it.overview || '',
+            overview: /spider-?man:\s*brand\s*new\s*day/i.test(String(it.title || ''))
+              ? 'A forgotten Peter Parker lives alone as a full-time Spider-Man until mounting pressure triggers a dangerous change and a powerful new enemy emerges.'
+              : (it.overview || ''),
+            runtime: it.runtime || null,
+            genres: Array.isArray(it.genres) ? it.genres : [],
             poster: it.poster || '',
             backdrop: it.backdrop || '',
             isUnreleased,
