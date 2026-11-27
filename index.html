@@ -7292,7 +7292,17 @@ function readTrendingCache() {
     const isNonExistent =
       t.includes('elemental heroes') ||
       t.includes('sinopsis ') ||
-      t.includes('synopsis ');
+      t.includes('synopsis ') ||
+      t.includes('evil spiderman') ||
+      t.includes('the spiderman') ||
+      t.includes('italian spiderman') ||
+      t.includes('japanese spiderman') ||
+      t.includes('neukölln spiderman') ||
+      t.includes('neukolln spiderman') ||
+      t.includes('spiderman ultimate') ||
+      t.includes('spiderman graveyard') ||
+      t.includes('low budget') ||
+      t.includes('untitled ');
 
     const isUnreleased =
       Boolean(item?.isUnreleased) ||
@@ -7394,7 +7404,7 @@ function readTrendingCache() {
       if (!apiItems.length) return localMatches;
 
       const mappedApi = apiItems
-        .filter(it => classifyTitleStatus(it).kind !== 'non_existent')
+        .filter(it => { const st = classifyTitleStatus(it).kind; return st !== 'non_existent' && st !== 'unreleased'; })
         .map(it => {
           const apps = Array.isArray(it.availableApps) && it.availableApps.length ? it.availableApps : [];
           const plats = apps.map(a => ({ id: a.id, label: a.shortLabel || a.label || a.id }));
