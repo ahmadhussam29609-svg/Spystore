@@ -7411,9 +7411,12 @@ function readTrendingCache() {
           const yearNum = parseInt(String(it.year || ''), 10);
           const titleL = String(it.title || '').toLowerCase();
           const isBrandNewDay = /spider-?man:\s*brand\s*new\s*day/i.test(titleL);
+          const isNoWayHome = /spider-?man:\s*no\s*way\s*home/i.test(titleL);
           let finalPlats = plats;
           if (isBrandNewDay) {
             finalPlats = [{ id: 'netflix', label: 'Netflix' }];
+          } else if (isNoWayHome && !finalPlats.some(p => p.id === 'disney')) {
+            finalPlats = [...finalPlats, { id: 'disney', label: 'Disney+' }];
           }
           const isUnreleased = !isBrandNewDay && ((!isNaN(yearNum) && yearNum > 2026) || titleL.includes('movie 3') || titleL.includes("gur'latan"));
           const mappedObj = {
