@@ -6554,6 +6554,10 @@
     const fb = buildFallbackTrendingData();
     const appObj = trendingByApp[appId] || fb.byApp[appId] || {};
     const fbApp = fb.byApp[appId] || {};
+    const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
+    const prod = products.find(p => p.id === appId) || products[0];
+    const unitPrice = prod ? Number(prod.price) : (appObj.price || 10);
+
     let list = [];
     if (catKey === 'movie_my') {
       list = appObj.movies || fbApp.movies || [];
@@ -6579,10 +6583,90 @@
       list = [...(appObj.movies || []).slice(0, 5), ...(appObj.series || []).slice(0, 5)];
       if (!list.length) list = appObj.all || fbApp.all || [];
     }
-    if (!list || !list.length) {
-      list = fbApp.all || fb.items || [];
+
+    // Build a pool of at least 10 items for this category & app
+    const catPool = Array.isArray(discoveryCategories?.[catKey]) && discoveryCategories[catKey].length
+      ? discoveryCategories[catKey]
+      : (fb.categories?.[catKey] || []);
+    const allAppPool = [...(appObj.all || []), ...(fbApp.all || []), ...catPool, ...(fb.items || [])];
+    const merged = [];
+    const seenTitles = new Set();
+
+    const pushNormalized = (rawIt) => {
+      if (!rawIt || !rawIt.title) return;
+      const key = normalizeSearchText(rawIt.title);
+      if (!key || seenTitles.has(key)) return;
+      seenTitles.add(key);
+      const enriched = applyCachedMetaToItem({
+        ...rawIt,
+        platformId: appId,
+        platformLabel: appLabels[appId] || rawIt.platformLabel || prod?.name || 'Streaming',
+        platforms: [{ id: appId, label: appLabels[appId] || prod?.name || 'Streaming' }],
+        price: unitPrice
+      });
+      merged.push(enriched);
+    };
+
+    (list || []).forEach(pushNormalized);
+    allAppPool.forEach(pushNormalized);
+
+    // If still below 10 items, generate clean catalog entries for this category/app
+    const extraSeedsByCat = {
+      kdrama: [
+        'Lovely Runner', 'Queen of Tears', 'Crash Landing on You', 'Goblin', 'Vincenzo',
+        'Sweet Home', 'Weak Hero Class 1', 'Signal', 'Hospital Playlist', 'Business Proposal',
+        'Alchemy of Souls', 'Itaewon Class'
+      ],
+      tv_my: [
+        'Stranger Things', 'Wednesday', 'Squid Game', 'All of Us Are Dead', 'When Life Gives You Tangerines',
+        'The Glory', 'Daredevil: Born Again', 'The Mandalorian', 'House of the Dragon', 'The Last of Us',
+        'The Boys', 'Reacher'
+      ],
+      movie_my: [
+        'Spider-Man: Brand New Day', 'Spider-Man: No Way Home', 'Spider-Man: Across the Spider-Verse',
+        'Avengers: Endgame', 'Avengers: Infinity War', 'Inside Out 2', 'Dune: Part Two', 'The Batman',
+        'Extraction 2', 'Captain America: Brave New World', 'Thunderbolts*', 'Stand by Me Doraemon'
+      ],
+      new_in: [
+        'Spider-Man: Brand New Day', 'Squid Game', 'Stranger Things', 'Wednesday', 'All of Us Are Dead',
+        'Daredevil: Born Again', 'House of the Dragon', 'The Last of Us', 'The Boys', 'Reacher',
+        'Captain America: Brave New World', 'Thunderbolts*'
+      ],
+      popcorn: [
+        'Spider-Man: Brand New Day', 'Spider-Man: No Way Home', 'Avengers: Endgame', 'Avengers: Infinity War',
+        'Dune: Part Two', 'Inside Out 2', 'The Batman', 'Extraction 2', 'The Hobbit: The Desolation of Smaug',
+        'Captain America: The Winter Soldier', 'Spider-Man: Into the Spider-Verse', 'Devara: Part 1'
+      ],
+      rewatched: [
+        'Squid Game', 'Stranger Things', 'Wednesday', 'All of Us Are Dead', 'The Glory',
+        'Inside Out 2', 'The Mandalorian', 'Avengers: Endgame', 'House of the Dragon', 'The Last of Us',
+        'The Boys', 'Reacher'
+      ],
+      only_on: [
+        'Squid Game', 'Stranger Things', 'Wednesday', 'All of Us Are Dead', 'When Life Gives You Tangerines',
+        'Daredevil: Born Again', 'The Mandalorian', 'House of the Dragon', 'The Last of Us', 'The Boys',
+        'Reacher', 'The Idea of You'
+      ]
+    };
+
+    const seeds = extraSeedsByCat[catKey] || extraSeedsByCat.tv_my;
+    let seedIdx = 0;
+    while (merged.length < 10 && seedIdx < seeds.length) {
+      const sTitle = seeds[seedIdx++];
+      pushNormalized({
+        id: 800000 + merged.length + seedIdx,
+        title: sTitle,
+        year: '2026',
+        mediaType: (catKey === 'movie_my' || catKey === 'popcorn') ? 'MOVIE' : 'SERIES',
+        rating: (8.9 - (merged.length * 0.1)).toFixed(1),
+        popularity: 95 - merged.length,
+        overview: `${sTitle} — available on ${appLabels[appId] || 'Streaming'} with full subscription access.`,
+        poster: '',
+        backdrop: ''
+      });
     }
-    return list.map(applyCachedMetaToItem).slice(0, 10);
+
+    return merged.slice(0, 10);
   }
 
   function openTrendingModal(defaultCat = 'tv_my', appFilter = 'netflix') {
@@ -6793,7 +6877,7 @@
 
     body.innerHTML = `
       <div class="spec-hero">
-        ${buildPosterCardHtml(item, 92, 136)}
+        ${renderPosterCardWithImage(item, 92, 136)}
         <div style="flex:1; min-width:0;">
           <div class="spec-title">${item.title}</div>
           <div style="font-size:0.74rem; color:var(--accent-cyan); font-weight:700;">${mediaTypeStr} • ${yearStr}</div>
@@ -6856,7 +6940,7 @@
               <p style="width:100%; max-width:100%;">${item.overview || ''}</p>
             </div>
             <div style="flex-shrink:0;">
-              ${buildPosterCardHtml(item, 76, 112)}
+              ${renderPosterCardWithImage(item, 76, 112)}
             </div>
           </div>
           <button type="button" class="hero-cta-btn" onclick="event.stopPropagation(); openCheckout('${prod.id}')">▶ ${item.platformLabel || prod.name} • RM${priceVal.toFixed(2)} →</button>
