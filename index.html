@@ -2891,7 +2891,7 @@
       <!-- Website Catalog Manager (Stok, Harga & Status) -->
       <div id="drawerCatalogToolView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">
-          Kemaskini <strong>Stok</strong>, <strong>Harga (1 Bln &amp; 2 Bln)</strong>, dan <strong>Status (1 Bln &amp; 2 Bln)</strong> terus pada laman web.
+          Update <strong>Stock</strong>, <strong>Price (1 Mo &amp; 2 Mo)</strong>, and <strong>Status (1 Mo &amp; 2 Mo)</strong> directly on the website.
         </div>
         <div class="form-group" style="margin-bottom:8px;">
           <label>Select Product / Plan *</label>
@@ -2935,7 +2935,7 @@
       <!-- All Transactions (Owner / Admin) -->
       <div id="drawerTransactionsToolView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">
-          Senarai semua transaksi semua pelanggan yang disusun kemas &amp; disambungkan ke SSResit.
+          List of all customer transactions organized &amp; connected to SSResit.
         </div>
         <div class="form-group" style="margin-bottom:10px;">
           <input type="text" class="form-control" id="drawerTxnSearchInput" placeholder="🔍 Cari no. order (cth. SPY-261126-...), nama, produk..." oninput="renderDrawerTransactionsList()" />
@@ -2946,7 +2946,7 @@
       <!-- Registered Customers Only (Owner Only) -->
       <div id="drawerCustomersOnlyView" style="display:none;">
         <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">
-          Senarai pelanggan yang telah mendaftar masuk ke laman web.
+          List of customers who have registered on the website.
         </div>
         <div id="registeredCustomersListBox" style="font-size:0.76rem; color:var(--text-secondary);"></div>
       </div>
@@ -2992,7 +2992,7 @@
       <!-- Owner Trending & Show Resources Updater -->
       <div id="drawerTrendingResourcesToolView" style="display:none;">
         <div style="font-size:0.74rem; color:var(--text-secondary); margin-bottom:10px;">
-          Segarkan senarai <strong>Trending (Auto-Sync 12 Jam)</strong> secara terus dari sumber carian live dan pilih tab kategori mana yang dipaparkan kepada pelanggan.
+          Refresh the <strong>Trending (12-Hour Auto-Sync)</strong> list directly from live search and choose which category tabs are shown to customers.
         </div>
 
         <button type="button" onclick="syncNowOwnerTrending12h()" style="width:100%; margin-bottom:12px; background:rgba(56,189,248,0.16); border:1px solid rgba(56,189,248,0.45); color:var(--accent-cyan); padding:11px; border-radius:11px; font-size:0.78rem; font-weight:800; cursor:pointer;">🔄 Refresh Trending &amp; Poster Sekarang</button>
@@ -3029,7 +3029,7 @@
               <input type="checkbox" id="toggleCat_only_on" checked />
             </label>
           </div>
-          <button type="button" class="primary-submit" style="margin-top:10px; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerTrendingTabsConfig()">Simpan Tetapan Tab Trending ✓</button>
+          <button type="button" class="primary-submit" style="margin-top:10px; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerTrendingTabsConfig()">Save Trending Tabs Settings ✓</button>
         </div>
       </div>
     </div>
@@ -3277,7 +3277,7 @@
   <div class="show-detail-backdrop" id="showDetailModal" onclick="if(event.target===this) closeShowDetailModal()">
     <div class="show-detail-card" id="showDetailCard">
       <div class="modal-top" style="margin-bottom:12px;">
-        <span style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:var(--accent-gold); text-transform:uppercase;" id="specModalHeaderTag">SPESIFIKASI CERITA</span>
+        <span style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:var(--accent-gold); text-transform:uppercase;" id="specModalHeaderTag">SHOW SPECIFICATION</span>
         <button type="button" class="close-modal" onclick="closeShowDetailModal()">✕</button>
       </div>
       <div id="showDetailBody"></div>
@@ -3421,11 +3421,11 @@
       claimWaBtn: 'Send Receipt & Claim on WhatsApp →'
     },
     my: {
-      brandSub: 'Hab Langganan Digital',
+      brandSub: 'Digital Subscription Hub',
       navCatalog: 'Katalog Aplikasi',
-      navShowSearch: 'Cari Cerita / Movie',
+      navShowSearch: 'Search Show / Movie',
       navTrending: 'Senarai Trending',
-      navAccount: 'Log Masuk / Daftar Akaun',
+      navAccount: 'Login / Register Account',
       navSupport: 'Sokongan Admin WhatsApp',
       warrantyTitle: '🛡️ Polisi Waranti Penuh 100%',
       warrantyDesc: 'Setiap langganan dilindungi sepanjang tempoh aktif. Gantian segera sekiranya berlaku masalah log masuk.',
@@ -3948,7 +3948,7 @@
     const trResDesc = document.querySelector('#drawerTrendingResourcesToolView > div:first-child');
     if (trResDesc) {
       trResDesc.innerHTML = isMy
-        ? 'Segarkan senarai <strong>Trending (Auto-Sync 12 Jam)</strong> secara terus dari sumber carian live dan pilih tab kategori mana yang dipaparkan kepada pelanggan.'
+        ? 'Refresh the <strong>Trending (12-Hour Auto-Sync)</strong> list directly from live search and choose which category tabs are shown to customers.'
         : 'Refresh the <strong>Trending (12-Hour Auto-Sync)</strong> list directly from live search and choose which category tabs are shown to customers.';
     }
     const trRefreshBtn = document.querySelector('#drawerTrendingResourcesToolView button[onclick*="syncNowOwnerTrending12h"]');
@@ -3956,7 +3956,7 @@
     const trCustomTitle = document.querySelector('#drawerTrendingResourcesToolView div[style*="Customize Tab Trending"]');
     if (trCustomTitle) trCustomTitle.textContent = isMy ? '🎛️ Customize Tab Trending Dipaparkan' : '🎛️ Customize Displayed Trending Tabs';
     const trSaveBtn = document.querySelector('#drawerTrendingResourcesToolView button[onclick*="saveOwnerTrendingTabsConfig"]');
-    if (trSaveBtn) trSaveBtn.textContent = isMy ? 'Simpan Tetapan Tab Trending ✓' : 'Save Trending Tabs Settings ✓';
+    if (trSaveBtn) trSaveBtn.textContent = isMy ? 'Save Trending Tabs Settings ✓' : 'Save Trending Tabs Settings ✓';
 
     refreshVerifyRoleListUI();
     updateAuthUI();
@@ -7355,7 +7355,9 @@ function readTrendingCache() {
     const yearNum = parseInt(String(item?.year || ''), 10);
     const plats = getItemPlatforms(item);
 
-    const isNonExistent =
+    const isAllowedUpcoming = t.includes('avengers: doomsday') || /spider-?man:\s*brand\s*new\s*day/.test(t);
+
+    const isNonExistent = !isAllowedUpcoming && (
       t.includes('elemental heroes') ||
       t.includes('sinopsis ') ||
       t.includes('synopsis ') ||
@@ -7367,8 +7369,17 @@ function readTrendingCache() {
       t.includes('neukolln spiderman') ||
       t.includes('spiderman ultimate') ||
       t.includes('spiderman graveyard') ||
+      t.includes('all roads lead to no way home') ||
+      t.includes('venom saga') ||
+      t.includes('fan film') ||
+      t.includes('fan-made') ||
+      t.includes('fanmade') ||
+      t.includes('parody') ||
+      t.includes('cancelled') ||
+      t.includes('canceled') ||
       t.includes('low budget') ||
-      t.includes('untitled ');
+      t.includes('untitled ')
+    );
 
     const isUnreleased =
       Boolean(item?.isUnreleased) ||
@@ -7417,12 +7428,8 @@ function readTrendingCache() {
     ensureTrendingStoreReady();
     const extraShows = [
       { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
-      { title: 'The Amazing Spider-Man', year: '2012', mediaType: 'MOVIE', rating: '7.0', poster: '', platforms: [], overview: 'Peter Parker investigates his parents’ disappearance and confronts The Lizard in New York.' },
-      { title: 'The Amazing Spider-Man 2', year: '2014', mediaType: 'MOVIE', rating: '6.6', poster: '', platforms: [], overview: 'Peter Parker faces Electro and new threats to New York while trying to keep his promise to Gwen Stacy.' },
-      { title: 'Captain Marvel', year: '2019', mediaType: 'MOVIE', rating: '6.8', poster: '', platformId: 'disney', platformLabel: 'Disney+', platforms: [{ id: 'disney', label: 'Disney+' }], overview: 'Carol Danvers becomes one of the universe’s most powerful heroes as Earth is caught in the middle of a galactic conflict.' },
       { title: 'Avengers: Doomsday', year: '2026', mediaType: 'MOVIE', rating: 'N/A', poster: '', isUpcoming: true, platforms: [], overview: 'Upcoming theatrical release. Not yet available on streaming platforms.' },
-      { title: 'Stand by Me Doraemon', year: '2014', mediaType: 'MOVIE', rating: '7.8', poster: '', platforms: [], overview: 'Nobita and Doraemon embark on an emotional journey to secure a happier future.' },
-      { title: "BoBoiBoy Movie 3: Ghost of Gur'latan", year: '2027', mediaType: 'MOVIE', rating: 'N/A', poster: '', isUnreleased: true, platforms: [], overview: 'Not yet released on platform.' }
+      { title: 'Stand by Me Doraemon', year: '2014', mediaType: 'MOVIE', rating: '7.8', poster: '', platforms: [], overview: 'Nobita and Doraemon embark on an emotional journey to secure a happier future.' }
     ];
     const trendingShows = [];
     Object.values(trendingByApp || {}).forEach(appObj => {
@@ -7517,25 +7524,24 @@ function readTrendingCache() {
         apiByKey.set(canonicalTitleKey(ap), ap);
       });
 
-      const merged = [];
-      const seen = new Set();
+      const byTitleMap = new Map();
+      const scoreItem = (it) => {
+        const pCount = Array.isArray(it?.platforms) ? it.platforms.length : 0;
+        const hasPoster = it?.poster ? 1 : 0;
+        return pCount * 10 + hasPoster;
+      };
 
-      mappedApi.forEach(ap => {
-        const k = canonicalTitleKey(ap);
-        if (seen.has(k)) return;
-        seen.add(k);
-        merged.push(ap);
-      });
-
-      localMatches.forEach(loc => {
-        const k = canonicalTitleKey(loc);
-        if (!seen.has(k)) {
-          seen.add(k);
-          merged.push(loc);
+      [...mappedApi, ...localMatches].forEach(cand => {
+        const st = classifyTitleStatus(cand).kind;
+        if (st === 'non_existent' || st === 'unreleased') return;
+        const k = canonicalTitleKey(cand);
+        const existing = byTitleMap.get(k);
+        if (!existing || scoreItem(cand) > scoreItem(existing)) {
+          byTitleMap.set(k, cand);
         }
       });
 
-      return merged;
+      return Array.from(byTitleMap.values());
     } catch (e) {
       if (e && e.name === 'AbortError') return _currentSearchMatches || localMatches;
       return localMatches;
