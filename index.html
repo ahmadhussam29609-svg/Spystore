@@ -6704,8 +6704,18 @@
     `;
   }
 
+  function renderPosterCardWithImage(item, wPx = 62, hPx = 92) {
+    const fallbackHtml = buildPosterCardHtml(item, wPx, hPx).replace(/"/g, '&quot;');
+    const posterUrl = String(item?.poster || '').trim();
+    if (posterUrl && /^https?:\/\//i.test(posterUrl) && !posterUrl.includes('9F4N9rC2aV3xZ8h1pL2k9Q4m1R0') && !posterUrl.includes('2014Doraemon') && !posterUrl.includes('ShopKillers') && !posterUrl.includes('MarryMyHusband') && !posterUrl.includes('1V4SPkV3bQTPju6t')) {
+      const safeAlt = String(item?.title || 'Poster').replace(/"/g, '&quot;');
+      return `<img src="${posterUrl}" alt="${safeAlt}" loading="lazy" referrerpolicy="no-referrer" style="width:${wPx}px; height:${hPx}px; object-fit:cover; border-radius:10px; flex-shrink:0; border:1px solid rgba(255,255,255,0.16); background:#0f172a; box-shadow:0 6px 16px rgba(0,0,0,0.38);" onerror="this.outerHTML='${fallbackHtml}';" />`;
+    }
+    return buildPosterCardHtml(item, wPx, hPx);
+  }
+
   function renderPosterOrFallback(item) {
-    return buildPosterCardHtml(item, 62, 92);
+    return renderPosterCardWithImage(item, 62, 92);
   }
 
   function getItemPlatforms(item) {
@@ -7250,6 +7260,15 @@
     ensureTrendingStoreReady();
     const extraShows = [
       { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
+      { title: 'Spider-Man: Homecoming', year: '2017', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/c24sv2weTHPsmDa7jEMN0m2P3RT.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker balances high school life in Queens with proving himself as Spider-Man under Tony Stark’s mentorship.' },
+      { title: 'Spider-Man: Far From Home', year: '2019', mediaType: 'MOVIE', rating: '7.4', poster: 'https://image.tmdb.org/t/p/w342/4q2NNj485uRkuDROPswL6y9kxt7.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker’s European school trip turns into a global mission alongside Mysterio and Nick Fury.' },
+      { title: 'Spider-Man: Into the Spider-Verse', year: '2018', mediaType: 'MOVIE', rating: '8.4', poster: 'https://image.tmdb.org/t/p/w342/iiZZdoQBEYBv6id8su7ImL0oCbD.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Miles Morales becomes Spider-Man and teams up with Spider-Heroes from across the multiverse.' },
+      { title: 'Spider-Man: Across the Spider-Verse', year: '2023', mediaType: 'MOVIE', rating: '8.6', poster: 'https://image.tmdb.org/t/p/w342/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Miles Morales journeys across the multiverse and clashes with the Spider-Society over fate and destiny.' },
+      { title: 'Doraemon: Nobita’s Sky Utopia', year: '2023', mediaType: 'MOVIE', rating: '7.5', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Doraemon, Nobita, and friends search for a sky paradise where everyone is a perfectionist.' },
+      { title: 'Doraemon: Nobita’s Earth Symphony', year: '2024', mediaType: 'MOVIE', rating: '7.6', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Music powers a grand adventure to save a musical planet from an ominous threat.' },
+      { title: 'Jujutsu Kaisen', year: '2024', mediaType: 'SERIES', rating: '8.7', poster: 'https://image.tmdb.org/t/p/w342/hFWP5bKHOqnaG5g90903200Jujutsu.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Yuji Itadori enters a secret world of sorcery and curses to protect others.' },
+      { title: 'Demon Slayer: Kimetsu no Yaiba', year: '2024', mediaType: 'SERIES', rating: '8.7', poster: 'https://image.tmdb.org/t/p/w342/xUfR9bWkll7V6GWKX6j001Demon.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Tanjiro Kamado joins the Demon Slayer Corps to cure his sister Nezuko and defeat demons.' },
+      { title: 'One Piece', year: '2024', mediaType: 'SERIES', rating: '8.9', poster: 'https://image.tmdb.org/t/p/w342/cMD9Ygz11zjJzAovURpO75Qg7rT.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Monkey D. Luffy and the Straw Hat Pirates set sail across the Grand Line in search of the One Piece.' },
       { title: 'Spider-Man: No Way Home', year: '2021', mediaType: 'MOVIE', rating: '8.2', poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker asks Doctor Strange to restore his secret identity, accidentally tearing open the multiverse.' },
       { title: 'Squid Game: Final Season', year: '2025', mediaType: 'SERIES', rating: '8.3', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Gi-hun returns to dismantle the deadly games from within as the final arena begins.' },
       { title: 'Stranger Things 5', year: '2025', mediaType: 'SERIES', rating: '8.8', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Hawkins faces its ultimate showdown against Vecna and the Upside Down.' },
@@ -7402,12 +7421,7 @@
   let _currentSearchMatches = [];
 
   function renderSearchPosterThumb(m) {
-    const typeTag = (m.mediaType || 'SHOW').toUpperCase();
-    const fallbackBox = `<div style="width:54px; height:80px; border-radius:10px; background:linear-gradient(145deg,#1e293b,#0f172a); border:1px solid var(--border-strong); display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; gap:3px; color:var(--accent-gold); font-weight:800; font-size:0.62rem;"><span>🎬</span><span>${typeTag}</span></div>`;
-    if (!m.poster) return fallbackBox;
-    const safeAlt = String(m.title || 'Poster').replace(/"/g, '&quot;');
-    const safeFb = fallbackBox.replace(/"/g, '&quot;');
-    return `<img src="${m.poster}" alt="${safeAlt}" loading="lazy" referrerpolicy="no-referrer" style="width:54px; height:80px; object-fit:cover; border-radius:10px; flex-shrink:0; border:1px solid var(--border-color); background:#0f172a;" onerror="this.outerHTML='${safeFb}';" />`;
+    return renderPosterCardWithImage(m, 56, 82);
   }
 
   function renderShowResultCardHtml(m, idx, closeModalBeforeCheckout = false) {
