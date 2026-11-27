@@ -7389,6 +7389,13 @@ function readTrendingCache() {
       t.includes('synopsis ') ||
       t.includes('evil spiderman') ||
       t.includes('the spiderman') ||
+      t.includes('generations: the evolution of spider-man') ||
+      t.includes('daredevil vs. spider-man') ||
+      t.includes('daredevil vs spider-man') ||
+      t.includes('the spider-man story') ||
+      t.includes('superman, spider-man or batman') ||
+      t.includes('icons unearthed: spider') ||
+      t.includes('man-spider') ||
       t.includes('italian spiderman') ||
       t.includes('japanese spiderman') ||
       t.includes('neukölln spiderman') ||
@@ -7548,10 +7555,12 @@ function readTrendingCache() {
           const yearNum = parseInt(String(it.year || ''), 10);
           const titleL = String(it.title || '').toLowerCase();
           const isBrandNewDay = /spider-?man:\s*brand\s*new\s*day/i.test(titleL);
+          const officialSpiderMovieRx = /^(spider-?man|spider-?man\s*2|spider-?man\s*3|the\s+amazing\s+spider-?man|the\s+amazing\s+spider-?man\s*2|spider-?man:\s*homecoming|spider-?man:\s*far\s+from\s+home|spider-?man:\s*no\s+way\s+home|spider-?man:\s*into\s+the\s+spider-?verse|spider-?man:\s*across\s+the\s+spider-?verse)$/i;
+          const isMovieType = String(it.mediaType || '').toUpperCase() === 'MOVIE';
           let finalPlats = [...plats];
           if (isBrandNewDay) {
             finalPlats = [{ id: 'netflix', label: 'Netflix' }];
-          } else if (/spider-?man|spiderman|spider\s*man/i.test(titleL)) {
+          } else if (isMovieType && officialSpiderMovieRx.test(titleL)) {
             finalPlats = [{ id: 'netflix', label: 'Netflix' }, { id: 'disney', label: 'Disney+' }];
           }
           const isUnreleased = !isBrandNewDay && ((!isNaN(yearNum) && yearNum > 2026) || titleL.includes('movie 3') || titleL.includes("gur'latan"));
