@@ -107,6 +107,11 @@ function isBlockedNonExistentOrFake(title, yearStr, overviewStr) {
   const isAllowedUpcoming = /avengers:\s*doomsday/i.test(t) || /spider-?man:\s*brand\s*new\s*day/i.test(t);
   if (isAllowedUpcoming) return false;
 
+  const yCheck = parseInt(String(yearStr || ''), 10);
+  if (/spider-?man/i.test(t) && !isNaN(yCheck) && yCheck < 2000) {
+    return true;
+  }
+
   const blockedPatterns = [
     'evil spiderman',
     'the spiderman',
