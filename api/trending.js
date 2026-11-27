@@ -1,67 +1,173 @@
-const TMDB_KEY = process.env.TMDB_API_KEY || '';
+const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
+const WATCH_REGION = 'MY';
 
 const PROVIDERS = [
-  { id: 'netflix', label: 'Netflix', tmdbIds: '8', price: 18 },
-  { id: 'disney', label: 'Disney+', tmdbIds: '337|122', price: 16 },
-  { id: 'hbomax', label: 'HBO Max', tmdbIds: '1899|384', price: 16 },
-  { id: 'primevideo', label: 'Prime Video', tmdbIds: '119|9', price: 10 }
+  { id: 'netflix', label: 'Netflix', providerId: 8, tmdbIds: '8|1796', price: 18, region: 'MY' },
+  { id: 'disney', label: 'Disney+', providerId: 337, tmdbIds: '337|122|390', price: 16, region: 'MY' },
+  { id: 'hbomax', label: 'HBO Max', providerId: 1899, tmdbIds: '1899|384|118', price: 16, region: 'MY' },
+  { id: 'primevideo', label: 'Prime Video', providerId: 119, tmdbIds: '119|9|10', price: 10, region: 'MY' }
 ];
+
+const IMG_BACKDROP = 'https://image.tmdb.org/t/p/w780';
+const IMG_POSTER = 'https://image.tmdb.org/t/p/w342';
+
+function formatItem(raw, mediaType, platform, rank, extra = {}) {
+  const title = raw.title || raw.name || 'Untitled';
+  const releaseDate = raw.release_date || raw.first_air_date || '';
+  const year = releaseDate ? releaseDate.slice(0, 4) : '2026';
+  const backdropUrl = raw.backdrop_path ? `${IMG_BACKDROP}${raw.backdrop_path}` : (raw.backdrop || '');
+  const posterUrl = raw.poster_path ? `${IMG_POSTER}${raw.poster_path}` : (raw.poster || '');
+  const ratingNum = typeof raw.vote_average === 'number' && raw.vote_average > 0
+    ? Number(raw.vote_average).toFixed(1)
+    : (raw.rating || 'N/A');
+
+  return {
+    rank,
+    id: raw.id,
+    title,
+    year,
+    releaseDate,
+    mediaType: mediaType === 'movie' ? 'MOVIE' : 'SERIES',
+    platformId: platform.id,
+    platformLabel: platform.label,
+    platforms: [{ id: platform.id, label: platform.label }],
+    price: platform.price,
+    rating: ratingNum,
+    popularity: Math.round(raw.popularity || Math.max(10, 100 - rank * 4)),
+    isNew: Boolean(extra.isNew) || Number(year) >= 2025,
+    isKdrama: Boolean(extra.isKdrama) || raw.original_language === 'ko',
+    isRewatched: Boolean(extra.isRewatched) || (raw.vote_count || 0) >= 500,
+    isOnlyOn: Boolean(extra.isOnlyOn),
+    overview: (raw.overview || '').trim(),
+    backdrop: backdropUrl,
+    poster: posterUrl
+  };
+}
+
+function isReleased(item) {
+  if (!item.releaseDate) return true;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  return item.releaseDate <= todayStr;
+}
+
+async function tmdbGetSafe(path) {
+  try {
+    const sep = path.includes('?') ? '&' : '?';
+    const url = `https://api.themoviedb.org/3${path}${sep}api_key=${encodeURIComponent(TMDB_API_KEY)}&language=en-US`;
+    const res = await fetch(url);
+    if (!res.ok) return { results: [] };
+    return await res.json();
+  } catch {
+    return { results: [] };
+  }
+}
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  if (!TMDB_KEY) {
-    return res.status(200).json({ byApp: {}, items: [], note: 'Using client fallback + search enrichment' });
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+
+  if (!TMDB_API_KEY) {
+    return res.status(200).json({
+      byApp: {},
+      categories: {},
+      items: [],
+      note: 'Set TMDB_API_KEY in Vercel environment variables for live TMDB trending data.'
+    });
   }
 
   try {
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    const [trendingTvRes, trendingMovRes, kdramaTvRes, kdramaMovRes] = await Promise.all([
+      tmdbGetSafe(`/trending/tv/day?watch_region=${WATCH_REGION}`),
+      tmdbGetSafe(`/trending/movie/day?watch_region=${WATCH_REGION}`),
+      tmdbGetSafe(`/discover/tv?watch_region=${WATCH_REGION}&with_original_language=ko&sort_by=popularity.desc&first_air_date.lte=${todayStr}`),
+      tmdbGetSafe(`/discover/movie?watch_region=${WATCH_REGION}&with_original_language=ko&sort_by=popularity.desc&release_date.lte=${todayStr}`)
+    ]);
+
+    const platformBundles = await Promise.all(
+      PROVIDERS.map(async (prov) => {
+        const reg = prov.region || WATCH_REGION;
+        const [movDisc, tvDisc, movNew, tvNew, movKo, tvKo] = await Promise.all([
+          tmdbGetSafe(`/discover/movie?watch_region=${reg}&with_watch_providers=${prov.tmdbIds}&sort_by=popularity.desc&release_date.lte=${todayStr}`),
+          tmdbGetSafe(`/discover/tv?watch_region=${reg}&with_watch_providers=${prov.tmdbIds}&sort_by=popularity.desc&first_air_date.lte=${todayStr}`),
+          tmdbGetSafe(`/discover/movie?watch_region=${reg}&with_watch_providers=${prov.tmdbIds}&sort_by=release_date.desc&release_date.lte=${todayStr}&vote_count.gte=10`),
+          tmdbGetSafe(`/discover/tv?watch_region=${reg}&with_watch_providers=${prov.tmdbIds}&sort_by=first_air_date.desc&first_air_date.lte=${todayStr}&vote_count.gte=10`),
+          tmdbGetSafe(`/discover/movie?watch_region=${reg}&with_watch_providers=${prov.tmdbIds}&with_original_language=ko&sort_by=popularity.desc&release_date.lte=${todayStr}`),
+          tmdbGetSafe(`/discover/tv?watch_region=${reg}&with_watch_providers=${prov.tmdbIds}&with_original_language=ko&sort_by=popularity.desc&first_air_date.lte=${todayStr}`)
+        ]);
+        return { prov, movDisc, tvDisc, movNew, tvNew, movKo, tvKo };
+      })
+    );
+
     const byApp = {};
-    const allItems = [];
-
-    for (const prov of PROVIDERS) {
-      const [movRes, tvRes, kdramaRes] = await Promise.all([
-        fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${encodeURIComponent(TMDB_KEY)}&with_watch_providers=${prov.tmdbIds}&watch_region=MY&sort_by=popularity.desc&page=1`),
-        fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${encodeURIComponent(TMDB_KEY)}&with_watch_providers=${prov.tmdbIds}&watch_region=MY&sort_by=popularity.desc&page=1`),
-        fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${encodeURIComponent(TMDB_KEY)}&with_watch_providers=${prov.tmdbIds}&watch_region=MY&with_original_language=ko&sort_by=popularity.desc&page=1`)
-      ]);
-
-      const movJson = await movRes.json();
-      const tvJson = await tvRes.json();
-      const kdJson = await kdramaRes.json();
-
-      const mapItem = (raw, mType, idx, extraFlags = {}) => {
-        const title = raw.title || raw.name || 'Untitled';
-        const rel = raw.release_date || raw.first_air_date || '';
-        const yr = rel ? rel.slice(0, 4) : '2026';
-        return {
-          rank: idx + 1,
-          id: raw.id,
-          title,
-          year: yr,
-          mediaType: mType,
-          platformId: prov.id,
-          platformLabel: prov.label,
-          platforms: [{ id: prov.id, label: prov.label }],
-          price: prov.price,
-          rating: typeof raw.vote_average === 'number' && raw.vote_average > 0 ? raw.vote_average.toFixed(1) : '8.0',
-          popularity: Math.round(raw.popularity || (95 - idx * 3)),
-          isNew: Number(yr) >= 2025,
-          isKdrama: raw.original_language === 'ko' || Boolean(extraFlags.isKdrama),
-          isRewatched: (raw.vote_count || 0) > 800,
-          isOnlyOn: true,
-          overview: raw.overview || '',
-          poster: raw.poster_path ? `https://image.tmdb.org/t/p/w342${raw.poster_path}` : '',
-          backdrop: raw.backdrop_path ? `https://image.tmdb.org/t/p/w780${raw.backdrop_path}` : ''
-        };
-      };
-
-      const movies = (movJson.results || [])
-        .filter(x => !(prov.id !== 'netflix' && /spider-?man:\s*brand\s*new\s*day/i.test(String(x.title || ''))))
+    platformBundles.forEach(({ prov, movDisc, tvDisc, movNew, tvNew, movKo, tvKo }) => {
+      const seenM = new Set();
+      const movies = (movDisc.results || [])
+        .map((m, i) => formatItem(m, 'movie', prov, i + 1))
+        .filter(it => {
+          if (seenM.has(it.id) || !isReleased(it)) return false;
+          seenM.add(it.id);
+          return true;
+        })
         .slice(0, 10)
-        .map((r, i) => mapItem(r, 'MOVIE', i));
+        .map((m, i) => ({ ...m, rank: i + 1 }));
 
-      const series = (tvJson.results || []).slice(0, 10).map((r, i) => mapItem(r, 'SERIES', i));
-      const kdrama = (kdJson.results || []).slice(0, 10).map((r, i) => mapItem(r, 'SERIES', i, { isKdrama: true }));
-      const combined = [...movies, ...series];
+      const seenT = new Set();
+      const series = (tvDisc.results || [])
+        .map((t, i) => formatItem(t, 'tv', prov, i + 1))
+        .filter(it => {
+          if (seenT.has(it.id) || !isReleased(it)) return false;
+          seenT.add(it.id);
+          return true;
+        })
+        .slice(0, 10)
+        .map((t, i) => ({ ...t, rank: i + 1 }));
+
+      const seenNM = new Set();
+      const newMovies = (movNew.results || [])
+        .map((m, i) => formatItem(m, 'movie', prov, i + 1, { isNew: true }))
+        .filter(it => {
+          if (seenNM.has(it.id) || !isReleased(it)) return false;
+          seenNM.add(it.id);
+          return true;
+        })
+        .slice(0, 10);
+
+      const seenNT = new Set();
+      const newSeries = (tvNew.results || [])
+        .map((t, i) => formatItem(t, 'tv', prov, i + 1, { isNew: true }))
+        .filter(it => {
+          if (seenNT.has(it.id) || !isReleased(it)) return false;
+          seenNT.add(it.id);
+          return true;
+        })
+        .slice(0, 10);
+
+      const seenKo = new Set();
+      const koRaw = [
+        ...(tvKo.results || []).map((t, i) => formatItem(t, 'tv', prov, i + 1, { isKdrama: true })),
+        ...(movKo.results || []).map((m, i) => formatItem(m, 'movie', prov, i + 1, { isKdrama: true }))
+      ];
+      const kdrama = koRaw
+        .filter(it => {
+          const key = `${it.mediaType}_${it.id}`;
+          if (seenKo.has(key) || !isReleased(it)) return false;
+          seenKo.add(key);
+          return true;
+        })
+        .slice(0, 10)
+        .map((it, i) => ({ ...it, rank: i + 1 }));
+
+      const combined = [];
+      const seenComb = new Set();
+      [...movies, ...series].forEach(it => {
+        const k = `${it.mediaType}_${it.id}`;
+        if (!seenComb.has(k)) {
+          seenComb.add(k);
+          combined.push(it);
+        }
+      });
 
       byApp[prov.id] = {
         label: prov.label,
@@ -69,23 +175,146 @@ module.exports = async (req, res) => {
         all: combined,
         movies,
         series,
-        newMovies: movies.filter(x => x.isNew),
-        newSeries: series.filter(x => x.isNew),
-        newReleases: combined.filter(x => x.isNew).slice(0, 10),
-        popcorn: movies.slice().sort((a, b) => Number(b.rating) - Number(a.rating)),
+        newMovies,
+        newSeries,
+        newReleases: [...newMovies.slice(0, 5), ...newSeries.slice(0, 5)].slice(0, 10),
+        popcorn: movies.slice().sort((a, b) => Number(b.rating === 'N/A' ? 0 : b.rating) - Number(a.rating === 'N/A' ? 0 : a.rating) || b.popularity - a.popularity).slice(0, 10),
         kdrama,
-        rewatched: series.slice().sort((a, b) => b.popularity - a.popularity),
-        onlyOn: combined.slice(0, 10)
+        rewatched: series.slice().sort((a, b) => (b.popularity * Number(b.rating === 'N/A' ? 6 : b.rating)) - (a.popularity * Number(a.rating === 'N/A' ? 6 : a.rating))).slice(0, 10),
+        onlyOn: combined.slice(0, 10).map((it, idx) => ({ ...it, isOnlyOn: true, rank: idx + 1 }))
       };
+    });
 
-      allItems.push(...combined.slice(0, 3));
+    const idToPlatform = new Map();
+    PROVIDERS.forEach(prov => {
+      (byApp[prov.id]?.movies || []).forEach(m => {
+        if (!idToPlatform.has(`MOVIE_${m.id}`)) idToPlatform.set(`MOVIE_${m.id}`, prov);
+      });
+      (byApp[prov.id]?.series || []).forEach(t => {
+        if (!idToPlatform.has(`SERIES_${t.id}`)) idToPlatform.set(`SERIES_${t.id}`, prov);
+      });
+    });
+
+    const tvMy = (trendingTvRes.results || [])
+      .map((r, idx) => formatItem(r, 'tv', idToPlatform.get(`SERIES_${r.id}`) || PROVIDERS[idx % PROVIDERS.length], idx + 1))
+      .filter(isReleased)
+      .slice(0, 10)
+      .map((item, i) => ({ ...item, rank: i + 1 }));
+
+    const movieMy = (trendingMovRes.results || [])
+      .map((r, idx) => formatItem(r, 'movie', idToPlatform.get(`MOVIE_${r.id}`) || PROVIDERS[idx % PROVIDERS.length], idx + 1))
+      .filter(isReleased)
+      .slice(0, 10)
+      .map((item, i) => ({ ...item, rank: i + 1 }));
+
+    const newPool = [];
+    for (let i = 0; i < 5; i++) {
+      for (const prov of PROVIDERS) {
+        const appObj = byApp[prov.id];
+        if (appObj?.newMovies?.[i]) newPool.push(appObj.newMovies[i]);
+        if (appObj?.newSeries?.[i]) newPool.push(appObj.newSeries[i]);
+      }
     }
+    const seenNew = new Set();
+    const newIn = newPool
+      .filter(it => {
+        const key = `${it.mediaType}_${it.id}`;
+        if (seenNew.has(key) || !isReleased(it)) return false;
+        seenNew.add(key);
+        return true;
+      })
+      .slice(0, 10)
+      .map((it, idx) => ({ ...it, rank: idx + 1 }));
+
+    const popcornRaw = [];
+    PROVIDERS.forEach(prov => { (byApp[prov.id]?.movies || []).forEach(m => popcornRaw.push(m)); });
+    const seenPop = new Set();
+    const popcorn = popcornRaw
+      .filter(it => {
+        const key = `${it.mediaType}_${it.id}`;
+        if (seenPop.has(key) || !isReleased(it)) return false;
+        seenPop.add(key);
+        return true;
+      })
+      .sort((a, b) => Number(b.rating === 'N/A' ? 0 : b.rating) - Number(a.rating === 'N/A' ? 0 : a.rating) || b.popularity - a.popularity)
+      .slice(0, 10)
+      .map((it, idx) => ({ ...it, rank: idx + 1 }));
+
+    const kdramaRaw = [];
+    const koTvList = kdramaTvRes.results || [];
+    const koMovList = kdramaMovRes.results || [];
+    for (let i = 0; i < Math.max(koTvList.length, koMovList.length); i++) {
+      if (koTvList[i]) kdramaRaw.push(formatItem(koTvList[i], 'tv', idToPlatform.get(`SERIES_${koTvList[i].id}`) || PROVIDERS[i % PROVIDERS.length], kdramaRaw.length + 1, { isKdrama: true }));
+      if (koMovList[i]) kdramaRaw.push(formatItem(koMovList[i], 'movie', idToPlatform.get(`MOVIE_${koMovList[i].id}`) || PROVIDERS[i % PROVIDERS.length], kdramaRaw.length + 1, { isKdrama: true }));
+    }
+    const seenKd = new Set();
+    const kdrama = kdramaRaw
+      .filter(it => {
+        const key = `${it.mediaType}_${it.id}`;
+        if (seenKd.has(key) || !isReleased(it)) return false;
+        seenKd.add(key);
+        return true;
+      })
+      .slice(0, 10)
+      .map((it, idx) => ({ ...it, rank: idx + 1 }));
+
+    const rewatchedRaw = [];
+    PROVIDERS.forEach(prov => { (byApp[prov.id]?.series || []).forEach(s => rewatchedRaw.push(s)); });
+    const seenRew = new Set();
+    const rewatched = rewatchedRaw
+      .filter(it => {
+        const key = `${it.mediaType}_${it.id}`;
+        if (seenRew.has(key) || !isReleased(it)) return false;
+        seenRew.add(key);
+        return true;
+      })
+      .sort((a, b) => (b.popularity * Number(b.rating === 'N/A' ? 6 : b.rating)) - (a.popularity * Number(a.rating === 'N/A' ? 6 : a.rating)))
+      .slice(0, 10)
+      .map((it, idx) => ({ ...it, rank: idx + 1 }));
+
+    const onlyOnPool = [];
+    PROVIDERS.forEach(prov => {
+      const mList = byApp[prov.id]?.movies || [];
+      const sList = byApp[prov.id]?.series || [];
+      if (mList[0]) onlyOnPool.push(mList[0]);
+      if (sList[0]) onlyOnPool.push(sList[0]);
+      if (mList[1]) onlyOnPool.push(mList[1]);
+      if (sList[1]) onlyOnPool.push(sList[1]);
+    });
+    const seenOnly = new Set();
+    const onlyOn = onlyOnPool
+      .filter(it => {
+        const key = `${it.mediaType}_${it.id}`;
+        if (seenOnly.has(key) || !isReleased(it)) return false;
+        seenOnly.add(key);
+        return true;
+      })
+      .slice(0, 10)
+      .map((it, idx) => ({ ...it, isOnlyOn: true, rank: idx + 1 }));
+
+    const heroItems = [
+      tvMy[0],
+      movieMy[0],
+      kdrama[0],
+      popcorn[0],
+      newIn[0],
+      tvMy[1]
+    ].filter(Boolean).map((it, idx) => ({ ...it, rank: idx + 1 }));
 
     return res.status(200).json({
-      byApp,
-      items: allItems.slice(0, 6)
+      items: heroItems,
+      categories: {
+        tv_my: tvMy,
+        movie_my: movieMy,
+        new_in: newIn,
+        popcorn,
+        kdrama,
+        rewatched,
+        only_on: onlyOn
+      },
+      byApp
     });
   } catch (err) {
-    return res.status(500).json({ error: 'Trending fetch failed', byApp: {}, items: [] });
+    return res.status(500).json({ error: 'Failed to load trending charts', byApp: {}, categories: {}, items: [] });
   }
 };
