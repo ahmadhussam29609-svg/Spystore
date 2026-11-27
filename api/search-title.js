@@ -30,29 +30,87 @@ function dedupeApps(apps = []) {
   });
 }
 
+function applySpiderManPlatformAvailability(title, currentApps = []) {
+  const t = String(title || '').toLowerCase().trim();
+  const apps = dedupeApps(Array.isArray(currentApps) ? [...currentApps] : []);
+
+  // Spider-Man: Brand New Day currently set to Netflix
+  if (/spider-?man:\s*brand\s*new\s*day/i.test(t)) {
+    return [APP_META.netflix];
+  }
+
+  // If watch providers already returned exact platform(s) (1 or 2), preserve exact count
+  if (apps.length > 0) {
+    return apps;
+  }
+
+  // Fallback only when TMDB watch providers has no entry for a known Spider-Man title
+  if (/spider-?man|amazing spider-?man/i.test(t)) {
+    if (/amazing\s*spider-?man|spider-?man:\s*no\s*way\s*home|spider-?man:\s*homecoming|spider-?man:\s*far\s*from\s*home/i.test(t)) {
+      return [APP_META.disney];
+    }
+    return [APP_META.netflix];
+  }
+
+  return apps;
+}
+
+function tokenizeQuery(rawQuery) {
+  return String(rawQuery || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
 function buildQueryVariants(rawQuery) {
   const q = String(rawQuery || '').trim();
   if (!q) return [];
-  const lower = q.toLowerCase();
+  const lower = q.toLowerCase().trim();
+  const compact = lower.replace(/[^a-z0-9]/g, '');
   const variants = [q];
 
-  if (lower.includes('spider')) {
-    variants.push('Spider-Man', 'Spiderman', 'The Amazing Spider-Man', 'Spider');
-  } else if (lower.includes('marvel')) {
+  if (compact.includes('spiderman') || lower === 'spider' || lower === 'spider-man') {
+    variants.push('Spider-Man', 'Spiderman', 'The Amazing Spider-Man', 'The Amazing Spider-Man 2');
+  } else if (compact.includes('marvel')) {
     variants.push('Marvel', 'Captain Marvel', 'The Marvels', 'Ms. Marvel');
-  } else if (lower.includes('avengers')) {
+  } else if (compact.includes('avengers')) {
     variants.push('Avengers', 'Avengers: Doomsday');
-  } else if (lower.includes('wwe')) {
+  } else if (compact.includes('wwe')) {
     variants.push('WWE', 'WWE Raw', 'WWE SmackDown');
-  } else if (lower.includes('doraemon')) {
+  } else if (compact.includes('doraemon')) {
     variants.push('Doraemon', 'Stand by Me Doraemon');
-  } else if (lower.includes('boboiboy')) {
+  } else if (compact.includes('boboiboy')) {
     variants.push('BoBoiBoy', 'BoBoiBoy Galaxy', 'BoBoiBoy Movie');
-  } else if (lower.includes('ejen ali')) {
+  } else if (compact.includes('ejenali')) {
     variants.push('Ejen Ali', 'Ejen Ali: The Movie');
   }
 
-  return Array.from(new Set(variants.map(v => v.trim()).filter(Boolean))).slice(0, 4);
+  return Array.from(new Set(variants.map(v => v.trim()).filter(Boolean))).slice(0, 6);
+}
+
+function matchesStrictKeyword(title, rawQuery) {
+  const tLower = String(title || '').toLowerCase();
+  const tCompact = tLower.replace(/[^a-z0-9]/g, '');
+  const qLower = String(rawQuery || '').toLowerCase().trim();
+  const qCompact = qLower.replace(/[^a-z0-9]/g, '');
+  if (!qCompact) return false;
+
+  if (qCompact === 'spiderman' || qCompact === 'spider') {
+    return tCompact.includes('spiderman') || tCompact.includes('spider');
+  }
+
+  const tokens = tokenizeQuery(rawQuery);
+  if (tokens.length > 1) {
+    const allTokensPresent = tokens.every(tok => {
+      const tokCompact = tok.replace(/[^a-z0-9]/g, '');
+      return tCompact.includes(tokCompact) || tLower.includes(tok);
+    });
+    if (allTokensPresent) return true;
+  }
+
+  return tCompact.includes(qCompact) || tLower.includes(qLower);
 }
 
 function isBlockedNonExistentOrFake(title, yearStr, overviewStr) {
@@ -102,10 +160,11 @@ function normalizeMatchScore(title, query) {
   const t = String(title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const q = String(query || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   if (!t || !q) return 0;
-  if (t === q) return 1000;
-  if (t.startsWith(q)) return 650;
-  if (t.includes(q)) return 400;
-  return 0;
+  let score = 0;
+  if (t === q) score = 1000;
+  else if (t.startsWith(q)) score = 700;
+  else if (t.includes(q)) score = 500;
+  return score;
 }
 
 module.exports = async (req, res) => {
@@ -128,7 +187,7 @@ module.exports = async (req, res) => {
 
   try {
     const queryVariants = buildQueryVariants(q);
-    const pagesToFetch = q.length <= 12 ? [1, 2] : [1];
+    const pagesToFetch = q.length <= 16 ? [1, 2] : [1];
 
     const tasks = [];
     for (const qVar of queryVariants) {
@@ -161,7 +220,8 @@ module.exports = async (req, res) => {
       const rel = r.release_date || r.first_air_date || '';
       const yr = rel ? rel.slice(0, 4) : '';
       const ov = r.overview || '';
-      return !isBlockedNonExistentOrFake(t, yr, ov);
+      if (isBlockedNonExistentOrFake(t, yr, ov)) return false;
+      return matchesStrictKeyword(t, q);
     });
 
     const rawResults = filteredRaw
@@ -170,7 +230,7 @@ module.exports = async (req, res) => {
         const sb = normalizeMatchScore(b.title || b.name, q) + (b.popularity || 0);
         return sb - sa;
       })
-      .slice(0, 20);
+      .slice(0, 24);
 
     const enriched = await Promise.all(rawResults.map(async (item) => {
       const mType = item.media_type === 'tv' ? 'tv' : 'movie';
@@ -178,7 +238,6 @@ module.exports = async (req, res) => {
       const releaseDate = item.release_date || item.first_air_date || '';
       const year = releaseDate ? releaseDate.slice(0, 4) : '-';
       const isBND = /spider-?man:\s*brand\s*new\s*day/i.test(title);
-      const isNoWayHome = /spider-?man:\s*no\s*way\s*home/i.test(title);
       const isInsidiousOut = /insidious:\s*out\s*of\s*the\s*further/i.test(title);
 
       let availableApps = [];
@@ -210,9 +269,7 @@ module.exports = async (req, res) => {
           }
         } catch (e) {}
 
-        if (isNoWayHome && !availableApps.some(a => a.id === 'disney')) {
-          availableApps.push(APP_META.disney);
-        }
+        availableApps = applySpiderManPlatformAvailability(title, availableApps);
       }
 
       return {
