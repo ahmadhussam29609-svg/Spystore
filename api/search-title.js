@@ -21,33 +21,6 @@ const PROVIDER_MAP = {
   10: APP_META.primevideo
 };
 
-const STUDIO_APP_RULES = [
-  {
-    app: APP_META.disney,
-    companyIds: [420, 2, 3, 1, 7521, 127928],
-    networkIds: [2739, 44, 54],
-    keywords: ['avengers', 'captain america', 'iron man', 'thor', 'loki', 'wandavision', 'mandalorian', 'star wars', 'pixar', 'toy story', 'inside out', 'frozen', 'moana', 'x-men', 'deadpool', 'guardians of the galaxy', 'black panther', 'doctor strange', 'ant-man', 'falcon', 'hawkeye', 'moon knight', 'ms. marvel', 'she-hulk', 'daredevil', 'agatha', 'thunderbolts', 'fantastic four']
-  },
-  {
-    app: APP_META.hbomax,
-    companyIds: [174, 128064, 429, 9993, 3268, 49],
-    networkIds: [49, 3186, 6783],
-    keywords: ['house of the dragon', 'game of thrones', 'the last of us', 'harry potter', 'fantastic beasts', 'batman', 'superman', 'joker', 'aquaman', 'wonder woman', 'dune', 'euphoria', 'the penguin', 'peacemaker', 'white lotus', 'succession', 'rick and morty', 'conjuring']
-  },
-  {
-    app: APP_META.primevideo,
-    companyIds: [20580, 10246],
-    networkIds: [1024],
-    keywords: ['the boys', 'gen v', 'reacher', 'rings of power', 'jack ryan', 'fallout', 'invincible', 'citadel', 'the terminal list', 'wheel of time', 'mr. & mrs. smith', 'saltburn', 'road house', 'the idea of you']
-  },
-  {
-    app: APP_META.netflix,
-    companyIds: [213, 1957],
-    networkIds: [213],
-    keywords: ['squid game', 'stranger things', 'wednesday', 'bridgerton', 'money heist', 'la casa de papel', 'lupin', 'the witcher', 'one piece', 'queen of tears', 'the glory', 'all of us are dead', 'sweet home', 'extraction', 'red notice', 'glass onion', 'enola holmes', 'boboiboy', 'ejen ali', 'upin & ipin', 'spider-man: no way home', 'spider-man: homecoming', 'spider-man: far from home', 'spider-verse']
-  }
-];
-
 function dedupeApps(apps = []) {
   const seen = new Set();
   return apps.filter(a => {
@@ -55,23 +28,6 @@ function dedupeApps(apps = []) {
     seen.add(a.id);
     return true;
   });
-}
-
-function inferFirstPartyApps(title, detailsJson = null) {
-  const matched = [];
-  const lowerTitle = String(title || '').toLowerCase();
-  const companyIds = new Set((detailsJson?.production_companies || []).map(c => c.id));
-  const networkIds = new Set((detailsJson?.networks || []).map(n => n.id));
-
-  for (const rule of STUDIO_APP_RULES) {
-    const hitCompany = rule.companyIds.some(id => companyIds.has(id));
-    const hitNetwork = rule.networkIds.some(id => networkIds.has(id));
-    const hitKeyword = rule.keywords.some(kw => lowerTitle.includes(kw));
-    if (hitCompany || hitNetwork || hitKeyword) {
-      matched.push(rule.app);
-    }
-  }
-  return dedupeApps(matched);
 }
 
 function normalizeMatchScore(title, query) {
@@ -103,23 +59,33 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const searchUrl = `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(TMDB_KEY)}&query=${encodeURIComponent(q)}&include_adult=false&language=en-US&page=1`;
-    const sRes = await fetch(searchUrl);
-    if (!sRes.ok) {
-      return res.status(200).json({ items: [] });
-    }
-    const sData = await sRes.json();
+    const pagesToFetch = q.length <= 12 ? [1, 2] : [1];
+    const pageResponses = await Promise.all(
+      pagesToFetch.map(async (pg) => {
+        const u = `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(TMDB_KEY)}&query=${encodeURIComponent(q)}&include_adult=false&language=en-US&page=${pg}`;
+        const r = await fetch(u);
+        if (!r.ok) return [];
+        const j = await r.json();
+        return Array.isArray(j.results) ? j.results : [];
+      })
+    );
 
-    const rawResults = Array.isArray(sData.results)
-      ? sData.results
-          .filter(r => r && (r.media_type === 'movie' || r.media_type === 'tv'))
-          .sort((a, b) => {
-            const sa = normalizeMatchScore(a.title || a.name, q) + (a.popularity || 0);
-            const sb = normalizeMatchScore(b.title || b.name, q) + (b.popularity || 0);
-            return sb - sa;
-          })
-          .slice(0, 12)
-      : [];
+    const combinedRaw = pageResponses.flat().filter(r => r && (r.media_type === 'movie' || r.media_type === 'tv'));
+    const seenMedia = new Set();
+    const uniqueRaw = combinedRaw.filter(r => {
+      const k = `${r.media_type}-${r.id}`;
+      if (seenMedia.has(k)) return false;
+      seenMedia.add(k);
+      return true;
+    });
+
+    const rawResults = uniqueRaw
+      .sort((a, b) => {
+        const sa = normalizeMatchScore(a.title || a.name, q) + (a.popularity || 0);
+        const sb = normalizeMatchScore(b.title || b.name, q) + (b.popularity || 0);
+        return sb - sa;
+      })
+      .slice(0, 14);
 
     const enriched = await Promise.all(rawResults.map(async (item) => {
       const mType = item.media_type === 'tv' ? 'tv' : 'movie';
@@ -143,40 +109,17 @@ module.exports = async (req, res) => {
           if (wpRes.ok) {
             const wpData = await wpRes.json();
             const regObj = wpData?.results?.[region] || {};
-            const sgObj = wpData?.results?.SG || {};
-            const usObj = wpData?.results?.US || {};
-
-            const primaryList = [
+            const providerEntries = [
               ...(Array.isArray(regObj.flatrate) ? regObj.flatrate : []),
               ...(Array.isArray(regObj.free) ? regObj.free : []),
               ...(Array.isArray(regObj.ads) ? regObj.ads : [])
             ];
-            primaryList.forEach(p => {
+            providerEntries.forEach(p => {
               const mapped = PROVIDER_MAP[p.provider_id];
               if (mapped) availableApps.push(mapped);
             });
-
-            if (!availableApps.length) {
-              const studioApps = inferFirstPartyApps(title, detailsJson);
-              if (studioApps.length) {
-                availableApps = studioApps;
-              } else {
-                const fallbackList = [
-                  ...(Array.isArray(sgObj.flatrate) ? sgObj.flatrate : []),
-                  ...(Array.isArray(usObj.flatrate) ? usObj.flatrate : [])
-                ];
-                fallbackList.forEach(p => {
-                  const mapped = PROVIDER_MAP[p.provider_id];
-                  if (mapped) availableApps.push(mapped);
-                });
-              }
-            }
           }
         } catch (e) {}
-
-        if (!availableApps.length) {
-          availableApps = inferFirstPartyApps(title, detailsJson);
-        }
       }
 
       return {
