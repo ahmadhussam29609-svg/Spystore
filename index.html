@@ -2992,57 +2992,45 @@
       <!-- Owner Trending & Show Resources Updater -->
       <div id="drawerTrendingResourcesToolView" style="display:none;">
         <div style="font-size:0.74rem; color:var(--text-secondary); margin-bottom:10px;">
-          Segarkan data <strong>Trending (12 Jam)</strong> secara manual atau masukkan tajuk custom ke dalam tab <strong>Trending</strong> menggunakan <strong>IMDb Rating</strong>.
+          Segarkan senarai <strong>Trending (Auto-Sync 12 Jam)</strong> secara terus dari sumber carian live dan pilih tab kategori mana yang dipaparkan kepada pelanggan.
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
-          <button type="button" onclick="syncNowOwnerTrending12h()" style="background:rgba(56,189,248,0.16); border:1px solid rgba(56,189,248,0.45); color:var(--accent-cyan); padding:10px; border-radius:10px; font-size:0.76rem; font-weight:800; cursor:pointer;">🔄 Refresh Trending Sekarang</button>
-          <button type="button" onclick="resetOwnerTrendingResourcesToDefault()" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-secondary); padding:10px; border-radius:10px; font-size:0.76rem; font-weight:700; cursor:pointer;">↺ Reset Custom</button>
-        </div>
+        <button type="button" onclick="syncNowOwnerTrending12h()" style="width:100%; margin-bottom:12px; background:rgba(56,189,248,0.16); border:1px solid rgba(56,189,248,0.45); color:var(--accent-cyan); padding:11px; border-radius:11px; font-size:0.78rem; font-weight:800; cursor:pointer;">🔄 Refresh Trending &amp; Poster Sekarang</button>
 
-        <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:11px; margin-bottom:12px;">
-          <div style="font-size:0.74rem; font-weight:800; color:var(--accent-gold); margin-bottom:8px;">+ Masukkan Tajuk ke Tab Trending</div>
-          <div class="form-group" style="margin-bottom:8px;">
-            <label>Tajuk Cerita / Movie *</label>
-            <input type="text" class="form-control" id="ownerResTitleInput" placeholder="cth. Spider-Man: Brand New Day" />
+        <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:12px; margin-bottom:12px;">
+          <div style="font-size:0.75rem; font-weight:800; color:var(--accent-gold); margin-bottom:8px;">🎛️ Customize Tab Trending Dipaparkan</div>
+          <div id="ownerTrendingTabsToggleBox" style="display:flex; flex-direction:column; gap:7px; font-size:0.76rem; color:var(--text-primary);">
+            <label style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px 10px; cursor:pointer;">
+              <span>Top 10 Tv Show in Malaysia Today</span>
+              <input type="checkbox" id="toggleCat_tv_my" checked />
+            </label>
+            <label style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px 10px; cursor:pointer;">
+              <span>Top 10 Movie in Malaysia Today</span>
+              <input type="checkbox" id="toggleCat_movie_my" checked />
+            </label>
+            <label style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px 10px; cursor:pointer;">
+              <span>New Releases</span>
+              <input type="checkbox" id="toggleCat_new_in" checked />
+            </label>
+            <label style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px 10px; cursor:pointer;">
+              <span>Perfect Popcorn Movie</span>
+              <input type="checkbox" id="toggleCat_popcorn" checked />
+            </label>
+            <label style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px 10px; cursor:pointer;">
+              <span>Kdrama</span>
+              <input type="checkbox" id="toggleCat_kdrama" checked />
+            </label>
+            <label style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px 10px; cursor:pointer;">
+              <span>Most Rewatched Show</span>
+              <input type="checkbox" id="toggleCat_rewatched" checked />
+            </label>
+            <label style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border-color); border-radius:9px; padding:8px 10px; cursor:pointer;">
+              <span>Only On Platform</span>
+              <input type="checkbox" id="toggleCat_only_on" checked />
+            </label>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Platform *</label>
-              <select class="form-control" id="ownerResPlatformSelect">
-                <option value="netflix">Netflix</option>
-                <option value="disney">Disney+</option>
-                <option value="hbomax">HBO Max</option>
-                <option value="primevideo">Prime Video</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Format *</label>
-              <select class="form-control" id="ownerResTypeSelect">
-                <option value="MOVIE">MOVIE</option>
-                <option value="SERIES">SERIES (TV Show)</option>
-              </select>
-            </div>
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Tahun Release</label>
-              <input type="text" class="form-control" id="ownerResYearInput" value="2026" placeholder="2026" />
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>IMDb Rating (1 - 10) *</label>
-              <input type="text" class="form-control" id="ownerResRatingInput" value="8.2" placeholder="cth. 8.2" />
-            </div>
-          </div>
-          <div class="form-group" style="margin-bottom:8px;">
-            <label>Sinopsis Ringkas (Pilihan)</label>
-            <input type="text" class="form-control" id="ownerResOverviewInput" placeholder="Ringkasan cerita..." />
-          </div>
-          <button type="button" class="primary-submit" style="margin-top:0; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerCustomShowResource()">Masukkan ke Trending ✓</button>
+          <button type="button" class="primary-submit" style="margin-top:10px; background:linear-gradient(135deg, #16a34a, #15803d); border-color:rgba(74,222,128,0.45);" onclick="saveOwnerTrendingTabsConfig()">Simpan Tetapan Tab Trending ✓</button>
         </div>
-
-        <div style="font-size:0.74rem; font-weight:800; color:var(--accent-cyan); margin-bottom:6px;">Custom Trending Aktif</div>
-        <div id="ownerCustomResourcesListBox" style="display:flex; flex-direction:column; gap:6px; font-size:0.74rem;"></div>
       </div>
     </div>
   </div>
@@ -3709,7 +3697,7 @@
         body: JSON.stringify({
           verifiedAdmins: getVerifiedAdminsList(),
           catalog: catalogData,
-          customShows: getOwnerCustomShowResources(),
+          trendingTabs: getEnabledTrendingCategories(),
           templates: {
             wa: getWaTemplate(),
             tg: getTgTemplate()
@@ -3773,9 +3761,9 @@
         syncWebsiteCatalog();
       }
 
-      if (data && Array.isArray(data.customShows)) {
-        saveOwnerCustomShowResources(data.customShows, false);
-        loadTrendingHero(false);
+      if (data && Array.isArray(data.trendingTabs) && data.trendingTabs.length) {
+        try { localStorage.setItem(OWNER_TRENDING_TABS_KEY, JSON.stringify(data.trendingTabs)); } catch (e) {}
+        applyEnabledTrendingTabsUI();
       }
 
       if (data && data.templates) {
@@ -6377,13 +6365,13 @@
   let _trendingFetchedFromApi = false;
   let _showAllInlineSearch = false;
 
-  const TRENDING_CACHE_KEY = 'spystore_trending_cache_v3';
+  const TRENDING_CACHE_KEY = 'spystore_trending_cache_v4';
   const TRENDING_INTERVAL_MS = 12 * 60 * 60 * 1000;
 
   function buildFallbackTrendingData() {
     const rawByApp = {
       netflix: [
-        { id: 969681, title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', popularity: 100, isNew: true, isOnlyOn: false, overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/g6TidT7be954rrzPPBTIXkSmfXj.jpg' },
+        { id: 969681, title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', popularity: 100, isNew: true, isOnlyOn: false, overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.', backdrop: '', poster: '' },
         { id: 93405, title: 'Squid Game: Final Season', year: '2025', mediaType: 'SERIES', rating: '8.3', popularity: 99, isNew: true, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Gi-hun returns to dismantle the deadly games from within as the final arena begins.', backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
         { id: 66732, title: 'Stranger Things 5', year: '2025', mediaType: 'SERIES', rating: '8.8', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Hawkins faces its ultimate showdown against Vecna and the Upside Down.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' },
         { id: 119051, title: 'Wednesday: Season 2', year: '2025', mediaType: 'SERIES', rating: '8.5', popularity: 97, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Wednesday Addams returns to Nevermore Academy with darker visions and new threats.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
@@ -6575,6 +6563,7 @@
 
   function renderTrendingModal() {
     ensureTrendingStoreReady();
+    applyEnabledTrendingTabsUI();
     const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
     const baseTitle = CATEGORY_TITLES[activeDiscoveryCat] || 'Streaming Picks';
     const titleEl = document.getElementById('trendingModalTitle');
@@ -6806,113 +6795,110 @@
     }
   }
 
-  const OWNER_CUSTOM_SHOWS_KEY = 'spystore_owner_custom_shows_v1';
+  const OWNER_TRENDING_TABS_KEY = 'spystore_owner_trending_tabs_v1';
+  const ALL_DISCOVERY_CAT_KEYS = ['tv_my', 'movie_my', 'new_in', 'popcorn', 'kdrama', 'rewatched', 'only_on'];
 
-  function getOwnerCustomShowResources() {
+  function getEnabledTrendingCategories() {
     try {
-      const list = JSON.parse(localStorage.getItem(OWNER_CUSTOM_SHOWS_KEY) || '[]');
-      return Array.isArray(list) ? list : [];
-    } catch (e) { return []; }
+      const saved = JSON.parse(localStorage.getItem(OWNER_TRENDING_TABS_KEY) || 'null');
+      if (Array.isArray(saved) && saved.length) {
+        return ALL_DISCOVERY_CAT_KEYS.filter(k => saved.includes(k));
+      }
+    } catch (e) {}
+    return [...ALL_DISCOVERY_CAT_KEYS];
   }
 
-  function saveOwnerCustomShowResources(list, syncRemote = true) {
-    try {
-      localStorage.setItem(OWNER_CUSTOM_SHOWS_KEY, JSON.stringify(list));
-    } catch (e) {}
-    if (syncRemote) pushSharedStoreToServer();
+  function applyEnabledTrendingTabsUI() {
+    const enabled = getEnabledTrendingCategories();
+    ALL_DISCOVERY_CAT_KEYS.forEach(k => {
+      const btn = document.getElementById(`catTab_${k}`);
+      if (btn) btn.style.display = enabled.includes(k) ? 'inline-block' : 'none';
+      const chk = document.getElementById(`toggleCat_${k}`);
+      if (chk) chk.checked = enabled.includes(k);
+    });
+    if (!enabled.includes(activeDiscoveryCat) && enabled.length) {
+      activeDiscoveryCat = enabled[0];
+    }
   }
 
   function renderOwnerCustomResourcesList() {
-    const box = document.getElementById('ownerCustomResourcesListBox');
-    if (!box) return;
-    const list = getOwnerCustomShowResources();
-    const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
-    if (!list.length) {
-      box.innerHTML = `<div style="color:var(--text-muted); background:var(--bg-input); border:1px solid var(--border-color); border-radius:9px; padding:9px;">Belum ada tajuk custom dalam Trending.</div>`;
+    applyEnabledTrendingTabsUI();
+  }
+
+  function saveOwnerTrendingTabsConfig() {
+    if (!['owner', 'joker'].includes(getUserRole())) { showToast('Hanya Owner boleh mengubah tab Trending.'); return; }
+    const selected = ALL_DISCOVERY_CAT_KEYS.filter(k => Boolean(document.getElementById(`toggleCat_${k}`)?.checked));
+    if (!selected.length) {
+      showToast('Sila pilih sekurang-kurangnya 1 tab Trending!');
       return;
     }
-    box.innerHTML = list.map((item, idx) => `
-      <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:10px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-        <div style="min-width:0;">
-          <div style="font-weight:800; color:var(--text-primary);">${item.title} <span style="color:var(--accent-gold);">(${appLabels[item.platformId] || item.platformId})</span></div>
-          <div style="font-size:0.68rem; color:var(--text-secondary);">${item.mediaType} • ${item.year || '2026'} • IMDb ★ ${item.rating || '8.2'}</div>
-        </div>
-        <button type="button" onclick="deleteOwnerCustomShowResource(${idx})" style="background:rgba(239,68,68,0.16); border:1px solid rgba(239,68,68,0.45); color:#f87171; padding:4px 8px; border-radius:7px; font-size:0.68rem; font-weight:800; cursor:pointer; flex-shrink:0;">Padam</button>
-      </div>
-    `).join('');
-  }
-
-  function saveOwnerCustomShowResource() {
-    if (!['owner', 'joker'].includes(getUserRole())) { showToast('Hanya Owner boleh mengemaskini Trending.'); return; }
-    const title = String(document.getElementById('ownerResTitleInput')?.value || '').trim();
-    const platformId = String(document.getElementById('ownerResPlatformSelect')?.value || 'netflix');
-    const mediaType = String(document.getElementById('ownerResTypeSelect')?.value || 'MOVIE');
-    const year = String(document.getElementById('ownerResYearInput')?.value || '2026').trim() || '2026';
-    const rating = String(document.getElementById('ownerResRatingInput')?.value || '8.2').trim() || '8.2';
-    const overview = String(document.getElementById('ownerResOverviewInput')?.value || '').trim();
-
-    if (!title) { showToast('Sila masukkan tajuk cerita atau movie!'); return; }
-
-    const appLabels = { netflix: 'Netflix', disney: 'Disney+', hbomax: 'HBO Max', primevideo: 'Prime Video' };
-    const entry = {
-      id: Date.now(),
-      title,
-      platformId,
-      platformLabel: appLabels[platformId] || 'Netflix',
-      platforms: [{ id: platformId, label: appLabels[platformId] || 'Netflix' }],
-      mediaType,
-      year,
-      rating,
-      popularity: 100,
-      catTop10: true,
-      isNew: true,
-      isPopcorn: mediaType === 'MOVIE',
-      isKdrama: false,
-      isRewatched: false,
-      isOnlyOn: false,
-      overview: overview || `${title} (${year}) kini trending di ${appLabels[platformId] || 'Netflix'}.`,
-      poster: '',
-      backdrop: ''
-    };
-
-    const existing = getOwnerCustomShowResources().filter(x => !(String(x.title || '').toLowerCase() === title.toLowerCase() && x.platformId === platformId));
-    existing.unshift(entry);
-    saveOwnerCustomShowResources(existing, getUserRole() !== 'joker');
-
-    if (document.getElementById('ownerResTitleInput')) document.getElementById('ownerResTitleInput').value = '';
-    if (document.getElementById('ownerResOverviewInput')) document.getElementById('ownerResOverviewInput').value = '';
-
-    renderOwnerCustomResourcesList();
-    localStorage.removeItem(TRENDING_CACHE_KEY);
-    loadTrendingHero(true);
-    showToast(`✅ "${title}" dikemaskini ke ${entry.platformLabel}!`);
-  }
-
-  function deleteOwnerCustomShowResource(idx) {
-    if (!['owner', 'joker'].includes(getUserRole())) return;
-    const list = getOwnerCustomShowResources();
-    if (!list[idx]) return;
-    const removed = list.splice(idx, 1)[0];
-    saveOwnerCustomShowResources(list, getUserRole() !== 'joker');
-    renderOwnerCustomResourcesList();
-    localStorage.removeItem(TRENDING_CACHE_KEY);
-    loadTrendingHero(true);
-    showToast(`🗑️ "${removed.title}" dipadam daripada senarai custom.`);
+    try {
+      localStorage.setItem(OWNER_TRENDING_TABS_KEY, JSON.stringify(selected));
+    } catch (e) {}
+    applyEnabledTrendingTabsUI();
+    if (getUserRole() !== 'joker') pushSharedStoreToServer();
+    closeOwnerAdminToolsModal();
+    showToast('✅ Tetapan tab Trending berjaya disimpan!');
   }
 
   function syncNowOwnerTrending12h() {
     localStorage.removeItem(TRENDING_CACHE_KEY);
     loadTrendingHero(true);
-    showToast('🔄 Senarai Trending & 7 kategori disegarkan sekarang!');
+    showToast('🔄 Senarai Trending & poster disegarkan dari sumber live!');
   }
 
-  function resetOwnerTrendingResourcesToDefault() {
-    if (!['owner', 'joker'].includes(getUserRole())) return;
-    saveOwnerCustomShowResources([], getUserRole() !== 'joker');
-    localStorage.removeItem(TRENDING_CACHE_KEY);
-    renderOwnerCustomResourcesList();
-    loadTrendingHero(true);
-    showToast('↺ Senarai Trending & sumber cerita ditetapkan semula.');
+  async function enrichTrendingItemsViaSearchApi(dataObj) {
+    if (!dataObj || !dataObj.byApp) return dataObj;
+    const uniqueTitles = new Map();
+    Object.values(dataObj.byApp).forEach(appObj => {
+      (appObj.all || []).forEach(it => {
+        const key = String(it.title || '').trim().toLowerCase();
+        if (key && !uniqueTitles.has(key)) uniqueTitles.set(key, it);
+      });
+    });
+
+    await Promise.all(Array.from(uniqueTitles.values()).map(async (item) => {
+      const cleanQuery = String(item.title || '').replace(/:\s*(Final Season|Season\s*\d+|Part\s*\d+)$/i, '').trim();
+      if (!cleanQuery) return;
+      try {
+        const res = await fetch(`/api/search-title?q=${encodeURIComponent(cleanQuery)}&region=MY`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const hits = Array.isArray(data.items) ? data.items : [];
+        if (!hits.length) return;
+        const exact = hits.find(h => String(h.title || '').toLowerCase() === String(item.title || '').toLowerCase()) ||
+                      hits.find(h => String(h.title || '').toLowerCase() === cleanQuery.toLowerCase()) ||
+                      hits[0];
+        if (!exact) return;
+        const isBND = /spider-?man:\s*brand\s*new\s*day/i.test(String(item.title || ''));
+        if (exact.poster) item.poster = exact.poster;
+        if (exact.backdrop) item.backdrop = exact.backdrop;
+        if (exact.overview && exact.overview.trim()) item.overview = exact.overview.trim();
+        if (!isBND && exact.rating && exact.rating !== 'N/A') item.rating = exact.rating;
+        if (exact.year && exact.year !== '-') item.year = exact.year;
+      } catch (e) {}
+    }));
+
+    Object.values(dataObj.byApp).forEach(appObj => {
+      const mapByTitle = new Map((appObj.all || []).map(x => [String(x.title || '').toLowerCase(), x]));
+      ['movies', 'series', 'newMovies', 'newSeries', 'newReleases', 'popcorn', 'kdrama', 'rewatched', 'onlyOn'].forEach(listKey => {
+        if (!Array.isArray(appObj[listKey])) return;
+        appObj[listKey] = appObj[listKey].map(entry => {
+          const updated = mapByTitle.get(String(entry.title || '').toLowerCase());
+          return updated ? { ...entry, poster: updated.poster || entry.poster, backdrop: updated.backdrop || entry.backdrop, overview: updated.overview || entry.overview, rating: updated.rating || entry.rating, year: updated.year || entry.year } : entry;
+        });
+      });
+    });
+
+    if (Array.isArray(dataObj.items)) {
+      const allByTitle = new Map();
+      Object.values(dataObj.byApp).forEach(appObj => (appObj.all || []).forEach(x => allByTitle.set(String(x.title || '').toLowerCase(), x)));
+      dataObj.items = dataObj.items.map(it => {
+        const up = allByTitle.get(String(it.title || '').toLowerCase());
+        return up ? { ...it, poster: up.poster || it.poster, backdrop: up.backdrop || it.backdrop, overview: up.overview || it.overview, rating: up.rating || it.rating } : it;
+      });
+    }
+    return dataObj;
   }
 
   function ensureSpiderManInTrending(dataObj) {
@@ -6933,7 +6919,7 @@
       isOnlyOn: false,
       overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.',
       backdrop: '',
-      poster: 'https://image.tmdb.org/t/p/w342/g6TidT7be954rrzPPBTIXkSmfXj.jpg'
+      poster: ''
     };
     ['disney', 'hbomax', 'primevideo'].forEach(otherApp => {
       const oObj = dataObj.byApp[otherApp];
@@ -6961,34 +6947,7 @@
       injectUnique(dataObj.categories.new_in);
       injectUnique(dataObj.categories.popcorn);
     }
-    const customShows = getOwnerCustomShowResources();
-    if (Array.isArray(customShows) && customShows.length) {
-      customShows.slice().reverse().forEach(cs => {
-        const appTarget = dataObj.byApp[cs.platformId];
-        if (!appTarget) return;
-        const injectCustom = (arr) => {
-          if (!Array.isArray(arr)) return;
-          const idx = arr.findIndex(x => String(x.title || '').toLowerCase() === String(cs.title || '').toLowerCase());
-          if (idx !== -1) arr.splice(idx, 1);
-          arr.unshift(cs);
-        };
-        injectCustom(appTarget.all);
-        if (cs.catTop10 !== false) {
-          if (cs.mediaType === 'MOVIE') injectCustom(appTarget.movies);
-          else injectCustom(appTarget.series);
-        }
-        if (cs.isNew) {
-          if (cs.mediaType === 'MOVIE') injectCustom(appTarget.newMovies);
-          else injectCustom(appTarget.newSeries);
-          injectCustom(appTarget.newReleases);
-        }
-        if (cs.isPopcorn) injectCustom(appTarget.popcorn);
-        if (cs.isKdrama) injectCustom(appTarget.kdrama);
-        if (cs.isRewatched) injectCustom(appTarget.rewatched);
-        if (cs.isOnlyOn) injectCustom(appTarget.onlyOn);
-        if (Array.isArray(dataObj.items)) injectCustom(dataObj.items);
-      });
-    }
+
 
     if (Array.isArray(dataObj.items)) {
       injectUnique(dataObj.items);
@@ -7024,20 +6983,19 @@
 
     try {
       const res = await fetch(`/api/trending?t=${Date.now()}`, { cache: 'no-store' });
-      if (!res.ok) {
-        writeTrendingCache(fb);
-        return;
-      }
-      const data = await res.json();
       let finalPayload = fb;
-      if (data && data.byApp && Object.keys(data.byApp).length) {
-        finalPayload = ensureSpiderManInTrending({
-          byApp: data.byApp,
-          categories: data.categories || fb.categories,
-          items: Array.isArray(data.items) && data.items.length ? data.items : fb.items
-        });
-        _trendingFetchedFromApi = true;
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.byApp && Object.keys(data.byApp).length) {
+          finalPayload = ensureSpiderManInTrending({
+            byApp: data.byApp,
+            categories: data.categories || fb.categories,
+            items: Array.isArray(data.items) && data.items.length ? data.items : fb.items
+          });
+          _trendingFetchedFromApi = true;
+        }
       }
+      finalPayload = await enrichTrendingItemsViaSearchApi(finalPayload);
       trendingByApp = finalPayload.byApp;
       discoveryCategories = finalPayload.categories;
       writeTrendingCache(finalPayload);
@@ -7048,7 +7006,13 @@
         renderTrendingModal();
       }
     } catch (e) {
-      writeTrendingCache(fb);
+      const enrichedFb = await enrichTrendingItemsViaSearchApi(fb);
+      trendingByApp = enrichedFb.byApp;
+      discoveryCategories = enrichedFb.categories;
+      writeTrendingCache(enrichedFb);
+      renderHeroSlidesFromItems(enrichedFb.items.slice(0, 6));
+      const modal = document.getElementById('trendingModal');
+      if (modal && modal.style.display === 'flex') renderTrendingModal();
     }
   }
 
@@ -7137,7 +7101,7 @@
   function collectAllShowCatalog() {
     ensureTrendingStoreReady();
     const extraShows = [
-      { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', poster: 'https://image.tmdb.org/t/p/w342/g6TidT7be954rrzPPBTIXkSmfXj.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
+      { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
       { title: 'Spider-Man: No Way Home', year: '2021', mediaType: 'MOVIE', rating: '8.2', poster: 'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker asks Doctor Strange to restore his secret identity, accidentally tearing open the multiverse.' },
       { title: 'Squid Game: Final Season', year: '2025', mediaType: 'SERIES', rating: '8.3', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Gi-hun returns to dismantle the deadly games from within as the final arena begins.' },
       { title: 'Stranger Things 5', year: '2025', mediaType: 'SERIES', rating: '8.8', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Hawkins faces its ultimate showdown against Vecna and the Upside Down.' },
@@ -7168,8 +7132,7 @@
       [...(appObj.all || []), ...(appObj.movies || []), ...(appObj.series || [])].forEach(it => trendingShows.push(it));
     });
     const seen = new Set();
-    const customShows = getOwnerCustomShowResources();
-    return [...customShows, ...extraShows, ...trendingShows].filter(item => {
+    return [...trendingShows, ...extraShows].filter(item => {
       if (classifyTitleStatus(item).kind === 'non_existent') return false;
       const key = canonicalTitleKey(item);
       if (seen.has(key)) return false;
