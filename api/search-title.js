@@ -39,19 +39,7 @@ function applySpiderManPlatformAvailability(title, currentApps = []) {
     return [APP_META.netflix];
   }
 
-  // If watch providers already returned exact platform(s) (1 or 2), preserve exact count
-  if (apps.length > 0) {
-    return apps;
-  }
-
-  // Fallback only when TMDB watch providers has no entry for a known Spider-Man title
-  if (/spider-?man|amazing spider-?man/i.test(t)) {
-    if (/amazing\s*spider-?man|spider-?man:\s*no\s*way\s*home|spider-?man:\s*homecoming|spider-?man:\s*far\s*from\s*home/i.test(t)) {
-      return [APP_META.disney];
-    }
-    return [APP_META.netflix];
-  }
-
+  // Preserve exact verified platform(s) (1 or 2) from watch providers; do not invent platforms when none exist
   return apps;
 }
 
@@ -142,7 +130,17 @@ function isBlockedNonExistentOrFake(title, yearStr, overviewStr) {
     'fanmade',
     'parody',
     'cancelled',
-    'canceled'
+    'canceled',
+    'making of',
+    'making the',
+    'premiere special',
+    'rite of passage',
+    'behind the scenes',
+    'behind-the-scenes',
+    'featurette',
+    'deleted scenes',
+    'gag reel',
+    'bloopers'
   ];
   if (blockedPatterns.some(pat => t.includes(pat) || ov.includes('cancelled') || ov.includes('canceled'))) {
     return true;
