@@ -42,6 +42,8 @@ function buildQueryVariants(rawQuery) {
     variants.push('Marvel', 'Captain Marvel', 'The Marvels', 'Ms. Marvel');
   } else if (lower.includes('avengers')) {
     variants.push('Avengers', 'Avengers: Doomsday');
+  } else if (lower.includes('wwe')) {
+    variants.push('WWE', 'WWE Raw', 'WWE SmackDown');
   } else if (lower.includes('doraemon')) {
     variants.push('Doraemon', 'Stand by Me Doraemon');
   } else if (lower.includes('boboiboy')) {
@@ -58,7 +60,6 @@ function isBlockedNonExistentOrFake(title, yearStr, overviewStr) {
   const ov = String(overviewStr || '').toLowerCase().trim();
   if (!t) return true;
 
-  // Keep upcoming major studio releases like Avengers: Doomsday
   const isAllowedUpcoming = /avengers:\s*doomsday/i.test(t) || /spider-?man:\s*brand\s*new\s*day/i.test(t);
   if (isAllowedUpcoming) return false;
 
@@ -71,6 +72,8 @@ function isBlockedNonExistentOrFake(title, yearStr, overviewStr) {
     'neukolln spiderman',
     'spiderman ultimate',
     'spiderman graveyard',
+    'all roads lead to no way home',
+    'venom saga',
     'low budget',
     'untitled ',
     'elemental heroes',
