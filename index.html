@@ -7473,8 +7473,8 @@ function readTrendingCache() {
     ensureTrendingStoreReady();
     const extraShows = [
       { title: 'Spider-Man: Brand New Day', year: '2026', mediaType: 'MOVIE', rating: '8.2', poster: '', platformId: 'netflix', platformLabel: 'Netflix', platforms: [{ id: 'netflix', label: 'Netflix' }], overview: 'Peter Parker begins a fresh street-level chapter in New York following the events that erased his identity from the world.' },
-      { title: 'The Amazing Spider-Man', year: '2012', mediaType: 'MOVIE', rating: '7.0', poster: 'https://image.tmdb.org/t/p/w342/fSbqVnUA6lE122.jpg', platformId: 'netflix', platformLabel: 'Netflix, Disney+', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'disney', label: 'Disney+' }], overview: 'Peter Parker investigates his parents’ disappearance and confronts The Lizard in New York.' },
-      { title: 'The Amazing Spider-Man 2', year: '2014', mediaType: 'MOVIE', rating: '6.6', poster: 'https://image.tmdb.org/t/p/w342/c3e9l18VE4R222.jpg', platformId: 'netflix', platformLabel: 'Netflix, Disney+', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'disney', label: 'Disney+' }], overview: 'Peter Parker faces Electro and new threats to New York while trying to keep his promise to Gwen Stacy.' },
+      { title: 'The Amazing Spider-Man', year: '2012', mediaType: 'MOVIE', rating: '6.8', poster: 'https://image.tmdb.org/t/p/w342/jIfkQNARYyERqRAq1p1c8xgePp4.jpg', platformId: 'netflix', platformLabel: 'Netflix, Disney+', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'disney', label: 'Disney+' }], overview: 'Peter Parker investigates his parents’ disappearance and confronts The Lizard in New York.' },
+      { title: 'The Amazing Spider-Man 2', year: '2014', mediaType: 'MOVIE', rating: '6.6', poster: 'https://image.tmdb.org/t/p/w342/dGjoPttcbKR5VWg1jQuNFB247KL.jpg', platformId: 'netflix', platformLabel: 'Netflix, Disney+', platforms: [{ id: 'netflix', label: 'Netflix' }, { id: 'disney', label: 'Disney+' }], overview: 'Peter Parker faces Electro and new threats to New York while trying to keep his promise to Gwen Stacy.' },
       { title: 'Avengers: Doomsday', year: '2026', mediaType: 'MOVIE', rating: 'N/A', poster: '', isUpcoming: true, platforms: [], overview: 'Upcoming theatrical release. Not yet available on streaming platforms.' },
       { title: 'Stand by Me Doraemon', year: '2014', mediaType: 'MOVIE', rating: '7.8', poster: '', platforms: [], overview: 'Nobita and Doraemon embark on an emotional journey to secure a happier future.' }
     ];
@@ -7582,7 +7582,7 @@ function readTrendingCache() {
       const byTitleMap = new Map();
       const scoreItem = (it) => {
         const pCount = Array.isArray(it?.platforms) ? it.platforms.length : 0;
-        const hasPoster = it?.poster ? 1 : 0;
+        const hasPoster = (it?.poster && /^https?:\/\//i.test(it.poster)) ? 50 : 0;
         return pCount * 10 + hasPoster;
       };
 
