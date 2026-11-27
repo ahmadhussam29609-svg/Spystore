@@ -30,6 +30,23 @@ function dedupeApps(apps = []) {
   });
 }
 
+function buildQueryVariants(rawQuery) {
+  const q = String(rawQuery || '').trim();
+  if (!q) return [];
+  const lower = q.toLowerCase();
+  const variants = [q];
+
+  if (lower === 'spider' || lower === 'spiderman' || lower === 'spider-man' || lower === 'spider man') {
+    variants.push('Spider-Man', 'Spiderman', 'Spider');
+  } else if (lower.includes('spiderman') && !lower.includes('spider-man')) {
+    variants.push(q.replace(/spiderman/gi, 'Spider-Man'));
+  } else if (lower.includes('spider-man')) {
+    variants.push(q.replace(/spider-man/gi, 'Spiderman'));
+  }
+
+  return Array.from(new Set(variants.map(v => v.trim()).filter(Boolean))).slice(0, 3);
+}
+
 function isFakeOrInvalidTitle(title, yearStr) {
   const t = String(title || '').toLowerCase().trim();
   if (!t) return true;
@@ -62,12 +79,12 @@ function isFakeOrInvalidTitle(title, yearStr) {
 }
 
 function normalizeMatchScore(title, query) {
-  const t = String(title || '').toLowerCase().trim();
-  const q = String(query || '').toLowerCase().trim();
+  const t = String(title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const q = String(query || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   if (!t || !q) return 0;
   if (t === q) return 1000;
-  if (t.startsWith(q)) return 600;
-  if (t.includes(q)) return 350;
+  if (t.startsWith(q)) return 650;
+  if (t.includes(q)) return 400;
   return 0;
 }
 
@@ -90,18 +107,27 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const pagesToFetch = q.length <= 14 ? [1, 2] : [1];
-    const pageResponses = await Promise.all(
-      pagesToFetch.map(async (pg) => {
-        const u = `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(TMDB_KEY)}&query=${encodeURIComponent(q)}&include_adult=false&language=en-US&page=${pg}`;
-        const r = await fetch(u);
-        if (!r.ok) return [];
-        const j = await r.json();
-        return Array.isArray(j.results) ? j.results : [];
-      })
-    );
+    const queryVariants = buildQueryVariants(q);
+    const pagesToFetch = q.length <= 10 ? [1, 2] : [1];
 
-    const combinedRaw = pageResponses.flat().filter(r => r && (r.media_type === 'movie' || r.media_type === 'tv'));
+    const tasks = [];
+    for (const qVar of queryVariants) {
+      for (const pg of pagesToFetch) {
+        tasks.push(
+          (async () => {
+            const u = `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(TMDB_KEY)}&query=${encodeURIComponent(qVar)}&include_adult=false&language=en-US&page=${pg}`;
+            const r = await fetch(u);
+            if (!r.ok) return [];
+            const j = await r.json();
+            return Array.isArray(j.results) ? j.results : [];
+          })()
+        );
+      }
+    }
+
+    const nestedResults = await Promise.all(tasks);
+    const combinedRaw = nestedResults.flat().filter(r => r && (r.media_type === 'movie' || r.media_type === 'tv'));
+
     const seenMedia = new Set();
     const uniqueRaw = combinedRaw.filter(r => {
       const k = `${r.media_type}-${r.id}`;
@@ -123,7 +149,7 @@ module.exports = async (req, res) => {
         const sb = normalizeMatchScore(b.title || b.name, q) + (b.popularity || 0);
         return sb - sa;
       })
-      .slice(0, 14);
+      .slice(0, 18);
 
     const enriched = await Promise.all(rawResults.map(async (item) => {
       const mType = item.media_type === 'tv' ? 'tv' : 'movie';
@@ -131,6 +157,7 @@ module.exports = async (req, res) => {
       const releaseDate = item.release_date || item.first_air_date || '';
       const year = releaseDate ? releaseDate.slice(0, 4) : '-';
       const isBND = /spider-?man:\s*brand\s*new\s*day/i.test(title);
+      const isNoWayHome = /spider-?man:\s*no\s*way\s*home/i.test(title);
 
       let availableApps = [];
       let detailsJson = null;
@@ -158,6 +185,10 @@ module.exports = async (req, res) => {
             });
           }
         } catch (e) {}
+
+        if (isNoWayHome && !availableApps.some(a => a.id === 'disney')) {
+          availableApps.push(APP_META.disney);
+        }
       }
 
       return {
