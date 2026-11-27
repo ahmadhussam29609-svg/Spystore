@@ -310,7 +310,11 @@ module.exports = async (req, res) => {
         rating: isBND
           ? '8.2'
           : (typeof item.vote_average === 'number' && item.vote_average > 0 ? item.vote_average.toFixed(1) : 'N/A'),
-        overview: (detailsJson?.overview || item.overview || '').trim(),
+        overview: /spider-?man:\s*brand\s*new\s*day/i.test(title)
+          ? 'A forgotten Peter Parker lives alone as a full-time Spider-Man until mounting pressure triggers a dangerous change and a powerful new enemy emerges.'
+          : (detailsJson?.overview || item.overview || '').trim(),
+        runtime: detailsJson?.runtime || (Array.isArray(detailsJson?.episode_run_time) && detailsJson.episode_run_time[0]) || null,
+        genres: Array.isArray(detailsJson?.genres) ? detailsJson.genres.map(g => g.name).filter(Boolean) : [],
         poster: item.poster_path ? `https://image.tmdb.org/t/p/w342${item.poster_path}` : '',
         backdrop: item.backdrop_path ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}` : '',
         availableApps: dedupeApps(availableApps)
