@@ -140,7 +140,8 @@ function isBlockedNonExistentOrFake(title, yearStr, overviewStr) {
     'featurette',
     'deleted scenes',
     'gag reel',
-    'bloopers'
+    'bloopers',
+    'strikes back'
   ];
   if (blockedPatterns.some(pat => t.includes(pat) || ov.includes('cancelled') || ov.includes('canceled'))) {
     return true;
