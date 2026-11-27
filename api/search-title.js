@@ -30,12 +30,15 @@ function dedupeApps(apps = []) {
   });
 }
 
-function applySpiderManPlatformAvailability(title, currentApps = []) {
+const OFFICIAL_SPIDERMAN_MOVIES_RX = /^(spider-?man|spider-?man\s*2|spider-?man\s*3|the\s+amazing\s+spider-?man|the\s+amazing\s+spider-?man\s*2|spider-?man:\s*homecoming|spider-?man:\s*far\s+from\s+home|spider-?man:\s*no\s+way\s+home|spider-?man:\s*into\s+the\s+spider-?verse|spider-?man:\s*across\s+the\s+spider-?verse)$/i;
+
+function applySpiderManPlatformAvailability(title, currentApps = [], mediaType = 'MOVIE') {
   const t = String(title || '').toLowerCase().trim();
+  const isMovie = String(mediaType || '').toUpperCase() === 'MOVIE' || String(mediaType || '').toLowerCase() === 'movie';
   if (/spider-?man:\s*brand\s*new\s*day/i.test(t)) {
     return [APP_META.netflix];
   }
-  if (/spider-?man|spiderman|spider\s*man/i.test(t)) {
+  if (isMovie && OFFICIAL_SPIDERMAN_MOVIES_RX.test(t)) {
     return [APP_META.netflix, APP_META.disney];
   }
   return dedupeApps(Array.isArray(currentApps) ? [...currentApps] : []);
@@ -115,6 +118,13 @@ function isBlockedNonExistentOrFake(title, yearStr, overviewStr) {
   const blockedPatterns = [
     'evil spiderman',
     'the spiderman',
+    'generations: the evolution of spider-man',
+    'daredevil vs. spider-man',
+    'daredevil vs spider-man',
+    'the spider-man story',
+    'superman, spider-man or batman',
+    'icons unearthed: spider',
+    'man-spider',
     'italian spiderman',
     'japanese spiderman',
     'neukölln spiderman',
@@ -288,7 +298,7 @@ module.exports = async (req, res) => {
           }
         } catch (e) {}
 
-        availableApps = applySpiderManPlatformAvailability(title, availableApps);
+        availableApps = applySpiderManPlatformAvailability(title, availableApps, mType);
       }
 
       return {
