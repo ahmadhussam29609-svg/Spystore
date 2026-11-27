@@ -6833,6 +6833,20 @@
     return POSTER_THEMES[Math.abs(hash) % POSTER_THEMES.length];
   }
 
+  function buildInlinePosterDataUri(title) {
+    const cleanTitle = String(title || 'MOVIE').replace(/[<>&"]/g, '');
+    const lines = cleanTitle.split(/[:\-]/).map(s => s.trim()).filter(Boolean).slice(0, 3);
+    if (!lines.length) lines.push('MOVIE');
+    const tspans = lines.map((ln, i) => {
+      const yPos = 140 + i * 34;
+      const fSize = i === 0 ? 24 : 18;
+      const fillCol = i === 0 ? '#facc15' : '#f8fafc';
+      return `<text x="50%" y="${yPos}" text-anchor="middle" fill="${fillCol}" font-family="Arial, sans-serif" font-weight="800" font-size="${fSize}">${ln.slice(0, 18)}</text>`;
+    }).join('');
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="360" viewBox="0 0 240 360"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#991b1b"/><stop offset="55%" stop-color="#1e1b4b"/><stop offset="100%" stop-color="#090d16"/></linearGradient></defs><rect width="240" height="360" rx="20" fill="url(#g)"/><rect x="14" y="14" width="212" height="332" rx="14" fill="none" stroke="rgba(250,204,21,0.35)" stroke-width="2"/><text x="50%" y="78" text-anchor="middle" fill="#38bdf8" font-family="Arial, sans-serif" font-weight="700" font-size="13" letter-spacing="3">SPYSTORE</text>${tspans}<text x="50%" y="315" text-anchor="middle" fill="#94a3b8" font-family="Arial, sans-serif" font-weight="700" font-size="12" letter-spacing="2">STREAMING</text></svg>`;
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  }
+
   function buildPosterCardHtml(item, wPx = 62, hPx = 92) {
     const theme = pickPosterTheme(item?.title || '');
     return `
@@ -6843,13 +6857,19 @@
   }
 
   function renderPosterCardWithImage(item, wPx = 62, hPx = 92) {
-    const fallbackHtml = buildPosterCardHtml(item, wPx, hPx).replace(/"/g, '&quot;');
+    const safeAlt = String(item?.title || 'Poster').replace(/"/g, '&quot;');
+    const inlineFallback = buildInlinePosterDataUri(item?.title || 'Poster');
     const posterUrl = String(item?.poster || '').trim();
-    if (posterUrl && /^https?:\/\//i.test(posterUrl) && !posterUrl.includes('9F4N9rC2aV3xZ8h1pL2k9Q4m1R0') && !posterUrl.includes('2014Doraemon') && !posterUrl.includes('ShopKillers') && !posterUrl.includes('MarryMyHusband') && !posterUrl.includes('1V4SPkV3bQTPju6t')) {
-      const safeAlt = String(item?.title || 'Poster').replace(/"/g, '&quot;');
-      return `<img src="${posterUrl}" alt="${safeAlt}" loading="eager" decoding="async" referrerpolicy="no-referrer" style="width:${wPx}px; height:${hPx}px; object-fit:cover; border-radius:10px; flex-shrink:0; border:1px solid rgba(255,255,255,0.16); background:#0f172a; box-shadow:0 6px 16px rgba(0,0,0,0.38);" onerror="this.outerHTML='${fallbackHtml}';" />`;
-    }
-    return buildPosterCardHtml(item, wPx, hPx);
+    const isValidRemote = posterUrl && /^https?:\/\//i.test(posterUrl) &&
+      !posterUrl.includes('9F4N9rC2aV3xZ8h1pL2k9Q4m1R0') &&
+      !posterUrl.includes('2014Doraemon') &&
+      !posterUrl.includes('ShopKillers') &&
+      !posterUrl.includes('MarryMyHusband') &&
+      !posterUrl.includes('1V4SPkV3bQTPju6t') &&
+      !posterUrl.includes('fSbqVnUA6lE122') &&
+      !posterUrl.includes('c3e9l18VE4R222');
+    const srcToUse = isValidRemote ? posterUrl : inlineFallback;
+    return `<img src="${srcToUse}" alt="${safeAlt}" loading="eager" decoding="async" referrerpolicy="no-referrer" style="width:${wPx}px; height:${hPx}px; object-fit:cover; border-radius:10px; flex-shrink:0; border:1px solid rgba(255,255,255,0.16); background:#0f172a; box-shadow:0 6px 16px rgba(0,0,0,0.38);" onerror="if(this.dataset.fb !== '1'){ this.dataset.fb='1'; this.src='${inlineFallback.replace(/'/g, "\'")}'; }" />`;
   }
 
   function renderPosterOrFallback(item) {
@@ -7527,9 +7547,7 @@ function readTrendingCache() {
           let finalPlats = [...plats];
           if (isBrandNewDay) {
             finalPlats = [{ id: 'netflix', label: 'Netflix' }];
-          } else if (/spider-?man:\s*no\s*way\s*home/i.test(titleL) && !finalPlats.length) {
-            finalPlats = [{ id: 'disney', label: 'Disney+' }];
-          } else if (/the\s+amazing\s+spider-?man/i.test(titleL) && !finalPlats.length) {
+          } else if (/spider-?man|spiderman|spider\s*man/i.test(titleL)) {
             finalPlats = [{ id: 'netflix', label: 'Netflix' }, { id: 'disney', label: 'Disney+' }];
           }
           const isUnreleased = !isBrandNewDay && ((!isNaN(yearNum) && yearNum > 2026) || titleL.includes('movie 3') || titleL.includes("gur'latan"));
