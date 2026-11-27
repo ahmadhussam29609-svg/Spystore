@@ -6945,8 +6945,11 @@
       ? `<div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:2px;">${plats.map(pl => renderPlatformLogoOnly(pl)).join('')}</div>`
       : `<div class="spec-val" style="color:var(--accent-gold); font-size:0.78rem;">${statusObj.badgeText}</div>`;
 
-    const actionBtnHtml = prod
-      ? `<button type="button" class="primary-submit" style="width:100%; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${prod.id}');">Order ${platNamesStr} →</button>`
+    const actionBtnHtml = (isAvailable && plats.length > 0)
+      ? plats.map(pl => {
+          const pMatch = products.find(p => p.id === pl.id) || products[0];
+          return `<button type="button" class="primary-submit" style="flex:1; min-width:140px; margin-top:0;" onclick="closeShowDetailModal(); closeTrendingModal(); openCheckout('${pMatch.id}');">Order ${pl.label} →</button>`;
+        }).join('')
       : `<div style="width:100%; text-align:center; padding:10px 12px; border-radius:10px; background:var(--bg-input); border:1px solid var(--border-color); color:var(--accent-gold); font-size:0.78rem; font-weight:700;">${statusObj.badgeText}</div>`;
 
     body.innerHTML = `
@@ -7379,7 +7382,8 @@ function readTrendingCache() {
 
     const isAllowedUpcoming = t.includes('avengers: doomsday') || /spider-?man:\s*brand\s*new\s*day/.test(t);
 
-    const isNonExistent = !isAllowedUpcoming && (
+    const isOldSpiderSeries = /spider-?man/i.test(t) && !isNaN(yearNum) && yearNum < 2000;
+    const isNonExistent = !isAllowedUpcoming && (isOldSpiderSeries ||
       t.includes('elemental heroes') ||
       t.includes('sinopsis ') ||
       t.includes('synopsis ') ||
