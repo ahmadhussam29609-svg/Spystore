@@ -21,8 +21,20 @@ const PROVIDER_MAP = {
   10: 'primevideo'
 };
 
-function normalizeTitleKey(s) {
-  return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+function getTodayKeyMY() {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kuala_Lumpur' }).format(new Date());
+  } catch (e) {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
+
+function isFreshTitle(yearStr, titleStr = '') {
+  const t = String(titleStr || '').toLowerCase();
+  if (/the\s+odyssey|avengers:\s*doomsday/i.test(t)) return false;
+  const y = parseInt(String(yearStr || ''), 10);
+  if (isNaN(y)) return true;
+  return y >= 2025 && y <= 2026;
 }
 
 async function fetchJsonSafe(url) {
@@ -39,39 +51,54 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
 
+  const dayKey = getTodayKeyMY();
+
   if (!TMDB_KEY) {
-    return res.status(200).json({ items: [], byApp: {}, categories: {} });
+    return res.status(200).json({ day: dayKey, items: [], byApp: {}, categories: {} });
   }
 
   try {
-    const [trDay, trMov, trTv, popMov, popTv] = await Promise.all([
+    const [trAll1, trAll2, trMov, trTv, discMov25, discMov26, discTv25, discTv26] = await Promise.all([
       fetchJsonSafe(`https://api.themoviedb.org/3/trending/all/day?api_key=${encodeURIComponent(TMDB_KEY)}&language=en-US&page=1`),
+      fetchJsonSafe(`https://api.themoviedb.org/3/trending/all/day?api_key=${encodeURIComponent(TMDB_KEY)}&language=en-US&page=2`),
       fetchJsonSafe(`https://api.themoviedb.org/3/trending/movie/day?api_key=${encodeURIComponent(TMDB_KEY)}&language=en-US&page=1`),
       fetchJsonSafe(`https://api.themoviedb.org/3/trending/tv/day?api_key=${encodeURIComponent(TMDB_KEY)}&language=en-US&page=1`),
-      fetchJsonSafe(`https://api.themoviedb.org/3/movie/popular?api_key=${encodeURIComponent(TMDB_KEY)}&language=en-US&page=1`),
-      fetchJsonSafe(`https://api.themoviedb.org/3/tv/popular?api_key=${encodeURIComponent(TMDB_KEY)}&language=en-US&page=1`)
+      fetchJsonSafe(`https://api.themoviedb.org/3/discover/movie?api_key=${encodeURIComponent(TMDB_KEY)}&sort_by=popularity.desc&primary_release_date.gte=2025-01-01&primary_release_date.lte=2026-11-28&page=1`),
+      fetchJsonSafe(`https://api.themoviedb.org/3/discover/movie?api_key=${encodeURIComponent(TMDB_KEY)}&sort_by=popularity.desc&primary_release_date.gte=2026-01-01&primary_release_date.lte=2026-11-28&page=1`),
+      fetchJsonSafe(`https://api.themoviedb.org/3/discover/tv?api_key=${encodeURIComponent(TMDB_KEY)}&sort_by=popularity.desc&first_air_date.gte=2025-01-01&first_air_date.lte=2026-11-28&page=1`),
+      fetchJsonSafe(`https://api.themoviedb.org/3/discover/tv?api_key=${encodeURIComponent(TMDB_KEY)}&sort_by=popularity.desc&first_air_date.gte=2026-01-01&first_air_date.lte=2026-11-28&page=1`)
     ]);
 
     const rawPool = [
-      ...(Array.isArray(trDay?.results) ? trDay.results : []),
-      ...(Array.isArray(trMov?.results) ? trMov.results.map(x => ({ ...x, media_type: 'movie' })) : []),
-      ...(Array.isArray(trTv?.results) ? trTv.results.map(x => ({ ...x, media_type: 'tv' })) : []),
-      ...(Array.isArray(popMov?.results) ? popMov.results.map(x => ({ ...x, media_type: 'movie' })) : []),
-      ...(Array.isArray(popTv?.results) ? popTv.results.map(x => ({ ...x, media_type: 'tv' })) : [])
+      ...(Array.isArray(trAll1?.results) ? trAll1.results.map((x, i) => ({ ...x, _searchBoost: 120 - i })) : []),
+      ...(Array.isArray(trAll2?.results) ? trAll2.results.map((x, i) => ({ ...x, _searchBoost: 80 - i })) : []),
+      ...(Array.isArray(trMov?.results) ? trMov.results.map((x, i) => ({ ...x, media_type: 'movie', _searchBoost: 110 - i })) : []),
+      ...(Array.isArray(trTv?.results) ? trTv.results.map((x, i) => ({ ...x, media_type: 'tv', _searchBoost: 110 - i })) : []),
+      ...(Array.isArray(discMov26?.results) ? discMov26.results.map((x, i) => ({ ...x, media_type: 'movie', _searchBoost: 95 - i })) : []),
+      ...(Array.isArray(discMov25?.results) ? discMov25.results.map((x, i) => ({ ...x, media_type: 'movie', _searchBoost: 85 - i })) : []),
+      ...(Array.isArray(discTv26?.results) ? discTv26.results.map((x, i) => ({ ...x, media_type: 'tv', _searchBoost: 95 - i })) : []),
+      ...(Array.isArray(discTv25?.results) ? discTv25.results.map((x, i) => ({ ...x, media_type: 'tv', _searchBoost: 85 - i })) : [])
     ].filter(r => r && (r.media_type === 'movie' || r.media_type === 'tv') && (r.title || r.name));
 
     const seen = new Set();
-    const uniqueSorted = rawPool
+    const freshSorted = rawPool
       .filter(r => {
         const k = `${r.media_type}-${r.id}`;
         if (seen.has(k)) return false;
         seen.add(k);
-        return true;
+        const title = r.title || r.name || '';
+        const rel = r.release_date || r.first_air_date || '';
+        const yr = rel ? rel.slice(0, 4) : '2026';
+        return isFreshTitle(yr, title);
       })
-      .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
-      .slice(0, 28);
+      .sort((a, b) => {
+        const scoreA = (a._searchBoost || 0) * 10 + (a.popularity || 0);
+        const scoreB = (b._searchBoost || 0) * 10 + (b.popularity || 0);
+        return scoreB - scoreA;
+      })
+      .slice(0, 36);
 
-    const enriched = await Promise.all(uniqueSorted.map(async (item, idx) => {
+    const enriched = await Promise.all(freshSorted.map(async (item, idx) => {
       const mType = item.media_type === 'tv' ? 'tv' : 'movie';
       const title = item.title || item.name || 'Untitled';
       const rel = item.release_date || item.first_air_date || '';
@@ -80,7 +107,7 @@ module.exports = async (req, res) => {
       const isKdrama = origLang === 'ko';
       const isNew = year === '2026' || year === '2025';
       const rating = typeof item.vote_average === 'number' && item.vote_average > 0 ? item.vote_average.toFixed(1) : '8.0';
-      const popularity = Math.round(item.popularity || (100 - idx));
+      const dailySearchScore = Math.round((item._searchBoost || 50) * 10 + (item.popularity || 50));
 
       let detectedApp = '';
       const platforms = [];
@@ -116,12 +143,14 @@ module.exports = async (req, res) => {
         platforms,
         price: APP_META[detectedApp]?.price || 18,
         rating,
-        popularity,
+        popularity: dailySearchScore,
+        dailySearchScore,
+        day: dayKey,
         isNew,
         isKdrama,
-        isRewatched: popularity >= 60,
+        isRewatched: dailySearchScore >= 400,
         isOnlyOn: platforms.length === 1,
-        overview: (item.overview || `${title} (${year}) — trending across popular searches and streaming charts.`).trim(),
+        overview: (item.overview || `${title} (${year}) — top daily search pick for ${dayKey}.`).trim(),
         poster: item.poster_path ? `https://image.tmdb.org/t/p/w342${item.poster_path}` : '',
         backdrop: item.backdrop_path ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}` : ''
       };
@@ -130,7 +159,7 @@ module.exports = async (req, res) => {
     const byApp = {};
     Object.keys(APP_META).forEach(appKey => {
       const appList = enriched.filter(x => x.platformId === appKey);
-      const baseList = appList.length >= 4 ? appList : enriched.map((x, i) => ({
+      const baseList = appList.length >= 6 ? appList : enriched.map((x, i) => ({
         ...x,
         platformId: appKey,
         platformLabel: APP_META[appKey].label,
@@ -148,8 +177,8 @@ module.exports = async (req, res) => {
         series: series.length ? series : baseList,
         newMovies: movies.filter(x => x.isNew),
         newSeries: series.filter(x => x.isNew),
-        newReleases: baseList.filter(x => x.isNew).slice(0, 8),
-        popcorn: (movies.length ? movies : baseList).slice().sort((a, b) => Number(b.rating) - Number(a.rating)),
+        newReleases: baseList.filter(x => x.isNew).slice(0, 10),
+        popcorn: (movies.length ? movies : baseList).slice().sort((a, b) => (b.dailySearchScore || 0) - (a.dailySearchScore || 0)),
         kdrama: baseList.filter(x => x.isKdrama),
         rewatched: baseList.filter(x => x.isRewatched),
         onlyOn: baseList.filter(x => x.isOnlyOn)
@@ -160,18 +189,19 @@ module.exports = async (req, res) => {
       tv_my: enriched.filter(x => x.mediaType === 'SERIES').slice(0, 10),
       movie_my: enriched.filter(x => x.mediaType === 'MOVIE').slice(0, 10),
       new_in: enriched.filter(x => x.isNew).slice(0, 10),
-      popcorn: enriched.filter(x => x.mediaType === 'MOVIE').slice().sort((a, b) => Number(b.rating) - Number(a.rating)).slice(0, 10),
+      popcorn: enriched.filter(x => x.mediaType === 'MOVIE').slice(0, 10),
       kdrama: enriched.filter(x => x.isKdrama).slice(0, 10),
       rewatched: enriched.filter(x => x.isRewatched).slice(0, 10),
       only_on: enriched.filter(x => x.isOnlyOn).slice(0, 10)
     };
 
     return res.status(200).json({
+      day: dayKey,
       items: enriched.slice(0, 6),
       byApp,
       categories
     });
   } catch (err) {
-    return res.status(500).json({ items: [], byApp: {}, categories: {} });
+    return res.status(500).json({ day: dayKey, items: [], byApp: {}, categories: {} });
   }
 };
