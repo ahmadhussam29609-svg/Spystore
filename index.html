@@ -7347,7 +7347,56 @@ function readTrendingCache() {
         renderTrendingModal();
       }
     } catch (e) {
-      const enrichedFb = await enrichTrendingItemsViaSearchApi(fb);
+      let enrichedFb = fb;
+      if (!_trendingFetchedFromApi) {
+        const topSearchedSeeds = ['Spider-Man', 'Avengers', 'Stranger Things', 'Squid Game', 'Doraemon', 'Wednesday'];
+        const boostItems = [];
+        const seenSeed = new Set();
+        for (const seedQ of topSearchedSeeds) {
+          try {
+            const sRes = await fetch(`/api/search-title?q=${encodeURIComponent(seedQ)}&region=MY`);
+            if (!sRes.ok) continue;
+            const sJson = await sRes.json();
+            const arr = Array.isArray(sJson.items) ? sJson.items.slice(0, 2) : [];
+            arr.forEach((it, i) => {
+              const k = normalizeSearchText(it.title);
+              if (!k || seenSeed.has(k)) return;
+              seenSeed.add(k);
+              const firstApp = Array.isArray(it.availableApps) && it.availableApps[0] ? it.availableApps[0].id : 'netflix';
+              const prodMatch = products.find(p => p.id === firstApp) || products[0];
+              boostItems.push({
+                rank: boostItems.length + 1,
+                id: it.id,
+                title: it.title,
+                year: it.year || '2026',
+                mediaType: it.mediaType || 'MOVIE',
+                platformId: firstApp,
+                platformLabel: prodMatch.name,
+                platforms: [{ id: firstApp, label: prodMatch.name }],
+                price: Number(prodMatch.price || 18),
+                rating: it.rating || '8.0',
+                popularity: 120 - boostItems.length * 5,
+                isNew: true,
+                overview: it.overview || '',
+                poster: it.poster || '',
+                backdrop: it.backdrop || ''
+              });
+            });
+          } catch (err2) {}
+        }
+        if (boostItems.length) {
+          enrichedFb = {
+            ...fb,
+            items: boostItems.slice(0, 6),
+            categories: {
+              ...fb.categories,
+              tv_my: [...boostItems.filter(x => x.mediaType === 'SERIES'), ...(fb.categories?.tv_my || [])].slice(0, 10),
+              movie_my: [...boostItems.filter(x => x.mediaType === 'MOVIE'), ...(fb.categories?.movie_my || [])].slice(0, 10)
+            }
+          };
+        }
+      }
+      enrichedFb = await enrichTrendingItemsViaSearchApi(enrichedFb);
       trendingByApp = enrichedFb.byApp;
       discoveryCategories = enrichedFb.categories;
       writeTrendingCache(enrichedFb);
