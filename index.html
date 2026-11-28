@@ -6483,13 +6483,19 @@
                 cache[normalizeSearchText(String(item.title).replace(/:\s*(Final Season|Season\s*\d+|Part\s*\d+)$/i, ''))];
     if (!hit) return item;
     const isBND = /spider-?man:\s*brand\s*new\s*day/i.test(String(item.title || ''));
+    const isAouad = /all\s+of\s+us\s+are\s+dead/i.test(String(item.title || ''));
+    const safeRating = isBND ? '8.2' : (isAouad && (hit.rating === '8.4' || !hit.rating) ? '7.6' : (hit.rating || item.rating || 'N/A'));
+    const safeYear = isAouad && (hit.year === '2026' || !hit.year) ? '2022' : (hit.year || item.year || '2026');
+    const safeOverview = isAouad && /mutated infection/i.test(String(hit.overview || ''))
+      ? 'Trapped students must escape their high school which has become ground zero for a zombie virus outbreak.'
+      : (hit.overview || item.overview || '');
     return {
       ...item,
       poster: hit.poster || item.poster || '',
       backdrop: hit.backdrop || item.backdrop || '',
-      overview: hit.overview || item.overview || '',
-      rating: isBND ? '8.2' : (hit.rating || item.rating || 'N/A'),
-      year: hit.year || item.year || '2026'
+      overview: safeOverview,
+      rating: safeRating,
+      year: safeYear
     };
   }
 
@@ -6500,7 +6506,7 @@
         { id: 93405, title: 'Squid Game', year: '2025', mediaType: 'SERIES', rating: '8.3', popularity: 99, isNew: true, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Gi-hun returns to dismantle the deadly games from within as the final arena begins.', backdrop: 'https://image.tmdb.org/t/p/w780/2meX1nrgRGOBhLkZajsFtfWjFgO.jpg', poster: 'https://image.tmdb.org/t/p/w342/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg' },
         { id: 66732, title: 'Stranger Things', year: '2025', mediaType: 'SERIES', rating: '8.8', popularity: 98, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Hawkins faces its ultimate showdown against Vecna and the Upside Down.', backdrop: 'https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQxpJR7o.jpg', poster: 'https://image.tmdb.org/t/p/w342/49WJfeN0moxb9IPfGn8AIqMGskD.jpg' },
         { id: 119051, title: 'Wednesday', year: '2025', mediaType: 'SERIES', rating: '8.5', popularity: 97, isNew: true, isRewatched: true, isOnlyOn: true, overview: 'Wednesday Addams returns to Nevermore Academy with darker visions and new threats.', backdrop: 'https://image.tmdb.org/t/p/w780/iHSwvRVsRyxpX7MV7b637N0gG1z.jpg', poster: 'https://image.tmdb.org/t/p/w342/9PFonBhy4cQy7Jz20PpGkgtgaOI.jpg' },
-        { id: 240459, title: 'All of Us Are Dead', year: '2026', mediaType: 'SERIES', rating: '8.4', popularity: 95, isNew: true, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Survivors in Seoul confront a new wave of mutated infection.', backdrop: 'https://image.tmdb.org/t/p/w780/8j12tohv1NBZNmpU93f47sAKBbw.jpg', poster: 'https://image.tmdb.org/t/p/w342/pTEFqAjLd5YTsMD6NSUxV6Dq7A6.jpg' },
+        { id: 99966, title: 'All of Us Are Dead', year: '2022', mediaType: 'SERIES', rating: '7.6', popularity: 95, isNew: false, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'Trapped students must escape their high school which has become ground zero for a zombie virus outbreak.', backdrop: 'https://image.tmdb.org/t/p/w780/8j12tohv1NBZNmpU93f47sAKBbw.jpg', poster: 'https://image.tmdb.org/t/p/w342/pTEFqAjLd5YTsMD6NSUxV6Dq7A6.jpg' },
         { id: 247881, title: 'When Life Gives You Tangerines', year: '2025', mediaType: 'SERIES', rating: '8.9', popularity: 94, isKdrama: true, isOnlyOn: true, overview: 'An unforgettable Jeju Island romance spanning decades of hardship and devotion.', backdrop: 'https://image.tmdb.org/t/p/w780/7iMBZzVZtG0oBug4TfqDb9ZxAOa.jpg', poster: 'https://image.tmdb.org/t/p/w342/q29q6AByKv53N7NagCEIdxPUvjU.jpg' },
         { id: 204082, title: 'The Glory', year: '2023', mediaType: 'SERIES', rating: '8.4', popularity: 92, isKdrama: true, isRewatched: true, isOnlyOn: true, overview: 'A former bullying victim executes a meticulous lifelong plan for justice.', backdrop: '', poster: '' },
         { id: 811941, title: 'Devara: Part 1', year: '2024', mediaType: 'MOVIE', rating: '7.6', popularity: 91, overview: 'A fearless coastal leader protects his people from smuggling syndicates.', backdrop: '', poster: 'https://image.tmdb.org/t/p/w342/lOSdUkGQmbAl5JQ3QoHqBZUbZhC.jpg' },
@@ -6617,7 +6623,7 @@
     const t = String(item.title || '').toLowerCase();
     if (/the\s+odyssey|avengers:\s*doomsday|iron\s+man(?!\s+heart)/i.test(t)) return false;
     const yr = parseInt(String(item.year || ''), 10);
-    if (!isNaN(yr) && (yr < 2025 || yr > 2026)) return false;
+    if (!isNaN(yr) && yr > 2026) return false;
     return true;
   }
 
