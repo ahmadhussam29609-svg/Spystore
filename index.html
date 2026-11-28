@@ -6441,7 +6441,14 @@
   let _trendingFetchedFromApi = false;
   let _showAllInlineSearch = false;
 
-  const TRENDING_CACHE_KEY = 'spystore_trending_cache_v7';
+  function getTodaySearchDayKey() {
+    try {
+      return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kuala_Lumpur' }).format(new Date());
+    } catch (e) {
+      return new Date().toISOString().slice(0, 10);
+    }
+  }
+  const TRENDING_CACHE_KEY = `spystore_trending_daily_${getTodaySearchDayKey()}`;
   const MEDIA_META_CACHE_KEY = 'spystore_media_meta_cache_v1';
   const TRENDING_INTERVAL_MS = 12 * 60 * 60 * 1000;
 
@@ -6605,6 +6612,15 @@
     };
   }
 
+  function isFreshTrendingCandidate(item) {
+    if (!item || !item.title) return false;
+    const t = String(item.title || '').toLowerCase();
+    if (/the\s+odyssey|avengers:\s*doomsday|iron\s+man(?!\s+heart)/i.test(t)) return false;
+    const yr = parseInt(String(item.year || ''), 10);
+    if (!isNaN(yr) && (yr < 2025 || yr > 2026)) return false;
+    return true;
+  }
+
   function ensureTrendingStoreReady() {
     if (!trendingByApp || !Object.keys(trendingByApp).length) {
       const fb = buildFallbackTrendingData();
@@ -6657,7 +6673,7 @@
     const seenTitles = new Set();
 
     const pushNormalized = (rawIt) => {
-      if (!rawIt || !rawIt.title) return;
+      if (!rawIt || !rawIt.title || !isFreshTrendingCandidate(rawIt)) return;
       const key = normalizeSearchText(rawIt.title);
       if (!key || seenTitles.has(key)) return;
       seenTitles.add(key);
@@ -6713,7 +6729,12 @@
       ]
     };
 
-    const seeds = extraSeedsByCat[catKey] || extraSeedsByCat.tv_my;
+    const fresh2026Seeds = [
+      'Spider-Man: Brand New Day', 'Squid Game', 'Stranger Things', 'Wednesday',
+      'All of Us Are Dead', 'When Life Gives You Tangerines', 'Daredevil: Born Again',
+      'House of the Dragon', 'The Last of Us', 'The Boys', 'Reacher', 'A Shop for Killers'
+    ];
+    const seeds = (extraSeedsByCat[catKey] || fresh2026Seeds).filter(s => isFreshTrendingCandidate({ title: s, year: '2026' }));
     let seedIdx = 0;
     while (merged.length < 10 && seedIdx < seeds.length) {
       const sTitle = seeds[seedIdx++];
@@ -7360,7 +7381,7 @@ function readTrendingCache() {
             const arr = Array.isArray(sJson.items) ? sJson.items.slice(0, 2) : [];
             arr.forEach((it, i) => {
               const k = normalizeSearchText(it.title);
-              if (!k || seenSeed.has(k)) return;
+              if (!k || seenSeed.has(k) || !isFreshTrendingCandidate(it)) return;
               seenSeed.add(k);
               const firstApp = Array.isArray(it.availableApps) && it.availableApps[0] ? it.availableApps[0].id : 'netflix';
               const prodMatch = products.find(p => p.id === firstApp) || products[0];
